@@ -1,4 +1,4 @@
-# ft_transcendance
+# ft_transcendence
 
 A web Pong game with real-time multiplayer.
 
@@ -21,13 +21,13 @@ You need the following programs to run the application:
 1. Clone the repository
 
 ```sh
-git clone https://github.com/vfurmane/ft_transcendance
+git clone https://github.com/vfurmane/ft_transcendence
 ```
 
 2. Install the dependencies
 
 ```sh
-cd ft_transcendance
+cd ft_transcendence
 npm install
 ```
 
@@ -47,4 +47,4 @@ npm start
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](https://github.com/vfurmane/ft_transcendance/blob/main/LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE](https://github.com/vfurmane/ft_transcendence/blob/main/LICENSE) file for details.
