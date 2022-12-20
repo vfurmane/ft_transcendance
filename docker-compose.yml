@@ -5,8 +5,6 @@ services:
     build:
       context: .
       dockerfile: ./apps/web/Dockerfile
-    container_name: web
-    image: ft_transcendence/web:nextjs13
     depends_on:
       - api
     restart: always
@@ -18,28 +16,16 @@ services:
     build:
       context: .
       dockerfile: ./apps/api/Dockerfile
-    container_name: api
-    image: ft_transcendence/api:nestjs9
     depends_on:
       database:
         condition: service_healthy
     restart: always
     ports:
       - 3000:3000
-    environment:
-      POSTGRES_HOST: database
-      POSTGRES_USERNAME: ${DATABASE_USERNAME}
-      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
-      POSTGRES_DATABASE: ${DATABASE_NAME}
-      FRONTEND_BASE_URL: ${FRONTEND_BASE_URL}
-      FT_OAUTH2_CLIENT_ID: ${FT_OAUTH2_CLIENT_ID}
-      FT_OAUTH2_CLIENT_SECRET: ${FT_OAUTH2_CLIENT_SECRET}
-      JWT_SECRET: ${JWT_SECRET}
     networks:
       - app
   database:
     image: postgres
-    container_name: database
     restart: always
     networks:
       - app
@@ -50,7 +36,7 @@ services:
       POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
       POSTGRES_PORT: ${DATABASE_PORT}
     healthcheck:
-      test: ["CMD", "pg_isready", "-U", "${DATABASE_USERNAME}", "-d", "${DATABASE_NAME}"]
+      test: ["CMD", "pg_isready", "-U", "sapient", "-d", "sapientdb"]
       interval: 5s
       timeout: 5s
       retries: 50
