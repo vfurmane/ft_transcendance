@@ -1,0 +1,44 @@
+version: "3.8"
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: ./apps/web/Dockerfile
+    depends_on:
+      - api
+    restart: always
+    ports:
+      - 8080:8080
+    networks:
+      - app
+  api:
+    build:
+      context: .
+      dockerfile: ./apps/api/Dockerfile
+    depends_on:
+      - database
+      #  condition: service_healthy
+    restart: always
+    ports:
+      - 3000:3000
+    networks:
+      - app
+  database:
+    image: postgres
+    restart: always
+    networks:
+      - app
+    environment:
+      #POSTGRES_RANDOM_ROOT_PASSWORD: true
+      POSTGRES_DB: ${DATABASE_NAME}
+      POSTGRES_USER: ${DATABASE_USERNAME}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+      POSTGRES_PORT: ${DATABASE_PORT}
+    #healthcheck:
+    #  test: ["CMD", "psql" ,"ping", "-h", "localhost"]
+    #  timeout: 5s
+    #  retries: 50
+
+networks:
+  app:
