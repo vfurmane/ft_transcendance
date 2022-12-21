@@ -1,0 +1,15 @@
+**/node_modules/
+**/dist
+**/.next
+**/README.md
+**/Dockerfile
+.git
+.gitignore
+**/npm-debug.log
+**/.coverage
+**/.coverage.*
+**/.env
+**/.*.swp
+**/.vscode
+docker-compose.dev.yml
+LICENSE
