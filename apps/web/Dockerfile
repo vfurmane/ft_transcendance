@@ -29,6 +29,6 @@ RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 USER nextjs
 
-COPY --from=installer --chown=nextjs /usr/src .
+COPY --from=installer --chown=nextjs:nodejs /usr/src .
 
 CMD ["npm", "run", "start", "--prefix", "apps/web"]
