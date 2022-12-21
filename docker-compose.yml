@@ -17,8 +17,8 @@ services:
       context: .
       dockerfile: ./apps/api/Dockerfile
     depends_on:
-      - database
-      #  condition: service_healthy
+      database:
+        condition: service_healthy
     restart: always
     ports:
       - 3000:3000
@@ -30,15 +30,16 @@ services:
     networks:
       - app
     environment:
-      #POSTGRES_RANDOM_ROOT_PASSWORD: true
+      POSTGRES_RANDOM_ROOT_PASSWORD: true
       POSTGRES_DB: ${DATABASE_NAME}
       POSTGRES_USER: ${DATABASE_USERNAME}
       POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
       POSTGRES_PORT: ${DATABASE_PORT}
-    #healthcheck:
-    #  test: ["CMD", "psql" ,"ping", "-h", "localhost"]
-    #  timeout: 5s
-    #  retries: 50
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "sapient", "-d", "sapientdb"]
+      interval: 5s
+      timeout: 5s
+      retries: 50
 
 networks:
   app:
