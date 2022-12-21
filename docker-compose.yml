@@ -5,6 +5,8 @@ services:
     build:
       context: .
       dockerfile: ./apps/web/Dockerfile
+    container_name: web
+    image: web:transcendence
     depends_on:
       - api
     restart: always
@@ -16,6 +18,8 @@ services:
     build:
       context: .
       dockerfile: ./apps/api/Dockerfile
+    container_name: api
+    image: api:transcendence
     depends_on:
       database:
         condition: service_healthy
@@ -26,6 +30,7 @@ services:
       - app
   database:
     image: postgres
+    container_name: database
     restart: always
     networks:
       - app
