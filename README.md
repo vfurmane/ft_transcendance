@@ -34,7 +34,15 @@ npm install
 3. Start the server
 
 ```sh
-npm start
+npm start # On the host
+docker compose up --build # With docker
+```
+
+## Development
+
+```sh
+npm run dev # On the host
+docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build # With docker
 ```
 
 ## Authors
