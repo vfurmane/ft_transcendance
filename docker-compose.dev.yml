@@ -1,12 +1,12 @@
 version: "3.8"
 services:
   web:
-    command: npm install; npm run dev --prefix apps/web
+    command: npm run dev --prefix apps/web
     user: "0:0"
     volumes:
        - ./apps/web:/usr/src/apps/web
   api:
-    command: npm install; npm run dev --prefix apps/api
+    command: npm run dev --prefix apps/api
     user: "0:0"
     volumes:
        - ./apps/api:/usr/src/apps/api
