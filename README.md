@@ -18,20 +18,32 @@ You need the following programs to run the application:
 
 ### Installation
 
-1. Clone the repository
+Clone the repository.
 
 ```sh
 git clone https://github.com/vfurmane/ft_transcendence
 ```
 
-2. Install the dependencies
+Install the dependencies.
 
 ```sh
 cd ft_transcendence
 npm install
 ```
 
-3. Start the server
+### Configuration
+
+Environment files must be configured first. You can find template files (`.env.template`) to help you configure the project.
+
+```
+# .env
+DATABASE_NAME=
+DATABASE_USERNAME=
+DATABASE_PASSWORD=
+DATABASE_PORT=5432
+```
+
+### Running the server
 
 ```sh
 npm start # On the host
