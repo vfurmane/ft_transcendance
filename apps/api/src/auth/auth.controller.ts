@@ -15,7 +15,7 @@ export class AuthController {
 
   @Get('/oauth2/42')
   @UseGuards(FtOauth2AuthGuard)
-  callback(@Req() req: SessionRequest) {
+  ftCallback(@Req() req: SessionRequest) {
     if (!req.user) {
       this.logger.error(
         'This is the impossible type error where the user is authenticated but the `req.user` is `undefined`',
