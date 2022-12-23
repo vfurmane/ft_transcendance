@@ -10,3 +10,10 @@ services:
     user: "0:0"
     volumes:
        - ./apps/api:/usr/src/apps/api
+  adminer:
+    image: adminer
+    restart: unless-stopped
+    ports:
+      - 5430:8080
+    networks:
+      - app
