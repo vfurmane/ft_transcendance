@@ -1,12 +1,24 @@
 import React from 'react';
 import TopBar from './TopBar';
+import { PlayButton } from './PlayButton';
+import { FriendList } from './FriendList';
 
 function Home() : JSX.Element {
     return (
-        <div>
-             <TopBar/>
-            <div style={{textAlign: 'center'}} >
-                <h1 style={{color:'white', width:'450px'}}>Ft_Transcendence is a great web site to play the mythic pong game with your friends !</h1>
+        <div >
+            <TopBar/>
+            <div className='illustration'>
+                <div className='titleAndButton'>
+                    <h1 className='title'>
+                        Ft_Transcendence
+                    </h1>
+                    <PlayButton/>
+                    <div className='cardContainer'>
+                        <FriendList/>
+                        <FriendList/> 
+                    </div>
+                    
+                </div>
             </div>
         </div>  
     );
