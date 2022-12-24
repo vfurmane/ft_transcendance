@@ -6,43 +6,18 @@ import Search from '../asset/Search.png';
 
 function TopBar() : JSX.Element {
 
-    let container = {
-        width: '100vw',
-        height: '80px',
-        backgroundColor : 'rgba(0,0,0,0)',
-        display: 'flex',
-        justifyContent: 'space-between',
-        
-    }
-
-    let elemts = {
-        display: 'flex',
-        justifyContent: 'space-around',
-        alignItems: 'center',
-        margin: '20px'
-    }
-
-    let styleInput = {
-        borderTop: '0px',
-        borderRight: '0px',
-        borderLeft: '0px',
-        borderBottom: 'solid white 1px',
-        backgroundColor: 'rgba(0,0,0,0)'
-    }
-
-
     return (
-        <div style={container}>
-            <div style={elemts}>
-                <Image  alt='logo' src={Logo} width={170} height={20} style={{marginRight: '20px'}} />
-                <a style={{color:'white', textDecoration:'none'}} href='/leaderbord'>Learderbord</a>
+        <div className='containerTopBar'>
+            <div className='elementTopBar'>
+                <Image  alt='logo' src={Logo} width={170} height={20}  />
+                <a className='leaderBoardLink' href='/leaderbord'>Learderbord</a>
             </div>
-            <div style={elemts}>
+            <div className='elementTopBar'>
                 <div >
-                    <Image alt='search' src={Search} width={15} height={15} style={{position: 'absolute', marginLeft: '125px'}} />
-                    <input type={'text'} placeholder={'Search someone...'}  style={styleInput} />           
+                    <Image alt='search' src={Search} width={15} height={15} className='logoSearchBar' />
+                    <input type={'text'} placeholder={'Search someone...'} className='searchBar' />           
                 </div>
-                <Image  alt='avatar' src={Avatar} width={42} height={42} style={{marginLeft: '30px'}} />
+                <Image  alt='avatar' src={Avatar} width={42} height={42} className='avatar' />
             </div>
             
         </div>
