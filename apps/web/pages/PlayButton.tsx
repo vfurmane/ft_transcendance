@@ -1,6 +1,6 @@
 import React from 'react';
 
-export function PlayButton() : JSX.Element {
+export default function PlayButton() : JSX.Element {
 
     return (
         <div className='playButtonContainer'>

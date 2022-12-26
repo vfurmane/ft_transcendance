@@ -1,6 +1,6 @@
 import React from 'react';
 import Image from 'next/image'
-import Logo from '../asset/logo.png';
+import Logo from '../asset/Logo.png';
 import Avatar from '../asset/Avatar.png';
 import Search from '../asset/Search.png';
 
