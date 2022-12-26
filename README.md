@@ -65,6 +65,18 @@ npm run dev # On the host
 docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build # With docker
 ```
 
+### Configuration
+
+Environment files must be configured first. You can find template files (`.env.template`) to help you configure the project.
+
+```
+# apps/api/.env
+POSTGRES_HOST=
+POSTGRES_USERNAME=
+POSTGRES_PASSWORD=
+POSTGRES_DATABASE=
+```
+
 ## Authors
 
 - Brice Detune
