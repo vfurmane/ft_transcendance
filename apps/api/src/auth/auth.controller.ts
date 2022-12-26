@@ -8,12 +8,14 @@ import {
 } from '@nestjs/common';
 import { SessionRequest } from 'types';
 import { FtOauth2AuthGuard } from './ft-oauth2-auth.guard';
+import { StateGuard } from './state.guard';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly logger: Logger) {}
 
   @Get('/oauth2/42')
+  @UseGuards(StateGuard)
   @UseGuards(FtOauth2AuthGuard)
   ftCallback(@Req() req: SessionRequest) {
     if (!req.user) {
