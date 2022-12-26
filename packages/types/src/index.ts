@@ -1,3 +1,10 @@
+export interface State {
+  id: string;
+  created_at: Date;
+  updated_at: Date;
+  token: string;
+}
+
 export interface User {
   name: string;
 }
@@ -6,4 +13,4 @@ export interface FtUser {
   login: string;
 }
 
-export type SessionRequest = Request & { user?: User }
+export type SessionRequest = Request & { state: State, user?: User }
