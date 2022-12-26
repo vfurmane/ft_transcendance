@@ -28,6 +28,7 @@ export class FtOauth2Strategy extends PassportStrategy(Strategy) {
   ) {
     const ftUser = await this.authService.fetchProfileWithToken(accessToken);
     profile = {
+      id: '0', // TODO once the users table is ready
       name: ftUser.login,
     };
     return cb(null, profile);
