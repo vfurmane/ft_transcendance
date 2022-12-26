@@ -43,6 +43,21 @@ DATABASE_PASSWORD=
 DATABASE_PORT=5432
 ```
 
+```
+# apps/api/.env
+FRONTEND_BASE_URL=
+
+POSTGRES_HOST=
+POSTGRES_USERNAME=
+POSTGRES_PASSWORD=
+POSTGRES_DATABASE=
+
+FT_OAUTH2_CLIENT_ID=
+FT_OAUTH2_CLIENT_SECRET=
+
+JWT_SECRET=
+```
+
 ### Running the server
 
 ```sh
@@ -55,18 +70,6 @@ docker compose up --build # With docker
 ```sh
 npm run dev # On the host
 docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build # With docker
-```
-
-### Configuration
-
-Environment files must be configured first. You can find template files (`.env.template`) to help you configure the project.
-
-```
-# apps/api/.env
-POSTGRES_HOST=
-POSTGRES_USERNAME=
-POSTGRES_PASSWORD=
-POSTGRES_DATABASE=
 ```
 
 ## Authors
