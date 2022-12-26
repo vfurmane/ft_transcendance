@@ -37,6 +37,18 @@ npm install
 npm start
 ```
 
+### Configuration
+
+Environment files must be configured first. You can find template files (`.env.template`) to help you configure the project.
+
+```
+# apps/api/.env
+POSTGRES_HOST=
+POSTGRES_USERNAME=
+POSTGRES_PASSWORD=
+POSTGRES_DATABASE=
+```
+
 ## Authors
 
 - Brice Detune
