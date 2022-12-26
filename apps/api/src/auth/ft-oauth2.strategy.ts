@@ -8,7 +8,7 @@ import { AuthService } from './auth.service';
 @Injectable()
 export class FtOauth2Strategy extends PassportStrategy(Strategy) {
   constructor(
-    private authService: AuthService,
+    private readonly authService: AuthService,
     protected configService: ConfigService,
   ) {
     super({
@@ -25,7 +25,7 @@ export class FtOauth2Strategy extends PassportStrategy(Strategy) {
     refreshToken: string,
     profile: User,
     cb: VerifyCallback,
-  ) {
+  ): Promise<void> {
     const ftUser = await this.authService.fetchProfileWithToken(accessToken);
     profile = {
       id: '0', // TODO once the users table is ready

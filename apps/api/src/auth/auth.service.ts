@@ -2,18 +2,18 @@ import { Injectable, Logger } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { AxiosError } from 'axios';
 import { catchError, firstValueFrom } from 'rxjs';
-import { FtUser, User } from 'types';
+import { AccessTokenResponse, FtUser, User } from 'types';
 import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private httpService: HttpService,
-    private jwtService: JwtService,
-    private logger: Logger,
+    private readonly httpService: HttpService,
+    private readonly jwtService: JwtService,
+    private readonly logger: Logger,
   ) {}
 
-  async fetchProfileWithToken(accessToken: string) {
+  async fetchProfileWithToken(accessToken: string): Promise<FtUser> {
     const { data } = await firstValueFrom(
       this.httpService
         .get<FtUser>('https://api.intra.42.fr/v2/me', {
@@ -31,7 +31,7 @@ export class AuthService {
     return data;
   }
 
-  async login(user: User) {
+  async login(user: User): Promise<AccessTokenResponse> {
     const payload = {
       sub: user.id,
       name: user.name,
