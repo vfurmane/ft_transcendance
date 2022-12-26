@@ -1,17 +1,17 @@
-import localFont from "@next/font/local";
-import { AppProps } from "next/app";
-import { ReactElement } from "react";
-import "../styles/global.scss";
+import '../styles/global.css';
+import Head from "next/head";
+import { AppProps } from 'next/app'
 
-const interFont = localFont({ src: "../assets/Inter-Regular.ttf" });
-
-export default function MyApp({
-  Component,
-  pageProps,
-}: AppProps): ReactElement {
-  return (
-    <main className={interFont.className}>
-      <Component {...pageProps} />
-    </main>
-  );
+export default function App({ Component, pageProps}: AppProps) : JSX.Element {
+    return (
+        <>
+            <Head>
+                <style>
+                    @import
+                    url('https://fonts.googleapis.com/css2?family=Saira:wght@100&family=Press+Start+2P&family=Rubik+Vinyl&family=Lacquer&display=swap');
+                </style>
+            </Head>
+            <Component {...pageProps} />
+        </>
+        );
 }

@@ -1,7 +1,8 @@
 import React from 'react';
 import TopBar from './TopBar';
-import { PlayButton } from './PlayButton';
-import { FriendList } from './FriendList';
+import  PlayButton  from './PlayButton';
+import  List  from './List';
+import FriendEntity from './FriendEntity';
 
 function Home() : JSX.Element {
     return (
@@ -14,8 +15,8 @@ function Home() : JSX.Element {
                     </h1>
                     <PlayButton/>
                     <div className='cardContainer'>
-                        <FriendList/>
-                        <FriendList/> 
+                        <List title='Friends List' list={<FriendEntity/>} />
+                        <List title='featuring' list={<></>} /> 
                     </div>
                     
                 </div>
