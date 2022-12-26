@@ -2,11 +2,16 @@ import { Injectable, Logger } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { AxiosError } from 'axios';
 import { catchError, firstValueFrom } from 'rxjs';
-import { FtUser } from 'types';
+import { FtUser, User } from 'types';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {
-  constructor(private httpService: HttpService, private logger: Logger) {}
+  constructor(
+    private httpService: HttpService,
+    private jwtService: JwtService,
+    private logger: Logger,
+  ) {}
 
   async fetchProfileWithToken(accessToken: string) {
     const { data } = await firstValueFrom(
@@ -24,5 +29,15 @@ export class AuthService {
         ),
     );
     return data;
+  }
+
+  async login(user: User) {
+    const payload = {
+      sub: user.id,
+      name: user.name,
+    };
+    return {
+      access_token: this.jwtService.sign(payload),
+    };
   }
 }

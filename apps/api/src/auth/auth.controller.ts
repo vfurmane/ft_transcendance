@@ -7,12 +7,16 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { SessionRequest } from 'types';
+import { AuthService } from './auth.service';
 import { FtOauth2AuthGuard } from './ft-oauth2-auth.guard';
 import { StateGuard } from './state.guard';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly logger: Logger) {}
+  constructor(
+    private readonly authService: AuthService,
+    readonly logger: Logger,
+  ) {}
 
   @Get('/oauth2/42')
   @UseGuards(StateGuard)
@@ -25,6 +29,6 @@ export class AuthController {
       throw new InternalServerErrorException('Unexpected error');
     }
     this.logger.log(`${req.user.name} logged in using OAuth2`);
-    return req.user;
+    return this.authService.login(req.user);
   }
 }
