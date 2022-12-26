@@ -6,7 +6,7 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { SessionRequest } from 'types';
+import { AccessTokenResponse, SessionRequest } from 'types';
 import { AuthService } from './auth.service';
 import { FtOauth2AuthGuard } from './ft-oauth2-auth.guard';
 import { StateGuard } from './state.guard';
@@ -21,7 +21,7 @@ export class AuthController {
   @Get('/oauth2/42')
   @UseGuards(StateGuard)
   @UseGuards(FtOauth2AuthGuard)
-  ftCallback(@Req() req: SessionRequest) {
+  ftCallback(@Req() req: SessionRequest): Promise<AccessTokenResponse> {
     if (!req.user) {
       this.logger.error(
         'This is the impossible type error where the user is authenticated but the `req.user` is `undefined`',
