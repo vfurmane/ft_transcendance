@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, VerifyCallback } from 'passport-oauth2';
+import { UsersService } from 'src/users/users.service';
 import { User } from 'types';
 import { AuthService } from './auth.service';
 
@@ -10,6 +11,7 @@ export class FtOauth2Strategy extends PassportStrategy(Strategy) {
   constructor(
     private readonly authService: AuthService,
     protected configService: ConfigService,
+    private readonly usersService: UsersService,
   ) {
     super({
       authorizationURL: 'https://api.intra.42.fr/oauth/authorize',
@@ -27,10 +29,14 @@ export class FtOauth2Strategy extends PassportStrategy(Strategy) {
     cb: VerifyCallback,
   ): Promise<void> {
     const ftUser = await this.authService.fetchProfileWithToken(accessToken);
-    profile = {
-      id: '0', // TODO once the users table is ready
-      name: ftUser.login,
-    };
+    let user = await this.usersService.getByEmail(ftUser.email);
+    if (user === null) {
+      user = await this.usersService.addUser({
+        email: ftUser.email,
+        name: ftUser.login,
+      });
+    }
+    profile = user;
     return cb(null, profile);
   }
 }
