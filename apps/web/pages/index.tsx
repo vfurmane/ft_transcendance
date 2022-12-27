@@ -1,4 +1,4 @@
-import Home from './home';
+import Home from './HomePage';
 
 
 export default function Web() {
