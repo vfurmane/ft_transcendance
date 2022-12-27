@@ -57,6 +57,7 @@ body
     justify-content: space-between;
     position: fixed;
     top: 0;
+    z-index: 99;
 }
 
 .elementTopBar
@@ -98,6 +99,7 @@ body
 .avatar
 {
     margin-bottom: 3px;
+    margin-top: 5px;
 }
 
 
@@ -105,14 +107,14 @@ body
 /*      play button      */
 /*=======================*/
 
-.playButtonContainer
+.shadowContainer
 {
     display: flex;
     justify-content: center;
     flex-direction: column;
     align-items: center;
     text-align: center;
-    padding: 20px;
+    padding-bottom: 20px;
 }
 
 .playButton
@@ -159,7 +161,8 @@ body
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 5px;
+    padding: 8px;
+   
   
 }
 
@@ -174,6 +177,8 @@ body
     border-radius: 8px;
     margin-top: 15%;
     font-family: 'Rubik Vinyl', cursive;
+    overflow: scroll;
+    position: relative;
 
 }
 
@@ -187,24 +192,38 @@ body
     border : 1px solid white;
     border-radius: 10px;
     width: 280px;
-    height: 60;
-    padding: 0px; }
+    height: 60px;
+    padding: 0px;
+    z-index: 2;
+    transition: transform 0.3s ease;
+    transform: translateX(0px);
+}
+
+.entity:hover
+{
+    transform: translateX(-10px) translateY(-10px);
+}
+
+.entityShadow
+{
+    background-color: white;
+    position: absolute;
+    z-index: 1;
+    border-radius: 10px;
+    width: 280px;
+    height: 60px;
+    padding: 0px;
+}
 
 .cardContainer .entity .image
 {
-    margin-top: 10px;
-    margin-right: 10px;
-}
-
-.friendText
-{
-    margin-left: 10px;
+    margin-right: 20px;
 }
 
 .friendText h3
 {
     font-family: 'Lacquer', cursive;
-    margin: 5px;
+    margin: 0px;
     margin-bottom: 0px;
 }
 
@@ -213,4 +232,11 @@ body
     font-family: 'Saira', sans-serif;
     color: #9f9f9f;
     margin:0px;
+}
+
+.statusImage
+{
+    position: absolute;
+    left: 38px;
+    bottom: 10px;
 }
