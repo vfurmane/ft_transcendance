@@ -37,10 +37,15 @@ export class UsersService {
   }
 
   async createTfa(user: User): Promise<SpeakeasyGeneratedSecretDto> {
-    const tfaSecret = speakeasy.generateSecret();
+    const tfaSecret = speakeasy.generateSecret({ name: 'ft_transcendence' });
     user.tfa_secret = tfaSecret.base32;
     user.tfa_setup = false;
     this.usersRepository.save(user);
+    tfaSecret.otpauth_url = speakeasy.otpauthURL({
+      secret: tfaSecret.base32,
+      label: user.email,
+      issuer: 'ft_transcendence',
+    });
     return tfaSecret;
   }
 
