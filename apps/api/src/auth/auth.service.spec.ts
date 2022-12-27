@@ -11,6 +11,7 @@ import { AxiosResponse } from 'axios';
 import { ConfigModule } from '@nestjs/config';
 import ftOauth2Configuration from '../config/ft-oauth2';
 import { User } from '../users/user.entity';
+import { UsersService } from '../users/users.service';
 
 const JWT_SECRET = faker.random.alphaNumeric(20);
 const code = faker.random.alphaNumeric(20);
@@ -53,6 +54,10 @@ describe('AuthService', () => {
         {
           provide: Logger,
           useValue: createMock<Logger>(),
+        },
+        {
+          provide: UsersService,
+          useValue: createMock<UsersService>(),
         },
       ],
     }).compile();
