@@ -24,7 +24,6 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { AccessTokenResponse, SessionRequest, User } from 'types';
-import * as speakeasy from 'speakeasy';
 import { UsersService } from '../users/users.service';
 import { AuthService } from './auth.service';
 import { CheckTfaTokenDto } from './check-tfa-token.dto';
@@ -124,16 +123,18 @@ export class AuthController {
       );
       throw new InternalServerErrorException('Unexpected error');
     }
-    const tfaSecret = speakeasy.generateSecret();
-    await this.usersService.createTfa(req.user, tfaSecret.base32);
-    return tfaSecret;
+    return this.usersService.createTfa(req.user);
   }
 
   @Post('tfa/check')
   @HttpCode(204)
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Check a OTP token.' })
+  @ApiBearerAuth()
   @ApiNoContentResponse({ description: 'The token is valid.' })
+  @ApiUnauthorizedResponse({
+    description: 'Authorization header is likely missing or invalid.',
+  })
   @ApiBadRequestResponse({
     description: 'The OTP is invalid or TFA is not setup yet.',
   })

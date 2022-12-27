@@ -1,9 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { Repository, UpdateResult } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
+import * as speakeasy from 'speakeasy';
 import { User } from 'types';
 import { AddUserDto } from './add-user.dto';
 import { User as UserEntity } from './user.entity';
+import { SpeakeasyGeneratedSecretDto } from 'src/auth/speakeasy-generated-secret.dto';
 
 @Injectable()
 export class UsersService {
@@ -32,10 +34,12 @@ export class UsersService {
     return this.usersRepository.save(userEntity);
   }
 
-  async createTfa(user: User, tfaSecret: string): Promise<User> {
-    user.tfa_secret = tfaSecret;
+  async createTfa(user: User): Promise<SpeakeasyGeneratedSecretDto> {
+    const tfaSecret = speakeasy.generateSecret();
+    user.tfa_secret = tfaSecret.base32;
     user.tfa_setup = false;
-    return this.usersRepository.save(user);
+    this.usersRepository.save(user);
+    return tfaSecret;
   }
 
   async validateTfa(userId: string): Promise<UpdateResult> {
