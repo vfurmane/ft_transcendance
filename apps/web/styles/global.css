@@ -2,7 +2,7 @@ body
 {
     background: url('../asset/Texture.png'), url('../asset/Red.png'), linear-gradient(160deg, rgba(5,5,5,1) 45%, rgba(30,30,30,1) 70%, rgba(75,75,75,1) 100%);
     background-repeat: repeat, no-repeat, no-repeat;
-    background-size: 40% 40%, 70% 28%, 100% 100%;
+    background-size: 40% 40%, 70% 26%, 100% 100%;
     background-position: top,  top, center;
     background-attachment:  fixed, local;
 }
@@ -41,6 +41,11 @@ body
     font-family: 'Lacquer', cursive;
     font-size: 70px;
     margin-top: 10%;
+}
+
+.title.small
+{
+    font-size: 30px;
 }
 
 /*=======================*/
@@ -103,6 +108,7 @@ body
 }
 
 
+
 /*=======================*/
 /*      play button      */
 /*=======================*/
@@ -111,10 +117,20 @@ body
 {
     display: flex;
     justify-content: center;
-    flex-direction: column;
+    
     align-items: center;
     text-align: center;
     padding-bottom: 20px;
+}
+
+.shadowContainer.MB
+{
+    margin-bottom: 15%;
+}
+
+.shadowContainer.leaderBoard
+{
+    flex-direction: row;
 }
 
 .playButton
@@ -132,6 +148,7 @@ body
     transition: transform 0.3s ease;
     transform: translateX(0px);
     margin: auto;
+    margin-top: 20px;
     z-index: 2;
 }
 
@@ -149,6 +166,7 @@ body
     position: absolute;
     background-color: white;
     border: 0px;
+    margin-top: 20px;;
     z-index: 1;
 }
 
@@ -162,8 +180,6 @@ body
     justify-content: space-between;
     align-items: center;
     padding: 8px;
-   
-  
 }
 
 .card
@@ -175,12 +191,11 @@ body
     color: white;
     text-align: center;
     border-radius: 8px;
-    margin-top: 15%;
     font-family: 'Rubik Vinyl', cursive;
     overflow: scroll;
     position: relative;
-
 }
+
 
 /*=======================*/
 /*      entity           */
@@ -215,19 +230,24 @@ body
     padding: 0px;
 }
 
-.cardContainer .entity .image
+.cardContainer .entity .L
 {
     margin-right: 20px;
 }
 
-.friendText h3
+.cardContainer .entity .R
+{
+    margin-left: 20px;
+}
+
+.entityText h3
 {
     font-family: 'Lacquer', cursive;
     margin: 0px;
     margin-bottom: 0px;
 }
 
-.friendText p
+.entityText p
 {
     font-family: 'Saira', sans-serif;
     color: #9f9f9f;
@@ -239,4 +259,16 @@ body
     position: absolute;
     left: 38px;
     bottom: 10px;
+}
+
+
+/*=======================*/
+/*      leaderboard      */
+/*=======================*/
+
+.leaderBoardContainer
+{
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
