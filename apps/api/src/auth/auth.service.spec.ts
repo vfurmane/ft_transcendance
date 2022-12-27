@@ -25,6 +25,8 @@ const user: User = {
   name: faker.internet.userName(),
   email: faker.internet.email(),
   password: faker.internet.password(),
+  tfa_secret: null,
+  tfa_setup: false,
 };
 
 describe('AuthService', () => {

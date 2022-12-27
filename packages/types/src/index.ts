@@ -6,3 +6,8 @@ export interface FtUser {
 export interface AccessTokenResponse {
   access_token: string;
 }
+
+export interface JwtPayload {
+  sub: string;
+  name: string;
+}
