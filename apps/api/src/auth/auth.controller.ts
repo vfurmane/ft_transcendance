@@ -12,8 +12,9 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import {
+  ApiBearerAuth,
+  ApiCreatedResponse,
   ApiMovedPermanentlyResponse,
-  ApiOkResponse,
   ApiOperation,
   ApiQuery,
   ApiTags,
@@ -101,9 +102,14 @@ export class AuthController {
 
   @Post('tfa')
   @UseGuards(JwtAuthGuard)
-  @ApiOkResponse({
+  @ApiBearerAuth()
+  @ApiCreatedResponse({
     description: 'The TFA secret has been created.',
     type: SpeakeasyGeneratedSecretDto,
+  })
+  @ApiUnauthorizedResponse({
+    description:
+      'The authentication failed (likely due to a missing Bearer token in the `Authorization` header)',
   })
   async createTfa(
     @Req() req: SessionRequest,
