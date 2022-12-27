@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Repository } from 'typeorm';
+import { Repository, UpdateResult } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './user.entity';
 
@@ -38,5 +38,9 @@ export class UsersService {
     user.tfa_secret = tfaSecret;
     user.tfa_setup = false;
     return this.usersRepository.save(user);
+  }
+
+  async validateTfa(userId: string): Promise<UpdateResult> {
+    return this.usersRepository.update({ id: userId }, { tfa_setup: true });
   }
 }
