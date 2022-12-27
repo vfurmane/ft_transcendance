@@ -1,15 +1,20 @@
-import { Controller, Get, Logger, UseGuards } from '@nestjs/common';
+import { Controller, Get, Logger, Post, UseGuards } from '@nestjs/common';
 import {
   ApiMovedPermanentlyResponse,
+  ApiOkResponse,
   ApiOperation,
   ApiQuery,
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { AccessTokenResponse } from 'types';
+import * as speakeasy from 'speakeasy';
+import { UsersService } from '../users/users.service';
 import { AuthService } from './auth.service';
 import { FtOauth2AuthGuard } from './ft-oauth2-auth.guard';
 import { FtOauth2Dto } from './ft-oauth2.dto';
+import { JwtAuthGuard } from './jwt-auth.guard';
+import { SpeakeasyGeneratedSecretDto } from './speakeasy-generated-secret.dto';
 import { StateGuard } from './state.guard';
 import { User as UserEntity } from '../users/user.entity';
 import { User } from '../common/decorators/user.decorator';
@@ -19,6 +24,7 @@ import { User } from '../common/decorators/user.decorator';
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
+    private readonly usersService: UsersService,
     readonly logger: Logger,
   ) {}
 
@@ -41,5 +47,19 @@ export class AuthController {
   ftCallback(@User() user: UserEntity): AccessTokenResponse {
     this.logger.log(`${user.name} logged in using OAuth2`);
     return this.authService.login(user);
+  }
+
+  @Post('tfa')
+  @UseGuards(JwtAuthGuard)
+  @ApiOkResponse({
+    description: 'The TFA secret has been created.',
+    type: SpeakeasyGeneratedSecretDto,
+  })
+  async createTfa(
+    @User() user: UserEntity,
+  ): Promise<SpeakeasyGeneratedSecretDto> {
+    const tfaSecret = speakeasy.generateSecret();
+    await this.usersService.createTfa(user, tfaSecret.base32);
+    return tfaSecret;
   }
 }

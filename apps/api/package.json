@@ -37,6 +37,7 @@
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",
     "rxjs": "^7.2.0",
+    "speakeasy": "^2.0.0",
     "typeorm": "^0.3.11"
   },
   "devDependencies": {
@@ -50,6 +51,7 @@
     "@types/node": "^16.0.0",
     "@types/passport-jwt": "^3.0.8",
     "@types/passport-oauth2": "^1.4.11",
+    "@types/speakeasy": "^2.0.7",
     "@types/supertest": "^2.0.11",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "eslint": "^8.0.1",

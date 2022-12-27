@@ -15,6 +15,12 @@ export class UsersService {
     private readonly usersRepository: Repository<User>,
   ) {}
 
+  async getById(id: string): Promise<User | null> {
+    return this.usersRepository.findOneBy({
+      id,
+    });
+  }
+
   async getByEmail(email: string): Promise<User | null> {
     return this.usersRepository.findOneBy({
       email,
@@ -25,7 +31,12 @@ export class UsersService {
     const userEntity = new User();
     userEntity.email = user.email;
     userEntity.name = user.name;
-    userEntity.password = null;
     return this.usersRepository.save(userEntity);
+  }
+
+  async createTfa(user: User, tfaSecret: string): Promise<User> {
+    user.tfa_secret = tfaSecret;
+    user.tfa_setup = false;
+    return this.usersRepository.save(user);
   }
 }
