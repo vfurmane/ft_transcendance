@@ -8,6 +8,7 @@ import { Logger } from '@nestjs/common';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { of, throwError } from 'rxjs';
 import { AxiosResponse } from 'axios';
+import { UsersService } from '../users/users.service';
 
 const JWT_SECRET = faker.random.alphaNumeric(20);
 const code = faker.random.alphaNumeric(20);
@@ -44,6 +45,10 @@ describe('AuthService', () => {
         {
           provide: Logger,
           useValue: createMock<Logger>(),
+        },
+        {
+          provide: UsersService,
+          useValue: createMock<UsersService>(),
         },
       ],
     }).compile();

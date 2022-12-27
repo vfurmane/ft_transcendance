@@ -5,6 +5,12 @@ import { AppModule } from './app.module';
 
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule);
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true,
+      whitelist: true,
+    }),
+  );
   const config = new DocumentBuilder()
     .setTitle('ft_transcendence')
     .setDescription("The sapient's transcendence's API")
