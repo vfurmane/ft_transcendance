@@ -20,6 +20,8 @@ const userEntity: UserEntity = {
   email,
   name,
   password: faker.internet.password(),
+  tfa_secret: null,
+  tfa_setup: false,
 };
 
 describe('UsersService', () => {

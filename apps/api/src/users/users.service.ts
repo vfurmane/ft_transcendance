@@ -31,4 +31,10 @@ export class UsersService {
     if (user.password) userEntity.password = user.password;
     return this.usersRepository.save(userEntity);
   }
+
+  async createTfa(user: User, tfaSecret: string): Promise<User> {
+    user.tfa_secret = tfaSecret;
+    user.tfa_setup = false;
+    return this.usersRepository.save(user);
+  }
 }

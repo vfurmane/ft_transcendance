@@ -13,25 +13,30 @@ import {
 } from '@nestjs/common';
 import {
   ApiMovedPermanentlyResponse,
+  ApiOkResponse,
   ApiOperation,
   ApiQuery,
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { AccessTokenResponse, SessionRequest, User } from 'types';
+import * as speakeasy from 'speakeasy';
+import { UsersService } from '../users/users.service';
 import { AuthService } from './auth.service';
 import { FtOauth2AuthGuard } from './ft-oauth2-auth.guard';
 import { FtOauth2Dto } from './ft-oauth2.dto';
+import { JwtAuthGuard } from './jwt-auth.guard';
+import { SpeakeasyGeneratedSecretDto } from './speakeasy-generated-secret.dto';
 import { StateGuard } from './state.guard';
 import { LocalAuthGuard } from './local-auth.guard';
 import { RegisterUserDto } from 'src/users/register-user.dto';
-import { JwtAuthGuard } from './jwt-auth-guard';
 
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
+    private readonly usersService: UsersService,
     readonly logger: Logger,
   ) {}
 
@@ -92,5 +97,25 @@ export class AuthController {
       throw new InternalServerErrorException('Unexpected error');
     }
     return req.user;
+  }
+
+  @Post('tfa')
+  @UseGuards(JwtAuthGuard)
+  @ApiOkResponse({
+    description: 'The TFA secret has been created.',
+    type: SpeakeasyGeneratedSecretDto,
+  })
+  async createTfa(
+    @Req() req: SessionRequest,
+  ): Promise<SpeakeasyGeneratedSecretDto> {
+    if (!req.user) {
+      this.logger.error(
+        'This is the impossible type error where the user is authenticated but the `req.user` is `undefined`',
+      );
+      throw new InternalServerErrorException('Unexpected error');
+    }
+    const tfaSecret = speakeasy.generateSecret();
+    await this.usersService.createTfa(req.user, tfaSecret.base32);
+    return tfaSecret;
   }
 }

@@ -9,9 +9,9 @@ import { UsersService } from 'src/users/users.service';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { FtOauth2Strategy } from './ft-oauth2.strategy';
+import { JwtStrategy } from './jwt.strategy';
 import { State } from './state.entity';
 import { LocalStrategy } from './local.strategy';
-import { JwtStrategy } from './jwt-strategy';
 
 @Module({
   imports: [

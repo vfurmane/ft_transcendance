@@ -10,6 +10,8 @@ export interface User {
   name: string;
   email: string;
   password: string | null;
+  tfa_secret: string | null;
+  tfa_setup: boolean;
 }
 
 export interface FtUser {
@@ -19,6 +21,11 @@ export interface FtUser {
 
 export interface AccessTokenResponse {
   access_token: string;
+}
+
+export interface JwtPayload {
+  sub: string;
+  name: string;
 }
 
 export type SessionRequest = Request & { state?: State, user?: User }

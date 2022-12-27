@@ -19,6 +19,8 @@ const user: User = {
   id: faker.datatype.uuid(),
   name: faker.internet.userName(),
   email: faker.internet.email(),
+  tfa_secret: null,
+  tfa_setup: false,
 };
 
 describe('AuthService', () => {

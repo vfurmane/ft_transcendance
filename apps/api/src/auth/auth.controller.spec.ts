@@ -3,6 +3,7 @@ import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { Logger } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
+import { UsersService } from '../users/users.service';
 import { Repository } from 'typeorm';
 import { User } from 'types';
 import { AuthController } from './auth.controller';
@@ -14,6 +15,8 @@ const user: User = {
   id: faker.datatype.uuid(),
   name: faker.internet.userName(),
   email: faker.internet.email(),
+  tfa_secret: null,
+  tfa_setup: false,
 };
 
 describe('AuthController', () => {
@@ -30,6 +33,10 @@ describe('AuthController', () => {
         {
           provide: getRepositoryToken(State),
           useValue: createMock<Repository<State>>(),
+        },
+        {
+          provide: UsersService,
+          useValue: createMock<UsersService>(),
         },
         Logger,
       ],

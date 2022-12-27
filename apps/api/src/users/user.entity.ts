@@ -29,4 +29,10 @@ export class User {
   @Exclude()
   @Column('varchar', { length: 255, nullable: true })
   password!: string | null;
+
+  @Column('varchar', { length: 255, nullable: true })
+  tfa_secret!: string | null;
+
+  @Column('boolean', { default: false })
+  tfa_setup!: boolean;
 }
