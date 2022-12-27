@@ -8,6 +8,7 @@ async function bootstrap(): Promise<void> {
     .setTitle('ft_transcendence')
     .setDescription("The sapient's transcendence's API")
     .setVersion('0')
+    .addBearerAuth()
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('swagger', app, document);
