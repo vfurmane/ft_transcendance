@@ -6,11 +6,20 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
+import {
+  ApiMovedPermanentlyResponse,
+  ApiOperation,
+  ApiQuery,
+  ApiTags,
+  ApiUnauthorizedResponse,
+} from '@nestjs/swagger';
 import { AccessTokenResponse, SessionRequest } from 'types';
 import { AuthService } from './auth.service';
 import { FtOauth2AuthGuard } from './ft-oauth2-auth.guard';
+import { FtOauth2Dto } from './ft-oauth2.dto';
 import { StateGuard } from './state.guard';
 
+@ApiTags('auth')
 @Controller('auth')
 export class AuthController {
   constructor(
@@ -21,6 +30,19 @@ export class AuthController {
   @Get('/oauth2/42')
   @UseGuards(StateGuard)
   @UseGuards(FtOauth2AuthGuard)
+  @ApiOperation({
+    summary:
+      'Authenticate the user against the 42 Authorization Server (managed by Passport).',
+  })
+  @ApiQuery({ type: FtOauth2Dto })
+  @ApiMovedPermanentlyResponse({
+    description:
+      'The user needs to authorize the request (should not happen in front to back communication).',
+  })
+  @ApiUnauthorizedResponse({
+    description:
+      'The authentication failed (`code` or `state` may be invalid).',
+  })
   ftCallback(@Req() req: SessionRequest): Promise<AccessTokenResponse> {
     if (!req.user) {
       this.logger.error(
