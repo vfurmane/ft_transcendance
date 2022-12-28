@@ -7,6 +7,7 @@ body
     background-attachment:  fixed, local;
 }
 
+
 /*=======================*/
 /*       home page       */
 /*=======================*/
@@ -123,6 +124,7 @@ body
     padding-bottom: 20px;
 }
 
+
 .shadowContainer.MB
 {
     margin-bottom: 15%;
@@ -177,15 +179,16 @@ body
 .cardContainer
 {
     display: flex;
-    justify-content: space-between;
     align-items: center;
     padding: 8px;
+    width: 100%;
 }
 
 .card
 {
     padding: 20px;
-    height: 300px;
+    height: 350px;
+    width: 100%;
     margin: 10px;
     background: url('../asset/Texture.png'), rgba(255,255,255,0.1);
     color: white;
@@ -214,6 +217,11 @@ body
     transform: translateX(0px);
 }
 
+.entity.small
+{
+    width: 200px;
+}
+
 .entity:hover
 {
     transform: translateX(-10px) translateY(-10px);
@@ -230,6 +238,11 @@ body
     padding: 0px;
 }
 
+.entityShadow.small
+{
+    width: 200px;
+}
+
 .cardContainer .entity .L
 {
     margin-right: 20px;
@@ -240,14 +253,14 @@ body
     margin-left: 20px;
 }
 
-.entityText h3
+h3
 {
     font-family: 'Lacquer', cursive;
     margin: 0px;
     margin-bottom: 0px;
 }
 
-.entityText p
+p
 {
     font-family: 'Saira', sans-serif;
     color: #9f9f9f;
@@ -271,4 +284,48 @@ body
     display: flex;
     justify-content: center;
     align-items: center;
+}
+
+.card.leaderBoard
+{
+    height: auto;
+    flex-wrap: wrap;
+    width: 100%;
+    margin-top: 10%;
+    margin-bottom: 10%;
+}
+
+.rank
+{
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    background-color: #eac435;
+    margin-right: 15px;
+    margin-left: 15px;
+    margin-bottom: 10px;
+    font-family:  'Saira', sans-serif;
+    color: white;
+    text-align: center;
+    padding-bottom: 5px;
+}
+.level
+{
+    border-radius: 10px;
+    background-color: #9f9f9f;
+    font-family:  'Saira', sans-serif;
+    color: white;
+    margin-left: 10px;
+    margin-right: 10px;
+    width: 55px;
+    height: 30px;
+    padding-top: 5px;
+    margin-bottom: 15px;
+}
+
+.leaderBoardDoubleColumn
+{
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
 }
