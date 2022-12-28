@@ -12,6 +12,7 @@ import { FtOauth2Strategy } from './ft-oauth2.strategy';
 import { JwtStrategy } from './jwt.strategy';
 import { State } from './state.entity';
 import ftOauth2Configuration from '../config/ft-oauth2';
+import { LocalStrategy } from './local.strategy';
 
 @Module({
   imports: [
@@ -31,7 +32,14 @@ import ftOauth2Configuration from '../config/ft-oauth2';
     TypeOrmModule.forFeature([State]),
     UsersModule,
   ],
-  providers: [AuthService, FtOauth2Strategy, JwtStrategy, Logger, UsersService],
+  providers: [
+    AuthService,
+    FtOauth2Strategy,
+    JwtStrategy,
+    LocalStrategy,
+    Logger,
+    UsersService,
+  ],
   controllers: [AuthController],
 })
 export class AuthModule {}
