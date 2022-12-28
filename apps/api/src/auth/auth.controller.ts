@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   Logger,
@@ -99,5 +100,14 @@ export class AuthController {
   })
   checkTfa(@User() user: UserEntity, @Body() body: CheckTfaTokenDto): void {
     this.authService.checkTfa(user, body.token);
+  }
+
+  @Delete('tfa')
+  @HttpCode(204)
+  @UseGuards(JwtAuthGuard)
+  async removeTfa(@User() user: UserEntity): Promise<void> {
+    if (!user.tfa_setup)
+      throw new BadRequestException('TFA is not configured on your account');
+    this.usersService.removeTfa(user.id);
   }
 }

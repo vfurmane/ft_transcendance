@@ -52,4 +52,8 @@ export class UsersService {
   async validateTfa(userId: string): Promise<UpdateResult> {
     return this.usersRepository.update({ id: userId }, { tfa_setup: true });
   }
+
+  async removeTfa(userId: string): Promise<UpdateResult> {
+    return this.usersRepository.update({ id: userId }, { tfa_setup: false });
+  }
 }
