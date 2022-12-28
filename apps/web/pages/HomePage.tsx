@@ -5,6 +5,7 @@ import  List  from './List';
 import FriendEntity from './FriendEntity';
 import MatchEntity from './MatchEntity';
 import LeaderboardEntity from './LeaderboardEntity';
+import ArrayDoubleColumn from './ArrayDoubleColumn';
 
 function Home() : JSX.Element {
     let friendList : JSX.Element[] = [];
@@ -15,7 +16,7 @@ function Home() : JSX.Element {
     {
         friendList.push(<FriendEntity name='name' status='status' />);
         matchList.push(<MatchEntity name='name' score={5} />);
-        leaderboard.push(<LeaderboardEntity name='name' level={420} rank={0} status='status' />)
+        leaderboard.push(<LeaderboardEntity name='name' level={420} rank={i + 1} status='status' />)
     }
 
     return (
@@ -33,8 +34,9 @@ function Home() : JSX.Element {
                     </div>
                     <h3  className='title small'>These guy are the best pong player of the world ... we are so pround of them !!</h3>
                     <div className='cardContainer'>
-                        <List title='leaderboard' list={leaderboard} />
+                        <ArrayDoubleColumn title='leaderboard' list={leaderboard} />
                     </div>
+                    <p>Go back to top</p>
                 </div>
             </div>
         </div>  
