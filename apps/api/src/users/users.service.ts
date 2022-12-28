@@ -34,7 +34,7 @@ export class UsersService {
     const userEntity = new User();
     userEntity.email = user.email;
     userEntity.name = user.name;
-    userEntity.password = user.password;
+    if (user.password) userEntity.password = user.password;
     return this.usersRepository.save(userEntity);
   }
 
