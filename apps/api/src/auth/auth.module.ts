@@ -10,6 +10,7 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { FtOauth2Strategy } from './ft-oauth2.strategy';
 import { State } from './state.entity';
+import { LocalStrategy } from './local.strategy';
 
 @Module({
   imports: [
@@ -27,7 +28,13 @@ import { State } from './state.entity';
     TypeOrmModule.forFeature([State]),
     UsersModule,
   ],
-  providers: [AuthService, FtOauth2Strategy, Logger, UsersService],
+  providers: [
+    AuthService,
+    FtOauth2Strategy,
+    LocalStrategy,
+    Logger,
+    UsersService,
+  ],
   controllers: [AuthController],
 })
 export class AuthModule {}

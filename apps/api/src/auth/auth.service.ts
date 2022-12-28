@@ -4,6 +4,8 @@ import { AxiosError } from 'axios';
 import { catchError, firstValueFrom } from 'rxjs';
 import { AccessTokenResponse, FtUser, User } from 'types';
 import { JwtService } from '@nestjs/jwt';
+import { UsersService } from 'src/users/users.service';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class AuthService {
@@ -11,6 +13,7 @@ export class AuthService {
     private readonly httpService: HttpService,
     private readonly jwtService: JwtService,
     private readonly logger: Logger,
+    private readonly userService: UsersService,
   ) {}
 
   async fetchProfileWithToken(accessToken: string): Promise<FtUser> {
@@ -29,6 +32,15 @@ export class AuthService {
         ),
     );
     return data;
+  }
+
+  async validateUser(email: string, pass: string): Promise<any> {
+    const user = await this.userService.getByEmail(email);
+    if (user && (await bcrypt.compare(pass, user.password || ''))) {
+      const { password, ...result } = user;
+      return result;
+    }
+    return null;
   }
 
   async login(user: User): Promise<AccessTokenResponse> {

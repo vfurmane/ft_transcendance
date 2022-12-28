@@ -3,7 +3,9 @@ import {
   Get,
   InternalServerErrorException,
   Logger,
+  Post,
   Req,
+  Request,
   UseGuards,
 } from '@nestjs/common';
 import {
@@ -13,11 +15,12 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { AccessTokenResponse, SessionRequest } from 'types';
+import { AccessTokenResponse, SessionRequest, User } from 'types';
 import { AuthService } from './auth.service';
 import { FtOauth2AuthGuard } from './ft-oauth2-auth.guard';
 import { FtOauth2Dto } from './ft-oauth2.dto';
 import { StateGuard } from './state.guard';
+import { AuthGuard } from '@nestjs/passport';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -52,5 +55,17 @@ export class AuthController {
     }
     this.logger.log(`${req.user.name} logged in using OAuth2`);
     return this.authService.login(req.user);
+  }
+
+  @UseGuards(AuthGuard('local'))
+  @Post('login')
+  async login(@Request() req: SessionRequest): Promise<User> {
+    if (!req.user) {
+      this.logger.error(
+        'This is the impossible type error where the user is authenticated but the `req.user` is `undefined`',
+      );
+      throw new InternalServerErrorException('Unexpected error');
+    }
+    return req.user;
   }
 }

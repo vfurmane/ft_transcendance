@@ -12,7 +12,7 @@ export class UsersService {
     private readonly usersRepository: Repository<UserEntity>,
   ) {}
 
-  async getByEmail(email: string): Promise<User | null> {
+  async getByEmail(email: string): Promise<UserEntity | null> {
     return this.usersRepository.findOneBy({
       email,
     });
