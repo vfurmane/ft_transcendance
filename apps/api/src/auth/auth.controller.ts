@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   ClassSerializerInterceptor,
   Controller,
@@ -126,6 +127,10 @@ export class AuthController {
       );
       throw new InternalServerErrorException('Unexpected error');
     }
+    if (req.user.tfa_setup)
+      throw new BadRequestException(
+        'TFA is already configured on your account',
+      );
     return this.usersService.createTfa(req.user);
   }
 
