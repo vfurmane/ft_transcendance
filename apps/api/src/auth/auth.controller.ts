@@ -40,6 +40,7 @@ import { StateGetGuard } from './state-get.guard';
 import { StatePostGuard } from './state-post.guard';
 import { State } from '../common/decorators/state.decorator';
 import { State as StateEntity } from './state.entity';
+import { AuthGuard } from '@nestjs/passport';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -75,6 +76,12 @@ export class AuthController {
     }
     this.logger.log(`${user.name} logged in using OAuth2`);
     return this.authService.login(user);
+  }
+
+  @UseGuards(AuthGuard('local'))
+  @Post('login')
+  async login(@User() user: UserEntity): Promise<UserEntity> {
+    return user;
   }
 
   @Post('tfa')

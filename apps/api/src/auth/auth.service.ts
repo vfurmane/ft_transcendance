@@ -11,6 +11,7 @@ import { UsersService } from '../users/users.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { State } from './state.entity';
 import { Repository } from 'typeorm';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class AuthService {
@@ -48,6 +49,15 @@ export class AuthService {
         ),
     );
     return data;
+  }
+
+  async validateUser(email: string, pass: string): Promise<any> {
+    const user = await this.usersService.getByEmail(email);
+    if (user && (await bcrypt.compare(pass, user.password || ''))) {
+      const { password, ...result } = user;
+      return result;
+    }
+    return null;
   }
 
   login(user: User): AccessTokenResponse {
