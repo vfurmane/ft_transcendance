@@ -86,6 +86,24 @@ export class AuthController {
     return this.usersService.createTfa(user);
   }
 
+  @Delete('tfa')
+  @HttpCode(204)
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Remove TFA setup.' })
+  @ApiBearerAuth()
+  @ApiNoContentResponse({
+    description: 'The TFA setup has been removed.',
+  })
+  @ApiUnauthorizedResponse({
+    description:
+      'The authentication failed (likely due to a missing Bearer token in the `Authorization` header)',
+  })
+  async removeTfa(@User() user: UserEntity): Promise<void> {
+    if (!user.tfa_setup)
+      throw new BadRequestException('TFA is not configured on your account');
+    this.usersService.removeTfa(user.id);
+  }
+
   @Post('tfa/check')
   @HttpCode(204)
   @UseGuards(JwtAuthGuard)
@@ -100,14 +118,5 @@ export class AuthController {
   })
   checkTfa(@User() user: UserEntity, @Body() body: CheckTfaTokenDto): void {
     this.authService.checkTfa(user, body.token);
-  }
-
-  @Delete('tfa')
-  @HttpCode(204)
-  @UseGuards(JwtAuthGuard)
-  async removeTfa(@User() user: UserEntity): Promise<void> {
-    if (!user.tfa_setup)
-      throw new BadRequestException('TFA is not configured on your account');
-    this.usersService.removeTfa(user.id);
   }
 }
