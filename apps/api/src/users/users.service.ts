@@ -42,7 +42,7 @@ export class UsersService {
     user.tfa_setup = false;
     this.usersRepository.save(user);
     tfaSecret.otpauth_url = speakeasy.otpauthURL({
-      secret: tfaSecret.base32,
+      secret: tfaSecret.ascii,
       label: user.email,
       issuer: 'ft_transcendence',
     });
