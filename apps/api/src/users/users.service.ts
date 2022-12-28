@@ -22,7 +22,7 @@ export class UsersService {
     const userEntity = new UserEntity();
     userEntity.email = user.email;
     userEntity.name = user.name;
-    userEntity.password = null;
+    userEntity.password = user.password;
     return this.usersRepository.save(userEntity);
   }
 }

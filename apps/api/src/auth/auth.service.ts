@@ -34,6 +34,17 @@ export class AuthService {
     return data;
   }
 
+  async createUser(username: string, email: string, pass: string): Promise<any> {
+    const user = new AddUserDto;
+    const salt = await bcrypt.genSalt();
+    user.name = username;
+    user.password = await bcrypt.hash(pass, salt);
+    user.email = email;
+    this.userService.addUser(user);
+    const { password, ...resut} = user;
+    return resut;
+  }
+
   async validateUser(email: string, pass: string): Promise<any> {
     const user = await this.userService.getByEmail(email);
     if (user && (await bcrypt.compare(pass, user.password || ''))) {

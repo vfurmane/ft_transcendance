@@ -57,6 +57,12 @@ export class AuthController {
     return this.authService.login(req.user);
   }
 
+  @Post('register')
+  async register(@Body() req: any) {
+    const user = await this.authService.createUser(req.username, req.email, req.password);
+    return user;
+  }
+
   @UseGuards(AuthGuard('local'))
   @Post('login')
   async login(@Request() req: SessionRequest): Promise<User> {
