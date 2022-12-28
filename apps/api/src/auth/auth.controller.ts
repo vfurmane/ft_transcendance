@@ -1,4 +1,5 @@
 import {
+  Body,
   Controller,
   Get,
   InternalServerErrorException,
@@ -20,7 +21,8 @@ import { AuthService } from './auth.service';
 import { FtOauth2AuthGuard } from './ft-oauth2-auth.guard';
 import { FtOauth2Dto } from './ft-oauth2.dto';
 import { StateGuard } from './state.guard';
-import { AuthGuard } from '@nestjs/passport';
+import { LocalAuthGuard } from './local-auth.guard';
+import { AddUserDto } from 'src/users/add-user.dto';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -58,12 +60,16 @@ export class AuthController {
   }
 
   @Post('register')
-  async register(@Body() req: any) {
-    const user = await this.authService.createUser(req.username, req.email, req.password);
+  async register(@Body() req: any): Promise<User> {
+    const user = await this.authService.createUser(
+      req.name,
+      req.email,
+      req.password,
+    );
     return user;
   }
 
-  @UseGuards(AuthGuard('local'))
+  @UseGuards(LocalAuthGuard)
   @Post('login')
   async login(@Request() req: SessionRequest): Promise<User> {
     if (!req.user) {

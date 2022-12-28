@@ -12,7 +12,7 @@ export class UsersService {
     private readonly usersRepository: Repository<UserEntity>,
   ) {}
 
-  async getByEmail(email: string): Promise<UserEntity | null> {
+  async getByEmail(email: string): Promise<User | null> {
     return this.usersRepository.findOneBy({
       email,
     });
@@ -22,7 +22,7 @@ export class UsersService {
     const userEntity = new UserEntity();
     userEntity.email = user.email;
     userEntity.name = user.name;
-    userEntity.password = user.password;
+    if (user.password) userEntity.password = user.password;
     return this.usersRepository.save(userEntity);
   }
 }
