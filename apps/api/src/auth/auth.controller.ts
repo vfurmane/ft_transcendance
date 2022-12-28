@@ -135,6 +135,30 @@ export class AuthController {
     return this.usersService.createTfa(req.user);
   }
 
+  @Delete('tfa')
+  @HttpCode(204)
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Remove TFA setup.' })
+  @ApiBearerAuth()
+  @ApiNoContentResponse({
+    description: 'The TFA setup has been removed.',
+  })
+  @ApiUnauthorizedResponse({
+    description:
+      'The authentication failed (likely due to a missing Bearer token in the `Authorization` header)',
+  })
+  async removeTfa(@Req() req: SessionRequest): Promise<void> {
+    if (!req.user) {
+      this.logger.error(
+        'This is the impossible type error where the user is authenticated but the `req.user` is `undefined`',
+      );
+      throw new InternalServerErrorException('Unexpected error');
+    }
+    if (!req.user.tfa_setup)
+      throw new BadRequestException('TFA is not configured on your account');
+    this.usersService.removeTfa(req.user.id);
+  }
+
   @Post('tfa/check')
   @HttpCode(204)
   @UseGuards(JwtAuthGuard)
@@ -155,20 +179,5 @@ export class AuthController {
       throw new InternalServerErrorException('Unexpected error');
     }
     this.authService.checkTfa(req.user, body.token);
-  }
-
-  @Delete('tfa')
-  @HttpCode(204)
-  @UseGuards(JwtAuthGuard)
-  async removeTfa(@Req() req: SessionRequest): Promise<void> {
-    if (!req.user) {
-      this.logger.error(
-        'This is the impossible type error where the user is authenticated but the `req.user` is `undefined`',
-      );
-      throw new InternalServerErrorException('Unexpected error');
-    }
-    if (!req.user.tfa_setup)
-      throw new BadRequestException('TFA is not configured on your account');
-    this.usersService.removeTfa(req.user.id);
   }
 }
