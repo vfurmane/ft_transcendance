@@ -1,8 +1,8 @@
 import React from "react";
 import Image from 'next/image';
-import Avatar from '../asset/Avatar.png';
+import Avatar from '../../asset/Avatar.png';
 
-export default function MatchEntity(props : {name : string, score: number}) : JSX.Element {
+export default function MatchEntity(props : {name : string, score: number, key: number}) : JSX.Element {
     return (
         <div className="shadowContainer">
             <div className="cardContainer entity">

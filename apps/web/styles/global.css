@@ -118,16 +118,14 @@ body
 {
     display: flex;
     justify-content: center;
-    
     align-items: center;
     text-align: center;
-    padding-bottom: 20px;
+    padding-bottom: 15px;
 }
-
 
 .shadowContainer.MB
 {
-    margin-bottom: 15%;
+    padding-bottom: 200px;
 }
 
 .shadowContainer.leaderBoard
@@ -150,7 +148,7 @@ body
     transition: transform 0.3s ease;
     transform: translateX(0px);
     margin: auto;
-    margin-top: 20px;
+    margin-top: 60px;
     z-index: 2;
 }
 
@@ -168,8 +166,32 @@ body
     position: absolute;
     background-color: white;
     border: 0px;
-    margin-top: 20px;;
+    margin-top: 60px;;
     z-index: 1;
+}
+
+.playMenuContainer
+{
+    z-index: 2;
+    position: absolute;
+    right: 240px;
+    top:275px;
+    background: url('../asset/Texture.png'), rgba(255,255,255,0.1);
+    color: white;
+    text-align: start;
+    border-radius: 8px;
+    font-family: 'Saira', sans-serif;
+    width: 18%;
+}
+
+.playMenuEntity
+{
+    padding: 10px;
+}
+
+.playMenuEntity.bar
+{
+    border-bottom: 1px solid white;
 }
 
 /*=======================*/
@@ -219,7 +241,7 @@ body
 
 .entity.small
 {
-    width: 200px;
+    width: 250px;
 }
 
 .entity:hover
@@ -240,7 +262,7 @@ body
 
 .entityShadow.small
 {
-    width: 200px;
+    width: 250px;
 }
 
 .cardContainer .entity .L
@@ -329,3 +351,33 @@ p
     justify-content: space-between;
     flex-wrap: wrap;
 }
+
+/*=======================*/
+/*      friend           */
+/*=======================*/
+
+.friendMenuContainer
+{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.buttonFriend
+{
+    width: 50%;
+    height: 60px;
+    margin: 10px;
+    border-radius: 10px;
+    color: white;
+    background-color: #9f9f9f;
+    font-size: 20px;
+    border: 0px;
+}
+
+.buttonFriend.yellow
+{
+    background-color: #eac435;
+}
+
