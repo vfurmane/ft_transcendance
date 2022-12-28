@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
@@ -77,6 +78,10 @@ export class AuthController {
   async createTfa(
     @User() user: UserEntity,
   ): Promise<SpeakeasyGeneratedSecretDto> {
+    if (user.tfa_setup)
+      throw new BadRequestException(
+        'TFA is already configured on your account',
+      );
     return this.usersService.createTfa(user);
   }
 
