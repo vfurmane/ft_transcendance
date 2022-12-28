@@ -8,6 +8,7 @@ import { SpeakeasyGeneratedSecretDto } from 'src/auth/speakeasy-generated-secret
 export interface AddUserData {
   name: string;
   email: string;
+  password: string | null;
 }
 
 @Injectable()
@@ -33,6 +34,7 @@ export class UsersService {
     const userEntity = new User();
     userEntity.email = user.email;
     userEntity.name = user.name;
+    userEntity.password = user.password;
     return this.usersRepository.save(userEntity);
   }
 

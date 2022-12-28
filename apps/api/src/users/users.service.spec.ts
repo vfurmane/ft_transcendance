@@ -11,6 +11,7 @@ const email = faker.internet.email();
 const addUserDto: AddUserData = {
   name,
   email,
+  password: null,
 };
 const userEntity: UserEntity = {
   id: faker.datatype.uuid(),

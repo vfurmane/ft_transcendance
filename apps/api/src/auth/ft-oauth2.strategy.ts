@@ -34,6 +34,7 @@ export class FtOauth2Strategy extends PassportStrategy(Strategy) {
       user = await this.usersService.addUser({
         email: ftUser.email,
         name: ftUser.login,
+        password: null,
       });
     }
     profile = user;
