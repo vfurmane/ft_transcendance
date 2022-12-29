@@ -64,13 +64,17 @@ export class AuthService {
       password: await bcrypt.hash(pass, salt),
     };
     this.usersService.addUser(user);
-    const { password, ...resut } = user;
-    return resut;
+    const { password, ...result } = user;
+    return result;
   }
 
   async validateUser(email: string, pass: string): Promise<any> {
     const user = await this.usersService.getByEmail(email);
-    if (user && (await bcrypt.compare(pass, user.password || ''))) {
+    if (
+      user &&
+      user?.password !== null &&
+      (await bcrypt.compare(pass, user.password))
+    ) {
       const { password, ...result } = user;
       return result;
     }
