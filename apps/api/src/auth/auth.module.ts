@@ -20,6 +20,8 @@ import { LocalStrategy } from './local.strategy';
       load: [ftOauth2Configuration],
     }),
     HttpModule,
+    UsersModule,
+    PassportModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -41,5 +43,6 @@ import { LocalStrategy } from './local.strategy';
     UsersService,
   ],
   controllers: [AuthController],
+  exports: [AuthService],
 })
 export class AuthModule {}

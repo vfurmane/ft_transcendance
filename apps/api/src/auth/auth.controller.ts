@@ -91,8 +91,8 @@ export class AuthController {
 
   @UseGuards(LocalAuthGuard)
   @Post('login')
-  async login(@User() user: UserEntity): Promise<UserEntity> {
-    return user;
+  async login(@User() user: UserEntity): Promise<AccessTokenResponse> {
+    return this.authService.login(user);
   }
 
   @Post('tfa')
