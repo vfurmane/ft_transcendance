@@ -1,5 +1,6 @@
 export interface State {
   id: string;
+  user: User | null;
   created_at: Date;
   updated_at: Date;
   token: string;
@@ -21,6 +22,10 @@ export interface FtUser {
 
 export interface AccessTokenResponse {
   access_token: string;
+}
+
+export interface TfaNeededResponse {
+  message: string;
 }
 
 export interface JwtPayload {

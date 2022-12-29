@@ -10,6 +10,7 @@ import {
   Logger,
   Post,
   Req,
+  UnauthorizedException,
   Request,
   UseGuards,
   UseInterceptors,
@@ -17,6 +18,7 @@ import {
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
+  ApiBody,
   ApiCreatedResponse,
   ApiMovedPermanentlyResponse,
   ApiNoContentResponse,
@@ -26,18 +28,25 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { AccessTokenResponse, SessionRequest, User } from 'types';
+import {
+  AccessTokenResponse,
+  SessionRequest,
+  TfaNeededResponse,
+  User,
+} from 'types';
 import { UsersService } from '../users/users.service';
 import { AccessTokenResponseDto } from './access-token-response.dto';
 import { AuthService } from './auth.service';
+import { CheckTfaTokenStateDto } from './check-tfa-token-state.dto';
 import { CheckTfaTokenDto } from './check-tfa-token.dto';
 import { FtOauth2AuthGuard } from './ft-oauth2-auth.guard';
 import { FtOauth2Dto } from './ft-oauth2.dto';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { SpeakeasyGeneratedSecretDto } from './speakeasy-generated-secret.dto';
-import { StateGuard } from './state.guard';
 import { LocalAuthGuard } from './local-auth.guard';
 import { RegisterUserDto } from 'src/users/register-user.dto';
+import { StateGetGuard } from './state-get.guard';
+import { StatePostGuard } from './state-post.guard';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -49,7 +58,7 @@ export class AuthController {
   ) {}
 
   @Get('/login/oauth2/42')
-  @UseGuards(StateGuard)
+  @UseGuards(StateGetGuard)
   @UseGuards(FtOauth2AuthGuard)
   @ApiOperation({
     summary:
@@ -65,12 +74,20 @@ export class AuthController {
     description:
       'The authentication failed (`code` or `state` may be invalid).',
   })
-  ftCallback(@Req() req: SessionRequest): AccessTokenResponse {
+  ftCallback(
+    @Req() req: SessionRequest,
+  ): AccessTokenResponse | TfaNeededResponse {
     if (!req.user) {
       this.logger.error(
         'This is the impossible type error where the user is authenticated but the `req.user` is `undefined`',
       );
       throw new InternalServerErrorException('Unexpected error');
+    }
+    if (req.user.tfa_setup) {
+      this.logger.log(
+        `${req.user.name} logged in using OAuth2, but TFA is needed`,
+      );
+      return { message: 'TFA needed' };
     }
     this.logger.log(`${req.user.name} logged in using OAuth2`);
     return this.authService.login(req.user);
@@ -171,13 +188,52 @@ export class AuthController {
   @ApiBadRequestResponse({
     description: 'The OTP is invalid or TFA is not setup yet.',
   })
-  checkTfa(@Req() req: SessionRequest, @Body() body: CheckTfaTokenDto): void {
+  async checkTfa(
+    @Req() req: SessionRequest,
+    @Body() body: CheckTfaTokenDto,
+  ): Promise<void> {
     if (!req.user) {
       this.logger.error(
         'This is the impossible type error where the user is authenticated but the `req.user` is `undefined`',
       );
       throw new InternalServerErrorException('Unexpected error');
     }
-    this.authService.checkTfa(req.user, body.token);
+    await this.authService.checkTfa(req.user, body.token);
+  }
+
+  @Post('tfa/login')
+  @HttpCode(200)
+  @UseGuards(StatePostGuard)
+  @ApiOperation({ summary: 'Login using an OTP token (as TFA).' })
+  @ApiBody({
+    type: CheckTfaTokenStateDto,
+  })
+  @ApiOkResponse({
+    description: 'The authentication succeeded.',
+    type: AccessTokenResponseDto,
+  })
+  @ApiUnauthorizedResponse({
+    description:
+      'Authorization header is missing or invalid, or the first factor authentication has not been done yet.',
+  })
+  @ApiBadRequestResponse({
+    description: 'The OTP is invalid or TFA is not setup yet.',
+  })
+  async loginWithTfa(
+    @Req() req: SessionRequest,
+    @Body() body: CheckTfaTokenStateDto,
+  ): Promise<AccessTokenResponse> {
+    if (!req.state) {
+      this.logger.error(
+        'This is the impossible type error where the state is registered but the `req.state` is `undefined`',
+      );
+      throw new InternalServerErrorException('Unexpected error');
+    }
+    if (!req.state.user)
+      throw new UnauthorizedException('Missing first factor authentication.');
+    await this.authService.checkTfa(req.state.user, body.token);
+    await this.authService.removeState(req.state);
+    this.logger.log(`${req.state.user.name} validated TFA`);
+    return this.authService.login(req.state.user);
   }
 }

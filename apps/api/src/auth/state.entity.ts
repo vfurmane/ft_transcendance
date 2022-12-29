@@ -1,7 +1,9 @@
+import { User } from '../users/user.entity';
 import {
   Column,
   CreateDateColumn,
   Entity,
+  ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -19,4 +21,9 @@ export class State {
 
   @Column('varchar', { length: 255, unique: true })
   token!: string;
+
+  @ManyToOne(() => User, (user) => user.states, {
+    eager: true,
+  })
+  user!: User | null;
 }

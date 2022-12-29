@@ -9,6 +9,9 @@ import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { of, throwError } from 'rxjs';
 import { AxiosResponse } from 'axios';
 import { UsersService } from '../users/users.service';
+import { getRepositoryToken } from '@nestjs/typeorm';
+import { State } from './state.entity';
+import { User as UserEntity } from '../users/user.entity';
 
 const JWT_SECRET = faker.random.alphaNumeric(20);
 const code = faker.random.alphaNumeric(20);
@@ -45,6 +48,14 @@ describe('AuthService', () => {
         {
           provide: Logger,
           useValue: createMock<Logger>(),
+        },
+        {
+          provide: getRepositoryToken(State),
+          useValue: createMock(),
+        },
+        {
+          provide: getRepositoryToken(UserEntity),
+          useValue: createMock(),
         },
         {
           provide: UsersService,

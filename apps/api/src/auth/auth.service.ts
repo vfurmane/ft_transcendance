@@ -3,15 +3,23 @@ import { HttpService } from '@nestjs/axios';
 import { AxiosError } from 'axios';
 import { catchError, firstValueFrom, throwError } from 'rxjs';
 import * as speakeasy from 'speakeasy';
-import { AccessTokenResponse, FtUser, JwtPayload, User } from 'types';
+import { AccessTokenResponse, FtUser, JwtPayload, State, User } from 'types';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from 'src/users/users.service';
 import * as bcrypt from 'bcrypt';
 import { RegisterUserDto } from 'src/users/register-user.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { State as StateEntity } from './state.entity';
+import { User as UserEntity } from '../users/user.entity';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class AuthService {
   constructor(
+    @InjectRepository(StateEntity)
+    private readonly statesRepository: Repository<StateEntity>,
+    @InjectRepository(UserEntity)
+    private readonly usersRepository: Repository<UserEntity>,
     private readonly httpService: HttpService,
     private readonly jwtService: JwtService,
     private readonly logger: Logger,
@@ -67,7 +75,25 @@ export class AuthService {
     };
   }
 
-  checkTfa(user: User, token: string): boolean {
+  async getRequestState(stateToken: string, user: User): Promise<State> {
+    if (!stateToken) throw 'State parameter is needed.';
+
+    let state = await this.statesRepository.findOneBy({
+      token: stateToken,
+    });
+    if (state === null) {
+      state = new StateEntity();
+      state.token = stateToken;
+      if (user)
+        state.user = await this.usersRepository.findOneBy({
+          id: user.id,
+        });
+      await this.statesRepository.save(state);
+    }
+    return state;
+  }
+
+  async checkTfa(user: User, token: string): Promise<boolean> {
     if (user.tfa_secret === null)
       throw new BadRequestException('TFA not setup yet');
 
@@ -85,5 +111,10 @@ export class AuthService {
       this.usersService.validateTfa(user.id);
     }
     return true;
+  }
+
+  async removeState(state: State): Promise<void> {
+    state;
+    return;
   }
 }

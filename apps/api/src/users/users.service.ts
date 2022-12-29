@@ -5,7 +5,7 @@ import * as speakeasy from 'speakeasy';
 import { User } from 'types';
 import { AddUserDto } from './add-user.dto';
 import { User as UserEntity } from './user.entity';
-import { SpeakeasyGeneratedSecretDto } from 'src/auth/speakeasy-generated-secret.dto';
+import { SpeakeasyGeneratedSecretDto } from '../auth/speakeasy-generated-secret.dto';
 
 @Injectable()
 export class UsersService {
