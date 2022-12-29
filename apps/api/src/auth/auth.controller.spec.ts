@@ -15,6 +15,7 @@ const user: User = {
   id: faker.datatype.uuid(),
   created_at: faker.date.recent(),
   updated_at: faker.date.recent(),
+  states: [],
   name: faker.internet.userName(),
   email: faker.internet.email(),
   password: faker.internet.password(),

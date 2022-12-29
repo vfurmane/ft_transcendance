@@ -12,6 +12,9 @@ import { ConfigModule } from '@nestjs/config';
 import ftOauth2Configuration from '../config/ft-oauth2';
 import { User } from '../users/user.entity';
 import { UsersService } from '../users/users.service';
+import { getRepositoryToken } from '@nestjs/typeorm';
+import { State } from './state.entity';
+import { User as UserEntity } from '../users/user.entity';
 
 const JWT_SECRET = faker.random.alphaNumeric(20);
 const code = faker.random.alphaNumeric(20);
@@ -23,6 +26,7 @@ const user: User = {
   id: faker.datatype.uuid(),
   created_at: faker.date.recent(),
   updated_at: faker.date.recent(),
+  states: [],
   name: faker.internet.userName(),
   email: faker.internet.email(),
   password: faker.internet.password(),
@@ -54,6 +58,14 @@ describe('AuthService', () => {
         {
           provide: Logger,
           useValue: createMock<Logger>(),
+        },
+        {
+          provide: getRepositoryToken(State),
+          useValue: createMock(),
+        },
+        {
+          provide: getRepositoryToken(UserEntity),
+          useValue: createMock(),
         },
         {
           provide: UsersService,
