@@ -20,4 +20,4 @@ export interface AccessTokenResponse {
   access_token: string;
 }
 
-export type SessionRequest = Request & { state: State, user?: User }
+export type SessionRequest = Request & { state?: State, user?: User }
