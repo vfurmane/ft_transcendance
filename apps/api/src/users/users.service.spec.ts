@@ -19,6 +19,7 @@ const userEntity: UserEntity = {
   email,
   name,
   password: faker.internet.password(),
+  states: [],
   tfa_secret: null,
   tfa_setup: false,
 };

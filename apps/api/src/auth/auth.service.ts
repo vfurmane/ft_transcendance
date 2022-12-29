@@ -3,16 +3,23 @@ import { HttpService } from '@nestjs/axios';
 import { AxiosError } from 'axios';
 import { catchError, firstValueFrom, throwError } from 'rxjs';
 import { AccessTokenResponse, FtUser, JwtPayload } from 'types';
+import * as speakeasy from 'speakeasy';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { User } from '../users/user.entity';
-import * as speakeasy from 'speakeasy';
 import { UsersService } from '../users/users.service';
+import { InjectRepository } from '@nestjs/typeorm';
+import { State } from './state.entity';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly configService: ConfigService,
+    @InjectRepository(State)
+    private readonly statesRepository: Repository<State>,
+    @InjectRepository(User)
+    private readonly usersRepository: Repository<User>,
     private readonly httpService: HttpService,
     private readonly jwtService: JwtService,
     private readonly logger: Logger,
@@ -53,7 +60,25 @@ export class AuthService {
     };
   }
 
-  checkTfa(user: User, token: string): boolean {
+  async getRequestState(stateToken: string, user: User): Promise<State> {
+    if (!stateToken) throw 'State parameter is needed.';
+
+    let state = await this.statesRepository.findOneBy({
+      token: stateToken,
+    });
+    if (state === null) {
+      state = new State();
+      state.token = stateToken;
+      if (user)
+        state.user = await this.usersRepository.findOneBy({
+          id: user.id,
+        });
+      await this.statesRepository.save(state);
+    }
+    return state;
+  }
+
+  async checkTfa(user: User, token: string): Promise<boolean> {
     if (user.tfa_secret === null)
       throw new BadRequestException('TFA not setup yet');
 
@@ -71,5 +96,10 @@ export class AuthService {
       this.usersService.validateTfa(user.id);
     }
     return true;
+  }
+
+  async removeState(state: State): Promise<void> {
+    state;
+    return;
   }
 }
