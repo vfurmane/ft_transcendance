@@ -6,7 +6,7 @@ services:
       context: .
       dockerfile: ./apps/web/Dockerfile
     container_name: web
-    image: web:transcendence
+    image: ft_transcendence/web:nextjs13
     depends_on:
       - api
     restart: always
@@ -19,7 +19,7 @@ services:
       context: .
       dockerfile: ./apps/api/Dockerfile
     container_name: api
-    image: api:transcendence
+    image: ft_transcendence/api:nestjs9
     depends_on:
       database:
         condition: service_healthy
