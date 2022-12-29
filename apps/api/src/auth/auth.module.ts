@@ -11,11 +11,14 @@ import { AuthService } from './auth.service';
 import { FtOauth2Strategy } from './ft-oauth2.strategy';
 import { State } from './state.entity';
 import { LocalStrategy } from './local.strategy';
+import { JwtStrategy } from './jwt-strategy';
 
 @Module({
   imports: [
     ConfigModule,
     HttpModule,
+    UsersModule,
+    PassportModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -31,10 +34,12 @@ import { LocalStrategy } from './local.strategy';
   providers: [
     AuthService,
     FtOauth2Strategy,
+    JwtStrategy,
     LocalStrategy,
     Logger,
     UsersService,
   ],
   controllers: [AuthController],
+  exports: [AuthService],
 })
 export class AuthModule {}

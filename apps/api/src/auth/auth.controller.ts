@@ -71,13 +71,13 @@ export class AuthController {
 
   @UseGuards(LocalAuthGuard)
   @Post('login')
-  async login(@Request() req: SessionRequest): Promise<User> {
+  async login(@Request() req: SessionRequest): Promise<AccessTokenResponse> {
     if (!req.user) {
       this.logger.error(
         'This is the impossible type error where the user is authenticated but the `req.user` is `undefined`',
       );
       throw new InternalServerErrorException('Unexpected error');
     }
-    return req.user;
+    return this.authService.login(req.user);
   }
 }
