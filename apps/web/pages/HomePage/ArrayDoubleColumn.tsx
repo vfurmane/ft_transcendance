@@ -1,12 +1,34 @@
-import React from 'react';
+import React, {useState} from 'react';
 import Image from 'next/image';
 import Message from '../../asset/message.png';
 
+
 export default function ArrayDoubleColumn(props : {title: string, list : JSX.Element[], open ?: boolean, name?: string, index?: number}):  JSX.Element {
-    
+    const [columnNum, setColumnNum] = useState(1);
+    const [pageNum, setPageNum] = useState(1);
+
+    function prevClick(){
+        if (columnNum > 1)
+        {
+            setColumnNum((prev)=>prev - 2);
+            setPageNum((prev)=>prev - 1);
+        }
+            
+    }
+
+    function nextClick(){
+        if (columnNum < Math.floor(props.list.length / 5))
+        {
+            setColumnNum((prev)=>prev + 2);
+            setPageNum((prev)=>prev + 1);
+        }
+            
+    }
+
+
     function getColumn(num: number) : JSX.Element[]{
 
-        if (props.open && typeof(props.index) !== 'undefined' && ((Number(props.index.toString().slice(-1)) < 5 && num === 1) || (Number(props.index.toString().slice(-1)) >= 5 && num === 2)))
+        if (props.open && typeof(props.index) !== 'undefined' && ((Number(props.index.toString().slice(-1)) < 5 && num % 2 > 0) || (Number(props.index.toString().slice(-1)) >= 5 && num % 2 === 0)))
         {
             return (
                 [<div className='friendMenuContainer'>
@@ -32,13 +54,20 @@ export default function ArrayDoubleColumn(props : {title: string, list : JSX.Ele
             <h2>{props.title}</h2>
             <div className='leaderBoardDoubleColumn'>
                 <div>
-                    {getColumn(1)}
+                    {getColumn(columnNum)}
                 </div>
                 <div>
-                    {getColumn(2)}
+                    {getColumn(columnNum + 1)}
                 </div>
             </div>
-            <h3>{'<   1 of 31   >'}</h3>
+            <div className='shadowContainer'>
+                <h3 onClick={()=>prevClick()}>{'<'}</h3>
+                <h3>{pageNum }</h3>
+                <h3>of</h3>
+                <h3>{ Math.ceil(props.list.length / 10)}</h3>
+                <h3 onClick={()=>nextClick()}>{'>'}</h3>
+            </div>
+            
         </div>
     );
 }
