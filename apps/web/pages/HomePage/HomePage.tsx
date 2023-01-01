@@ -44,7 +44,7 @@ function Home() : JSX.Element {
             setOpenFriendMenuLeaderBrd(!openFriendMenuLeaderBrd);
     }
 
-    for (let i = 0; i < 10; i++)
+    for (let i = 0; i < 22; i++)
     {
         friendList.push(<FriendEntity name={'name' + (i + 1).toString()} status='status' key={i} index={i} handleClick={handleClickFriendMenu} />);
         matchList.push(<MatchEntity name={'name' + (i + 1).toString()} score={5} key={i}/>);

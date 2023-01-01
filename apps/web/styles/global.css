@@ -189,6 +189,12 @@ body
     padding: 10px;
 }
 
+.playMenuEntity:hover
+{
+    background-color: white;
+    color:rgba(0, 0, 0, 1);
+}
+
 .playMenuEntity.bar
 {
     border-bottom: 1px solid white;
@@ -279,6 +285,7 @@ h3
 {
     font-family: 'Lacquer', cursive;
     margin: 0px;
+    margin-left: 10px;
     margin-bottom: 0px;
 }
 
@@ -376,7 +383,7 @@ p
     border: 0px;
 }
 
-.buttonFriend.yellow
+.buttonFriend:hover
 {
     background-color: #eac435;
 }
