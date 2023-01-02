@@ -22,7 +22,7 @@ import { FtOauth2AuthGuard } from './ft-oauth2-auth.guard';
 import { FtOauth2Dto } from './ft-oauth2.dto';
 import { StateGuard } from './state.guard';
 import { LocalAuthGuard } from './local-auth.guard';
-import { AddUserDto } from 'src/users/add-user.dto';
+import { RegisterUserDto } from 'src/users/register-user.dto';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -60,12 +60,8 @@ export class AuthController {
   }
 
   @Post('register')
-  async register(@Body() req: any): Promise<User> {
-    const user = await this.authService.createUser(
-      req.name,
-      req.email,
-      req.password,
-    );
+  async register(@Body() registerUserDto: RegisterUserDto): Promise<User> {
+    const user = await this.authService.createUser(registerUserDto);
     return user;
   }
 

@@ -22,3 +22,8 @@ export interface AccessTokenResponse {
 }
 
 export type SessionRequest = Request & { state?: State, user?: User }
+
+export interface JwtPayload {
+  sub: string;
+  name: string;
+}

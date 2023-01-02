@@ -6,7 +6,7 @@ import { AccessTokenResponse, FtUser, User } from 'types';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from 'src/users/users.service';
 import * as bcrypt from 'bcrypt';
-import { AddUserDto } from 'src/users/add-user.dto';
+import { RegisterUserDto } from 'src/users/register-user.dto';
 
 @Injectable()
 export class AuthService {
@@ -35,28 +35,20 @@ export class AuthService {
     return data;
   }
 
-  async createUser(
-    username: string,
-    email: string,
-    pass: string,
-  ): Promise<any> {
-    const user = new AddUserDto();
+  async createUser(user: RegisterUserDto): Promise<User> {
     const salt = await bcrypt.genSalt();
-    user.name = username;
-    user.password = await bcrypt.hash(pass, salt);
-    user.email = email;
+    user.password = await bcrypt.hash(user.password, salt);
     return this.userService.addUser(user);
   }
 
-  async validateUser(email: string, pass: string): Promise<any> {
+  async validateUser(email: string, pass: string): Promise<User | null> {
     const user = await this.userService.getByEmail(email);
     if (
       user &&
       user?.password !== null &&
       (await bcrypt.compare(pass, user.password))
     ) {
-      const { password, ...result } = user;
-      return result;
+      return user;
     }
     return null;
   }
