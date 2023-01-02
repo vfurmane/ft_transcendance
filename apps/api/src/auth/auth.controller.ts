@@ -42,6 +42,7 @@ import { State } from '../common/decorators/state.decorator';
 import { State as StateEntity } from './state.entity';
 import { AuthGuard } from '@nestjs/passport';
 import { LocalAuthGuard } from './local-auth.guard';
+import { RegisterUserDto } from 'src/users/register-user.dto';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -80,12 +81,10 @@ export class AuthController {
   }
 
   @Post('register')
-  async register(@Body() req: any): Promise<UserEntity> {
-    const user = await this.authService.createUser(
-      req.name,
-      req.email,
-      req.password,
-    );
+  async register(
+    @Body() registerUserDto: RegisterUserDto,
+  ): Promise<UserEntity> {
+    const user = await this.authService.createUser(registerUserDto);
     return user;
   }
 
