@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Body,
+  ClassSerializerInterceptor,
   Controller,
   Delete,
   Get,
@@ -10,6 +11,7 @@ import {
   Post,
   UnauthorizedException,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
@@ -79,6 +81,7 @@ export class AuthController {
     return this.authService.login(user);
   }
 
+  @UseInterceptors(ClassSerializerInterceptor)
   @Post('register')
   async register(
     @Body() registerUserDto: RegisterUserDto,
