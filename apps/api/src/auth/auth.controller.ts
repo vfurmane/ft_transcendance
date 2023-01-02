@@ -25,6 +25,7 @@ import { FtOauth2Dto } from './ft-oauth2.dto';
 import { StateGuard } from './state.guard';
 import { LocalAuthGuard } from './local-auth.guard';
 import { RegisterUserDto } from 'src/users/register-user.dto';
+import { JwtAuthGuard } from './jwt-auth-guard';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -78,5 +79,18 @@ export class AuthController {
       throw new InternalServerErrorException('Unexpected error');
     }
     return this.authService.login(req.user);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @UseInterceptors(ClassSerializerInterceptor)
+  @Get('profile')
+  async getProfile(@Request() req: SessionRequest): Promise<User> {
+    if (!req.user) {
+      this.logger.error(
+        'This is the impossible type error where the user is authenticated but the `req.user` is `undefined`',
+      );
+      throw new InternalServerErrorException('Unexpected error');
+    }
+    return req.user;
   }
 }
