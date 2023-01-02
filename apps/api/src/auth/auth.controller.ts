@@ -40,9 +40,8 @@ import { StateGetGuard } from './state-get.guard';
 import { StatePostGuard } from './state-post.guard';
 import { State } from '../common/decorators/state.decorator';
 import { State as StateEntity } from './state.entity';
-import { AuthGuard } from '@nestjs/passport';
 import { LocalAuthGuard } from './local-auth.guard';
-import { RegisterUserDto } from 'src/users/register-user.dto';
+import { RegisterUserDto } from '../users/register-user.dto';
 
 @ApiTags('auth')
 @Controller('auth')
