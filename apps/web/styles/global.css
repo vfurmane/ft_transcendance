@@ -2,9 +2,10 @@ body
 {
     background: url('../asset/Texture.png'), url('../asset/Red.png'), linear-gradient(160deg, rgba(5,5,5,1) 45%, rgba(30,30,30,1) 70%, rgba(75,75,75,1) 100%);
     background-repeat: repeat, no-repeat, no-repeat;
-    background-size: 40% 40%, 70% 26%, 100% 100%;
+    background-size: 40% 40%, 90% 30%, 100% 100%;
     background-position: top,  top, center;
     background-attachment:  fixed, local;
+    width: 100vw;
 }
 
 
@@ -15,7 +16,7 @@ body
 .illustration
 {
     background-image: url('../asset/Illustration.png');
-    background-size: 80% 80%;
+    background-size: 90% 80%;
     background-position: center;
     margin-top: 80px;
     background-repeat: no-repeat;
@@ -25,29 +26,21 @@ body
     
 }
 
-.titleAndButton
-{
-    width: 60%;
-    margin: auto;
-    display: flex;
-    justify-content: center;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-}
-
 .title
 {
     color: white;
     font-family: 'Lacquer', cursive;
-    font-size: 70px;
-    margin-top: 10%;
+    font-size: 6vw;
+    margin-top: 150px;
+    width: auto;
 }
 
 .title.small
 {
     font-size: 30px;
+    text-align: center;
 }
+
 
 /*=======================*/
 /*       top bar         */
@@ -106,6 +99,7 @@ body
 {
     margin-bottom: 3px;
     margin-top: 5px;
+    margin-left: 10px;
 }
 
 
@@ -120,12 +114,14 @@ body
     justify-content: center;
     align-items: center;
     text-align: center;
-    padding-bottom: 15px;
+    width: 100%;
+    margin-bottom: 20px;
 }
 
 .shadowContainer.MB
 {
-    padding-bottom: 200px;
+    padding-bottom: 150px;
+    padding-top: 50px;
 }
 
 .shadowContainer.leaderBoard
@@ -136,12 +132,12 @@ body
 .playButton
 {
     background: url('../asset/Texture.png'), #eac435;
-    width: 25%;
-    height: 90px;
+    width: 35%;
+    height: 15vh;
     border-radius: 8px;
     border: solid 1px white;
     font-family: 'Press Start 2P', cursive;
-    font-size: 60px;
+    font-size: 6vw;
     text-shadow: 2px 2px white;
     padding: 5px;
     position: absolute;
@@ -159,8 +155,8 @@ body
 
 .playButtonShadow
 {
-    width: 25%;
-    height: 90px;
+    width: 35%;
+    height: 15vh;
     border-radius: 8px;
     padding: 5px;
     position: absolute;
@@ -172,16 +168,12 @@ body
 
 .playMenuContainer
 {
-    z-index: 2;
-    position: absolute;
-    right: 240px;
-    top:275px;
     background: url('../asset/Texture.png'), rgba(255,255,255,0.1);
     color: white;
     text-align: start;
     border-radius: 8px;
     font-family: 'Saira', sans-serif;
-    width: 18%;
+    width: 100%;
 }
 
 .playMenuEntity
@@ -208,14 +200,14 @@ body
 {
     display: flex;
     align-items: center;
-    padding: 8px;
-    width: 100%;
+    justify-content: space-between;
+    width: auto;
 }
 
 .card
 {
     padding: 20px;
-    height: 350px;
+    height: 450px;
     width: 100%;
     margin: 10px;
     background: url('../asset/Texture.png'), rgba(255,255,255,0.1);
@@ -237,23 +229,32 @@ body
     background: url('../asset/Texture.png') #1e1e1e;
     border : 1px solid white;
     border-radius: 10px;
-    width: 280px;
+    width: 250px;
     height: 60px;
-    padding: 0px;
     z-index: 2;
     transition: transform 0.3s ease;
     transform: translateX(0px);
+
 }
 
 .entity.small
 {
-    width: 250px;
+    width: 200px;
 }
+
+.entity.big
+{
+    width: 360px;
+}
+
+
 
 .entity:hover
 {
-    transform: translateX(-10px) translateY(-10px);
+    transform: translateX(-15px) translateY(-10px);
+    
 }
+
 
 .entityShadow
 {
@@ -261,32 +262,28 @@ body
     position: absolute;
     z-index: 1;
     border-radius: 10px;
-    width: 280px;
+    width: 250px;
     height: 60px;
-    padding: 0px;
 }
 
 .entityShadow.small
 {
-    width: 250px;
+    width: 200px;
 }
 
-.cardContainer .entity .L
+.entityShadow.big
 {
-    margin-right: 20px;
+    width: 360px;
 }
 
-.cardContainer .entity .R
-{
-    margin-left: 20px;
-}
 
 h3
 {
     font-family: 'Lacquer', cursive;
-    margin: 0px;
     margin-left: 10px;
+    margin-right: 10px;
     margin-bottom: 0px;
+    font-size: 2vh;
 }
 
 p
@@ -294,6 +291,8 @@ p
     font-family: 'Saira', sans-serif;
     color: #9f9f9f;
     margin:0px;
+    font-size: 2vh;
+    text-align: center;
 }
 
 .statusImage
@@ -303,6 +302,23 @@ p
     bottom: 10px;
 }
 
+.L
+{
+    margin-right: 20px;
+}
+
+.avatarText
+{
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+}
+
+.entityText
+{
+    margin-left: 10px;
+}
 
 /*=======================*/
 /*      leaderboard      */
@@ -311,14 +327,14 @@ p
 .leaderBoardContainer
 {
     display: flex;
-    justify-content: center;
+    justify-content: space-between;
     align-items: center;
+    width: 350px;
 }
 
 .card.leaderBoard
 {
     height: auto;
-    flex-wrap: wrap;
     width: 100%;
     margin-top: 10%;
     margin-bottom: 10%;
@@ -327,16 +343,14 @@ p
 .rank
 {
     border-radius: 50%;
-    width: 20px;
-    height: 20px;
+    width: 30px;
+    height: 30px;
     background-color: #eac435;
-    margin-right: 15px;
-    margin-left: 15px;
     margin-bottom: 10px;
     font-family:  'Saira', sans-serif;
     color: white;
     text-align: center;
-    padding-bottom: 5px;
+   
 }
 .level
 {
@@ -344,8 +358,6 @@ p
     background-color: #9f9f9f;
     font-family:  'Saira', sans-serif;
     color: white;
-    margin-left: 10px;
-    margin-right: 10px;
     width: 55px;
     height: 30px;
     padding-top: 5px;
@@ -357,6 +369,7 @@ p
     display: flex;
     justify-content: space-between;
     flex-wrap: wrap;
+
 }
 
 /*=======================*/

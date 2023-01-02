@@ -6,6 +6,7 @@ import FriendEntity from './FriendEntity';
 import MatchEntity from './MatchEntity';
 import LeaderboardEntity from './LeaderboardEntity';
 import ArrayDoubleColumn from './ArrayDoubleColumn';
+import PlayMenu from './PlayMenu';
 
 
 function Home() : JSX.Element {
@@ -15,24 +16,31 @@ function Home() : JSX.Element {
 
     const [openPlayButton, setOpenPlayButton] = useState(false);
     const [openFriendMenu, setOpenFriendMenu] = useState(false);
-    const [openFriendMenuLeaderBrd, setOpenFriendMenuLeaderBrd] = useState(false);
+    const [openFriendMenuLeaderBrdLeft, setOpenFriendMenuLeaderBrdLeft] = useState(false);
+    const [openFriendMenuLeaderBrdRight, setOpenFriendMenuLeaderBrdRight] = useState(false);
     const [nameOfFriend, setNameOfFriend] = useState('');
     const [indexOfFriend, setIndexOfFriend] = useState(0);
+    const [clickOnLeaderBoardItem, setClickOnLeaderBoardItem] = useState(false);
 
     function handleClickPlayButton() : void {
         setOpenPlayButton(!openPlayButton);
     }
 
     function handleClickFriendMenu( e : {name : string, index: number}) : void {
-        setOpenFriendMenu(!openFriendMenu);
+        setOpenFriendMenu(true);
         setNameOfFriend(e.name);
         setIndexOfFriend(e.index);
     }
 
     function handleClickFriendMenuLeaderBrd( e : {name : string, index: number}) : void {
-        setOpenFriendMenuLeaderBrd(!openFriendMenuLeaderBrd);
+        if (Number(e.index.toString().slice(-1)) < 5)
+            setOpenFriendMenuLeaderBrdLeft(true);
+        if ( Number(e.index.toString().slice(-1)) >= 5)
+            setOpenFriendMenuLeaderBrdRight(true);
+
         setNameOfFriend(e.name);
         setIndexOfFriend(e.index);
+        setClickOnLeaderBoardItem(true);
     }
 
     function close() :void {
@@ -40,9 +48,13 @@ function Home() : JSX.Element {
             setOpenPlayButton(!openPlayButton);
         if (openFriendMenu)
             setOpenFriendMenu(!openFriendMenu);
-        if (openFriendMenuLeaderBrd)
-            setOpenFriendMenuLeaderBrd(!openFriendMenuLeaderBrd);
+        if (openFriendMenuLeaderBrdLeft)
+            setOpenFriendMenuLeaderBrdLeft(!openFriendMenuLeaderBrdLeft);
+        if (openFriendMenuLeaderBrdRight)
+            setOpenFriendMenuLeaderBrdRight(!openFriendMenuLeaderBrdRight);
     }
+
+    
 
     for (let i = 0; i < 22; i++)
     {
@@ -52,23 +64,48 @@ function Home() : JSX.Element {
     }
 
     return (
-        <div onClick={()=>close()}>
+        <div onClick={()=>close()} >
             <TopBar/>
-            <div className='illustration'>
-                <div className='titleAndButton'>
-                    <h1 className='title'>
-                        Ft_Transcendence
-                    </h1>
-                    <PlayButton handleClick={handleClickPlayButton} open={openPlayButton}/>
-                    <div className='cardContainer'>
-                        <List title='Friends List' list={friendList} open={openFriendMenu} name={nameOfFriend} index={indexOfFriend}/>
+            <div className='container'> 
+                <div className='row'>
+                    <div className='col-10 offset-2 '>
+                        <h3 className='title'>Ft_Transcendence</h3>
+                    </div>
+                </div>
+                <div className='row'>
+                    <div className='col-4 offset-4 '>
+                        <PlayButton handleClick={handleClickPlayButton} open={openPlayButton}/>
+                    </div>
+                    {openPlayButton ? 
+                    <div className='col-10 offset-1 col-lg-3'>
+                        <div className='playMenuContainer'>
+                            <PlayMenu/>
+                        </div> 
+                    </div>
+                    : <></>}
+                </div>
+                <div className='row'>
+                    <div className='col-10 offset-1 col-lg-4'>
+                         <List title='Friends List' list={friendList} open={openFriendMenu} name={nameOfFriend} index={indexOfFriend}/>
+                    </div>
+                    <div className='col-10 offset-1  offset-lg-0 col-lg-6'>
                         <List title='featuring' list={matchList} />
                     </div>
-                    <h3  className='title small'>These guy are the best pong player of the world ... we are so pround of them !!</h3>
-                    <div className='cardContainer'>
-                        <ArrayDoubleColumn title='leaderboard' list={leaderboard} open={openFriendMenuLeaderBrd} name={nameOfFriend} index={indexOfFriend}/>
+                </div>
+                <div className='row'>
+                    <div className='col-8 offset-2'>
+                        <h3 className='title small'>These guy are the best pong player of the world ... we are so pround of them !!</h3>
                     </div>
-                    <p>Go back to top</p>
+                </div>
+                <div className='row'>
+                    <div className='col-10 offset-1'>
+                        <ArrayDoubleColumn title='leaderboard' list={leaderboard} openLeft={openFriendMenuLeaderBrdLeft} openRight={openFriendMenuLeaderBrdRight} name={nameOfFriend} index={indexOfFriend}/>
+                    </div>
+                </div>
+                <div className='row'>
+                    <div className='col-4 offset-4'>
+                        <p>Go back to top</p>
+                    </div>
                 </div>
             </div>
         </div>  

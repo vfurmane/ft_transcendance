@@ -32,7 +32,6 @@ export default function leaderboardEntity(props : {name : string, level: number,
                     </div>
                 </div>
                 <div className="entityShadow small"></div>
-                
             </div>
             {div2}
         </div>
