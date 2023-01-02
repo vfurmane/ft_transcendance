@@ -136,7 +136,7 @@ export class AuthController {
     await this.authService.checkTfa(user, body.token);
   }
 
-  @Post('tfa/login')
+  @Post('/login/tfa')
   @HttpCode(200)
   @UseGuards(StatePostGuard)
   @ApiOperation({ summary: 'Login using an OTP token (as TFA).' })
