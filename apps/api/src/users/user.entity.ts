@@ -5,6 +5,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { Exclude } from 'class-transformer';
 
 @Entity()
 export class User {
@@ -23,6 +24,7 @@ export class User {
   @Column('varchar', { length: 30, unique: true })
   name!: string;
 
+  @Exclude()
   @Column('varchar', { length: 255, nullable: true })
   password!: string | null;
 }

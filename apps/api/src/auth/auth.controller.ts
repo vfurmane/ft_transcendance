@@ -1,5 +1,6 @@
 import {
   Body,
+  ClassSerializerInterceptor,
   Controller,
   Get,
   InternalServerErrorException,
@@ -8,6 +9,7 @@ import {
   Req,
   Request,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import {
   ApiMovedPermanentlyResponse,
@@ -59,6 +61,7 @@ export class AuthController {
     return this.authService.login(req.user);
   }
 
+  @UseInterceptors(ClassSerializerInterceptor)
   @Post('register')
   async register(@Body() registerUserDto: RegisterUserDto): Promise<User> {
     const user = await this.authService.createUser(registerUserDto);
