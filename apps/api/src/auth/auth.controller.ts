@@ -27,7 +27,7 @@ export class AuthController {
     readonly logger: Logger,
   ) {}
 
-  @Get('/oauth2/42')
+  @Get('/login/oauth2/42')
   @UseGuards(StateGuard)
   @UseGuards(FtOauth2AuthGuard)
   @ApiOperation({
