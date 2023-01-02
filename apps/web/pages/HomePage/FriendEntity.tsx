@@ -9,8 +9,8 @@ export default function FriendEntity (props : {name : string, status: string, ke
     return (
         <div className="shadowContainer">
             <div className="cardContainer entity" onClick={()=>props.handleClick({name: props.name, index:props.index})}>
-                <div className="cardContainer">
-                    <Image  alt='avatar' src={Avatar} width={42} height={42} className='avatar L' />
+                <div className="avatarText">
+                    <Image  alt='avatar' src={Avatar} width={42} height={42} className='avatar' />
                     <Image alt='status' src={Connect} width={20} height={20} className='statusImage'/>
                     <div className="entityText">
                         <h3>{props.name}</h3>
@@ -19,8 +19,7 @@ export default function FriendEntity (props : {name : string, status: string, ke
                 </div>
                 <Image  alt='rm friend' src={RemoveFriend} width={20} height={20} className='L' />
             </div>
-            <div className="cardContainer entity entityShadow">
-            </div>
+            <div className="entityShadow"></div>
         </div>
     );
 }

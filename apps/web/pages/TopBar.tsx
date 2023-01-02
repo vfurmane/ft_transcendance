@@ -19,7 +19,6 @@ function TopBar() : JSX.Element {
                 </div>
                 <Image  alt='avatar' src={Avatar} width={42} height={42} className='avatar' />
             </div>
-            
         </div>
     );
 }

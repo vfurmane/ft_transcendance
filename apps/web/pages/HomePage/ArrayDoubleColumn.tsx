@@ -3,7 +3,7 @@ import Image from 'next/image';
 import Message from '../../asset/message.png';
 
 
-export default function ArrayDoubleColumn(props : {title: string, list : JSX.Element[], open ?: boolean, name?: string, index?: number}):  JSX.Element {
+export default function ArrayDoubleColumn(props : {title: string, list : JSX.Element[], openLeft ?: boolean, openRight?: boolean, name?: string, index?: number}):  JSX.Element {
     const [columnNum, setColumnNum] = useState(1);
     const [pageNum, setPageNum] = useState(1);
 
@@ -28,7 +28,7 @@ export default function ArrayDoubleColumn(props : {title: string, list : JSX.Ele
 
     function getColumn(num: number) : JSX.Element[]{
 
-        if (props.open && typeof(props.index) !== 'undefined' && ((Number(props.index.toString().slice(-1)) < 5 && num % 2 > 0) || (Number(props.index.toString().slice(-1)) >= 5 && num % 2 === 0)))
+        if ((props.openLeft || props.openRight) && typeof(props.index) !== 'undefined' && ((Number(props.index.toString().slice(-1)) < 5 && num % 2 > 0) || (Number(props.index.toString().slice(-1)) >= 5 && num % 2 === 0)))
         {
             return (
                 [<div className='friendMenuContainer'>
@@ -60,11 +60,11 @@ export default function ArrayDoubleColumn(props : {title: string, list : JSX.Ele
                     {getColumn(columnNum + 1)}
                 </div>
             </div>
-            <div className='shadowContainer'>
+            <div className='shadowContainer arrayPrevNext'>
                 <h3 onClick={()=>prevClick()}>{'<'}</h3>
                 <h3>{pageNum }</h3>
                 <h3>of</h3>
-                <h3>{ Math.ceil(props.list.length / 10)}</h3>
+                <h3>{typeof(props.list) !== 'undefined' ? Math.ceil(props.list.length / 10) : ''}</h3>
                 <h3 onClick={()=>nextClick()}>{'>'}</h3>
             </div>
             
