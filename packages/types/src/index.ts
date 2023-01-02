@@ -16,3 +16,8 @@ export interface JwtPayload {
   sub: string;
   name: string;
 }
+
+export interface JwtPayload {
+  sub: string;
+  name: string;
+}

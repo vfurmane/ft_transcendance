@@ -12,7 +12,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { State } from './state.entity';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
-import { AddUserData } from '../users/users.service';
+import { RegisterUserDto } from 'src/users/register-user.dto';
 
 @Injectable()
 export class AuthService {
@@ -52,31 +52,20 @@ export class AuthService {
     return data;
   }
 
-  async createUser(
-    username: string,
-    email: string,
-    pass: string,
-  ): Promise<any> {
+  async createUser(user: RegisterUserDto): Promise<User> {
     const salt = await bcrypt.genSalt();
-    const user: AddUserData = {
-      name: username,
-      email: email,
-      password: await bcrypt.hash(pass, salt),
-    };
-    this.usersService.addUser(user);
-    const { password, ...result } = user;
-    return result;
+    user.password = await bcrypt.hash(user.password, salt);
+    return this.usersService.addUser(user);
   }
 
-  async validateUser(email: string, pass: string): Promise<any> {
+  async validateUser(email: string, pass: string): Promise<User | null> {
     const user = await this.usersService.getByEmail(email);
     if (
       user &&
       user?.password !== null &&
       (await bcrypt.compare(pass, user.password))
     ) {
-      const { password, ...result } = user;
-      return result;
+      return user;
     }
     return null;
   }
