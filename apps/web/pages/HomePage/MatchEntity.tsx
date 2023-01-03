@@ -6,23 +6,23 @@ export default function MatchEntity(props : {name : string, score: number, key: 
     return (
         <div className="shadowContainer">
             <div className="cardContainer entity big">
-                <div className="cardContainer">
+                <div className="cardContainer start">
                     <Image  alt='avatar' src={Avatar} width={42} height={42} className='avatar' />
                     <div className="entityText">
                         <h3>{props.name}</h3>
-                        <p>{props.score}</p>
+                        <p className="textCenter">{props.score}</p>
                     </div>
                 </div>
                 <span>VS</span>
-                <div className="cardContainer">
+                <div className="cardContainer end">
                     <div className="entityText">
                         <h3>{props.name}</h3>
-                        <p>{props.score}</p>
+                        <p className="textCenter">{props.score}</p>
                     </div>
                     <Image  alt='avatar' src={Avatar} width={42} height={42} className='avatar' />
                 </div>
             </div>
-            <div className="entityShadow big"></div>
+            <div className="entityShadow big d-none d-sm-block"></div>
         </div>
     );
 }

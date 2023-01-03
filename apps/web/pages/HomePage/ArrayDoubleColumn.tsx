@@ -60,11 +60,11 @@ export default function ArrayDoubleColumn(props : {title: string, list : JSX.Ele
                     {getColumn(columnNum + 1)}
                 </div>
             </div>
-            <div className='shadowContainer arrayPrevNext'>
-                <h3 onClick={()=>prevClick()}>{'<'}</h3>
-                <h3>{pageNum }</h3>
-                <h3>of</h3>
-                <h3>{typeof(props.list) !== 'undefined' ? Math.ceil(props.list.length / 10) : ''}</h3>
+            <div className='shadowContainer'>
+                <h3 className='L' onClick={()=>prevClick()}>{'<'}</h3>
+                <h3 className='L'>{pageNum }</h3>
+                <h3 className='L'>of</h3>
+                <h3 className='L'>{typeof(props.list) !== 'undefined' ? Math.ceil(props.list.length / 10) : ''}</h3>
                 <h3 onClick={()=>nextClick()}>{'>'}</h3>
             </div>
             
