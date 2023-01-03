@@ -21,6 +21,7 @@ function Home() : JSX.Element {
     const [nameOfFriend, setNameOfFriend] = useState('');
     const [indexOfFriend, setIndexOfFriend] = useState(0);
     const [clickOnLeaderBoardItem, setClickOnLeaderBoardItem] = useState(false);
+    const [openProfil, setOpenProfil] = useState(false);
 
     function handleClickPlayButton() : void {
         setOpenPlayButton(!openPlayButton);
@@ -43,6 +44,10 @@ function Home() : JSX.Element {
         setClickOnLeaderBoardItem(true);
     }
 
+    function clickProfil(){
+        setOpenProfil(!openProfil);
+    }
+
     function close() :void {
         if (openPlayButton)
             setOpenPlayButton(!openPlayButton);
@@ -52,6 +57,8 @@ function Home() : JSX.Element {
             setOpenFriendMenuLeaderBrdLeft(!openFriendMenuLeaderBrdLeft);
         if (openFriendMenuLeaderBrdRight)
             setOpenFriendMenuLeaderBrdRight(!openFriendMenuLeaderBrdRight);
+        if (openProfil)
+            setOpenProfil(!openProfil);
     }
 
     
@@ -65,8 +72,8 @@ function Home() : JSX.Element {
 
     return (
         <div onClick={()=>close()} >
-            <TopBar/>
-            <div className='illustration d-none d-lg-block'></div>
+            <TopBar clickProfil={clickProfil} openProfil={openProfil}/>
+            <div className='illustration d-none d-xl-block'></div>
             <div className='container '> 
                     <div className='row'>
                         <div className='col-10 offset-1'>
@@ -74,7 +81,7 @@ function Home() : JSX.Element {
                         </div>
                     </div>
                     <div className='row'>
-                        <div className='col-3 offset-3 offset-lg-4 offset-xl-5'>
+                        <div className='col-3 offset-2 offset-sm-3 offset-lg-4 offset-xl-5'>
                             <PlayButton handleClick={handleClickPlayButton} open={openPlayButton}/>
                         </div>
                         {openPlayButton ? 

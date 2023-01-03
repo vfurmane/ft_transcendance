@@ -35,7 +35,7 @@ export default function ArrayDoubleColumn(props : {title: string, list : JSX.Ele
                     {(typeof(props.index) !== 'undefined')? props.list[props.index] : ''}
                     <button className='buttonFriend'><h3>profil</h3></button>
                     <button className='buttonFriend'><Image alt='message' src={Message} width={42} height={42} /></button>
-                    <button className='buttonFriend yellow'><h3>Play with {props.name}</h3></button>
+                    <button className='buttonFriend'><h3>Play with {props.name}</h3></button>
                 </div>]
             );
         }
