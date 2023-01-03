@@ -82,8 +82,8 @@ describe('AuthService', () => {
   });
 
   describe('login', () => {
-    it('should return an object containing the access token', async () => {
-      const response = await service.login(user);
+    it('should return an object containing the access token', () => {
+      const response = service.login(user);
       const payload = jwtService.decode(response.access_token);
       expect(payload).toHaveProperty('sub', user.id);
       expect(payload).toHaveProperty('name', user.name);

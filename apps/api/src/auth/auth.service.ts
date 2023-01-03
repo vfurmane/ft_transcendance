@@ -56,7 +56,7 @@ export class AuthService {
     return null;
   }
 
-  async login(user: User): Promise<AccessTokenResponse> {
+  login(user: User): AccessTokenResponse {
     const payload = {
       sub: user.id,
       name: user.name,

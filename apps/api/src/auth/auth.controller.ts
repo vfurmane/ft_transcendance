@@ -51,7 +51,7 @@ export class AuthController {
     description:
       'The authentication failed (`code` or `state` may be invalid).',
   })
-  ftCallback(@Req() req: SessionRequest): Promise<AccessTokenResponse> {
+  ftCallback(@Req() req: SessionRequest): AccessTokenResponse {
     if (!req.user) {
       this.logger.error(
         'This is the impossible type error where the user is authenticated but the `req.user` is `undefined`',
