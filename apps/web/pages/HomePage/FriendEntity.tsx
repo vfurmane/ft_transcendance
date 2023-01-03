@@ -19,7 +19,7 @@ export default function FriendEntity (props : {name : string, status: string, ke
                 </div>
                 <Image  alt='rm friend' src={RemoveFriend} width={20} height={20} className='L' />
             </div>
-            <div className="entityShadow"></div>
+            <div className="entityShadow d-none d-sm-block"></div>
         </div>
     );
 }
