@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { AxiosError } from 'axios';
-import { catchError, firstValueFrom } from 'rxjs';
+import { catchError, firstValueFrom, throwError } from 'rxjs';
 import { AccessTokenResponse, FtUser, User } from 'types';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from 'src/users/users.service';
@@ -28,7 +28,10 @@ export class AuthService {
         .pipe(
           catchError((error: AxiosError) => {
             if (error.response?.data) this.logger.error(error.response?.data);
-            throw "An error occured while fetching the user's profile using its access token.";
+            return throwError(
+              () =>
+                "An error occured while fetching the user's profile using its access token.",
+            );
           }),
         ),
     );
