@@ -2,50 +2,44 @@
 /*      general          */
 /*=======================*/
 
-body
-{
-    background: url('../asset/texture.png'), url('../asset/red.png'), linear-gradient(160deg, rgba(5,5,5,1) 45%, rgba(30,30,30,1) 70%, rgba(75,75,75,1) 100%);
+body {
+    background: url('../asset/texture.png'), url('../asset/red.png'), linear-gradient(160deg, rgba(20, 20, 20, 1) 45%, rgba(45, 45, 45, 1) 70%, rgba(85, 85, 85, 1) 100%);
     background-repeat: repeat, no-repeat, no-repeat;
-    background-size: 40% 40%, 90% 30%, 100% 100%;
-    background-position: top,  top, center;
-    background-attachment:  fixed, local;
+    background-size: 50px 50px, 90% 30%, 100% 100%;
+    background-position: top, top, center;
+    background-attachment: fixed, local;
     width: 100vw;
 }
 
 body::-webkit-scrollbar {
-    display: none; 
+    display: none;
 }
 
-h2
-{
+h2 {
     margin-bottom: 40px;
 }
 
-h3
-{
+h3 {
     font-family: 'Lacquer', cursive;
     margin: 0px;
     font-size: 1.8vh;
 }
 
-p
-{
+p {
     font-family: 'Saira', sans-serif;
     color: #9f9f9f;
-    margin:0px;
+    margin: 0px;
     font-size: 1.5vh;
     text-align: start;
 }
 
-.avatar
-{
+.avatar {
     margin-bottom: 3px;
     margin-top: 5px;
     margin-left: 10px;
 }
 
-.shadowContainer
-{
+.shadowContainer {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -59,8 +53,7 @@ p
 /*       home page       */
 /*=======================*/
 
-.illustration
-{
+.illustration {
     background-image: url('../asset/Illustration.png');
     background-size: 80% 80%;
     background-position: center;
@@ -70,46 +63,54 @@ p
     background-repeat: no-repeat;
     width: 100%;
     height: 2000px;
-    background-attachment:fixed;
-    
+    background-attachment: fixed;
+    filter: blur(1px);
+
 }
 
-.title
-{
+.title {
     color: white;
     font-family: 'Lacquer', cursive;
-    font-size: 6vw;
+    font-size: 100px;
     margin-top: 150px;
     text-align: center;
+    color: white;
+    text-shadow: 0px 5px 2px rgba(234, 196, 53, 1);
+    text-align: center;
+    width: 100%;
 }
 
-.title.small
-{
+.title.small {
+    font-size: 8vw;
+    text-shadow: 0px 3px 2px rgba(234, 196, 53, 1);
+}
+
+.text {
     font-size: 30px;
     text-align: center;
+    text-shadow: 0px 0px 0px;
+    color: white;
+    margin-top: 80px;
+    margin-bottom: 0px;
 }
 
 
-.textCenter
-{
+.textCenter {
     text-align: center;
 }
 
-.statusImage
-{
+.statusImage {
     position: absolute;
     left: 38px;
     bottom: 10px;
 }
 
-.L
-{
+.L {
     margin-right: 10px;
 }
 
 
-.avatarText
-{
+.avatarText {
     display: flex;
     align-items: center;
     justify-content: flex-start;
@@ -120,12 +121,12 @@ p
 /*       top bar         */
 /*=======================*/
 
-.containerTopBar
-{
+.containerTopBar {
     width: 100vw;
     height: 80px;
-    background: url('../asset/texture.png'), rgba(5,5,5,1);
+    background: url('../asset/texture.png'), rgba(20, 20, 20, 1);
     background-repeat: repeat, no-repeat;
+    background-size: 50px 50px;
     display: flex;
     justify-content: space-between;
     position: fixed;
@@ -133,8 +134,7 @@ p
     z-index: 99;
 }
 
-.elementTopBar
-{
+.elementTopBar {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -142,31 +142,28 @@ p
     margin-left: 10px;
     margin-right: 10px;
     height: 50px;
-   
-    
+
+
 }
 
-.elementTopBar.toggle
-{
+.elementTopBar.toggle {
     position: absolute;
     top: 15px;
     right: 20px;
     margin: 0px;
 }
 
-.elementTopBar.toggle.menu
-{
+.elementTopBar.toggle.menu {
     top: 70px;
     right: 10px;
-    background-color: #000000;
+    background-color: rgb(20, 20, 20);
     border-radius: 10px;
     padding: 10px;
     width: 100vw;
     justify-content: flex-end;
 }
 
-.elementTopBar.toggle.avatarMenu
-{
+.elementTopBar.toggle.avatarMenu {
     top: 110px;
     right: 10px;
     color: white;
@@ -174,8 +171,7 @@ p
     padding: 10px;
 }
 
-.searchBar
-{
+.searchBar {
     border-top: 0px;
     border-bottom: solid white 1px;
     border-left: 0px;
@@ -189,16 +185,14 @@ p
 
 
 
-.logoSearchBar
-{
+.logoSearchBar {
     position: absolute;
     margin-left: 230px;
     margin-top: 5px;
 
 }
 
-.leaderBoardLink
-{
+.leaderBoardLink {
     color: white;
     text-decoration: none;
     margin-left: 20px;
@@ -213,21 +207,20 @@ p
 /*      play button      */
 /*=======================*/
 
-.shadowContainer.leaderBoard
-{
+.shadowContainer.leaderBoard {
     flex-direction: row;
 }
 
-.paddingPlayButton
-{
+.paddingPlayButton {
     padding-bottom: 200px;
 
 }
 
-.playButton
-{
-    background: url('../asset/texture.png'), #eac435;
-    border-radius: 8px;
+.playButton {
+    background: url('../asset/texture.png'), linear-gradient(160deg, rgba(234, 196, 53, 1) 45%, rgb(233, 110, 9) 70%, rgb(218, 74, 8) 100%);
+    background-repeat: repeat, no-repeat;
+    background-size: 50px 50px, 100% 100%;
+    border-radius: 20px;
     border: solid 1px white;
     font-family: 'Press Start 2P', cursive;
     font-size: 60px;
@@ -237,32 +230,33 @@ p
     margin-top: 60px;
     z-index: 2;
     position: absolute;
-    width: 260px;
-    height: 90px;
+    width: 300px;
+    height: 100px;
     text-align: center;
+    box-shadow: 0px 2px 8px 1px rgba(234, 196, 53, 1);
 }
 
-.playButton:hover
-{
-    transform: translateX(-10px) translateY(-10px);
+.playButton:hover {
+    transform: translateX(-5px) translateY(-5px);
+
 }
 
-.playButtonShadow
-{
+.playButtonShadow {
     border: 0px;
-    width: 260px;
-    height: 90px;
-    border-radius: 8px;
+    width: 300px;
+    height: 100px;
+    border-radius: 20px;
     position: absolute;
     background-color: white;
-    margin-top: 60px;;
+    margin-top: 60px;
+    ;
     z-index: -1;
-    box-shadow:  0px 0px 200px 1px rgb(190, 21, 21);
+    box-shadow: 0px 0px 220px 0px rgb(155, 1, 1);
 }
 
-.playMenuContainer
-{
-    background: url('../asset/texture.png'), rgba(255,255,255,0.1);
+.playMenuContainer {
+    background: url('../asset/texture.png'), rgba(255, 255, 255, 0.1);
+    background-size: 20px 20px;
     color: white;
     text-align: start;
     border-radius: 8px;
@@ -271,20 +265,17 @@ p
     margin-top: 50px;
 }
 
-.playMenuEntity
-{
+.playMenuEntity {
     width: 100%;
     padding: 10px;
 }
 
-.playMenuEntity:hover
-{
+.playMenuEntity:hover {
     background-color: white;
-    color:rgba(0, 0, 0, 1);
+    color: rgba(0, 0, 0, 1);
 }
 
-.playMenuEntity.bar
-{
+.playMenuEntity.bar {
     border-bottom: 1px solid white;
 }
 
@@ -292,27 +283,28 @@ p
 /*      card             */
 /*=======================*/
 
-.card
-{
+.card {
     padding: 20px;
     height: 450px;
     width: 100%;
     margin-top: 15px;
-    background: url('../asset/texture.png'), rgba(255,255,255,0.1);
+    background: url('../asset/texture.png'), rgba(151, 150, 150, 0.1);
+    background-size: 50px 50px;
     color: white;
     text-align: center;
     border-radius: 8px;
     font-family: 'Rubik Vinyl', cursive;
     position: relative;
     overflow: scroll;
+    backdrop-filter: blur(8px);
+    border: 0px;
 }
 
 .card::-webkit-scrollbar {
-    display: none; 
+    display: none;
 }
 
-.cardContainer
-{
+.cardContainer {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -320,12 +312,11 @@ p
     overflow: hidden;
 }
 
-.cardContainer.start
-{
+.cardContainer.start {
     justify-content: flex-start;
 }
-.cardContainer.end
-{
+
+.cardContainer.end {
     justify-content: flex-end;
 }
 
@@ -333,10 +324,10 @@ p
 /*      entity           */
 /*=======================*/
 
-.entity
-{
+.entity {
     background: url('../asset/texture.png') #1e1e1e;
-    border : 1px solid white;
+    background-size: 50px 50px;
+    border: 1px solid white;
     border-radius: 10px;
     width: 250px;
     height: 60px;
@@ -346,24 +337,20 @@ p
 
 }
 
-.entity.small
-{
+.entity.small {
     width: 200px;
 }
 
-.entity.big
-{
+.entity.big {
     width: 360px;
 }
 
-.entity:hover
-{
-    transform: translateX(-15px) translateY(-10px); 
+.entity:hover {
+    transform: translateX(-5px) translateY(-5px);
 }
 
 
-.entityShadow
-{
+.entityShadow {
     background-color: white;
     position: absolute;
     z-index: 1;
@@ -372,18 +359,15 @@ p
     height: 60px;
 }
 
-.entityShadow.small
-{
+.entityShadow.small {
     width: 200px;
 }
 
-.entityShadow.big
-{
+.entityShadow.big {
     width: 360px;
 }
 
-.entityText
-{
+.entityText {
     margin-left: 15px;
     margin-right: 10px;
 }
@@ -393,39 +377,36 @@ p
 /*      leaderboard      */
 /*=======================*/
 
-.leaderBoardContainer
-{
+.leaderBoardContainer {
     display: flex;
     justify-content: space-between;
     align-items: center;
     width: 350px;
 }
 
-.card.leaderBoard
-{
+.card.leaderBoard {
     height: auto;
     width: 100%;
     margin-top: 10%;
     margin-bottom: 10%;
 }
 
-.rank
-{
+.rank {
     border-radius: 50%;
     width: 30px;
     height: 30px;
     background-color: #eac435;
     margin-bottom: 10px;
-    font-family:  'Saira', sans-serif;
+    font-family: 'Saira', sans-serif;
     color: white;
     text-align: center;
-   
+
 }
-.level
-{
+
+.level {
     border-radius: 10px;
     background-color: #9f9f9f;
-    font-family:  'Saira', sans-serif;
+    font-family: 'Saira', sans-serif;
     color: white;
     width: 55px;
     height: 30px;
@@ -433,8 +414,7 @@ p
     margin-bottom: 15px;
 }
 
-.leaderBoardDoubleColumn
-{
+.leaderBoardDoubleColumn {
     display: flex;
     justify-content: space-between;
     flex-wrap: wrap;
@@ -446,16 +426,14 @@ p
 /*      friend           */
 /*=======================*/
 
-.friendMenuContainer
-{
+.friendMenuContainer {
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
 }
 
-.buttonFriend
-{
+.buttonFriend {
     width: 50%;
     height: 60px;
     margin: 10px;
@@ -467,10 +445,6 @@ p
     border: solid 1px white;
 }
 
-.buttonFriend:hover
-{
+.buttonFriend:hover {
     background-color: #eac435;
-    box-shadow:  0px 0px 300px  rgb(190, 21, 21);
-    
 }
-
