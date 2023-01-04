@@ -26,6 +26,7 @@ export interface AccessTokenResponse {
 
 export interface TfaNeededResponse {
   message: string;
+  route: string;
 }
 
 export interface JwtPayload {

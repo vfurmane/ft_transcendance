@@ -87,7 +87,7 @@ export class AuthController {
       this.logger.log(
         `${req.user.name} logged in using OAuth2, but TFA is needed`,
       );
-      return { message: 'TFA needed' };
+      return { message: 'Authentication factor needed', route: 'tfa' };
     }
     this.logger.log(`${req.user.name} logged in using OAuth2`);
     return this.authService.login(req.user);
