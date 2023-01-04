@@ -107,13 +107,6 @@ export class AuthController {
     return this.authService.login(user, state);
   }
 
-  @UseGuards(JwtAuthGuard)
-  @UseInterceptors(ClassSerializerInterceptor)
-  @Get('profile')
-  async getProfile(@User() user: UserEntity): Promise<UserEntity> {
-    return user;
-  }
-
   @Post('tfa')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
