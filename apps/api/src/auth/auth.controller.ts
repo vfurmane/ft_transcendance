@@ -72,7 +72,7 @@ export class AuthController {
   ): AccessTokenResponse | TfaNeededResponse {
     if (user.tfa_setup) {
       this.logger.log(`${user.name} logged in using OAuth2, but TFA is needed`);
-      return { message: 'TFA needed' };
+      return { message: 'Authentication factor needed', route: 'tfa' };
     }
     this.logger.log(`${user.name} logged in using OAuth2`);
     return this.authService.login(user);
