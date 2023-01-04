@@ -1,0 +1,49 @@
+.container {
+  border: none;
+  border-bottom: 1px #E8E8E8 solid;
+  outline: none;
+  box-sizing: border-box;
+  padding: 12px 6px;
+
+  background: none;
+  color: #E8E8E8;
+  font-size: 16px;
+}
+
+.container::placeholder {
+  color: #9F9F9F;
+  opacity: 1;
+}
+
+.container[type='submit'] {
+  margin: 0;
+  border: none;
+  border-radius: 8px;
+  padding: 7px 18px;
+  width: auto;
+  overflow: visible;
+
+  background: #9F9F9F;
+  color: #1E1E1E;
+  font: inherit;
+
+  line-height: normal;
+
+  -webkit-font-smoothing: inherit;
+  -moz-osx-font-smoothing: inherit;
+
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.container[type='submit']:hover {
+  cursor: pointer;
+}
+
+.container[type='submit'].primary {
+  background-color: #EAC435;
+}
+
+.fullWidth {
+  width: 100%;
+}
