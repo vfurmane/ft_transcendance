@@ -73,10 +73,10 @@ function Home() : JSX.Element {
     return (
         <div onClick={()=>close()} >
             <TopBar clickProfil={clickProfil} openProfil={openProfil}/>
-            <div className='illustration d-none d-xl-block'></div>
+            <div className='illustration d-none d-lg-block'></div>
             <div className='container '> 
                     <div className='row'>
-                        <div className='col-10 offset-1'>
+                        <div className='col-10 offset-1 offset-xl-0'>
                             <h3 className='title'>Ft_Transcendence</h3>
                         </div>
                     </div>
