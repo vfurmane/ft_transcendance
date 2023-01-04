@@ -1,0 +1,50 @@
+version: "3.8"
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: ./apps/web/Dockerfile
+    container_name: web
+    image: ft_transcendence/web:nextjs13
+    depends_on:
+      - api
+    restart: always
+    ports:
+      - 8080:8080
+    networks:
+      - app
+  api:
+    build:
+      context: .
+      dockerfile: ./apps/api/Dockerfile
+    container_name: api
+    image: ft_transcendence/api:nestjs9
+    depends_on:
+      database:
+        condition: service_healthy
+    restart: always
+    ports:
+      - 3000:3000
+    networks:
+      - app
+  database:
+    image: postgres
+    container_name: database
+    restart: always
+    networks:
+      - app
+    environment:
+      POSTGRES_RANDOM_ROOT_PASSWORD: true
+      POSTGRES_DB: ${DATABASE_NAME}
+      POSTGRES_USER: ${DATABASE_USERNAME}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+      POSTGRES_PORT: ${DATABASE_PORT}
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "${DATABASE_USERNAME}", "-d", "${DATABASE_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 50
+
+networks:
+  app:
