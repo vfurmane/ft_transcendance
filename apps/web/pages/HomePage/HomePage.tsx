@@ -76,8 +76,11 @@ function Home() : JSX.Element {
             <div className='illustration d-none d-lg-block'></div>
             <div className='container '> 
                     <div className='row'>
-                        <div className='col-10 offset-1 offset-xl-0'>
+                        <div className='col-12  d-none d-lg-block'>
                             <h3 className='title'>Ft_Transcendence</h3>
+                        </div>
+                        <div className='col-12 d-block d-lg-none'>
+                            <h3 className='title small d-block d-lg-none'>Ft_Transcendence</h3>
                         </div>
                     </div>
                     <div className='row'>
@@ -102,7 +105,7 @@ function Home() : JSX.Element {
                     </div>
                     <div className='row'>
                         <div className='col-8 offset-2'>
-                            <h3 className='title small'>These guy are the best pong player of the world ... we are so pround of them !!</h3>
+                            <h3 className='text'>These guy are the best pong player of the world ... we are so pround of them !!</h3>
                         </div>
                     </div>
                     <div className='row'>
