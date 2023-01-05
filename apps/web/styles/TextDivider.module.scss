@@ -1,0 +1,15 @@
+@import 'variables';
+
+.container {
+  margin: 20px 0;
+  width: 100%;
+
+  display: flex;
+  gap: 10px;
+}
+
+.divider {
+  border: 0;
+  border-bottom: 1px $dark-neutral-grey solid;
+  width: 100%;
+}
