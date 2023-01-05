@@ -7,10 +7,10 @@ import { User as UserEntity } from '../users/user.entity';
 export class SearchService {
     constructor(
     @InjectRepository(UserEntity)
-    private readonly usersRepository: Repository<UserEntity>,
+    private readonly usersRepository: Repository<UserEntity>
     ) {}
 
-    async findAll(letters : string): Promise<string[]> {
+    async findAll(letters : string): Promise<UserEntity[]> {
 
         const queryBuilder = this.usersRepository?.createQueryBuilder().select('*');
 
@@ -19,7 +19,7 @@ export class SearchService {
             {
                 letters,
             },
-        ).select('name');
+        );
         return  await queryBuilder.getRawMany();
     }
 }

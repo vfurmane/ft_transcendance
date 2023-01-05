@@ -19,10 +19,11 @@ const userEntity: UserEntity = {
   updated_at: faker.datatype.datetime(),
   email,
   name,
-  password: faker.internet.password(),
+  password: null,
   states: [],
   tfa_secret: null,
   tfa_setup: false,
+
 };
 
 describe('UsersService', () => {
