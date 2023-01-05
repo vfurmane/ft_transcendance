@@ -18,6 +18,12 @@ export class UsersService {
     });
   }
 
+  async getByUsername(username: string): Promise<User | null> {
+    return this.usersRepository.findOneBy({
+      name: username,
+    });
+  }
+
   async getByEmail(email: string): Promise<User | null> {
     return this.usersRepository.findOneBy({
       email,

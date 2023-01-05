@@ -41,8 +41,8 @@ export class AuthService {
     return this.userService.addUser(user);
   }
 
-  async validateUser(email: string, pass: string): Promise<User | null> {
-    const user = await this.userService.getByEmail(email);
+  async validateUser(username: string, pass: string): Promise<User | null> {
+    const user = await this.usersService.getByUsername(username);
     if (
       user &&
       user?.password !== null &&
