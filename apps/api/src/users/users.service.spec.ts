@@ -12,6 +12,7 @@ const email = faker.internet.email();
 const addUserDto: AddUserDto = {
   name,
   email,
+  password: null,
 };
 const userEntity: UserEntity = {
   id: faker.datatype.uuid(),
@@ -19,10 +20,11 @@ const userEntity: UserEntity = {
   updated_at: faker.datatype.datetime(),
   email,
   name,
-  password: faker.internet.password(),
+  password: null,
   states: [],
   tfa_secret: null,
   tfa_setup: false,
+
 };
 
 describe('UsersService', () => {
