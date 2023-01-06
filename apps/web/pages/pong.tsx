@@ -10,14 +10,26 @@ enum Key{
 	DOWN = 40
 }
 
+enum Form{
+	REC = 2,
+	TRI = 3,
+	SQR = 4,
+	PEN = 5,
+	HEX = 6
+}
+
 class Board {
+	private	boardType = Form.REC;
+
 	private	boardCanvasRef;
 	private	boardCanvas;
 	private	boardContext;
 	private	countUpdate:number = 0;
 	public	static point:number = 0;
+	public	static live:number = 3;
 	private	ball: Ball;
 	private	player: Racket;
+	private	cible: Target;
 	public static keyPressed: [] = [];
 	private	start = Date.now();
 
@@ -30,6 +42,7 @@ class Board {
 		this.boardContext = this.boardCanvas.getContext('2d');
 		this.ball = new Ball(window.innerWidth / 4, window.innerHeight / 4, 40, 40);
 		this.player = new Racket(10, window.innerHeight / 4, 40, 100);
+		this.cible = new Target(window.innerWidth / 3, window.innerHeight / 4, 20, 20);
 		window.addEventListener("keydown",function(e){
 			Board.keyPressed[e.which] = true;
 		});
@@ -50,17 +63,34 @@ class Board {
 		this.boardContext.font = "50px sherif";
 		this.boardContext.fillText(Board.point, window.innerWidth / 4, 50)
 		this.boardContext.fillText(Math.round((Date.now() - this.start) / 1000), window.innerWidth / 4, 110)
+		this.boardContext.font = "20px sherif";
+		for (let i:number = 0; i < Board.live; i++) {
+			this.boardContext.fillText("❤️", (window.innerWidth / 4) + (25 * i), 160)
+		}
 		this.countUpdate++;
 		this.ball.update(this.player);
 		this.player.update();
+		this.cible.update(this.ball);
 		this.ball.draw(this.boardContext);
 		this.player.draw(this.boardContext);
+		this.cible.draw(this.boardContext);
 		this.ball.printPos(this.boardContext);
 		this.player.printPos(this.boardContext);
-		if (Board.point == -3) {
+		if (Board.live == 0) {
 			Board.point = 0;
+			Board.live = 3;
 			this.start = Date.now();
 		}
+	}
+}
+
+class Point {
+	public	x;
+	public	y;
+
+	constructor(x:number,y:number) {
+		this.x = x;
+		this.y = y;
 	}
 }
 
@@ -101,6 +131,34 @@ class Entity {
 		return (1);
 	}
 }
+
+class Target extends Entity {
+	private	speed:number = 0;
+
+	constructor(x:number,y:number,w:number,h:number) {
+		super(x,y,w,h);
+		this.xspeed = this.speed;
+		this.yspeed = this.speed;
+	}
+
+	draw(context){
+		context.fillStyle = "#f00";
+		context.fillRect(this.x,this.y,this.width,this.height);
+	}
+
+	randomVal(min, max) {
+		return Math.floor(Math.random() * (max - min + 1) + min);
+	}
+
+	update(ball:Ball) {
+		if (this.collision(ball)) {
+			Board.point++;
+			this.x = this.randomVal(window.innerWidth / 4, (window.innerWidth / 2 - 30))
+			this.y = this.randomVal(30, ((window.innerHeight / 2) - 30))
+		}
+	}
+}
+
 
 class Ball extends Entity {
 	private	speed:number = 4;
@@ -151,7 +209,7 @@ class Ball extends Entity {
 				this.yspeed = -this.speed;
 			}
 			if (this.x + this.xspeed <= 0) {
-				Board.point--;
+				Board.live--;
 				this.x = window.innerWidth / 4;
 				this.y = window.innerHeight / 4;
 			}
