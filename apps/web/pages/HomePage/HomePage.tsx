@@ -19,7 +19,6 @@ function Home() : JSX.Element {
     const [openFriendMenuLeaderBrd, setOpenFriendMenuLeaderBrd] = useState(false);
     const [nameOfFriend, setNameOfFriend] = useState('');
     const [indexOfFriend, setIndexOfFriend] = useState(0);
-    const [openProfil, setOpenProfil] = useState(false);
 
     const prevIndexOfFriendRef = useRef(0);
     const prevIndexOfFriendMenuLeaderBordRef = useRef(0);
@@ -48,9 +47,6 @@ function Home() : JSX.Element {
         setIndexOfFriend(e.index);
     }
 
-    function clickProfil(){
-        setOpenProfil(!openProfil);
-    }
 
     function close() :void {
         if (openPlayButton)
@@ -64,9 +60,6 @@ function Home() : JSX.Element {
             
         if (openFriendMenuLeaderBrd && indexOfFriend !== prevIndexOfFriendMenuLeaderBordRef.current)
             setOpenFriendMenuLeaderBrd(!openFriendMenuLeaderBrd);
-  
-        if (openProfil)
-            setOpenProfil(!openProfil);
     }
 
     
@@ -80,7 +73,7 @@ function Home() : JSX.Element {
 
     return (
         <div onClick={()=>close()} >
-            <TopBar clickProfil={clickProfil} openProfil={openProfil}/>
+            <TopBar/>
             <div className='illustration d-none d-lg-block'></div>
             <div className='container ' > 
                     <div className='row'>
