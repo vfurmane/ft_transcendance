@@ -8,6 +8,8 @@ import { Logger } from '@nestjs/common';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { of, throwError } from 'rxjs';
 import { AxiosResponse } from 'axios';
+import { ConfigModule } from '@nestjs/config';
+import ftOauth2Configuration from '../config/ft-oauth2';
 
 const JWT_SECRET = faker.random.alphaNumeric(20);
 const code = faker.random.alphaNumeric(20);
@@ -29,6 +31,9 @@ describe('AuthService', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       imports: [
+        ConfigModule.forRoot({
+          load: [ftOauth2Configuration],
+        }),
         JwtModule.register({
           secret: JWT_SECRET,
         }),

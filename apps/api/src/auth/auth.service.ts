@@ -4,10 +4,12 @@ import { AxiosError } from 'axios';
 import { catchError, firstValueFrom, throwError } from 'rxjs';
 import { AccessTokenResponse, FtUser, User } from 'types';
 import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AuthService {
   constructor(
+    private readonly configService: ConfigService,
     private readonly httpService: HttpService,
     private readonly jwtService: JwtService,
     private readonly logger: Logger,
@@ -16,11 +18,14 @@ export class AuthService {
   async fetchProfileWithToken(accessToken: string): Promise<FtUser> {
     const { data } = await firstValueFrom(
       this.httpService
-        .get<FtUser>('https://api.intra.42.fr/v2/me', {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
+        .get<FtUser>(
+          `${this.configService.get<string>('ft.api.routes.users.me')}`,
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
           },
-        })
+        )
         .pipe(
           catchError((error: AxiosError) => {
             if (error.response?.data) this.logger.error(error.response?.data);
