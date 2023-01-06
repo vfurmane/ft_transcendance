@@ -32,6 +32,9 @@ async function login(data: LoginFormData): Promise<string | null> {
 }
 
 export function LoginForm(): ReactElement {
+  const ftOauth2AuthorizationURL = `https://api.intra.42.fr/oauth/authorize?response_type=code&redirect_uri=${encodeURIComponent(
+    `${process.env.NEXT_PUBLIC_BASE_URL}/auth/oauth2/42`
+  )}&client_id=${process.env.NEXT_PUBLIC_FT_OAUTH2_CLIENT_ID}`;
   const [formError, setFormError] = useState("");
   const [formSuccess, setFormSuccess] = useState("");
   const [loading, setLoading] = useState(false);
@@ -80,7 +83,9 @@ export function LoginForm(): ReactElement {
         <Input disabled={loading} type="submit" fullWidth primary />
       </form>
       <TextDivider>or</TextDivider>
-      <Button fullWidth>Sign in with 42</Button>
+      <Button href={ftOauth2AuthorizationURL} fullWidth>
+        Sign in with 42
+      </Button>
     </div>
   );
 }
