@@ -10,10 +10,13 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { FtOauth2Strategy } from './ft-oauth2.strategy';
 import { State } from './state.entity';
+import ftOauth2Configuration from '../config/ft-oauth2';
 
 @Module({
   imports: [
-    ConfigModule,
+    ConfigModule.forRoot({
+      load: [ftOauth2Configuration],
+    }),
     HttpModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
