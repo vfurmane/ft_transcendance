@@ -14,8 +14,8 @@ export class FtOauth2Strategy extends PassportStrategy(Strategy) {
     private readonly usersService: UsersService,
   ) {
     super({
-      authorizationURL: 'https://api.intra.42.fr/oauth/authorize',
-      tokenURL: 'https://api.intra.42.fr/oauth/token',
+      authorizationURL: `${configService.get('ft.api.oauth.authorizationURL')}`,
+      tokenURL: `${configService.get('ft.api.oauth.tokenURL')}`,
       clientID: `${configService.get('FT_OAUTH2_CLIENT_ID')}`,
       clientSecret: `${configService.get('FT_OAUTH2_CLIENT_SECRET')}`,
       callbackURL: `${configService.get('FRONTEND_BASE_URL')}/auth/oauth2/42`,
