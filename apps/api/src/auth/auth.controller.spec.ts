@@ -52,12 +52,5 @@ describe('AuthController', () => {
       expect(service.login).toHaveBeenCalledWith(user);
       expect(response).toHaveProperty('access_token', accessToken);
     });
-    it('should return the access token of the user', async () => {
-      const req = createMock<Request>();
-      service.login.mockReturnValueOnce({ access_token: accessToken });
-      const response = await controller.ftCallback({ ...req, user });
-      expect(service.login).toHaveBeenCalledWith(user);
-      expect(response).toHaveProperty('access_token', accessToken);
-    });
   });
 });
