@@ -5,16 +5,23 @@ import Avatar from '../asset/Avatar.png';
 import Search from '../asset/Search.png';
 import ToggleBar from '../asset/toggleBar.png';
 import ToggleCross from '../asset/toggleCross.png';
+import Link from 'next/link';
 
-function TopBar(props : {clickProfil : ()=>void, openProfil: boolean}): JSX.Element {
+function TopBar(): JSX.Element {
 
     const [openToggle, setOpenToggle] = useState(false);
-
+    const [openProfil, setOpenProfil] = useState(false);
 
     function clickToggle(){
         setOpenToggle(!openToggle);
-        if (!openToggle && props.openProfil)
-            props.clickProfil();
+        if (!openToggle && openProfil)
+            clickProfil();
+        if (openProfil)
+            clickProfil();
+    }
+
+    function clickProfil(){
+        setOpenProfil(!openProfil);
     }
 
 
@@ -32,7 +39,7 @@ function TopBar(props : {clickProfil : ()=>void, openProfil: boolean}): JSX.Elem
                         <Image alt='search' src={Search} width={20} height={20} className='logoSearchBar' />
                         <input type={'text'} placeholder={'Search someone...'} className='searchBar' />
                     </div>
-                    <Image alt='avatar' src={Avatar} width={45} height={45} className='avatar' onClick={props.clickProfil}/>
+                    <Image alt='avatar' src={Avatar} width={45} height={45} className='avatar' onClick={clickProfil}/>
                 </div>
             </div>
             <div className='d-md-none'>
@@ -53,18 +60,18 @@ function TopBar(props : {clickProfil : ()=>void, openProfil: boolean}): JSX.Elem
                             <Image alt='search' src={Search} width={15} height={15} className='logoSearchBar' />
                             <input type={'text'} placeholder={'Search someone...'} className='searchBar toggle' />
                         </div>
-                        <Image alt='avatar' src={Avatar} width={42} height={42} className='avatar'  onClick={props.clickProfil}/>
+                        <Image alt='avatar' src={Avatar} width={42} height={42} className='avatar'  onClick={clickProfil}/>
                     </div>
                 </div>
 
                 : ''
                 }
             </div>
-            {props.openProfil? 
-            <div className='elementTopBar toggle avatarMenu '>
+            {openProfil? 
+            <div className={openToggle? 'elementTopBar toggle avatarMenu open' : 'elementTopBar toggle avatarMenu'}>
                 <div className='playMenuContainer'>
                     <div className='playMenuEntity bar'>
-                        <h3>Profil</h3>
+                    <Link href={{pathname:"./ProfilePage/Profil", query: {name:"userName"}} }style={{ textDecoration: 'none' }}><h3>profil</h3></Link>
                     </div>
                     <div className='playMenuEntity'>
                         <h3>logout</h3>

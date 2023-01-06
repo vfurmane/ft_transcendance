@@ -1,6 +1,7 @@
 import React, {useState} from 'react';
 import Image from 'next/image';
 import Message from '../../asset/message.png';
+import Link from 'next/link';
 
 
 export default function ArrayDoubleColumn(props : {title: string, list : JSX.Element[], open ?: boolean, name?: string, index?: number}):  JSX.Element {
@@ -28,25 +29,13 @@ export default function ArrayDoubleColumn(props : {title: string, list : JSX.Ele
 
     function getColumn(num: number) : JSX.Element[]{
 
-        /*if ((props.openLeft || props.openRight) && typeof(props.index) !== 'undefined' && ((Number(props.index.toString().slice(-1)) < 5 && num % 2 > 0) || (Number(props.index.toString().slice(-1)) >= 5 && num % 2 === 0)))
-        {
-            return (
-                [<div className='friendMenuContainer'>
-                    {(typeof(props.index) !== 'undefined')? props.list[props.index] : ''}
-                    <button className='buttonFriend'><h3>profil</h3></button>
-                    <button className='buttonFriend'><Image alt='message' src={Message} width={42} height={42} /></button>
-                    <button className='buttonFriend'><h3>Play with {props.name}</h3></button>
-                </div>]
-            );
-        }*/
-
         if (props.open &&  typeof(props.index) !== 'undefined')
         {
             props.list[props.index] = 
                 <div className="leaderBoardContainer">
                     <div className="shadowContainer">
                         <div className="cardContainer entity">
-                            <button className='buttonFriend'><h3>profil</h3></button>
+                            <button className='buttonFriend'> <Link href={{pathname:"../ProfilePage/Profil", query: {name: props.name}} }style={{ textDecoration: 'none' }}><h3>profil</h3></Link></button>
                             <button className='buttonFriend'><Image alt='message' src={Message} width={30} height={30} /></button>
                             <button className='buttonFriend yellow'><h3>Play</h3></button>
                         </div>
