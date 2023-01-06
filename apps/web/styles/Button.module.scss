@@ -1,6 +1,7 @@
 @import 'variables';
 
 .container {
+  box-sizing: border-box;
   margin: 0;
   border: none;
   border-radius: 8px;
@@ -8,9 +9,12 @@
   width: auto;
   overflow: visible;
 
+  display: block;
+
   background: $dark-neutral-grey;
   color: $dark-neutral-black;
   font: inherit;
+  text-decoration: none;
 
   line-height: normal;
 
