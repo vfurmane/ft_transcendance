@@ -3,7 +3,7 @@ import Image from 'next/image';
 import Message from '../../asset/message.png';
 
 
-export default function ArrayDoubleColumn(props : {title: string, list : JSX.Element[], openLeft ?: boolean, openRight?: boolean, name?: string, index?: number}):  JSX.Element {
+export default function ArrayDoubleColumn(props : {title: string, list : JSX.Element[], open ?: boolean, name?: string, index?: number}):  JSX.Element {
     const [columnNum, setColumnNum] = useState(1);
     const [pageNum, setPageNum] = useState(1);
 
@@ -28,7 +28,7 @@ export default function ArrayDoubleColumn(props : {title: string, list : JSX.Ele
 
     function getColumn(num: number) : JSX.Element[]{
 
-        if ((props.openLeft || props.openRight) && typeof(props.index) !== 'undefined' && ((Number(props.index.toString().slice(-1)) < 5 && num % 2 > 0) || (Number(props.index.toString().slice(-1)) >= 5 && num % 2 === 0)))
+        /*if ((props.openLeft || props.openRight) && typeof(props.index) !== 'undefined' && ((Number(props.index.toString().slice(-1)) < 5 && num % 2 > 0) || (Number(props.index.toString().slice(-1)) >= 5 && num % 2 === 0)))
         {
             return (
                 [<div className='friendMenuContainer'>
@@ -38,6 +38,22 @@ export default function ArrayDoubleColumn(props : {title: string, list : JSX.Ele
                     <button className='buttonFriend'><h3>Play with {props.name}</h3></button>
                 </div>]
             );
+        }*/
+
+        if (props.open &&  typeof(props.index) !== 'undefined')
+        {
+            props.list[props.index] = 
+                <div className="leaderBoardContainer">
+                    <div className="shadowContainer">
+                        <div className="cardContainer entity">
+                            <button className='buttonFriend'><h3>profil</h3></button>
+                            <button className='buttonFriend'><Image alt='message' src={Message} width={30} height={30} /></button>
+                            <button className='buttonFriend yellow'><h3>Play</h3></button>
+                        </div>
+                        <div className="entityShadow d-none d-sm-block"></div>
+                    </div>
+                </div>
+            
         }
 
         let column : JSX.Element[] = [];

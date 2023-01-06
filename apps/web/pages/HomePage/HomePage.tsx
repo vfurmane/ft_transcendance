@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import TopBar from '../TopBar';
 import  PlayButton  from './PlayButton';
 import  List  from './List';
@@ -16,12 +16,13 @@ function Home() : JSX.Element {
 
     const [openPlayButton, setOpenPlayButton] = useState(false);
     const [openFriendMenu, setOpenFriendMenu] = useState(false);
-    const [openFriendMenuLeaderBrdLeft, setOpenFriendMenuLeaderBrdLeft] = useState(false);
-    const [openFriendMenuLeaderBrdRight, setOpenFriendMenuLeaderBrdRight] = useState(false);
+    const [openFriendMenuLeaderBrd, setOpenFriendMenuLeaderBrd] = useState(false);
     const [nameOfFriend, setNameOfFriend] = useState('');
     const [indexOfFriend, setIndexOfFriend] = useState(0);
-    const [clickOnLeaderBoardItem, setClickOnLeaderBoardItem] = useState(false);
     const [openProfil, setOpenProfil] = useState(false);
+
+    const prevIndexOfFriendRef = useRef(0);
+    const prevIndexOfFriendMenuLeaderBordRef = useRef(0);
 
     function handleClickPlayButton() : void {
         setOpenPlayButton(!openPlayButton);
@@ -30,18 +31,21 @@ function Home() : JSX.Element {
     function handleClickFriendMenu( e : {name : string, index: number}) : void {
         setOpenFriendMenu(true);
         setNameOfFriend(e.name);
-        setIndexOfFriend(e.index);
+        if (indexOfFriend === e.index)
+            prevIndexOfFriendRef.current = indexOfFriend - 1;
+        else
+            prevIndexOfFriendRef.current = indexOfFriend;
+        setIndexOfFriend( e.index);
     }
 
     function handleClickFriendMenuLeaderBrd( e : {name : string, index: number}) : void {
-        if (Number(e.index.toString().slice(-1)) < 5)
-            setOpenFriendMenuLeaderBrdLeft(true);
-        if ( Number(e.index.toString().slice(-1)) >= 5)
-            setOpenFriendMenuLeaderBrdRight(true);
-
+        setOpenFriendMenuLeaderBrd(true);
         setNameOfFriend(e.name);
+        if (indexOfFriend === e.index)
+            prevIndexOfFriendMenuLeaderBordRef.current = indexOfFriend - 1;
+        else
+            prevIndexOfFriendMenuLeaderBordRef.current = indexOfFriend;
         setIndexOfFriend(e.index);
-        setClickOnLeaderBoardItem(true);
     }
 
     function clickProfil(){
@@ -51,12 +55,16 @@ function Home() : JSX.Element {
     function close() :void {
         if (openPlayButton)
             setOpenPlayButton(!openPlayButton);
-        if (openFriendMenu)
+        if (openFriendMenu && indexOfFriend !== prevIndexOfFriendRef.current)
+        {
+            console.log(indexOfFriend);
+            console.log(prevIndexOfFriendRef.current);
             setOpenFriendMenu(!openFriendMenu);
-        if (openFriendMenuLeaderBrdLeft)
-            setOpenFriendMenuLeaderBrdLeft(!openFriendMenuLeaderBrdLeft);
-        if (openFriendMenuLeaderBrdRight)
-            setOpenFriendMenuLeaderBrdRight(!openFriendMenuLeaderBrdRight);
+        }
+            
+        if (openFriendMenuLeaderBrd && indexOfFriend !== prevIndexOfFriendMenuLeaderBordRef.current)
+            setOpenFriendMenuLeaderBrd(!openFriendMenuLeaderBrd);
+  
         if (openProfil)
             setOpenProfil(!openProfil);
     }
@@ -65,7 +73,7 @@ function Home() : JSX.Element {
 
     for (let i = 0; i < 22; i++)
     {
-        friendList.push(<FriendEntity name={'name' + (i + 1).toString()} status='status' key={i} index={i} handleClick={handleClickFriendMenu} />);
+        friendList.push(<FriendEntity name={'name' + (i + 1).toString()} status='status' key={i} index={i}  handleClick={handleClickFriendMenu} />);
         matchList.push(<MatchEntity name={'name' + (i + 1).toString()} score={5} key={i}/>);
         leaderboard.push(<LeaderboardEntity name={'name' + (i + 1).toString()} level={420} rank={i + 1} status='status' key={i} handleClick={handleClickFriendMenuLeaderBrd}/>)
     }
@@ -74,7 +82,7 @@ function Home() : JSX.Element {
         <div onClick={()=>close()} >
             <TopBar clickProfil={clickProfil} openProfil={openProfil}/>
             <div className='illustration d-none d-lg-block'></div>
-            <div className='container '> 
+            <div className='container ' > 
                     <div className='row'>
                         <div className='col-12  d-none d-lg-block'>
                             <h3 className='title'>Ft_Transcendence</h3>
@@ -84,12 +92,16 @@ function Home() : JSX.Element {
                         </div>
                     </div>
                     <div className='row'>
-                        <div className='col-3 offset-2 offset-sm-3 offset-lg-4 offset-xl-5'>
+                        
+                        <div className={openPlayButton ? 'col-12 col-lg-3 offset-lg-4' : 'col-12'}>
                             <PlayButton handleClick={handleClickPlayButton} open={openPlayButton}/>
                         </div>
                         {openPlayButton ? 
-                        <div className='col-10 offset-1 offset-xl-0 offset-lg-1 col-lg-3 '>
-                            <div className='playMenuContainer'>
+                        <div className='col-10 offset-1 offset-xl-0 offset-lg-1 col-lg-3 offset-xl-1 '>
+                            <div className='playMenuContainer d-block d-lg-none'>
+                                <PlayMenu/>
+                            </div> 
+                            <div className='playMenuContainer marge_top d-none d-lg-block'>
                                 <PlayMenu/>
                             </div> 
                         </div>
@@ -110,7 +122,7 @@ function Home() : JSX.Element {
                     </div>
                     <div className='row'>
                         <div className='col-10 offset-1'>
-                            <ArrayDoubleColumn title='leaderboard' list={leaderboard} openLeft={openFriendMenuLeaderBrdLeft} openRight={openFriendMenuLeaderBrdRight} name={nameOfFriend} index={indexOfFriend}/>
+                            <ArrayDoubleColumn title='leaderboard' list={leaderboard} open={openFriendMenuLeaderBrd}  name={nameOfFriend} index={indexOfFriend}/>
                         </div>
                     </div>
                     <div className='row'>
