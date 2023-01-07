@@ -22,7 +22,6 @@ async function exchangeCodeForToken(
       console.error(error);
       return null;
     });
-  console.log(response);
   if (response && response.access_token) return response.access_token;
   return null;
 }
