@@ -1,9 +1,9 @@
 import { ReactElement, useState } from "react";
 import { useForm } from "react-hook-form";
-import { Button } from "../components/Button";
 import { Input } from "../components/Input";
 import { TextDivider } from "../components/TextDivider";
 import styles from "styles/LoginForm.module.scss";
+import { FtOAuth2Button } from "./FtOAuth2Button";
 
 interface LoginFormData {
   username: string;
@@ -32,9 +32,6 @@ async function login(data: LoginFormData): Promise<string | null> {
 }
 
 export function LoginForm(): ReactElement {
-  const ftOauth2AuthorizationURL = `https://api.intra.42.fr/oauth/authorize?response_type=code&redirect_uri=${encodeURIComponent(
-    `${process.env.NEXT_PUBLIC_BASE_URL}/auth/oauth2/42`
-  )}&client_id=${process.env.NEXT_PUBLIC_FT_OAUTH2_CLIENT_ID}`;
   const [formError, setFormError] = useState("");
   const [formSuccess, setFormSuccess] = useState("");
   const [loading, setLoading] = useState(false);
@@ -83,9 +80,7 @@ export function LoginForm(): ReactElement {
         <Input disabled={loading} type="submit" fullWidth primary />
       </form>
       <TextDivider>or</TextDivider>
-      <Button href={ftOauth2AuthorizationURL} fullWidth>
-        Sign in with 42
-      </Button>
+      <FtOAuth2Button disabled={loading} fullWidth />
     </div>
   );
 }
