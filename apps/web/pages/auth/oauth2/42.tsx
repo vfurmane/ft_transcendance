@@ -1,5 +1,5 @@
 import { useRouter } from "next/router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 async function exchangeCodeForToken(
   code: string,
@@ -28,6 +28,7 @@ async function exchangeCodeForToken(
 
 export default function FtOauth2(): JSX.Element {
   const router = useRouter();
+  const [message, setMessage] = useState("Loading...");
   useEffect((): void => {
     if (!router.isReady) return;
 
@@ -41,12 +42,14 @@ export default function FtOauth2(): JSX.Element {
     }
     exchangeCodeForToken(code, state).then((accessToken) => {
       if (accessToken) {
+        setMessage("Success! Redirecting...");
         localStorage.setItem("access_token", accessToken);
         router.replace("/");
       } else {
+        setMessage("An error occured... Redirecting to the login page...");
         router.replace("/login");
       }
     });
   }, [router]);
-  return <></>;
+  return <>{message}</>;
 }
