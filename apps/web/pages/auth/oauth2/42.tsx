@@ -4,7 +4,7 @@ import { useEffect } from "react";
 async function exchangeCodeForToken(
   code: string,
   state?: string
-): Promise<any> {
+): Promise<string | null> {
   const response = await fetch(
     `${
       process.env.NEXT_PUBLIC_API_BASE_URL
@@ -29,12 +29,21 @@ async function exchangeCodeForToken(
 export default function FtOauth2(): JSX.Element {
   const router = useRouter();
   useEffect((): void => {
+    if (!router.isReady) return;
+
     const code = router.query.code;
-    if (!code || typeof code !== "string") {
+    const state = router.query.state;
+    if (
+      !(code && typeof code == "string" && state && typeof state == "string")
+    ) {
       // router.push("/login");
       return;
     }
-    exchangeCodeForToken(code);
+    exchangeCodeForToken(code, state).then((accessToken) => {
+      if (accessToken) {
+        localStorage.setItem("access_token", accessToken);
+      }
+    });
   }, [router]);
   return <></>;
 }
