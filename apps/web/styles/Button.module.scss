@@ -29,6 +29,11 @@
   cursor: pointer;
 }
 
+.container:disabled {
+  cursor: not-allowed;
+  background: $dark-neutral-grey-lighter;
+}
+
 .fullWidth {
   width: 100%;
 }
