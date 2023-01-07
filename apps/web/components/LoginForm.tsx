@@ -1,13 +1,22 @@
-import { ReactElement, useState } from "react";
+import { ReactElement, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Input } from "../components/Input";
 import { TextDivider } from "../components/TextDivider";
 import styles from "styles/LoginForm.module.scss";
+import crypto from "crypto";
 import { FtOAuth2Button } from "./FtOAuth2Button";
 
 interface LoginFormData {
   username: string;
   password: string;
+}
+
+function obtainState(): string {
+  let state = localStorage.getItem("state");
+  if (state !== null) return state;
+  state = crypto.randomBytes(32).toString("hex");
+  localStorage.setItem("state", state);
+  return state;
 }
 
 async function login(data: LoginFormData): Promise<string | null> {
@@ -34,6 +43,7 @@ async function login(data: LoginFormData): Promise<string | null> {
 }
 
 export function LoginForm(): ReactElement {
+  const [state, setState] = useState("");
   const [formError, setFormError] = useState("");
   const [formSuccess, setFormSuccess] = useState("");
   const [loading, setLoading] = useState(false);
@@ -64,6 +74,10 @@ export function LoginForm(): ReactElement {
     setLoading(false);
   };
 
+  useEffect(() => {
+    setState(obtainState());
+  }, []);
+
   return (
     <div className={styles.container}>
       <form className={styles.form} onSubmit={handleSubmit(onSubmit)}>
@@ -88,7 +102,7 @@ export function LoginForm(): ReactElement {
         <Input disabled={loading} type="submit" fullWidth primary />
       </form>
       <TextDivider>or</TextDivider>
-      <FtOAuth2Button disabled={loading} fullWidth />
+      <FtOAuth2Button disabled={loading} state={state} fullWidth />
     </div>
   );
 }
