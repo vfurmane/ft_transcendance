@@ -36,12 +36,15 @@ export default function FtOauth2(): JSX.Element {
     if (
       !(code && typeof code == "string" && state && typeof state == "string")
     ) {
-      // router.push("/login");
+      router.replace("/login");
       return;
     }
     exchangeCodeForToken(code, state).then((accessToken) => {
       if (accessToken) {
         localStorage.setItem("access_token", accessToken);
+        router.replace("/");
+      } else {
+        router.replace("/login");
       }
     });
   }, [router]);
