@@ -13,8 +13,8 @@ export function Button(props: ButtonProps): ReactElement {
     return (
       <a
         className={`${styles.container} ${
-          props.fullWidth && styles.fullWidth
-        } ${props.primary && styles.primary}`}
+          props.fullWidth ? styles.fullWidth : ""
+        } ${props.primary ? styles.primary : ""}`}
         href={props.href}
       >
         {props.children}
@@ -22,9 +22,9 @@ export function Button(props: ButtonProps): ReactElement {
     );
   return (
     <button
-      className={`${styles.container} ${props.fullWidth && styles.fullWidth} ${
-        props.primary && styles.primary
-      }`}
+      className={`${styles.container} ${
+        props.fullWidth ? styles.fullWidth : ""
+      } ${props.primary ? styles.primary : ""}`}
     >
       {props.children}
     </button>
