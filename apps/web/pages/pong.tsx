@@ -36,13 +36,39 @@ class Board {
 	constructor() {
 	}
 
+	createRegularPolygon(point:Point,side:number,n:number) {
+		let points = [];
+		let angle = (-(360 - ((n - 2)*180)/n) * (Math.PI / 180))
+		points[n - 1] = new Point(point.x, point.y - side);
+		let vector = point.vectorTo(points[n-1]);
+		for (let i:number = n - 1; i > 0; i--) {
+			points[i - 1] = (new Point(points[i].x, points[i].y));
+			[vector.x, vector.y] = [-((vector.x * Math.cos(angle)) + (vector.y * Math.sin(angle))), ((vector.x * Math.sin(angle)) - (vector.y * Math.cos(angle)))]
+			points[i - 1].x += vector.x;
+			points[i - 1].y += vector.y;
+		}
+		return (points);
+	}
+
+	createRect(x:number,y:number,w:number,h:number) {
+		let point = [];
+		point[0] = new Point(x,y);
+		point[1] = new Point(x+w,y);
+		point[2] = new Point(x+w,y+h);
+		point[3] = new Point(x,y+h);
+		return point;
+	}
+
 	init(ref) {
 		this.boardCanvasRef = ref;
 		this.boardCanvas = this.boardCanvasRef.current;
 		this.boardContext = this.boardCanvas.getContext('2d');
-		this.ball = new Ball(window.innerWidth / 4, window.innerHeight / 4, 40, 40);
-		this.player = new Racket(10, window.innerHeight / 4, 40, 100);
-		this.cible = new Target(window.innerWidth / 3, window.innerHeight / 4, 20, 20);
+		this.test = new Ball(this.createRegularPolygon(new Point(window.innerWidth / 5, window.innerHeight / 5), 10, 42));
+		console.log(this.test.point);
+		this.test.draw(this.boardContext);
+		this.ball = new Ball(this.createRect(window.innerWidth / 4, window.innerHeight / 4, 40, 40));
+		this.player = new Racket(this.createRect(10, window.innerHeight / 4, 40, 100));
+		this.cible = new Target(this.createRect(window.innerWidth / 3, window.innerHeight / 4, 20, 20));
 		window.addEventListener("keydown",function(e){
 			Board.keyPressed[e.which] = true;
 		});
@@ -67,6 +93,9 @@ class Board {
 		for (let i:number = 0; i < Board.live; i++) {
 			this.boardContext.fillText("❤️", (window.innerWidth / 4) + (25 * i), 160)
 		}
+		this.test.draw(this.boardContext);
+		this.test.printPoint(this.boardContext, 0, 'red');
+		this.test.printPoint(this.boardContext, this.test.point.length - 1, 'green');
 		this.countUpdate++;
 		this.ball.update(this.player);
 		this.player.update(this.ball);
@@ -118,18 +147,26 @@ class Point {
 
 class Entity {
 	private	point:Point = [];
-	private	x;
-	private	y;
 	private	xspeed;
 	private	yspeed;
 
-	constructor(x:number,y:number,w:number,h:number) {
-		this.point[0] = new Point(x,y);
-		this.point[1] = new Point(x+w,y);
-		this.point[2] = new Point(x+w,y+h);
-		this.point[3] = new Point(x,y+h);
-		this.x = x;
-		this.y = y;
+	constructor(points) {
+		let i = 0;
+		for (let point of points) {
+			this.point[i] = point;
+			i++;
+		}
+	}
+
+	printPoint(context, n:number, color) {
+		context.beginPath();
+		context.moveTo(this.point[n].x, this.point[n].y);
+		context.lineTo(this.point[n].x + 2, this.point[n].y);
+		context.lineTo(this.point[n].x + 2, this.point[n].y + 2);
+		context.lineTo(this.point[n].x, this.point[n].y + 2);
+		context.closePath();
+		context.strokeStyle = color 
+		context.stroke();
 	}
 
 	getx() {
@@ -212,7 +249,6 @@ class Entity {
 	printPos(context) {
 		context.font = "14px sherif"
 		context.fillStyle = "#000";
-		context.fillText("x=" + this.point[0].x + " y=" + this.point[0].y + " x'=" + (this.point[2].x) + " y'=" + (this.point[2].y), this.point[0].x, this.point[0].y)
 	}
 
 	getEdges() {
@@ -288,8 +324,6 @@ class Ball extends Entity {
 	update(racket:Racket) {
 		if (this.sat(racket)) {
 			this.xspeed = -this.xspeed;
-			this.x += this.xspeed;
-			this.y += this.yspeed;
 			this.moveTo(new Vector(this.xspeed, this.yspeed));
 			if (this.xspeed > 0) {
 				this.xspeed += racket.speed;
@@ -307,21 +341,17 @@ class Ball extends Entity {
 			} else {
 				this.yspeed = -this.speed;
 			}
-			if (this.x + this.xspeed <= 0) {
+			if (this.getx() + this.xspeed <= 0) {
 				Board.live--;
 				this.replaceTo(new Point(window.innerWidth / 4, window.innerHeight / 4));
 			}
 			if (this.DontHitWallX()) {
-				this.x += this.xspeed;
 			} else {
 				this.xspeed = -this.xspeed;
-				this.x += this.xspeed;
 			}
 			if (this.DontHitWallY()) {
-				this.y += this.yspeed;
 			} else {
 				this.yspeed = -this.yspeed;
-				this.y += this.yspeed;
 			}
 			this.moveTo(new Vector(this.xspeed, this.yspeed));
 		}
@@ -341,21 +371,15 @@ class Racket extends Entity {
 		if (Board.keyPressed[Key.UP] && Board.keyPressed[Key.DOWN]) {
 		} else 
 		if (Board.keyPressed[Key.UP]) {
-			this.y -= this.speed;
+			this.moveTo(new Vector(0, -this.speed))
 		} else if (Board.keyPressed[Key.DOWN]) {
-			this.y += this.speed;
+			this.moveTo(new Vector(0, this.speed))
 		}
-		if (ball.y < this.y) {
-			this.y -= this.speed;
-		} else {
-			this.y += this.speed;
+		if (this.gety() < 0)
+			this.replaceTo(new Point(this.getx(), 0))
+		if (this.gety() + 100 > (window.innerHeight / 2)) {
+			this.replaceTo(new Point(this.getx(), ((window.innerHeight / 2) - 100)));
 		}
-		if (this.y < 0)
-			this.y = 0;
-		if (this.y + 100 > (window.innerHeight / 2)) {
-			this.y = ((window.innerHeight / 2) - 100);
-		}
-		this.replaceTo(new Point(this.x, this.y));
 	}
 }
 
