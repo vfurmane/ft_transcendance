@@ -22,9 +22,11 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
       <div className={styles.container}>
         <input
           autoComplete="off"
-          className={`${styles.input} ${props.fullWidth && styles.fullWidth} ${
-            props.primary && styles.primary
-          } ${props.error && styles.error}`}
+          className={`${styles.input} ${
+            props.fullWidth ? styles.fullWidth : ""
+          } ${props.primary ? styles.primary : ""} ${
+            props.error ? styles.error : ""
+          }`}
           disabled={props.disabled}
           placeholder={props.placeholder}
           ref={ref}
