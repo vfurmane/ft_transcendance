@@ -51,6 +51,14 @@ FT_OAUTH2_CLIENT_SECRET=
 JWT_SECRET=
 ```
 
+```
+# apps/web/.env.local
+NEXT_PUBLIC_BASE_URL=
+NEXT_PUBLIC_API_BASE_URL=
+
+NEXT_PUBLIC_FT_OAUTH2_CLIENT_ID=
+```
+
 ### Running the server
 
 ```sh
