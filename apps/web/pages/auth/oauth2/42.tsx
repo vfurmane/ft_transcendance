@@ -13,16 +13,15 @@ async function exchangeCodeForToken(
       code,
       state: `${state}`,
     })}`
-  )
-    .then((response) => {
-      if (!response.ok) throw new Error("HTTP error");
-      return response;
-    })
-    .then((data) => data.json())
-    .catch((error) => {
-      console.error(error);
-      return null;
-    });
+  ).then(async (response) => {
+    if (!response.ok) {
+      return response.json().then((error) => {
+        throw new Error(error.message || "An unexpected error occured...");
+      });
+    } else {
+      return response.json();
+    }
+  });
   if (response && response.access_token) return response.access_token;
   return null;
 }
@@ -41,16 +40,20 @@ export default function FtOauth2(): JSX.Element {
       router.replace("/login");
       return;
     }
-    exchangeCodeForToken(code, state).then((accessToken) => {
-      if (accessToken) {
-        setMessage("Success! Redirecting...");
-        localStorage.setItem("access_token", accessToken);
-        router.replace("/");
-      } else {
-        setMessage("An error occured... Redirecting to the login page...");
+    exchangeCodeForToken(code, state)
+      .then((accessToken) => {
+        if (accessToken) {
+          setMessage("Success! Redirecting...");
+          localStorage.setItem("access_token", accessToken);
+          router.replace("/");
+        } else {
+          throw new Error("An unexpected error occured...");
+        }
+      })
+      .catch((error) => {
+        setMessage(error?.message || "An unexpected error occured...");
         router.replace("/login");
-      }
-    });
+      });
   }, [router]);
   return <Loading>{message}</Loading>;
 }
