@@ -1,6 +1,7 @@
 import { useRouter } from "next/router";
 import { useEffect } from "react";
 import { LoginForm } from "../components/LoginForm";
+import styles from "../styles/login-page.module.scss";
 
 export default function Login(): JSX.Element {
   const router = useRouter();
@@ -13,8 +14,8 @@ export default function Login(): JSX.Element {
   }, [router]);
 
   return (
-    <>
+    <div className={styles.container}>
       <LoginForm />
-    </>
+    </div>
   );
 }
