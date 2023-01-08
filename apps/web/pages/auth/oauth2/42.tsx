@@ -1,5 +1,6 @@
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
+import { Loading } from "../../../components/Loading";
 
 async function exchangeCodeForToken(
   code: string,
@@ -51,5 +52,5 @@ export default function FtOauth2(): JSX.Element {
       }
     });
   }, [router]);
-  return <>{message}</>;
+  return <Loading>{message}</Loading>;
 }
