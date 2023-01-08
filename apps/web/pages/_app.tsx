@@ -1,6 +1,7 @@
 import localFont from "@next/font/local";
 import { AppProps } from "next/app";
 import { ReactElement } from "react";
+import "../styles/global.scss";
 
 const interFont = localFont({ src: "../assets/Inter-Regular.ttf" });
 
