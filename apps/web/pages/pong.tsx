@@ -20,7 +20,6 @@ enum Form{
 
 class Board {
 	private	boardType = Form.REC;
-
 	private	boardCanvasRef;
 	private	boardCanvas;
 	private	boardContext;
@@ -32,6 +31,7 @@ class Board {
 	private	cible: Target;
 	public static keyPressed: [] = [];
 	private	start = Date.now();
+	private	wall:Wall = [];
 
 	constructor() {
 	}
@@ -39,15 +39,27 @@ class Board {
 	createRegularPolygon(point:Point,side:number,n:number) {
 		let points = [];
 		let angle = (-(360 - ((n - 2)*180)/n) * (Math.PI / 180))
-		points[n - 1] = new Point(point.x, point.y - side);
-		let vector = point.vectorTo(points[n-1]);
-		for (let i:number = n - 1; i > 0; i--) {
-			points[i - 1] = (new Point(points[i].x, points[i].y));
+		points[0] = new Point(point.x, point.y);
+		let vector = point.vectorTo(new Point(points[0].x, points[0].y - side));
+		for (let i:number = 0; i < n - 1; i++) {
+			points[i + 1] = new Point(points[i].x, points[i].y);
 			[vector.x, vector.y] = [-((vector.x * Math.cos(angle)) + (vector.y * Math.sin(angle))), ((vector.x * Math.sin(angle)) - (vector.y * Math.cos(angle)))]
-			points[i - 1].x += vector.x;
-			points[i - 1].y += vector.y;
+			points[i + 1].x += vector.x;
+			points[i + 1].y += vector.y;
 		}
 		return (points);
+	}
+
+	createWall(n:number) {
+		let wall = [];
+		if (n == 2) {
+			wall.push(new Wall(this.createRect(0,0,this.boardCanvas.width,1))); // top wall
+			wall.push(new Wall(this.createRect(0,0,1,this.boardCanvas.height))); // left wall
+			wall.push(new Wall(this.createRect(0,this.boardCanvas.height,this.boardCanvas.width,1))); // bot wall
+			wall.push(new Wall(this.createRect(this.boardCanvas.width,0,-10,this.boardCanvas.height))); // right wall
+		} else {
+		}
+		return (wall);
 	}
 
 	createRect(x:number,y:number,w:number,h:number) {
@@ -63,10 +75,9 @@ class Board {
 		this.boardCanvasRef = ref;
 		this.boardCanvas = this.boardCanvasRef.current;
 		this.boardContext = this.boardCanvas.getContext('2d');
-		this.test = new Ball(this.createRegularPolygon(new Point(window.innerWidth / 5, window.innerHeight / 5), 10, 42));
-		console.log(this.test.point);
-		this.test.draw(this.boardContext);
-		this.ball = new Ball(this.createRect(window.innerWidth / 4, window.innerHeight / 4, 40, 40));
+		this.wall = this.createWall(this.boardType);
+		console.log(this.wall);
+		this.ball = new Ball(this.createRegularPolygon(new Point(window.innerWidth / 4, window.innerHeight / 4), 40, 6));
 		this.player = new Racket(this.createRect(10, window.innerHeight / 4, 40, 100));
 		this.cible = new Target(this.createRect(window.innerWidth / 3, window.innerHeight / 4, 20, 20));
 		window.addEventListener("keydown",function(e){
@@ -93,14 +104,13 @@ class Board {
 		for (let i:number = 0; i < Board.live; i++) {
 			this.boardContext.fillText("❤️", (window.innerWidth / 4) + (25 * i), 160)
 		}
-		this.test.draw(this.boardContext);
-		this.test.printPoint(this.boardContext, 0, 'red');
-		this.test.printPoint(this.boardContext, this.test.point.length - 1, 'green');
 		this.countUpdate++;
-		this.ball.update(this.player);
+		this.ball.update(this.player, this.wall);
 		this.player.update(this.ball);
 		this.cible.update(this.ball);
 		this.ball.draw(this.boardContext);
+		this.ball.printPoint(this.boardContext, 0, 'red');
+		this.ball.printPoint(this.boardContext, this.ball.point.length -  1, 'green');
 		this.player.draw(this.boardContext);
 		this.cible.draw(this.boardContext);
 		this.ball.printPos(this.boardContext);
@@ -129,6 +139,22 @@ class Vector {
 	perp() {
 		return (new Vector(-this.y, this.x));
 	}
+
+	norm() {
+		return (Math.sqrt((this.x * this.x) + (this.y * this.y)));
+	}
+
+	normalized() {
+		return (new Vector(this.x / this.norm(), this.y / this.norm()));
+	}
+
+	add(other) {
+		return (new Vector(this.x + other.x, this.y + other.y));
+	}
+
+	sub(other) {
+		return (new Vector(this.x - other.x, this.y - other.y));
+	}
 }
 
 class Point {
@@ -147,8 +173,7 @@ class Point {
 
 class Entity {
 	private	point:Point = [];
-	private	xspeed;
-	private	yspeed;
+	private	speed:Vector;
 
 	constructor(points) {
 		let i = 0;
@@ -270,13 +295,17 @@ class Entity {
 	}
 }
 
+class Wall extends Entity {
+	constructor(points) {
+		super(points);
+	}
+}
+
 class Target extends Entity {
 	private	speed:number = 0;
 
-	constructor(x:number,y:number,w:number,h:number) {
-		super(x,y,w,h);
-		this.xspeed = this.speed;
-		this.yspeed = this.speed;
+	constructor(points) {
+		super(points);
 	}
 
 	draw(context){
@@ -305,55 +334,72 @@ class Target extends Entity {
 }
 
 class Ball extends Entity {
-	private	speed:number = 1;
+	private defaultSpeed:number = 1;
 
-	constructor(x:number,y:number,w:number,h:number) {
-		super(x,y,w,h);
-		this.xspeed = this.speed;
-		this.yspeed = this.speed;
+	constructor(points) {
+		super(points);
+		this.speed = new Vector(1, 1);
 	}
 
 	DontHitWallX() {
-		return (((this.point[0].x + this.xspeed) < ((window.innerWidth / 2) - 40)) && ((this.point[0].x + this.xspeed) > 0))
+		return (((this.point[0].x + this.speed.x) < ((window.innerWidth / 2) - 40)) && ((this.point[0].x + this.speed.x) > 0))
 	}
 
 	DontHitWallY() {
-		return (((this.point[0].y + this.yspeed) < ((window.innerHeight / 2) - 40)) && ((this.point[0].y + this.yspeed) > 0))
+		return (((this.point[0].y + this.speed.y) < ((window.innerHeight / 2) - 40)) && ((this.point[0].y + this.speed.y) > 0))
 	}
 
-	update(racket:Racket) {
+	update(racket:Racket, walls) {
 		if (this.sat(racket)) {
-			this.xspeed = -this.xspeed;
-			this.moveTo(new Vector(this.xspeed, this.yspeed));
-			if (this.xspeed > 0) {
-				this.xspeed += racket.speed;
+			this.speed.x = -this.speed.x;
+			this.moveTo(this.speed);
+			if (this.speed.x > 0) {
+				this.speed.x += 10;
 			} else {
-				this.xspeed -= racket.speed;
+				this.speed.x -= 10;
 			}
 		} else {
-			if (this.xspeed > 0) {
-				this.xspeed = this.speed;
+			if (this.speed.x > 0) {
+				this.speed.x = this.defaultSpeed;
 			} else {
-				this.xspeed = -this.speed;
+				this.speed.x = -this.defaultSpeed;
 			}
-			if (this.yspeed > 0) {
-				this.yspeed = this.speed;
+			if (this.speed.y > 0) {
+				this.speed.y = this.defaultSpeed;
 			} else {
-				this.yspeed = -this.speed;
+				this.speed.y = -this.defaultSpeed;
 			}
-			if (this.getx() + this.xspeed <= 0) {
+			if (this.getx() + this.speedx <= 0) {
 				Board.live--;
 				this.replaceTo(new Point(window.innerWidth / 4, window.innerHeight / 4));
 			}
 			if (this.DontHitWallX()) {
 			} else {
-				this.xspeed = -this.xspeed;
+				this.speed.x = -this.speed.x;
 			}
 			if (this.DontHitWallY()) {
 			} else {
-				this.yspeed = -this.yspeed;
+				this.speed.y = -this.speed.y;
 			}
-			this.moveTo(new Vector(this.xspeed, this.yspeed));
+			for (let wall of walls) {
+				if (this.sat(wall)) {
+					console.log(this.speed);
+					let perp = wall.point[0].vectorTo(wall.point[2]).perp();
+					perp.y = 0;
+					perp = perp.normalized();
+					let tmp = this.speed.normalized();
+					let angle = (Math.PI - (Math.atan2(tmp.y,tmp.x) - Math.atan2(perp.y,perp.x))) % (Math.PI * 2);
+					angle *= 2;
+					console.log(angle * (180 / Math.PI));
+					console.log(tmp);
+					[tmp.x, tmp.y] = [((tmp.x * Math.cos(angle)) + (tmp.y * Math.sin(angle))), ((tmp.x * Math.sin(angle)) - (tmp.y * Math.cos(angle)))]
+					console.log(tmp);
+					this.speed = tmp//(wall.point[0].vectorTo(wall.point[2])).perp().normalized().sub(this.speed);
+				//	this.replaceTo(new Point(window.innerWidth / 4, window.innerHeight / 4));
+					console.log(this.speed);
+				}
+			}
+			this.moveTo(this.speed);
 		}
 	}
 }
@@ -361,8 +407,8 @@ class Ball extends Entity {
 class Racket extends Entity {
 	private speed:number = 1;
 
-	constructor(x:number,y:number,w:number,h:number) {
-		super(x,y,w,h);
+	constructor(points) {
+		super(points);
 		this.xspeed = this.speed;
 		this.yspeed = 0;
 	}
