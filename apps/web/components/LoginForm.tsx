@@ -11,13 +11,16 @@ interface LoginFormData {
 }
 
 async function login(data: LoginFormData): Promise<string | null> {
-  const response = await fetch(`http://localhost:3000/auth/login`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(data),
-  })
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/login`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    }
+  )
     .then((response) => {
       if (!response.ok) throw new Error("HTTP error");
       return response;
