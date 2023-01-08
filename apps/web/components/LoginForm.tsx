@@ -20,16 +20,15 @@ async function login(data: LoginFormData): Promise<string | null> {
       },
       body: JSON.stringify(data),
     }
-  )
-    .then((response) => {
-      if (!response.ok) throw new Error("HTTP error");
-      return response;
-    })
-    .then((data) => data.json())
-    .catch((error) => {
-      console.error(error);
-      return null;
-    });
+  ).then(async (response) => {
+    if (!response.ok) {
+      return response.json().then((error) => {
+        throw new Error(error.message || "An unexpected error occured...");
+      });
+    } else {
+      return response.json();
+    }
+  });
   if (response && response.access_token) return response.access_token;
   return null;
 }
@@ -49,14 +48,20 @@ export function LoginForm(): ReactElement {
     setFormSuccess("");
     setLoading(true);
 
-    const accessToken = await login(data);
-    if (accessToken === null) {
-      setFormError("Invalid credentials");
-      setLoading(false);
-    } else {
-      localStorage.setItem("access_token", accessToken);
-      setFormSuccess("Success! Redirecting...");
-    }
+    await login(data)
+      .then((accessToken) => {
+        if (accessToken === null) {
+          throw new Error("An unexpected error occured...");
+        } else {
+          localStorage.setItem("access_token", accessToken);
+          setFormSuccess("Success! Redirecting...");
+          return;
+        }
+      })
+      .catch((error) => {
+        setFormError(error?.message || "An unexpected error occured...");
+      });
+    setLoading(false);
   };
 
   return (
