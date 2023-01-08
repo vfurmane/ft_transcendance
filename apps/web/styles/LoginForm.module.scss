@@ -10,8 +10,9 @@
   flex-direction: column;
   align-items: center;
 
-  background-color: $dark-background-grey-lighter;
-  color: #e8e8e8;
+  background: $dark-background-lighter-rgba-overlay, url('/noise.png');
+  background-repeat: repeat;
+  color: #E8E8E8;
   text-align: center;
 
   * {
