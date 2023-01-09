@@ -3,13 +3,14 @@ import { JwtModule, JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthService } from './auth.service';
 import { faker } from '@faker-js/faker';
-import { FtUser, User } from 'types';
+import { FtUser } from 'types';
 import { Logger } from '@nestjs/common';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { of, throwError } from 'rxjs';
 import { AxiosResponse } from 'axios';
 import { ConfigModule } from '@nestjs/config';
 import ftOauth2Configuration from '../config/ft-oauth2';
+import { User } from '../users/user.entity';
 
 const JWT_SECRET = faker.random.alphaNumeric(20);
 const code = faker.random.alphaNumeric(20);
@@ -19,8 +20,11 @@ const ftUser: FtUser = {
 };
 const user: User = {
   id: faker.datatype.uuid(),
+  created_at: faker.date.recent(),
+  updated_at: faker.date.recent(),
   name: faker.internet.userName(),
   email: faker.internet.email(),
+  password: faker.internet.password(),
 };
 
 describe('AuthService', () => {
