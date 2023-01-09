@@ -19,5 +19,3 @@ export interface FtUser {
 export interface AccessTokenResponse {
   access_token: string;
 }
-
-export type SessionRequest = Request & { state?: State, user?: User }

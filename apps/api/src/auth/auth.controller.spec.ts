@@ -4,7 +4,7 @@ import { Logger } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { User } from 'types';
+import { User } from '../users/user.entity';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { State } from './state.entity';
@@ -12,8 +12,11 @@ import { State } from './state.entity';
 const accessToken = faker.random.alphaNumeric(20);
 const user: User = {
   id: faker.datatype.uuid(),
+  created_at: faker.date.recent(),
+  updated_at: faker.date.recent(),
   name: faker.internet.userName(),
   email: faker.internet.email(),
+  password: faker.internet.password(),
 };
 
 describe('AuthController', () => {
@@ -46,9 +49,8 @@ describe('AuthController', () => {
 
   describe('ftCallback', () => {
     it('should return the access token of the user', async () => {
-      const req = createMock<Request>();
       service.login.mockReturnValueOnce({ access_token: accessToken });
-      const response = controller.ftCallback({ ...req, user });
+      const response = controller.ftCallback(user);
       expect(service.login).toHaveBeenCalledWith(user);
       expect(response).toHaveProperty('access_token', accessToken);
     });
