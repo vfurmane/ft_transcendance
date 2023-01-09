@@ -33,24 +33,17 @@ npm install
 
 ### Configuration
 
-Environment files must be configured first. You can find template files (`.env.template`) to help you configure the project.
+The environment file must be configured first. You can find the template file (`.env.template`) to help you configure the project.
 
 ```
-# .env
+# containers config
 DATABASE_NAME=
 DATABASE_USERNAME=
 DATABASE_PASSWORD=
 DATABASE_PORT=5432
-```
 
-```
-# apps/api/.env
-FRONTEND_BASE_URL=
-
-POSTGRES_HOST=
-POSTGRES_USERNAME=
-POSTGRES_PASSWORD=
-POSTGRES_DATABASE=
+# api
+FRONTEND_BASE_URL=http://localhost:8080
 
 FT_OAUTH2_CLIENT_ID=
 FT_OAUTH2_CLIENT_SECRET=
