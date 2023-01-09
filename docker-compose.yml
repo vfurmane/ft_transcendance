@@ -26,6 +26,15 @@ services:
     restart: always
     ports:
       - 3000:3000
+    environment:
+      POSTGRES_HOST: database
+      POSTGRES_USERNAME: ${DATABASE_USERNAME}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+      POSTGRES_DATABASE: ${DATABASE_NAME}
+      FRONTEND_BASE_URL: ${FRONTEND_BASE_URL}
+      FT_OAUTH2_CLIENT_ID: ${FT_OAUTH2_CLIENT_ID}
+      FT_OAUTH2_CLIENT_SECRET: ${FT_OAUTH2_CLIENT_SECRET}
+      JWT_SECRET: ${JWT_SECRET}
     networks:
       - app
   database:
