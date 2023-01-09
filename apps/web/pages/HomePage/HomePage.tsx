@@ -1,12 +1,13 @@
 import React, {useEffect, useRef, useState} from 'react';
 import TopBar from '../TopBar';
-import  PlayButton  from './PlayButton';
-import  List  from './List';
+import PlayButton  from './PlayButton';
+import List  from './List';
 import FriendEntity from './FriendEntity';
 import MatchEntity from './MatchEntity';
 import LeaderboardEntity from './LeaderboardEntity';
 import ArrayDoubleColumn from './ArrayDoubleColumn';
 import PlayMenu from './PlayMenu';
+
 
 
 function Home() : JSX.Element {
@@ -60,15 +61,13 @@ function Home() : JSX.Element {
             
         if (openFriendMenuLeaderBrd && indexOfFriend !== prevIndexOfFriendMenuLeaderBordRef.current)
             setOpenFriendMenuLeaderBrd(!openFriendMenuLeaderBrd);
-    }
-
-    
+    }    
 
     for (let i = 0; i < 22; i++)
     {
-        friendList.push(<FriendEntity name={'name' + (i + 1).toString()} status='status' key={i} index={i}  handleClick={handleClickFriendMenu} />);
-        matchList.push(<MatchEntity name={'name' + (i + 1).toString()} score={5} key={i}/>);
-        leaderboard.push(<LeaderboardEntity name={'name' + (i + 1).toString()} level={420} rank={i + 1} status='status' key={i} handleClick={handleClickFriendMenuLeaderBrd}/>)
+        friendList.push(<FriendEntity url={`/avatar/avatar-${Math.floor(Math.random() * 19) + 1}.png`}  name={'name' + (i + 1).toString()} status='status' key={i} index={i}  handleClick={handleClickFriendMenu} />);
+        matchList.push(<MatchEntity url1={`/avatar/avatar-${Math.floor(Math.random() * 19) + 1}.png`} url2={`/avatar/avatar-${Math.floor(Math.random() * 19) + 1}.png`} name={'name' + (i + 1).toString()} score={5} key={i} />);
+        leaderboard.push(<LeaderboardEntity url={`/avatar/avatar-${Math.floor(Math.random() * 19) + 1}.png`}  name={'name' + (i + 1).toString()} level={420} rank={i + 1} status='status' key={i} handleClick={handleClickFriendMenuLeaderBrd}/>)
     }
 
     return (

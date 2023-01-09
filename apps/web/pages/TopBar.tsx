@@ -1,10 +1,10 @@
 import React , {useState} from 'react';
 import Image from 'next/image'
-import Logo from '../asset/Logo.png';
-import Avatar from '../asset/Avatar.png';
-import Search from '../asset/Search.png';
-import ToggleBar from '../asset/toggleBar.png';
-import ToggleCross from '../asset/toggleCross.png';
+import Logo from '../public/Logo.png';
+import Avatar from '../public/avatar/avatar-11.png';
+import Search from '../public/Search.png';
+import ToggleBar from '../public/toggleBar.png';
+import ToggleCross from '../public/toggleCross.png';
 import Link from 'next/link';
 
 function TopBar(): JSX.Element {
@@ -39,7 +39,9 @@ function TopBar(): JSX.Element {
                         <Image alt='search' src={Search} width={20} height={20} className='logoSearchBar' />
                         <input type={'text'} placeholder={'Search someone...'} className='searchBar' />
                     </div>
-                    <Image alt='avatar' src={Avatar} width={45} height={45} className='avatar' onClick={clickProfil}/>
+                    <div className='fill small'>
+                        <Image alt='avatar' src={Avatar} width={45} height={45}  onClick={clickProfil}/>
+                    </div>
                 </div>
             </div>
             <div className='d-md-none'>
@@ -60,7 +62,9 @@ function TopBar(): JSX.Element {
                             <Image alt='search' src={Search} width={15} height={15} className='logoSearchBar' />
                             <input type={'text'} placeholder={'Search someone...'} className='searchBar toggle' />
                         </div>
-                        <Image alt='avatar' src={Avatar} width={42} height={42} className='avatar'  onClick={clickProfil}/>
+                        <div className='fill small'>
+                            <Image alt='avatar' src={Avatar} width={42} height={42} onClick={clickProfil}/>
+                        </div>
                     </div>
                 </div>
 
@@ -71,7 +75,7 @@ function TopBar(): JSX.Element {
             <div className={openToggle? 'elementTopBar toggle avatarMenu open' : 'elementTopBar toggle avatarMenu'}>
                 <div className='playMenuContainer'>
                     <div className='playMenuEntity bar'>
-                    <Link href={{pathname:"./ProfilePage/Profil", query: {name:"userName"}} }style={{ textDecoration: 'none' }}><h3>profil</h3></Link>
+                    <Link href={{pathname:"/ProfilePage/Profil", query: {name:'userName'}} }style={{ textDecoration: 'none' }}><h3>profil</h3></Link>
                     </div>
                     <div className='playMenuEntity'>
                         <h3>logout</h3>

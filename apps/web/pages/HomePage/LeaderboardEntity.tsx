@@ -1,9 +1,8 @@
 import React from "react";
 import Image from 'next/image';
-import Avatar from '../../asset/Avatar.png';
-import Connect from '../../asset/statusConnect.png'
+import Connect from '../../public/statusConnect.png';
 
-export default function leaderboardEntity(props : {name : string, level: number, rank: number, status : string, key: number, handleClick : (e :{name: string, index: number})=>void }) : JSX.Element {
+export default function leaderboardEntity(props : {url: string, name : string, level: number, rank: number, status : string, key: number, handleClick : (e :{name: string, index: number})=>void }) : JSX.Element {
     
     let div1 : JSX.Element;
     let div2 : JSX.Element;
@@ -23,7 +22,9 @@ export default function leaderboardEntity(props : {name : string, level: number,
             <div className="shadowContainer">
                 <div className="cardContainer entity small" onClick={()=>props.handleClick({name: props.name, index:(props.rank - 1)})}>
                     <div className="cardContainer">
-                        <Image  alt='avatar' src={Avatar} width={42} height={42} className='avatar L' />
+                        <div className="fill small">
+                            <Image  alt='avatar' src={props.url} width={47} height={47} />
+                        </div>
                         <Image alt='status' src={Connect} width={20} height={20} className='statusImage'/>
                         <div className="entityText">
                             <h3>{props.name}</h3>
