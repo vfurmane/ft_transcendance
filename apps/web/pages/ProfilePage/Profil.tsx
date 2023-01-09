@@ -1,14 +1,25 @@
-import React from "react";
+import React , { useState } from "react";
 import TopBar from "../TopBar";
 import { useRouter } from "next/router";
 import Image from "next/image";
-import Avatar from '../../public/avatar/avatar-6.png';
 import MatchEntity from "../HomePage/MatchEntity";
+import { selectUserState } from "../../store/UserSlice";
+import { useSelector } from "react-redux";
 
-export default function Profil(props: { name: string }): JSX.Element {
+
+
+export default function Profil(): JSX.Element {
     const router = useRouter();
-    const { name } = router.query;
+    const [name, setName] = useState('');
+
     let listOfMatch = [];
+    const UserState  = useSelector(selectUserState);
+
+    if (router.query.name === '')
+        setName(UserState.name);
+    else if (typeof router.query.name !== 'undefined')
+        setName(router.query.name[0]);
+
 
     for (let i = 0; i < 22; i++) {
         listOfMatch.push(<MatchEntity url1={`/avatar/avatar-${Math.floor(Math.random() * 19) + 1}.png`} url2={`/avatar/avatar-${Math.floor(Math.random() * 19) + 1}.png`} name={'name' + (i + 1).toString()} score={5} key={i} />);

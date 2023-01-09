@@ -7,6 +7,8 @@ import MatchEntity from './MatchEntity';
 import LeaderboardEntity from './LeaderboardEntity';
 import ArrayDoubleColumn from './ArrayDoubleColumn';
 import PlayMenu from './PlayMenu';
+import { setUserState } from "../../store/UserSlice";
+import { useDispatch } from "react-redux";
 
 
 
@@ -14,7 +16,6 @@ function Home() : JSX.Element {
     let friendList : JSX.Element[] = [];
     let matchList : JSX.Element[] = [];
     let leaderboard : JSX.Element[] = [];
-
     const [openPlayButton, setOpenPlayButton] = useState(false);
     const [openFriendMenu, setOpenFriendMenu] = useState(false);
     const [openFriendMenuLeaderBrd, setOpenFriendMenuLeaderBrd] = useState(false);
@@ -23,6 +24,18 @@ function Home() : JSX.Element {
 
     const prevIndexOfFriendRef = useRef(0);
     const prevIndexOfFriendMenuLeaderBordRef = useRef(0);
+
+    const dispatch = useDispatch();
+
+    useEffect(() => {
+        dispatch(setUserState(
+            {
+                id: 'store is working',
+                name: 'max',
+                avatar_num: 1,
+                status: 'branchWithStore'
+            }))
+    },[])
 
     function handleClickPlayButton() : void {
         setOpenPlayButton(!openPlayButton);

@@ -75,7 +75,7 @@ function TopBar(): JSX.Element {
             <div className={openToggle? 'elementTopBar toggle avatarMenu open' : 'elementTopBar toggle avatarMenu'}>
                 <div className='playMenuContainer'>
                     <div className='playMenuEntity bar'>
-                    <Link href={{pathname:"/ProfilePage/Profil", query: {name:'userName'}} }style={{ textDecoration: 'none' }}><h3>profil</h3></Link>
+                    <Link href={{pathname:"/ProfilePage/Profil", query: {name:''}} }style={{ textDecoration: 'none' }}><h3>profil</h3></Link>
                     </div>
                     <div className='playMenuEntity'>
                         <h3>logout</h3>

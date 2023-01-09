@@ -1,8 +1,10 @@
 import '../styles/global.css';
 import Head from "next/head";
-import { AppProps } from 'next/app'
+import { AppProps } from 'next/app';
+import { wrapper } from "../store/store";
 
-export default function App({ Component, pageProps}: AppProps) : JSX.Element {
+
+function App({ Component, pageProps}: AppProps) : JSX.Element {
     return (
         <>
             <Head>
@@ -17,3 +19,5 @@ export default function App({ Component, pageProps}: AppProps) : JSX.Element {
         </>
         );
 }
+
+export default wrapper.withRedux(App);
