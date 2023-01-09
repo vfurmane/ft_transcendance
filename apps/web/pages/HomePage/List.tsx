@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
-import Message from '../../asset/message.png';
+import Message from '../../public/message.png';
 import Link from 'next/link';
 
 export default function List(props: { title: string, list: JSX.Element[], open?: boolean, name?: string, index?: number }): JSX.Element {
@@ -10,7 +10,7 @@ export default function List(props: { title: string, list: JSX.Element[], open?:
                                     <div className="cardContainer entity">
                                         <button className='buttonFriend'><Link href={{pathname:"../ProfilePage/Profil", query: {name: props.name}} }style={{ textDecoration: 'none' }}><h3>profil</h3></Link></button>
                                         <button className='buttonFriend'><Image alt='message' src={Message} width={30} height={30} /></button>
-                                        <button className='buttonFriend yellow'><h3>Play</h3></button>
+                                        <button className='buttonFriend'><h3>Play</h3></button>
                                     </div>
                                     <div className="entityShadow d-none d-sm-block"></div>
                                 </div>

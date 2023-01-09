@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 import Image from 'next/image';
-import Message from '../../asset/message.png';
+import Message from '../../public/message.png';
 import Link from 'next/link';
 
 
