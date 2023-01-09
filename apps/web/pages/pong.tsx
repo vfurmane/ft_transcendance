@@ -53,10 +53,10 @@ class Board {
 	createWall(n:number) {
 		let wall = [];
 		if (n == 2) {
-			wall.push(new Wall(this.createRect(0,0,this.boardCanvas.width,1))); // top wall
-			wall.push(new Wall(this.createRect(0,0,1,this.boardCanvas.height))); // left wall
-			wall.push(new Wall(this.createRect(0,this.boardCanvas.height,this.boardCanvas.width,1))); // bot wall
-			wall.push(new Wall(this.createRect(this.boardCanvas.width,0,-10,this.boardCanvas.height))); // right wall
+			wall.push(new Wall(this.createRect(0,0,this.boardCanvas.width,0.001))); // top wall
+			wall.push(new Wall(this.createRect(0,0,0.001,this.boardCanvas.height))); // left wall
+			wall.push(new Wall(this.createRect(0,this.boardCanvas.height,this.boardCanvas.width,0.001))); // bot wall
+			wall.push(new Wall(this.createRect(this.boardCanvas.width,0,-0.001,this.boardCanvas.height))); // right wall
 		} else {
 		}
 		return (wall);
@@ -77,7 +77,7 @@ class Board {
 		this.boardContext = this.boardCanvas.getContext('2d');
 		this.wall = this.createWall(this.boardType);
 		console.log(this.wall);
-		this.ball = new Ball(this.createRegularPolygon(new Point(window.innerWidth / 4, window.innerHeight / 4), 40, 6));
+		this.ball = new Ball(this.createRegularPolygon(new Point(window.innerWidth / 4, window.innerHeight / 4), 40, 5));
 		this.player = new Racket(this.createRect(10, window.innerHeight / 4, 40, 100));
 		this.cible = new Target(this.createRect(window.innerWidth / 3, window.innerHeight / 4, 20, 20));
 		window.addEventListener("keydown",function(e){
@@ -111,6 +111,8 @@ class Board {
 		this.ball.draw(this.boardContext);
 		this.ball.printPoint(this.boardContext, 0, 'red');
 		this.ball.printPoint(this.boardContext, this.ball.point.length -  1, 'green');
+		this.player.printPoint(this.boardContext, 1, 'red');
+		this.player.printPoint(this.boardContext, 2, 'green');
 		this.player.draw(this.boardContext);
 		this.cible.draw(this.boardContext);
 		this.ball.printPos(this.boardContext);
@@ -155,6 +157,10 @@ class Vector {
 	sub(other) {
 		return (new Vector(this.x - other.x, this.y - other.y));
 	}
+
+	crossProduct(other) {
+		return ((this.x * other.y) - (this.y * other.x))
+	}
 }
 
 class Point {
@@ -168,6 +174,24 @@ class Point {
 
 	vectorTo(other:Point) {
 		return (new Vector((other.x - this.x), (other.y - this.y)));
+	}
+
+	midSegment(other:Point) {
+		return (new Point((this.x + other.x)/2, (this.y + other.y)/2));
+	}
+
+	intersect(to1,from2,to2) {
+		let from1 = new Point(this.x, this.y);
+		let v1 = from1.vectorTo(to1);
+		let v2 = from2.vectorTo(to2);
+		console.log(from1, to1, from2, to2, v1, v2);
+		let vectorcentreraquettecentreball = from1.vectorTo(from2);
+		let cp = vectorcentreraquettecentreball.crossProduct(v2);
+		let othercp = v1.crossProduct(v2);
+		if (othercp == 0) {
+			return (null);
+		}
+		return (cp / othercp);
 	}
 }
 
@@ -200,6 +224,15 @@ class Entity {
 
 	gety() {
 		return (this.point[0].y);
+	}
+
+	center() {
+		if (this.point.length % 2) {
+			let tmp = this.point[0].midSegment(this.point[1]);
+			return (tmp.midSegment(this.point[Math.ceil(this.point.length/2)]));
+		} else {
+			return (this.point[0].midSegment(this.point[this.point.length/2]));
+		}
 	}
 
 	replaceTo(point:Point) {
@@ -338,7 +371,7 @@ class Ball extends Entity {
 
 	constructor(points) {
 		super(points);
-		this.speed = new Vector(1, 1);
+		this.speed = new Vector(2, 0);
 	}
 
 	DontHitWallX() {
@@ -349,54 +382,59 @@ class Ball extends Entity {
 		return (((this.point[0].y + this.speed.y) < ((window.innerHeight / 2) - 40)) && ((this.point[0].y + this.speed.y) > 0))
 	}
 
+	getFace(p1, p2) {
+		for (let i = 0; i < (this.point.length - 2); i++) {
+			if (this.point[i].intersect(this.point[i + 1], p1, p2) === null) {
+				return (this.point[i].midSegment(this.point[i + 1]));
+			}
+		}
+			return (this.point[this.point.length - 1].midSegment(this.point[0]));
+	}
+
 	update(racket:Racket, walls) {
 		if (this.sat(racket)) {
-			this.speed.x = -this.speed.x;
+			let angle = 0;
+			let face = this.getFace(racket.point[2], racket.point[1]);
+			let ratio = racket.point[2].intersect(racket.point[1], this.center(), face)
+			console.log(this.center());
+			console.log(this.point[2]);
+			console.log(this.point[3]);
+	//		console.log(this.point[0]);
+	//		console.log(this.point[5]);
+			console.log(face);
+			console.log(ratio);
+			if (ratio > 1)
+				ratio = 1;
+			if (ratio < 0)
+				ratio = 0;
+			angle = -(Math.PI/4 + (Math.PI/2 * (1 - ratio)));
+			let norm = racket.point[2].vectorTo(racket.point[1]).normalized();
+			[norm.x, norm.y] = [((norm.x * Math.cos(angle)) + (norm.y * Math.sin(angle))), (-(norm.x * Math.sin(angle)) + (norm.y * Math.cos(angle)))]
+			this.speed = new Vector(norm.x * this.speed.norm(), norm.y * this.speed.norm());	
 			this.moveTo(this.speed);
-			if (this.speed.x > 0) {
-				this.speed.x += 10;
-			} else {
-				this.speed.x -= 10;
-			}
 		} else {
-			if (this.speed.x > 0) {
-				this.speed.x = this.defaultSpeed;
-			} else {
-				this.speed.x = -this.defaultSpeed;
-			}
-			if (this.speed.y > 0) {
-				this.speed.y = this.defaultSpeed;
-			} else {
-				this.speed.y = -this.defaultSpeed;
-			}
-			if (this.getx() + this.speedx <= 0) {
-				Board.live--;
-				this.replaceTo(new Point(window.innerWidth / 4, window.innerHeight / 4));
-			}
-			if (this.DontHitWallX()) {
-			} else {
-				this.speed.x = -this.speed.x;
-			}
-			if (this.DontHitWallY()) {
-			} else {
-				this.speed.y = -this.speed.y;
-			}
 			for (let wall of walls) {
 				if (this.sat(wall)) {
-					console.log(this.speed);
-					let perp = wall.point[0].vectorTo(wall.point[2]).perp();
-					perp.y = 0;
-					perp = perp.normalized();
-					let tmp = this.speed.normalized();
-					let angle = (Math.PI - (Math.atan2(tmp.y,tmp.x) - Math.atan2(perp.y,perp.x))) % (Math.PI * 2);
-					angle *= 2;
-					console.log(angle * (180 / Math.PI));
-					console.log(tmp);
-					[tmp.x, tmp.y] = [((tmp.x * Math.cos(angle)) + (tmp.y * Math.sin(angle))), ((tmp.x * Math.sin(angle)) - (tmp.y * Math.cos(angle)))]
-					console.log(tmp);
+					let wallVector = wall.point[0].vectorTo(wall.point[2]);
+					let Norm = wallVector.norm() * this.speed.norm();
+					let angle = Math.acos(wallVector.product(this.speed)/Norm);
+					let tmp = new Vector(this.speed.x, this.speed.y);
+					let isAcute = angle <= (Math.PI / 2);
+					let outAngle = isAcute ?  angle * 2 : (Math.PI - angle) * 2;
+					let cosA = Math.cos(outAngle);
+					let sinA = Math.sin(outAngle);
+					[tmp.x, tmp.y] = [((this.speed.x * cosA) - (this.speed.y * sinA)), ((this.speed.x * sinA) + (this.speed.y * cosA))]
+					let angle2 = Math.acos(wallVector.product(tmp)/Norm);
+					if ((Math.abs(angle2 - angle) > 0.01)
+						|| (Math.abs(angle2 - (Math.PI / 2)) < 0.001 && (((this.speed.x > 0 && tmp.x > 0) || (this.speed.x < 0 && tmp.x < 0))
+							&&  ((this.speed.x > 0 && tmp.x > 0) || (this.speed.x < 0 && tmp.x < 0)))))
+					{
+						[tmp.x, tmp.y] = [((this.speed.x * cosA) - (this.speed.y * -sinA)), ((this.speed.x * -sinA) + (this.speed.y * cosA))]
+					}
 					this.speed = tmp//(wall.point[0].vectorTo(wall.point[2])).perp().normalized().sub(this.speed);
-				//	this.replaceTo(new Point(window.innerWidth / 4, window.innerHeight / 4));
-					console.log(this.speed);
+			//		this.replaceTo(new Point(window.innerWidth / 4, window.innerHeight / 4));
+			//		this.speed.x = 0;
+			//		this.speed.y = 0;
 				}
 			}
 			this.moveTo(this.speed);
@@ -405,21 +443,18 @@ class Ball extends Entity {
 }
 
 class Racket extends Entity {
-	private speed:number = 1;
-
 	constructor(points) {
 		super(points);
-		this.xspeed = this.speed;
-		this.yspeed = 0;
+		this.speed = new Vector(0, 1);
 	}
 
 	update(ball:Ball) {
 		if (Board.keyPressed[Key.UP] && Board.keyPressed[Key.DOWN]) {
 		} else 
 		if (Board.keyPressed[Key.UP]) {
-			this.moveTo(new Vector(0, -this.speed))
+			this.moveTo(new Vector(0, -this.speed.y))
 		} else if (Board.keyPressed[Key.DOWN]) {
-			this.moveTo(new Vector(0, this.speed))
+			this.moveTo(new Vector(0, this.speed.y))
 		}
 		if (this.gety() < 0)
 			this.replaceTo(new Point(this.getx(), 0))
