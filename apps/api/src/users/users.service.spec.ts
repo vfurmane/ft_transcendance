@@ -3,13 +3,12 @@ import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { AddUserDto } from './add-user.dto';
 import { User as UserEntity } from './user.entity';
-import { UsersService } from './users.service';
+import { AddUserData, UsersService } from './users.service';
 
 const name = faker.internet.userName();
 const email = faker.internet.email();
-const addUserDto: AddUserDto = {
+const addUserDto: AddUserData = {
   name,
   email,
 };

@@ -1,8 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { AddUserDto } from './add-user.dto';
 import { User } from './user.entity';
+
+export interface AddUserData {
+  name: string;
+  email: string;
+}
 
 @Injectable()
 export class UsersService {
@@ -17,7 +21,7 @@ export class UsersService {
     });
   }
 
-  async addUser(user: AddUserDto): Promise<User> {
+  async addUser(user: AddUserData): Promise<User> {
     const userEntity = new User();
     userEntity.email = user.email;
     userEntity.name = user.name;
