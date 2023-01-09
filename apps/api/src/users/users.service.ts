@@ -1,15 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User } from 'types';
 import { AddUserDto } from './add-user.dto';
-import { User as UserEntity } from './user.entity';
+import { User } from './user.entity';
 
 @Injectable()
 export class UsersService {
   constructor(
-    @InjectRepository(UserEntity)
-    private readonly usersRepository: Repository<UserEntity>,
+    @InjectRepository(User)
+    private readonly usersRepository: Repository<User>,
   ) {}
 
   async getByEmail(email: string): Promise<User | null> {
@@ -19,7 +18,7 @@ export class UsersService {
   }
 
   async addUser(user: AddUserDto): Promise<User> {
-    const userEntity = new UserEntity();
+    const userEntity = new User();
     userEntity.email = user.email;
     userEntity.name = user.name;
     userEntity.password = null;
