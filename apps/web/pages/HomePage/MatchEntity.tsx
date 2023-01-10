@@ -1,6 +1,6 @@
 import React from "react";
 import Image, { StaticImageData } from 'next/image';
-import Avatar from '../../asset/Avatar.png';
+
 
 export default function MatchEntity(props : {name : string, score: number, key: number, url1: string | StaticImageData,  url2: string | StaticImageData}) : JSX.Element {
     return (

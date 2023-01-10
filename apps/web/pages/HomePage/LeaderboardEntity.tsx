@@ -1,18 +1,25 @@
 import React from "react";
 import Image from 'next/image';
 import Connect from '../../public/statusConnect.png';
+import User from "../../interface/UserInterface";
 
-export default function leaderboardEntity(props : {url: string, name : string, level: number, rank: number, status : string, key: number, handleClick : (e :{name: string, index: number})=>void }) : JSX.Element {
+export default function leaderboardEntity(props : {user : User, level: number, rank: number, key: number, handleClick : (e :{user: User, index: number})=>void }) : JSX.Element {
     
     let div1 : JSX.Element;
     let div2 : JSX.Element;
 
+    let color = `rgb(${234 - ((props.rank) * 20)}, ${196 - ((props.rank - 1) * 20)}, ${53 - ((props.rank - 1) * 20)})`;
+
+    let style = {
+        backgroundColor: color
+    }
+
     if (props.rank && Number(props.rank.toString().slice(-1)) <= 5 && Number(props.rank.toString().slice(-1)) != 0)
     {
-        div1 = <div className="rank">{props.rank}</div>;
+        div1 = <div className="rank" style={style}>{props.rank}</div>;
         div2 = <div className="level">{props.level}</div>;
     } else {
-        div2 = <div className="rank">{props.rank}</div>;
+        div2 = <div className="rank" style={style}>{props.rank}</div>;
         div1 = <div className="level">{props.level}</div>;
     }
 
@@ -20,15 +27,16 @@ export default function leaderboardEntity(props : {url: string, name : string, l
         <div className="leaderBoardContainer">
             {div1}
             <div className="shadowContainer">
-                <div className="cardContainer entity small" onClick={()=>props.handleClick({name: props.name, index:(props.rank - 1)})}>
+                <div className="cardContainer entity small" onClick={()=>props.handleClick({user: props.user, index:(props.rank - 1)})}>
                     <div className="cardContainer">
                         <div className="fill small">
-                            <Image  alt='avatar' src={props.url} width={47} height={47} />
+                            <Image  alt='avatar' src={`/avatar/avatar-${props.user.avatar_num}.png`} width={47} height={47} />
                         </div>
-                        <Image alt='status' src={Connect} width={20} height={20} className='statusImage'/>
+                        {props.user.status === 'onligne' ? <Image alt='status' src={Connect} width={20} height={20} className='statusImage'/>
+                        : <></>}
                         <div className="entityText">
-                            <h3>{props.name}</h3>
-                            <p>{props.status}</p>
+                            <h3>{props.user.name}</h3>
+                            <p>{props.user.status}</p>
                         </div>
                     </div>
                 </div>

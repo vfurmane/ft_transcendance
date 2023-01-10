@@ -9,6 +9,7 @@ import ArrayDoubleColumn from './ArrayDoubleColumn';
 import PlayMenu from './PlayMenu';
 import { setUserState } from "../../store/UserSlice";
 import { useDispatch } from "react-redux";
+import User from '../../interface/UserInterface';
 
 
 
@@ -19,7 +20,7 @@ function Home() : JSX.Element {
     const [openPlayButton, setOpenPlayButton] = useState(false);
     const [openFriendMenu, setOpenFriendMenu] = useState(false);
     const [openFriendMenuLeaderBrd, setOpenFriendMenuLeaderBrd] = useState(false);
-    const [nameOfFriend, setNameOfFriend] = useState('');
+    const [friend, setFriend] = useState({id:'', name:'default', avatar_num:1, status:'default'})
     const [indexOfFriend, setIndexOfFriend] = useState(0);
 
     const prevIndexOfFriendRef = useRef(0);
@@ -31,9 +32,9 @@ function Home() : JSX.Element {
         dispatch(setUserState(
             {
                 id: 'store is working',
-                name: 'max',
-                avatar_num: 1,
-                status: 'branchWithStore'
+                name: 'maxence',
+                avatar_num: 6,
+                status: 'Store Ok'
             }))
     },[])
 
@@ -41,9 +42,9 @@ function Home() : JSX.Element {
         setOpenPlayButton(!openPlayButton);
     }
 
-    function handleClickFriendMenu( e : {name : string, index: number}) : void {
+    function handleClickFriendMenu( e : {user : User, index: number}) : void {
         setOpenFriendMenu(true);
-        setNameOfFriend(e.name);
+        setFriend(e.user);
         if (indexOfFriend === e.index)
             prevIndexOfFriendRef.current = indexOfFriend - 1;
         else
@@ -51,9 +52,9 @@ function Home() : JSX.Element {
         setIndexOfFriend( e.index);
     }
 
-    function handleClickFriendMenuLeaderBrd( e : {name : string, index: number}) : void {
+    function handleClickFriendMenuLeaderBrd( e : {user : User, index: number}) : void {
         setOpenFriendMenuLeaderBrd(true);
-        setNameOfFriend(e.name);
+        setFriend(e.user);
         if (indexOfFriend === e.index)
             prevIndexOfFriendMenuLeaderBordRef.current = indexOfFriend - 1;
         else
@@ -78,9 +79,9 @@ function Home() : JSX.Element {
 
     for (let i = 0; i < 22; i++)
     {
-        friendList.push(<FriendEntity url={`/avatar/avatar-${Math.floor(Math.random() * 19) + 1}.png`}  name={'name' + (i + 1).toString()} status='status' key={i} index={i}  handleClick={handleClickFriendMenu} />);
+        friendList.push(<FriendEntity user={{id:`${i + 1}`, avatar_num: Math.floor(Math.random() * 19) + 1, status:( Math.floor(Math.random() * 2)) === 0 ? 'onligne' : 'outligne', name : 'name' + (i + 1).toString()} }  key={i} index={i}  handleClick={handleClickFriendMenu} />);
         matchList.push(<MatchEntity url1={`/avatar/avatar-${Math.floor(Math.random() * 19) + 1}.png`} url2={`/avatar/avatar-${Math.floor(Math.random() * 19) + 1}.png`} name={'name' + (i + 1).toString()} score={5} key={i} />);
-        leaderboard.push(<LeaderboardEntity url={`/avatar/avatar-${Math.floor(Math.random() * 19) + 1}.png`}  name={'name' + (i + 1).toString()} level={420} rank={i + 1} status='status' key={i} handleClick={handleClickFriendMenuLeaderBrd}/>)
+        leaderboard.push(<LeaderboardEntity  user={{id:`${i + 1}`, avatar_num: Math.floor(Math.random() * 19) + 1, status:( Math.floor(Math.random() * 2)) === 0 ? 'onligne' : 'outligne', name : 'name' + (i + 1).toString()} } level={420} rank={i + 1} key={i} handleClick={handleClickFriendMenuLeaderBrd}/>)
     }
 
     return (
@@ -114,7 +115,7 @@ function Home() : JSX.Element {
                     </div>
                     <div className='row'>
                         <div className='col-10 offset-1 col-lg-4'>
-                            <List title='Friends List' list={friendList} open={openFriendMenu} name={nameOfFriend} index={indexOfFriend}/>
+                            <List title='Friends List' list={friendList} open={openFriendMenu} user={friend} index={indexOfFriend}/>
                         </div>
                         <div className='col-10 offset-1  offset-lg-0 col-lg-6'>
                             <List title='featuring' list={matchList} />
@@ -127,7 +128,7 @@ function Home() : JSX.Element {
                     </div>
                     <div className='row'>
                         <div className='col-10 offset-1'>
-                            <ArrayDoubleColumn title='leaderboard' list={leaderboard} open={openFriendMenuLeaderBrd}  name={nameOfFriend} index={indexOfFriend}/>
+                            <ArrayDoubleColumn title='leaderboard' list={leaderboard} open={openFriendMenuLeaderBrd}  user={friend} index={indexOfFriend}/>
                         </div>
                     </div>
                     <div className='row'>

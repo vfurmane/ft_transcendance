@@ -1,24 +1,30 @@
-import React , { useState } from "react";
+import React , { useEffect, useState } from "react";
 import TopBar from "../TopBar";
 import { useRouter } from "next/router";
 import Image from "next/image";
 import MatchEntity from "../HomePage/MatchEntity";
 import { selectUserState } from "../../store/UserSlice";
 import { useSelector } from "react-redux";
+import User from "../../interface/UserInterface";
 
 
 
 export default function Profil(): JSX.Element {
     const router = useRouter();
-    const [name, setName] = useState('');
+    const [user, setUser] = useState({id:'', name:'default', avatar_num:1, status:'default'});
+
 
     let listOfMatch = [];
-    const UserState  = useSelector(selectUserState);
+    let  UserState  = useSelector(selectUserState);
 
-    if (router.query.name === '')
-        setName(UserState.name);
-    else if (typeof router.query.name !== 'undefined')
-        setName(router.query.name[0]);
+    console.log(UserState);
+
+    useEffect( () => {
+        if (typeof router.query.user === 'string')
+            setUser(JSON.parse(router.query.user))
+    }, [router.query]);
+    
+        
 
 
     for (let i = 0; i < 22; i++) {
@@ -35,14 +41,15 @@ export default function Profil(): JSX.Element {
             <TopBar />
             <div className='container margin_top' >
                 <div className='row'>
-                    <div className='col-10 offset-1 col-sm-4 col-md-2' style={{ display: 'flex', justifyContent:'center', alignItems: 'center' }}>
+                    <div className='col-10 offset-1 col-sm-4 col-md-2' style={{ display: 'flex', justifyContent:'center', alignItems: 'center', flexDirection:'column'}}>
                         <div className="fill">
-                            <Image alt="avatar" src={'/avatar/avatar-6.png'} width={200} height={200} />
+                            <Image alt="avatar" src={`/avatar/avatar-${user.avatar_num}.png`} width={200} height={200} />
                         </div>
+                        <p>{user.status}</p>
                     </div>
                     <div className="col-10 offset-1  col-md-6 offset-md-0" style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center', marginTop: '50px', marginBottom: '50px', width: 'auto' }}>
                         <div>
-                            <h2 style={{ color: 'white', fontSize: '40px', marginBottom: '10px' }}>{name}</h2>
+                            <h2 style={{ color: 'white', fontSize: '40px', marginBottom: '10px' }}>{user.name}</h2>
                             <div style={{ display: 'flex', textAlign: 'center', justifyContent: 'flex-start', width: '60%', borderRadius: '8px', overflow: 'hidden' }}>
                                 <p style={{ color: 'white', backgroundColor: 'rgba(39,255,39,0.6)', width: `${(victory/(defeat + victory)) * 100}%`, padding: '5px' }}>{victory} victory</p>
                                 <p style={{ color: 'white', backgroundColor: 'rgba(255,0,0,0.6)', width: `${(defeat/(defeat + victory)) * 100}%`, padding: '5px' }}>{defeat} defeat</p>

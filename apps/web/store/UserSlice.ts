@@ -18,11 +18,21 @@ export const UserSlice = createSlice({
   initialState,
   reducers: {
 
-    // Action to set the authentication status
+    // Action to set the user
     setUserState(state, action) {
-      state = action.payload;
-    }
-  },
+      return action.payload;
+    },
+
+    // Special reducer for hydrating the state. Special case for next-redux-wrapper
+    extraReducers: {
+      [HYDRATE]: (state, action) => {
+        return {
+          ...state,
+          ...action.payload,
+        };
+      },
+    },
+  }
 });
 
 export const { setUserState } = UserSlice.actions;

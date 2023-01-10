@@ -1,16 +1,19 @@
 import React , {useState} from 'react';
 import Image from 'next/image'
 import Logo from '../public/Logo.png';
-import Avatar from '../public/avatar/avatar-11.png';
 import Search from '../public/Search.png';
 import ToggleBar from '../public/toggleBar.png';
 import ToggleCross from '../public/toggleCross.png';
 import Link from 'next/link';
+import { selectUserState } from "../store/UserSlice";
+import { useSelector } from "react-redux";
 
 function TopBar(): JSX.Element {
 
     const [openToggle, setOpenToggle] = useState(false);
     const [openProfil, setOpenProfil] = useState(false);
+
+    const UserState = useSelector(selectUserState);
 
     function clickToggle(){
         setOpenToggle(!openToggle);
@@ -29,7 +32,7 @@ function TopBar(): JSX.Element {
         <div className='containerTopBar'>
             <div className='d-none d-md-block'>
                 <div className='elementTopBar' >
-                    <Image alt='logo' src={Logo} width={200} height={30} />
+                    <Link href={'/HomePage/HomePage'}><Image alt='logo' src={Logo} width={200} height={30} /></Link>
                     <a className='leaderBoardLink' href='/leaderbord'>Learderbord</a>
                 </div>
             </div>
@@ -40,7 +43,7 @@ function TopBar(): JSX.Element {
                         <input type={'text'} placeholder={'Search someone...'} className='searchBar' />
                     </div>
                     <div className='fill small'>
-                        <Image alt='avatar' src={Avatar} width={45} height={45}  onClick={clickProfil}/>
+                        <Image alt='avatar' src={`/avatar/avatar-${UserState.avatar_num}.png`} width={45} height={45}  onClick={clickProfil}/>
                     </div>
                 </div>
             </div>
@@ -63,7 +66,7 @@ function TopBar(): JSX.Element {
                             <input type={'text'} placeholder={'Search someone...'} className='searchBar toggle' />
                         </div>
                         <div className='fill small'>
-                            <Image alt='avatar' src={Avatar} width={42} height={42} onClick={clickProfil}/>
+                            <Image alt='avatar' src={`/avatar/avatar-${UserState.avatar_num}.png`} width={42} height={42} onClick={clickProfil}/>
                         </div>
                     </div>
                 </div>
@@ -75,7 +78,7 @@ function TopBar(): JSX.Element {
             <div className={openToggle? 'elementTopBar toggle avatarMenu open' : 'elementTopBar toggle avatarMenu'}>
                 <div className='playMenuContainer'>
                     <div className='playMenuEntity bar'>
-                    <Link href={{pathname:"/ProfilePage/Profil", query: {name:''}} }style={{ textDecoration: 'none' }}><h3>profil</h3></Link>
+                    <Link href={{pathname:"/ProfilePage/Profil", query: {user : JSON.stringify(UserState)}} }style={{ textDecoration: 'none' }}><h3>profil</h3></Link>
                     </div>
                     <div className='playMenuEntity'>
                         <h3>logout</h3>
