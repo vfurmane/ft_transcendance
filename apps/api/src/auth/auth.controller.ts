@@ -90,9 +90,18 @@ export class AuthController {
     return user;
   }
 
-  @UseGuards(LocalAuthGuard)
+  @UseGuards(LocalAuthGuard, StatePostGuard)
   @Post('login')
-  async login(@User() user: UserEntity): Promise<AccessTokenResponse> {
+  async login(
+    @User() user: UserEntity,
+  ): Promise<AccessTokenResponse | TfaNeededResponse> {
+    if (user.tfa_setup) {
+      this.logger.log(
+        `${user.name} logged in using username:password, but TFA is needed`,
+      );
+      return { message: 'Authentication factor needed', route: 'tfa' };
+    }
+    this.logger.log(`${user.name} logged in using username:password`);
     return this.authService.login(user);
   }
 
