@@ -20,23 +20,24 @@ function Home() : JSX.Element {
     const [openPlayButton, setOpenPlayButton] = useState(false);
     const [openFriendMenu, setOpenFriendMenu] = useState(false);
     const [openFriendMenuLeaderBrd, setOpenFriendMenuLeaderBrd] = useState(false);
-    const [friend, setFriend] = useState({id:'', name:'default', avatar_num:1, status:'default'})
+    const [friend, setFriend] = useState({id:'', name:'', avatar_num: 1, status:'', victory: 0, defeat:0})
     const [indexOfFriend, setIndexOfFriend] = useState(0);
 
     const prevIndexOfFriendRef = useRef(0);
     const prevIndexOfFriendMenuLeaderBordRef = useRef(0);
 
     const dispatch = useDispatch();
-
     useEffect(() => {
         dispatch(setUserState(
             {
                 id: 'store is working',
                 name: 'maxence',
                 avatar_num: 6,
-                status: 'Store Ok'
+                status: 'Store Ok',
+                victory: 200,
+                defeat: 70
             }))
-    },[])
+    },[dispatch])
 
     function handleClickPlayButton() : void {
         setOpenPlayButton(!openPlayButton);
@@ -62,7 +63,6 @@ function Home() : JSX.Element {
         setIndexOfFriend(e.index);
     }
 
-
     function close() :void {
         if (openPlayButton)
             setOpenPlayButton(!openPlayButton);
@@ -79,9 +79,9 @@ function Home() : JSX.Element {
 
     for (let i = 0; i < 22; i++)
     {
-        friendList.push(<FriendEntity user={{id:`${i + 1}`, avatar_num: Math.floor(Math.random() * 19) + 1, status:( Math.floor(Math.random() * 2)) === 0 ? 'onligne' : 'outligne', name : 'name' + (i + 1).toString()} }  key={i} index={i}  handleClick={handleClickFriendMenu} />);
+        friendList.push(<FriendEntity user={{id:`${i + 1}`, avatar_num: Math.floor(Math.random() * 19) + 1, status:( Math.floor(Math.random() * 2)) === 0 ? 'onligne' : 'outligne', name : 'name' + (i + 1).toString(), victory: Math.floor(Math.random() * 1000), defeat: Math.floor(Math.random() * 1000)}}  key={i} index={i}  handleClick={handleClickFriendMenu} />);
         matchList.push(<MatchEntity url1={`/avatar/avatar-${Math.floor(Math.random() * 19) + 1}.png`} url2={`/avatar/avatar-${Math.floor(Math.random() * 19) + 1}.png`} name={'name' + (i + 1).toString()} score={5} key={i} />);
-        leaderboard.push(<LeaderboardEntity  user={{id:`${i + 1}`, avatar_num: Math.floor(Math.random() * 19) + 1, status:( Math.floor(Math.random() * 2)) === 0 ? 'onligne' : 'outligne', name : 'name' + (i + 1).toString()} } level={420} rank={i + 1} key={i} handleClick={handleClickFriendMenuLeaderBrd}/>)
+        leaderboard.push(<LeaderboardEntity  user={{id:`${i + 1}`, avatar_num: Math.floor(Math.random() * 19) + 1, status:( Math.floor(Math.random() * 2)) === 0 ? 'onligne' : 'outligne', name : 'name' + (i + 1).toString(), victory: Math.floor(Math.random() * 1000), defeat: Math.floor(Math.random() * 1000)} } level={420} rank={i + 1} key={i} handleClick={handleClickFriendMenuLeaderBrd}/>)
     }
 
     return (

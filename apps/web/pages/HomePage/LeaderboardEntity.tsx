@@ -5,10 +5,13 @@ import User from "../../interface/UserInterface";
 
 export default function leaderboardEntity(props : {user : User, level: number, rank: number, key: number, handleClick : (e :{user: User, index: number})=>void }) : JSX.Element {
     
+    if (typeof props.user === 'undefined')
+        return <></>;
+
     let div1 : JSX.Element;
     let div2 : JSX.Element;
 
-    let color = `rgb(${234 - ((props.rank) * 20)}, ${196 - ((props.rank - 1) * 20)}, ${53 - ((props.rank - 1) * 20)})`;
+    let color = `rgb(${234 - ((props.rank) * 15)}, ${196 - ((props.rank - 1) * 5)}, ${53 - ((props.rank - 1) * 2)})`;
 
     let style = {
         backgroundColor: color
@@ -23,7 +26,7 @@ export default function leaderboardEntity(props : {user : User, level: number, r
         div1 = <div className="level">{props.level}</div>;
     }
 
-    return (
+   return (
         <div className="leaderBoardContainer">
             {div1}
             <div className="shadowContainer">
@@ -44,7 +47,9 @@ export default function leaderboardEntity(props : {user : User, level: number, r
             </div>
             {div2}
         </div>
+        );
+ 
         
-    );
+   
     
 }

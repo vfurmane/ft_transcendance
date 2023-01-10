@@ -6,6 +6,8 @@ import User from "../../interface/UserInterface";
 
 
 export default function FriendEntity (props : {user : User, key: number, index: number, handleClick: (e : {user: User, index: number})=>void}) : JSX.Element {
+    if (typeof props.user === 'undefined')
+        return <></>;
     return (
         <div className="shadowContainer">
             <div className="cardContainer entity" onClick={()=>props.handleClick({user: props.user, index:props.index})}>

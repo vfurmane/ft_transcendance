@@ -22,8 +22,7 @@ export default function ArrayDoubleColumn(props : {title: string, list : JSX.Ele
         {
             setColumnNum((prev)=>prev + 2);
             setPageNum((prev)=>prev + 1);
-        }
-            
+        }   
     }
 
 

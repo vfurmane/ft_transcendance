@@ -8,7 +8,9 @@ const initialState : User = {
   id: '123',
   name : 'max',
   avatar_num: 3,
-  status: 'online'
+  status: 'online',
+  victory: 0,
+  defeat: 0
 };
 
 
@@ -21,17 +23,17 @@ export const UserSlice = createSlice({
     // Action to set the user
     setUserState(state, action) {
       return action.payload;
-    },
+    }
 
     // Special reducer for hydrating the state. Special case for next-redux-wrapper
-    extraReducers: {
+    /*extraReducers: {
       [HYDRATE]: (state, action) => {
         return {
           ...state,
-          ...action.payload,
+          ...action.payload.auth,
         };
       },
-    },
+    },*/
   }
 });
 
