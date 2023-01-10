@@ -10,6 +10,7 @@ import {
 import { Exclude, Expose } from 'class-transformer';
 import { Message } from './message.entity';
 import { ConversationRole } from './conversationRole.entity';
+import { Jwt } from './jwt.entity';
 
 @Exclude()
 @Entity()
@@ -54,4 +55,7 @@ export class User {
     (conversationRole) => conversationRole.user,
   )
   conversationRoles!: ConversationRole[];
+  
+  @OneToMany(() => Jwt, (jwt) => jwt.user)
+  jwts!: Jwt[];
 }

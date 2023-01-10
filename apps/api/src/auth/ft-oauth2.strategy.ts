@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, VerifyCallback } from 'passport-oauth2';
-import { UsersService } from 'src/users/users.service';
+import { UsersService } from '../users/users.service';
 import { User } from 'types';
 import { AuthService } from './auth.service';
 

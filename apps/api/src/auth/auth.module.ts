@@ -13,6 +13,7 @@ import { JwtStrategy } from './jwt.strategy';
 import { State } from 'types';
 import ftOauth2Configuration from '../config/ft-oauth2';
 import { LocalStrategy } from './local.strategy';
+import { Jwt } from 'types';
 
 @Module({
   imports: [
@@ -31,7 +32,8 @@ import { LocalStrategy } from './local.strategy';
       }),
     }),
     PassportModule,
-    TypeOrmModule.forFeature([State]),
+    TypeOrmModule.forFeature([State, Jwt]),
+    forwardRef(() => UsersModule),
   ],
   providers: [
     AuthService,

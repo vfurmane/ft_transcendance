@@ -70,10 +70,10 @@ export class AuthController {
     description:
       'The authentication failed (`code` or `state` may be invalid).',
   })
-  ftCallback(
+  async ftCallback(
     @User() user: UserEntity,
     @State() state: StateEntity,
-  ): AccessTokenResponse | TfaNeededResponse {
+  ): Promise<AccessTokenResponse | TfaNeededResponse> {
     if (user.tfa_setup) {
       this.logger.log(`${user.name} logged in using OAuth2, but TFA is needed`);
       return { message: 'Authentication factor needed', route: 'tfa' };
