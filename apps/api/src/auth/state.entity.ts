@@ -25,6 +25,7 @@ export class State {
   @Column('varchar', { length: 255, unique: true })
   token!: string;
 
+  @Exclude()
   @ManyToOne(() => User, (user) => user.states, {
     eager: true,
   })
