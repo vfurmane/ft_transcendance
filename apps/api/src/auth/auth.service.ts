@@ -1,4 +1,10 @@
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import {
+  BadRequestException,
+  forwardRef,
+  Inject,
+  Injectable,
+  Logger,
+} from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { AxiosError } from 'axios';
 import { catchError, firstValueFrom, throwError } from 'rxjs';
@@ -12,7 +18,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { State } from './state.entity';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
-import { RegisterUserDto } from 'src/users/register-user.dto';
+import { RegisterUserDto } from '../users/register-user.dto';
+import { Jwt } from './jwt.entity';
 
 @Injectable()
 export class AuthService {
@@ -22,9 +29,13 @@ export class AuthService {
     private readonly statesRepository: Repository<State>,
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
+    @InjectRepository(Jwt)
+    private readonly jwtsRepository: Repository<Jwt>,
     private readonly httpService: HttpService,
     private readonly jwtService: JwtService,
     private readonly logger: Logger,
+
+    @Inject(forwardRef(() => UsersService))
     private readonly usersService: UsersService,
   ) {}
 
@@ -70,10 +81,26 @@ export class AuthService {
     return null;
   }
 
-  login(user: User, state?: State): AccessTokenResponse {
+  async validateJwt(user: User, payload: JwtPayload): Promise<User | null> {
+    //Check if jwt exist in db (in case of revocation)
+    const jwt = await this.jwtsRepository.findOneBy({ id: payload.jti });
+    if (!jwt) return null;
+
+    return user;
+  }
+
+
+  async login(user: User, state?: State): Promise<AccessTokenResponse> {
+    const jwtEntity = new Jwt();
+    jwtEntity.user = user;
+    await this.jwtsRepository.save(jwtEntity).then((jwt) => {
+      jwtEntity.id = jwt.id;
+    });
+
     const payload: JwtPayload = {
       sub: user.id,
       name: user.name,
+      jti: jwtEntity.id,
     };
     if (state) {
       this.statesRepository.delete({ token: state.token });

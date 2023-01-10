@@ -17,11 +17,7 @@ export interface TfaNeededResponse {
 export interface JwtPayload {
   sub: string;
   name: string;
-}
-
-export interface JwtPayload {
-  sub: string;
-  name: string;
+  jti: string;
 }
 
 export interface unreadMessagesResponse
