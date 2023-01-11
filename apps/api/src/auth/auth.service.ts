@@ -69,12 +69,12 @@ export class AuthService {
     if (state === null) {
       state = new State();
       state.token = stateToken;
-      if (user)
-        state.user = await this.usersRepository.findOneBy({
-          id: user.id,
-        });
-      await this.statesRepository.save(state);
     }
+    if (user && (!state.user || user.id !== state.user.id))
+      state.user = await this.usersRepository.findOneBy({
+        id: user.id,
+      });
+    await this.statesRepository.save(state);
     return state;
   }
 
