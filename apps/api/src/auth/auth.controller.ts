@@ -55,7 +55,7 @@ export class AuthController {
   ) {}
 
   @Get('/login/oauth2/42')
-  @UseGuards(StateGetGuard, FtOauth2AuthGuard)
+  @UseGuards(FtOauth2AuthGuard, StateGetGuard)
   @ApiOperation({
     summary:
       'Authenticate the user against the 42 Authorization Server (managed by Passport).',
