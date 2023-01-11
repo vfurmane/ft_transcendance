@@ -1,11 +1,12 @@
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
+import { AccessTokenResponse, TfaNeededResponse } from "types";
 import { Loading } from "../../../components/Loading";
 
 async function exchangeCodeForToken(
   code: string,
   state?: string
-): Promise<string | null> {
+): Promise<AccessTokenResponse | TfaNeededResponse | null> {
   const response = await fetch(
     `${
       process.env.NEXT_PUBLIC_API_BASE_URL
@@ -22,8 +23,8 @@ async function exchangeCodeForToken(
       return response.json();
     }
   });
-  if (response && response.access_token) return response.access_token;
-  return null;
+  if (!response) return null;
+  return response;
 }
 
 export default function FtOauth2(): JSX.Element {
@@ -41,13 +42,20 @@ export default function FtOauth2(): JSX.Element {
       return;
     }
     exchangeCodeForToken(code, state)
-      .then((accessToken) => {
-        if (accessToken) {
-          setMessage("Success! Redirecting...");
-          localStorage.setItem("access_token", accessToken);
-          router.replace("/");
-        } else {
+      .then((response) => {
+        if (response === null) {
           throw new Error("An unexpected error occured...");
+        } else {
+          if ("access_token" in response && response.access_token) {
+            setMessage("Success! Redirecting...");
+            localStorage.setItem("access_token", response.access_token);
+            router.replace("/");
+          } else if (
+            "message" in response &&
+            response.message === "Authentication factor needed"
+          ) {
+            router.replace(`/auth/${response.route}`);
+          }
         }
       })
       .catch((error) => {
