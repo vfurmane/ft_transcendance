@@ -18,9 +18,9 @@ enum Form{
 	HEX = 6
 }
 
-class Board {
-	private	playerNumber = 1;
-	private	boardType = Form.REC;
+class Game {
+	private	isSolo = false;
+	private	boardType = Form.PEN;
 	private	boardCanvasRef;
 	private	boardCanvas;
 	private	boardContext;
@@ -52,26 +52,34 @@ class Board {
 		return (points);
 	}
 
-	createWall(n:number) {
-		let wall = [];
-		if (n == 2) {
-			wall.push(new Wall(new Point(0,0), new Point(this.boardCanvas.width,0))); // top wall
-			wall.push(new Wall(new Point(0,this.boardCanvas.height), new Point(0,0))); // left wall
-			wall.push(new Wall(new Point(this.boardCanvas.width,this.boardCanvas.height), new Point(0,this.boardCanvas.height))); // bot wall
-			wall.push(new Wall(new Point(this.boardCanvas.width,0), new Point(this.boardCanvas.width,this.boardCanvas.height))); // right wall
-		//	wall.push(new Wall(new Point(this.boardCanvas.width/2, 0), new Point(this.boardCanvas.width, this.boardCanvas.height / 2)));
-		//	wall.push(new Wall(new Point(this.boardCanvas.width, this.boardCanvas.height/2), new Point(this.boardCanvas.width/2, this.boardCanvas.height)));
-		//	wall.push(new Wall(new Point(this.boardCanvas.width/2, this.boardCanvas.height), new Point(0, this.boardCanvas.height / 2)));
-		//	wall.push(new Wall(new Point(0, this.boardCanvas.height / 2), new Point(this.boardCanvas.width / 2, 0)));
+
+	createRacket(isSolo,wall) {
+		if (isSolo) {
+			return ([new Racket(this.createRect(10, this.boardCanvas.height / 2, 10, 40))]);
 		} else {
-
-		}
-		return (wall);
-	}
-
-	createRacket(n:number) {
-		if (n == 1) {
-			return ([new Racket(this.createRect(10, this.boardCanvas.height / 2, 40, 100))/*, new Racket(this.createRect(this.boardCanvas.width - 10, this.boardCanvas.height / 2 + 100, -40, -100)), new Racket([new Point(this.boardCanvas.width/2+100, 10), new Point(this.boardCanvas.width/2+100, 50), new Point(this.boardCanvas.width/2,50), new Point(this.boardCanvas.width/2,10)]), new Racket([new Point(this.boardCanvas.width/2, this.boardCanvas.height - 10), new Point(this.boardCanvas.width/2, this.boardCanvas.height - 50), new Point(this.boardCanvas.width/2 + 100,this.boardCanvas.height - 50), new Point(this.boardCanvas.width/2 + 100,this.boardCanvas.height - 10)])*/]);
+			let racket = [];
+			let j = wall.length - 1;
+			let wallDir = wall[j].point[0].vectorTo(wall[j].point[2]).normalized();
+			let wallPerp = wallDir.perp().normalized();
+			let wallCenter = wall[j].center();
+			let racketCenter = new Point(wallCenter.x + (wallPerp.x * 5), wallCenter.y + (wallPerp.y * 5));
+			let p3 = new Point((racketCenter.x - (wallDir.x * 40)), (racketCenter.y - (wallDir.y * 40)))
+			let p0 = new Point((racketCenter.x + (wallDir.x * 40)), (racketCenter.y + (wallDir.y * 40)))
+			let p1 = new Point((p0.x + (wallPerp.x * 10)), (p0.y + (wallPerp.y * 10)))
+			let p2 = new Point((p3.x + (wallPerp.x * 10)), (p3.y + (wallPerp.y * 10)))
+			racket.push(new Racket([p0, p1, p2, p3]));
+			for (let i = 0; i < wall.length - 1; i++) {
+				let wallDir = wall[i].point[0].vectorTo(wall[i].point[2]).normalized();
+				let wallPerp = wallDir.perp().normalized();
+				let wallCenter = wall[i].center();
+				let racketCenter = new Point(wallCenter.x + (wallPerp.x * 5), wallCenter.y + (wallPerp.y * 5));
+				let p3 = new Point((racketCenter.x - (wallDir.x * 40)), (racketCenter.y - (wallDir.y * 40)))
+				let p0 = new Point((racketCenter.x + (wallDir.x * 40)), (racketCenter.y + (wallDir.y * 40)))
+				let p1 = new Point((p0.x + (wallPerp.x * 10)), (p0.y + (wallPerp.y * 10)))
+				let p2 = new Point((p3.x + (wallPerp.x * 10)), (p3.y + (wallPerp.y * 10)))
+				racket.push(new Racket([p0, p1, p2, p3]));
+			}
+			return (racket/*[new Racket(this.createRect(10, this.boardCanvas.height / 2, 10, 40))]*/);
 		}
 	}
 
@@ -90,58 +98,118 @@ class Board {
 		this.boardContext = this.boardCanvas.getContext('2d');
 		this.boardCanvas.width = window.innerWidth * 0.9;
 		this.boardCanvas.height = window.innerHeight * 0.9;
-		this.board = new Entity(this.createRegularPolygon(new Point(10, 0), this.boardCanvas.height * 1, 3));
-		this.wall = this.createWall(this.boardType);
-		this.ball = new Ball(this.createRegularPolygon(new Point(this.boardCanvas.width / 2, this.boardCanvas.height / 2), 40, 4));
-		this.player = this.createRacket(this.playerNumber);
-		this.cible = new Target(this.createRect(this.boardCanvas.width * (2 / 3), this.boardCanvas.height / 2, 20, 20));
+		this.board = new Board(this.boardType, this.boardCanvas);
+		if (this.boardType != Form.REC) {
+			this.player = this.createRacket(this.isSolo, this.board.wall);
+			this.ball = new Ball(this.createRegularPolygon(this.board.board.center(), (30), this.boardType));
+		} else {
+			this.player = this.createRacket(this.isSolo, [this.board.wall[1], this.board.wall[3]]);
+			this.ball = new Ball(this.createRect(this.board.board.center().x, this.board.board.center().y, 10, 10));
+		}
+		if (this.isSolo)
+			this.cible = new Target(this.createRect(this.boardCanvas.width * (2 / 3), this.boardCanvas.height / 2, 20, 20));
 		window.addEventListener("keydown",function(e){
-			Board.keyPressed[e.which] = true;
+			Game.keyPressed[e.which] = true;
 		});
 		window.addEventListener("keyup",function(e){
-			Board.keyPressed[e.which] = false;
+			Game.keyPressed[e.which] = false;
 		});
 	}
 
-	updateBoard() {
+	updateGame() {
 		this.boardCanvas.width = window.innerWidth * 0.9
 		this.boardCanvas.height = window.innerHeight * 0.9
 
 		this.boardContext.fillStyle = "#666666"
-		this.boardContext.fillRect(0, 0, this.boardCanvas.width, this.boardCanvas.height)
+		this.board.board.draw(this.boardContext, 'gray');
+		//this.boardContext.fillRect(0, 0, this.boardCanvas.width, this.boardCanvas.height)
 		this.boardContext.font = "14px sherif"
 		this.boardContext.fillStyle = "#000000"
 		this.boardContext.fillText(Math.round(this.countUpdate / (Math.round((Date.now() - this.start) / 1000))) + " Print from class Board : " + this.boardCanvas.width + " " + this.boardCanvas.height, 0 , 10)
 		this.boardContext.font = "50px sherif";
-		this.boardContext.fillText(Board.point, this.boardCanvas.width / 2, 50)
+		this.boardContext.fillText(Game.point, this.boardCanvas.width / 2, 50)
 		this.boardContext.fillText(Math.round((Date.now() - this.start) / 1000), this.boardCanvas.width / 2, 110)
 		this.boardContext.font = "20px sherif";
-		for (let i:number = 0; i < Board.live; i++) {
+		for (let i:number = 0; i < Game.live; i++) {
 			this.boardContext.fillText("❤️", (this.boardCanvas.width / 2) + (25 * i), 160)
 		}
 		this.countUpdate++;
-		this.ball.update(this.player, this.wall);
+		this.ball.update(this.player, this.board.wall);
 		for (let p of this.player)
-			p.update(this.ball, this.wall);
-		this.cible.update(this.ball, this.boardCanvas);
-		for (let wall of this.wall) {
+			p.update(this.ball, this.board.wall);
+		if (this.isSolo)
+			this.cible.update(this.ball, this.boardCanvas);
+		for (let wall of this.board.wall) {
 			wall.draw(this.boardContext);
 		}
 		this.ball.draw(this.boardContext);
-		this.ball.printPoint(this.boardContext, 0, 'red');
-		this.ball.printPoint(this.boardContext, this.ball.point.length -  1, 'green');
+	//	this.ball.printPoint(this.boardContext, 0, 'red');
+	//	this.ball.printPoint(this.boardContext, this.ball.point.length -  1, 'green');
+		this.player[0].draw(this.boardContext, 'blue');
 		for (let p of this.player) {
-			p.draw(this.boardContext);
-			p.printPoint(this.boardContext, 1, 'red');
-			p.printPoint(this.boardContext, 2, 'green');
+			if (p != this.player[0])
+				p.draw(this.boardContext);
+			p.printPoint(this.boardContext, 0, 'red');
+			p.printPoint(this.boardContext, 3, 'green');
 		}
-		this.cible.draw(this.boardContext);
-		if (Board.live == 0) {
-			Board.point = 0;
-			Board.live = 3;
+		if (this.isSolo)
+			this.cible.draw(this.boardContext);
+		if (Game.live == 0) {
+			Game.point = 0;
+			Game.live = 3;
 			this.start = Date.now();
 		}
-		this.board.draw(this.boardContext);
+	}
+}
+
+class Board {
+	private	board;
+	private	wall;
+
+	constructor(boardType, canvas) {
+		let height = 0;
+		let size = 1;
+		if (boardType == Form.HEX || boardType == Form.PEN) {
+			height = canvas.height / 4;
+			size = 0.5;
+		}
+		if (boardType != Form.REC)
+			this.board = new Entity(/*this.createRect(0, 0, canvas.width, canvas.height)*/this.createRegularPolygon(new Point(0, height), canvas.height * size, boardType));
+		else
+			this.board = new Entity(this.createRect(0, 0, canvas.width, canvas.height));
+		this.wall = this.createWall(this.board);
+	}
+
+	createRegularPolygon(point:Point,side:number,n:number) {
+		let points = [];
+		let angle = (-(360 - ((n - 2)*180)/n) * (Math.PI / 180))
+		points[0] = new Point(point.x, point.y);
+		let vector = point.vectorTo(new Point(points[0].x, points[0].y - side));
+		for (let i:number = 0; i < n - 1; i++) {
+			points[i + 1] = new Point(points[i].x, points[i].y);
+			[vector.x, vector.y] = [-((vector.x * Math.cos(angle)) + (vector.y * Math.sin(angle))), ((vector.x * Math.sin(angle)) - (vector.y * Math.cos(angle)))]
+			points[i + 1].x += vector.x;
+			points[i + 1].y += vector.y;
+		}
+		return (points);
+	}
+
+	createRect(x:number,y:number,w:number,h:number) {
+		let point = [];
+		point[0] = new Point(x,y);
+		point[1] = new Point(x+w,y);
+		point[2] = new Point(x+w,y+h);
+		point[3] = new Point(x,y+h);
+		return point;
+	}
+
+	createWall(board:Entity) {
+		let wall = [];
+		for (let i = 0; i < board.point.length - 1; i++) {
+			wall.push(new Wall(board.point[i], board.point[i + 1]));
+		}
+		wall.push(new Wall(board.point[board.point.length - 1], board.point[0]));
+		return (wall);
 	}
 }
 
@@ -207,8 +275,8 @@ class Point {
 		let vectorcentreraquettecentreball = from1.vectorTo(from2);
 		let cp = vectorcentreraquettecentreball.crossProduct(v2);
 		let othercp = v1.crossProduct(v2);
-		if (othercp == 0) {
-			return (null);
+		if (othercp === 0) {
+			return (0);
 		}
 		return (cp / othercp);
 	}
@@ -312,16 +380,18 @@ class Entity {
 		return true;
 	}
 
-	draw(context){
+	draw(context,color){
+		if (color === undefined)
+			color = 'white'
 		context.beginPath();
 		context.moveTo(this.getx(), this.gety());
 		for (let point of this.point) {
 			context.lineTo(point.x, point.y);
 		}
 		context.closePath();
-		context.strokeStyle = 'white'
+		context.strokeStyle = color
 		context.stroke();
-		context.fillStyle = 'white'
+		context.fillStyle = color
 		context.fill();
 	}
 
@@ -383,40 +453,45 @@ class Target extends Entity {
 
 	update(ball:Ball, canvas) {
 		if (this.sat(ball)/*this.collision(ball)*/) {
-			Board.point++;
+			Game.point++;
 			this.replaceTo(new Point(this.randomVal(canvas.width / 2, (canvas.width - 30)), this.randomVal(30, ((canvas.height) - 30))));
 		}
 	}
 }
 
 class Ball extends Entity {
-	private defaultSpeed:number = 8;
+	private defaultSpeed:number = 3;
 
 	constructor(points) {
 		super(points);
-		this.speed = new Vector(1 * this.defaultSpeed, 1 * this.defaultSpeed);
+		let dir = (new Vector(Math.random() - Math.random(), Math.random() - Math.random())).normalized();
+		this.speed = new Vector(dir.x * this.defaultSpeed, dir.y * this.defaultSpeed);
 	}
 
-	getFace(p1, p2) {
-		for (let i = 0; i < (this.point.length - 2); i++) {
-			if (this.point[i].intersect(this.point[i + 1], p1, p2) === null) {
-				return (this.point[i].midSegment(this.point[i + 1]));
-			}
+	isParallel(from1, to1, from2, to2)
+	{
+		let v1 = from1.vectorTo(to1);
+		let v2 = from2.vectorTo(to2);
+		return (v1.crossProduct(v2));
+	}
+
+	getFace(n) {
+		if (n) {
+			return (this.point[n - 1].midSegment(this.point[n]));
 		}
-			return (this.point[this.point.length - 1].midSegment(this.point[0]));
+		return (this.point[this.point.length - 1].midSegment(this.point[0]));
 	}
 
 	update(rackets:Racket, walls) {
 		for (let racket of rackets) {
 			if (this.sat(racket)) {
 				let angle = 0;
-				let face = this.getFace(racket.point[2], racket.point[1]);
+				let face = this.getFace(rackets.indexOf(racket));
 				let ratio = racket.point[2].intersect(racket.point[1], this.center(), face)
 				if (ratio > 1)
 					ratio = 1;
 				if (ratio < 0)
 					ratio = 0;
-				console.log(ratio);
 				angle = -(Math.PI/4 + (Math.PI/2 * (1 - ratio)));
 				let norm = racket.point[2].vectorTo(racket.point[1]).normalized();
 				[norm.x, norm.y] = [((norm.x * Math.cos(angle)) + (norm.y * Math.sin(angle))), (-(norm.x * Math.sin(angle)) + (norm.y * Math.cos(angle)))]
@@ -439,22 +514,11 @@ class Ball extends Entity {
 				let angle2 = Math.acos(wallVector.product(tmp)/Norm);
 				if (Math.abs(angle2 - angle) > 0.001)
 				{
-					console.error("Picking second solution");
 					[tmp.x, tmp.y] = [((this.speed.x * cosA) - (this.speed.y * -sinA)), ((this.speed.x * -sinA) + (this.speed.y * cosA))]
 				}
-				else
-					console.error("Keeping first solution");
-				console.error("Picked  vector: ", tmp);
 				this.speed = tmp
-				console.log("speedball",this.speed);
-			//	(wall.point[0].vectorTo(wall.point[2])).perp().normalized().sub(this.speed);
-			//	this.replaceTo(new Point(window.innerWidth / 4, window.innerHeight / 4));
-			//	this.speed.x = 0;
-			//	this.speed.y = 0;
-				console.log("p0",this.point[0].x,this.point[0].y);
 				this.moveTo(this.speed);
 				this.moveTo(this.speed);
-				console.log("p0",this.point[0].x,this.point[0].y);
 				return ;
 			}
 		}
@@ -463,7 +527,7 @@ class Ball extends Entity {
 }
 
 class Racket extends Entity {
-	private defaultSpeed:number = 3;
+	private defaultSpeed:number = 4;
 	private dir;
 	constructor(points) {
 		super(points);
@@ -472,16 +536,16 @@ class Racket extends Entity {
 	}
 
 	update(ball:Ball,walls) {
-		if (Board.keyPressed[Key.UP] && Board.keyPressed[Key.DOWN]) {
+		if (Game.keyPressed[Key.UP] && Game.keyPressed[Key.DOWN]) {
 		} else 
-		if (Board.keyPressed[Key.UP]) {
+		if (Game.keyPressed[Key.UP]) {
 			this.speed = new Vector(this.dir.x * this.defaultSpeed, this.dir.y * this.defaultSpeed)
 			this.moveTo(this.speed);
-		} else if (Board.keyPressed[Key.DOWN]) {
+		} else if (Game.keyPressed[Key.DOWN]) {
 			this.speed = new Vector(-this.dir.x * this.defaultSpeed, -this.dir.y * this.defaultSpeed)
 			this.moveTo(this.speed);
 		}
-/*		if (this.center().vectorTo(ball.point[0]).norm() > (new Point(this.center().x + this.dir.x * this.defaultSpeed, this.center().y + this.dir.y * this.defaultSpeed)).vectorTo(ball.point[0]).norm()) {
+		if (this.center().vectorTo(ball.point[0]).norm() > (new Point(this.center().x + this.dir.x * this.defaultSpeed, this.center().y + this.dir.y * this.defaultSpeed)).vectorTo(ball.point[0]).norm()) {
 			this.speed = new Vector(this.dir.x * this.defaultSpeed, this.dir.y * this.defaultSpeed)
 			this.moveTo(this.speed);
 		}
@@ -489,7 +553,7 @@ class Racket extends Entity {
 			this.speed = new Vector(-this.dir.x * this.defaultSpeed, -this.dir.y * this.defaultSpeed)
 			this.moveTo(this.speed);
 		}
-*/		for (let wall of walls) {
+		for (let wall of walls) {
 			if (this.sat(wall)) {
 				this.moveTo(new Vector(-this.speed.x, -this.speed.y))
 			}
@@ -499,9 +563,9 @@ class Racket extends Entity {
 
 const Canvas = props => {
 	const canvasRef = useRef(null);
-	let game = new Board();
+	let game = new Game();
 	function handleResize() {
-		game.updateBoard();
+		game.updateGame();
 		requestAnimationFrame(handleResize);
 	}
 
