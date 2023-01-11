@@ -9,7 +9,10 @@ import ArrayDoubleColumn from './ArrayDoubleColumn';
 import PlayMenu from './PlayMenu';
 import { setUserState } from "../../store/UserSlice";
 import { useDispatch } from "react-redux";
-import User from '../../interface/UserInterface';
+import User , { initUser } from '../../interface/UserInterface';
+import Link from 'next/link';
+import ChatBar from '../chatBar';
+
 
 
 
@@ -20,7 +23,7 @@ function Home() : JSX.Element {
     const [openPlayButton, setOpenPlayButton] = useState(false);
     const [openFriendMenu, setOpenFriendMenu] = useState(false);
     const [openFriendMenuLeaderBrd, setOpenFriendMenuLeaderBrd] = useState(false);
-    const [friend, setFriend] = useState({id:'', name:'', avatar_num: 1, status:'', victory: 0, defeat:0})
+    const [friend, setFriend] = useState(initUser)
     const [indexOfFriend, setIndexOfFriend] = useState(0);
 
     const prevIndexOfFriendRef = useRef(0);
@@ -34,7 +37,7 @@ function Home() : JSX.Element {
                 name: 'maxence',
                 avatar_num: 6,
                 status: 'Store Ok',
-                victory: 200,
+                victory: 1000,
                 defeat: 70
             }))
     },[dispatch])
@@ -79,13 +82,13 @@ function Home() : JSX.Element {
 
     for (let i = 0; i < 22; i++)
     {
-        friendList.push(<FriendEntity user={{id:`${i + 1}`, avatar_num: Math.floor(Math.random() * 19) + 1, status:( Math.floor(Math.random() * 2)) === 0 ? 'onligne' : 'outligne', name : 'name' + (i + 1).toString(), victory: Math.floor(Math.random() * 1000), defeat: Math.floor(Math.random() * 1000)}}  key={i} index={i}  handleClick={handleClickFriendMenu} />);
+        friendList.push(<FriendEntity del={true} user={{id:`${i + 1}`, avatar_num: Math.floor(Math.random() * 19) + 1, status:( Math.floor(Math.random() * 2)) === 0 ? 'onligne' : 'outligne', name : 'name' + (i + 1).toString(), victory: Math.floor(Math.random() * 1000), defeat: Math.floor(Math.random() * 1000)}}  key={i} index={i}  handleClick={handleClickFriendMenu} />);
         matchList.push(<MatchEntity url1={`/avatar/avatar-${Math.floor(Math.random() * 19) + 1}.png`} url2={`/avatar/avatar-${Math.floor(Math.random() * 19) + 1}.png`} name={'name' + (i + 1).toString()} score={5} key={i} />);
         leaderboard.push(<LeaderboardEntity  user={{id:`${i + 1}`, avatar_num: Math.floor(Math.random() * 19) + 1, status:( Math.floor(Math.random() * 2)) === 0 ? 'onligne' : 'outligne', name : 'name' + (i + 1).toString(), victory: Math.floor(Math.random() * 1000), defeat: Math.floor(Math.random() * 1000)} } level={420} rank={i + 1} key={i} handleClick={handleClickFriendMenuLeaderBrd}/>)
     }
 
     return (
-        <div onClick={()=>close()} >
+        <div onClick={()=>close()} id={'top'} >
             <TopBar/>
             <div className='illustration d-none d-lg-block'></div>
             <div className='container ' > 
@@ -115,10 +118,14 @@ function Home() : JSX.Element {
                     </div>
                     <div className='row'>
                         <div className='col-10 offset-1 col-lg-4'>
-                            <List title='Friends List' list={friendList} open={openFriendMenu} user={friend} index={indexOfFriend}/>
+                            <div className='card'>
+                                 <List title='Friends List' list={friendList} open={openFriendMenu} user={friend} index={indexOfFriend}/>
+                            </div>
                         </div>
                         <div className='col-10 offset-1  offset-lg-0 col-lg-6'>
-                            <List title='featuring' list={matchList} />
+                            <div className='card'>
+                                 <List title='featuring' list={matchList} />
+                            </div>
                         </div>
                     </div>
                     <div className='row'>
@@ -127,17 +134,17 @@ function Home() : JSX.Element {
                         </div>
                     </div>
                     <div className='row'>
-                        <div className='col-10 offset-1'>
+                        <div className='col-10 offset-1' id='leaderBoard'>
                             <ArrayDoubleColumn title='leaderboard' list={leaderboard} open={openFriendMenuLeaderBrd}  user={friend} index={indexOfFriend}/>
                         </div>
                     </div>
                     <div className='row'>
                         <div className='col-4 offset-4'>
-                            <p className='textCenter'>Go back to top</p>
+                            <Link href={'#top'} className='textCenter'><p>Go back to top</p></Link>
                         </div>
                     </div>
-                </div>
-            
+            </div>
+            <ChatBar/>
         </div>  
     );
 }

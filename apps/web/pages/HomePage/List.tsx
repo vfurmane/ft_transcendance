@@ -17,10 +17,15 @@ export default function List(props: { title: string, list: JSX.Element[], open?:
                                     <div className="entityShadow d-none d-sm-block"></div>
                                 </div>
     }
-      return (
-            <div className='card'>
-                <h2>{props.title}</h2>
+    return (
+        <div>
+            <h2>{props.title}</h2>
+            <div className='cardList'>
                 {props.list}
             </div>
-        );
+            
+        </div>
+           
+       
+    );
 }

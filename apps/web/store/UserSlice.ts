@@ -23,7 +23,7 @@ export const UserSlice = createSlice({
     // Action to set the user
     setUserState(state, action) {
       return action.payload;
-    }
+    },
 
     // Special reducer for hydrating the state. Special case for next-redux-wrapper
     /*extraReducers: {
@@ -33,7 +33,7 @@ export const UserSlice = createSlice({
           ...action.payload.auth,
         };
       },
-    },*/
+    }*/
   }
 });
 
