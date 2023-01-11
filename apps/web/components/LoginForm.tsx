@@ -5,6 +5,8 @@ import { TextDivider } from "../components/TextDivider";
 import styles from "styles/LoginForm.module.scss";
 import crypto from "crypto";
 import { FtOAuth2Button } from "./FtOAuth2Button";
+import { useRouter } from "next/router";
+import { AccessTokenResponse, TfaNeededResponse } from "types";
 
 interface LoginFormData {
   username: string;
@@ -19,7 +21,10 @@ function obtainState(): string {
   return state;
 }
 
-async function login(data: LoginFormData): Promise<string | null> {
+async function login(
+  data: LoginFormData,
+  state: string
+): Promise<AccessTokenResponse | TfaNeededResponse | null> {
   const response = await fetch(
     `${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/login`,
     {
@@ -27,7 +32,7 @@ async function login(data: LoginFormData): Promise<string | null> {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(data),
+      body: JSON.stringify({ ...data, state }),
     }
   ).then(async (response) => {
     if (!response.ok) {
@@ -38,11 +43,12 @@ async function login(data: LoginFormData): Promise<string | null> {
       return response.json();
     }
   });
-  if (response && response.access_token) return response.access_token;
-  return null;
+  if (!response) return null;
+  return response;
 }
 
 export function LoginForm(): ReactElement {
+  const router = useRouter();
   const [state, setState] = useState("");
   const [formError, setFormError] = useState("");
   const [formSuccess, setFormSuccess] = useState("");
@@ -58,14 +64,22 @@ export function LoginForm(): ReactElement {
     setFormSuccess("");
     setLoading(true);
 
-    await login(data)
-      .then((accessToken) => {
-        if (accessToken === null) {
+    await login(data, state)
+      .then((response) => {
+        if (response === null) {
           throw new Error("An unexpected error occured...");
         } else {
-          localStorage.setItem("access_token", accessToken);
-          setFormSuccess("Success! Redirecting...");
-          return;
+          if ("access_token" in response && response.access_token) {
+            setFormSuccess("Success! Redirecting...");
+            localStorage.setItem("access_token", response.access_token);
+            localStorage.removeItem("state");
+            router.replace("/");
+          } else if (
+            "message" in response &&
+            response.message === "Authentication factor needed"
+          ) {
+            router.replace(`/auth/${response.route}`);
+          }
         }
       })
       .catch((error) => {
