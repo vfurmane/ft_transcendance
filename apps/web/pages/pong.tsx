@@ -20,7 +20,7 @@ enum Form{
 
 class Game {
 	private	isSolo = false;
-	private	boardType = Form.PEN;
+	private	boardType = Form.REC;
 	private	boardCanvasRef;
 	private	boardCanvas;
 	private	boardContext;
@@ -34,6 +34,7 @@ class Game {
 	public static keyPressed: [] = [];
 	private	start = Date.now();
 	private	wall:Wall = [];
+	private	color = ['blue', 'red', 'orange', 'white', 'pink', 'black']
 
 	constructor() {
 	}
@@ -67,7 +68,10 @@ class Game {
 			let p0 = new Point((racketCenter.x + (wallDir.x * 40)), (racketCenter.y + (wallDir.y * 40)))
 			let p1 = new Point((p0.x + (wallPerp.x * 10)), (p0.y + (wallPerp.y * 10)))
 			let p2 = new Point((p3.x + (wallPerp.x * 10)), (p3.y + (wallPerp.y * 10)))
-			racket.push(new Racket([p0, p1, p2, p3]));
+			if (this.player === undefined)
+				racket.push(new Racket(0, [p0, p1, p2, p3], this.color[0]));
+			else
+				racket.push(new Racket(0, [p0, p1, p2, p3], this.player[0].color));
 			for (let i = 0; i < wall.length - 1; i++) {
 				let wallDir = wall[i].point[0].vectorTo(wall[i].point[2]).normalized();
 				let wallPerp = wallDir.perp().normalized();
@@ -77,7 +81,10 @@ class Game {
 				let p0 = new Point((racketCenter.x + (wallDir.x * 40)), (racketCenter.y + (wallDir.y * 40)))
 				let p1 = new Point((p0.x + (wallPerp.x * 10)), (p0.y + (wallPerp.y * 10)))
 				let p2 = new Point((p3.x + (wallPerp.x * 10)), (p3.y + (wallPerp.y * 10)))
-				racket.push(new Racket([p0, p1, p2, p3]));
+				if (this.player === undefined)
+					racket.push(new Racket(i + 1, [p0, p1, p2, p3], this.color[i + 1]));
+				else
+					racket.push(new Racket(i + 1, [p0, p1, p2, p3], this.player[i + 1].color));
 			}
 			return (racket/*[new Racket(this.createRect(10, this.boardCanvas.height / 2, 10, 40))]*/);
 		}
@@ -120,9 +127,24 @@ class Game {
 		this.boardCanvas.width = window.innerWidth * 0.9
 		this.boardCanvas.height = window.innerHeight * 0.9
 
+		for (let p of this.player) {
+			if (p.hp == 0) {
+				if (this.boardType == Form.REC)
+					return ;
+				this.player.splice(p.index, 1);
+				for (let i = 0; i < this.player.length; i++) {
+					if (this.player[i].index > p.index) {
+						this.player[i].index--;
+					}
+				}
+				console.log(this.player);
+				this.boardType--;
+				this.init(this.boardCanvasRef);
+			}
+		}
+
 		this.boardContext.fillStyle = "#666666"
 		this.board.board.draw(this.boardContext, 'gray');
-		//this.boardContext.fillRect(0, 0, this.boardCanvas.width, this.boardCanvas.height)
 		this.boardContext.font = "14px sherif"
 		this.boardContext.fillStyle = "#000000"
 		this.boardContext.fillText(Math.round(this.countUpdate / (Math.round((Date.now() - this.start) / 1000))) + " Print from class Board : " + this.boardCanvas.width + " " + this.boardCanvas.height, 0 , 10)
@@ -143,14 +165,11 @@ class Game {
 			wall.draw(this.boardContext);
 		}
 		this.ball.draw(this.boardContext);
-	//	this.ball.printPoint(this.boardContext, 0, 'red');
-	//	this.ball.printPoint(this.boardContext, this.ball.point.length -  1, 'green');
-		this.player[0].draw(this.boardContext, 'blue');
 		for (let p of this.player) {
-			if (p != this.player[0])
-				p.draw(this.boardContext);
+			p.draw(this.boardContext, p.color);
 			p.printPoint(this.boardContext, 0, 'red');
 			p.printPoint(this.boardContext, 3, 'green');
+			this.boardContext.fillText(p.hp, this.boardCanvas.width / 1.2, 50 + (20 * p.index));
 		}
 		if (this.isSolo)
 			this.cible.draw(this.boardContext);
@@ -460,7 +479,7 @@ class Target extends Entity {
 }
 
 class Ball extends Entity {
-	private defaultSpeed:number = 3;
+	private defaultSpeed:number = 4;
 
 	constructor(points) {
 		super(points);
@@ -519,6 +538,13 @@ class Ball extends Entity {
 				this.speed = tmp
 				this.moveTo(this.speed);
 				this.moveTo(this.speed);
+				let index = walls.indexOf(wall);
+				console.log(index);
+				if (index === walls.length - 1)
+					index = 0;
+				else
+					index++;
+				rackets[index].hp--;
 				return ;
 			}
 		}
@@ -527,31 +553,40 @@ class Ball extends Entity {
 }
 
 class Racket extends Entity {
-	private defaultSpeed:number = 4;
+	private defaultSpeed:number = 3;
+	private hp = 3;
+	private index;
 	private dir;
-	constructor(points) {
+	private	color;
+
+	constructor(index, points, color) {
 		super(points);
+		this.index = index;
+		this.color = color;
 		this.dir = this.point[2].vectorTo(this.point[1]).normalized()
 		this.speed = new Vector(this.dir.x * this.defaultSpeed, this.dir.y * this.defaultSpeed);
 	}
 
 	update(ball:Ball,walls) {
-		if (Game.keyPressed[Key.UP] && Game.keyPressed[Key.DOWN]) {
-		} else 
-		if (Game.keyPressed[Key.UP]) {
-			this.speed = new Vector(this.dir.x * this.defaultSpeed, this.dir.y * this.defaultSpeed)
-			this.moveTo(this.speed);
-		} else if (Game.keyPressed[Key.DOWN]) {
-			this.speed = new Vector(-this.dir.x * this.defaultSpeed, -this.dir.y * this.defaultSpeed)
-			this.moveTo(this.speed);
-		}
-		if (this.center().vectorTo(ball.point[0]).norm() > (new Point(this.center().x + this.dir.x * this.defaultSpeed, this.center().y + this.dir.y * this.defaultSpeed)).vectorTo(ball.point[0]).norm()) {
-			this.speed = new Vector(this.dir.x * this.defaultSpeed, this.dir.y * this.defaultSpeed)
-			this.moveTo(this.speed);
-		}
-		else {
-			this.speed = new Vector(-this.dir.x * this.defaultSpeed, -this.dir.y * this.defaultSpeed)
-			this.moveTo(this.speed);
+		if (this.index == 0) {
+			if (Game.keyPressed[Key.UP] && Game.keyPressed[Key.DOWN]) {
+			} else 
+			if (Game.keyPressed[Key.UP]) {
+				this.speed = new Vector(this.dir.x * this.defaultSpeed, this.dir.y * this.defaultSpeed)
+				this.moveTo(this.speed);
+			} else if (Game.keyPressed[Key.DOWN]) {
+				this.speed = new Vector(-this.dir.x * this.defaultSpeed, -this.dir.y * this.defaultSpeed)
+				this.moveTo(this.speed);
+			}
+		} else {
+			if (this.center().vectorTo(ball.point[0]).norm() > (new Point(this.center().x + this.dir.x * this.defaultSpeed, this.center().y + this.dir.y * this.defaultSpeed)).vectorTo(ball.point[0]).norm()) {
+				this.speed = new Vector(this.dir.x * this.defaultSpeed, this.dir.y * this.defaultSpeed)
+				this.moveTo(this.speed);
+			}
+			else {
+				this.speed = new Vector(-this.dir.x * this.defaultSpeed, -this.dir.y * this.defaultSpeed)
+				this.moveTo(this.speed);
+			}
 		}
 		for (let wall of walls) {
 			if (this.sat(wall)) {
