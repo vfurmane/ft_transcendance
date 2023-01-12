@@ -21,3 +21,15 @@ export interface JwtPayload {
   sub: string;
   name: string;
 }
+
+export interface unreadMessagesResponse
+{
+  totalNumberOfUnreadMessages: number;
+  UnreadMessage: unreadMessages[];
+}
+
+export interface unreadMessages {
+  conversationId: string;
+  name: string;
+  numberOfUnreadMessages: number;
+}

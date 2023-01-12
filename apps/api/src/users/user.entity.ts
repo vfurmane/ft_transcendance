@@ -7,31 +7,34 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Exclude } from 'class-transformer';
+import { Exclude, Expose } from 'class-transformer';
+import { Message } from 'src/conversations/entities/message.entity';
+import { ConversationRole } from 'src/conversations/entities/conversationRole.entity';
 
+@Exclude()
 @Entity()
 export class User {
+  @Expose()
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
-  @Exclude()
   @CreateDateColumn()
   created_at!: Date;
 
-  @Exclude()
   @UpdateDateColumn()
   updated_at!: Date;
 
+  @Expose()
   @OneToMany(() => State, (state) => state.user)
   states!: State[];
 
   @Column('varchar', { length: 255, unique: true })
   email!: string;
 
+  @Expose()
   @Column('varchar', { length: 30, unique: true })
   name!: string;
 
-  @Exclude()
   @Column('varchar', { length: 255, nullable: true })
   password!: string | null;
 
@@ -40,4 +43,12 @@ export class User {
 
   @Column('boolean', { default: false })
   tfa_setup!: boolean;
+
+  @Expose()
+  @OneToMany(()=> Message, (message) => message.sender)
+  messages!: Message[];
+
+  @Expose()
+  @OneToMany(() => ConversationRole, (conversationRole) => conversationRole.user)
+  conversationRoles!: ConversationRole[]; 
 }

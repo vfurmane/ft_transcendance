@@ -95,6 +95,7 @@ export class AuthController {
   async login(
     @User() user: UserEntity,
   ): Promise<AccessTokenResponse | TfaNeededResponse> {
+    console.error("Trying to log in");
     if (user.tfa_setup) {
       this.logger.log(
         `${user.name} logged in using username:password, but TFA is needed`,
