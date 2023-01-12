@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import Image from 'next/image';
 import Achivement from "../../interface/AchivementInterface";
+import styles from 'styles/entity.module.scss';
+import textStyles from 'styles/text.module.scss';
 
 
 
@@ -8,17 +10,17 @@ export default function AchivementEntity(props : {achivement: Achivement , key: 
     if (typeof props.achivement === 'undefined')
         return <></>;
     return (
-        <div className="shadowContainer">
-            <div className="cardContainer entity" onClick={()=>props.handleClick({achivement: props.achivement})}>
-                <div className="avatarText">
+        <div className={styles.shadowContainer}>
+            <div className={`${styles.entityContainer} ${styles.entity}`} onClick={()=>props.handleClick({achivement: props.achivement})}>
+                <div className={styles.imageText}>
                         <Image  alt='avatar' src={`/achivement.png`} width={32} height={32} style={{marginLeft:'10px'}}/>
-                    <div className="entityText">
-                        <h3>{props.achivement.name}</h3>
-                        <p>{props.achivement.status}</p>
+                    <div className={styles.entityText}>
+                        <h3 className={textStyles.laquer}>{props.achivement.name}</h3>
+                        <p className={textStyles.saira}> {props.achivement.status}</p>
                     </div>
                 </div>
             </div>
-            <div className="entityShadow d-none d-md-block"></div>
+            <div className={`${styles.entityShadow} d-none d-md-block`}></div>
         </div>
     );
 }

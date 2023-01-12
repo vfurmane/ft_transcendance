@@ -3,6 +3,10 @@ import Image from 'next/image';
 import Message from '../../public/message.png';
 import Link from 'next/link';
 import User from '../../interface/UserInterface';
+import styles from 'styles/leaderBoard.module.scss';
+import textStyle from 'styles/text.module.scss';
+import entityStyles from 'styles/entity.module.scss';
+
 
 export default function ArrayDoubleColumn(props : {title: string, list : JSX.Element[], open ?: boolean, user?: User, index?: number}):  JSX.Element {
     const [columnNum, setColumnNum] = useState(1);
@@ -25,20 +29,19 @@ export default function ArrayDoubleColumn(props : {title: string, list : JSX.Ele
         }   
     }
 
-
     function getColumn(num: number) : JSX.Element[]{
 
         if (props.open &&  typeof(props.index) !== 'undefined')
         {
             props.list[props.index] = 
-                <div className="leaderBoardContainer">
-                    <div className="shadowContainer">
-                        <div className="cardContainer entity">
-                            <button className='buttonFriend'> <Link href={{pathname:"../ProfilePage/Profil", query: {user: JSON.stringify(props.user)}} }style={{ textDecoration: 'none' }}><h3>profil</h3></Link></button>
-                            <button className='buttonFriend'><Image alt='message' src={Message} width={30} height={30} /></button>
-                            <button className='buttonFriend yellow'><h3>Play</h3></button>
+                <div className={styles.leaderBoardContainer}>
+                    <div className={entityStyles.shadowContainer}>
+                        <div className={`${entityStyles.entityContainer} ${entityStyles.entity}`}>
+                            <button className={entityStyles.buttonEntity}> <Link href={{pathname:"../ProfilePage/Profil", query: {user: JSON.stringify(props.user)}} }style={{ textDecoration: 'none' }}><h3 className={textStyle.laquer}>profil</h3></Link></button>
+                            <button className={entityStyles.buttonEntity}><Image alt='message' src={Message} width={30} height={30} /></button>
+                            <button className={entityStyles.buttonEntity}><h3 className={textStyle.laquer}>Play</h3></button>
                         </div>
-                        <div className="entityShadow d-none d-sm-block"></div>
+                        <div className={`${entityStyles.entityShadow} d-none d-sm-block`}></div>
                     </div>
                 </div>
             
@@ -54,9 +57,9 @@ export default function ArrayDoubleColumn(props : {title: string, list : JSX.Ele
     }
     
     return (
-        <div className='card leaderBoard'>
+        <div className={`card ${styles.leaderBoard}`}>
             <h2>{props.title}</h2>
-            <div className='leaderBoardDoubleColumn'>
+            <div className={styles.leaderBoardDoubleColumn}>
                 <div>
                     {getColumn(columnNum)}
                 </div>
@@ -64,12 +67,12 @@ export default function ArrayDoubleColumn(props : {title: string, list : JSX.Ele
                     {getColumn(columnNum + 1)}
                 </div>
             </div>
-            <div className='shadowContainer'>
-                <h3 className='L' onClick={()=>prevClick()}>{'<'}</h3>
-                <h3 className='L'>{pageNum }</h3>
-                <h3 className='L'>of</h3>
-                <h3 className='L'>{typeof(props.list) !== 'undefined' ? Math.ceil(props.list.length / 10) : ''}</h3>
-                <h3 onClick={()=>nextClick()}>{'>'}</h3>
+            <div className={entityStyles.shadowContainer}>
+                <h3 className={textStyle.laquer} onClick={()=>prevClick()}>{'<'}</h3>
+                <h3 className={textStyle.laquer}>{pageNum }</h3>
+                <h3 className={textStyle.laquer}>of</h3>
+                <h3 className={textStyle.laquer}>{typeof(props.list) !== 'undefined' ? Math.ceil(props.list.length / 10) : ''}</h3>
+                <h3 className={textStyle.laquer} onClick={()=>nextClick()}>{'>'}</h3>
             </div>
             
         </div>

@@ -1,5 +1,5 @@
 import React, {useEffect, useRef, useState} from 'react';
-import TopBar from '../TopBar';
+import TopBar from '../topBar/TopBar';
 import PlayButton  from './PlayButton';
 import List  from './List';
 import FriendEntity from './FriendEntity';
@@ -11,7 +11,10 @@ import { setUserState } from "../../store/UserSlice";
 import { useDispatch } from "react-redux";
 import User , { initUser } from '../../interface/UserInterface';
 import Link from 'next/link';
-import ChatBar from '../chatBar';
+import ChatBar from '../chatBar/chatBar';
+import playButtonStyles from 'styles/playButton.module.scss';
+import textStyles from 'styles/text.module.scss';
+
 
 
 
@@ -107,10 +110,10 @@ function Home() : JSX.Element {
                         </div>
                         {openPlayButton ? 
                         <div className='col-10 offset-1 offset-xl-0 offset-lg-1 col-lg-3 offset-xl-1 '>
-                            <div className='playMenuContainer d-block d-lg-none'>
+                            <div className={`{${playButtonStyles.playMenuContainer} d-block d-lg-none`}>
                                 <PlayMenu/>
                             </div> 
-                            <div className='playMenuContainer marge_top d-none d-lg-block'>
+                            <div className={`{${playButtonStyles.playMenuContainer} ${playButtonStyles.marge_top} d-none d-lg-block`}>
                                 <PlayMenu/>
                             </div> 
                         </div>
@@ -130,7 +133,7 @@ function Home() : JSX.Element {
                     </div>
                     <div className='row'>
                         <div className='col-8 offset-2'>
-                            <h3 className='text'>These guy are the best pong player of the world ... we are so pround of them !!</h3>
+                            <h3 className={`text ${textStyles.laquer}`}>These guy are the best pong player of the world ... we are so pround of them !!</h3>
                         </div>
                     </div>
                     <div className='row'>
@@ -140,7 +143,7 @@ function Home() : JSX.Element {
                     </div>
                     <div className='row'>
                         <div className='col-4 offset-4'>
-                            <Link href={'#top'} className='textCenter'><p>Go back to top</p></Link>
+                            <Link href={'#top'} style={{ textDecoration:'none'}}><p className={textStyles.saira} style={{textAlign:'center', marginTop:'50px'}}>Go back to top</p></Link>
                         </div>
                     </div>
             </div>

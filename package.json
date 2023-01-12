@@ -21,7 +21,8 @@
     "node": ">=14.0.0"
   },
   "dependencies": {
-    "passport-jwt": "^4.0.1"
+    "passport-jwt": "^4.0.1",
+    "sass": "^1.57.1"
   },
   "packageManager": "npm@8.19.2"
 }

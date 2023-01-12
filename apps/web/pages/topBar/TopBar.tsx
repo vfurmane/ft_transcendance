@@ -1,14 +1,15 @@
 import React , {use, useEffect, useState} from 'react';
 import Image from 'next/image'
-import Logo from '../public/Logo.png';
-import Search from '../public/Search.png';
-import ToggleBar from '../public/toggleBar.png';
-import ToggleCross from '../public/toggleCross.png';
+import Logo from '../../public/Logo.png';
+import Search from '../../public/Search.png';
+import ToggleBar from '../../public/toggleBar.png';
+import ToggleCross from '../../public/toggleCross.png';
 import Link from 'next/link';
-import { selectUserState } from "../store/UserSlice";
+import { selectUserState } from "../../store/UserSlice";
 import { useSelector } from "react-redux";
-import User, { initUser } from '../interface/UserInterface';
-import FriendEntity from './HomePage/FriendEntity';
+import FriendEntity from '../HomePage/FriendEntity';
+import styles from 'styles/topBar.module.scss';
+import textStyles from 'styles/text.module.scss';
 
 function TopBar(): JSX.Element {
 
@@ -42,18 +43,18 @@ function TopBar(): JSX.Element {
     }
 
     return (
-        <div className='containerTopBar'>
+        <div className={styles.containerTopBar}>
             <div className='d-none d-md-block'>
-                <div className='elementTopBar' >
+                <div className={styles.elementTopBar} >
                     <Link href={'/HomePage/HomePage'}><Image alt='logo' src={Logo} width={200} height={30} /></Link>
-                    <Link className='leaderBoardLink' href='/HomePage/HomePage#leaderBoard'>Learderbord</Link>
+                    <Link className={styles.leaderBoardLink} href='/HomePage/HomePage#leaderBoard'>Learderbord</Link>
                 </div>
             </div>
             <div className='d-none d-md-block '>
-                <div className='elementTopBar'>
+                <div className={styles.elementTopBar}>
                     <div >
-                        <Image alt='search' src={Search} width={20} height={20} className='logoSearchBar' />
-                        <input type={'text'} placeholder={'Search someone...'} className='searchBar'  value={value} onChange={(e)=> changeValue(e.target.value)}/>
+                        <Image alt='search' src={Search} width={20} height={20} className={styles.logoSearchBar} />
+                        <input type={'text'} placeholder={'Search someone...'} className={styles.searchBar}  value={value} onChange={(e)=> changeValue(e.target.value)}/>
                     </div>
                     <div className='fill small'>
                         <Image alt='avatar' src={`/avatar/avatar-${UserState.avatar_num}.png`} width={45} height={45}  onClick={clickProfil}/>
@@ -61,12 +62,12 @@ function TopBar(): JSX.Element {
                 </div>
             </div>
             <div className='d-md-none'>
-                <div className='elementTopBar' >
+                <div className={styles.elementTopBar} >
                     <Link href={'/HomePage/HomePage'}><Image alt='logo' src={Logo} width={170} height={20} /></Link>
                 </div>
             </div>
             <div className='d-md-none'>
-                <div className='elementTopBar toggle' onClick={clickToggle} >
+                <div className={`${styles.elementTopBar}  ${styles.toggle}`} onClick={clickToggle} >
                     {!openToggle ? 
                     <Image alt='toggle' src={ToggleBar} width={35} height={35}/> :
                     <Image alt='toggle' src={ToggleCross} width={35} height={35}/>}
@@ -75,8 +76,8 @@ function TopBar(): JSX.Element {
                 <div>
                     <div className='elementTopBar toggle menu'>
                         <div>
-                            <Image alt='search' src={Search} width={15} height={15} className='logoSearchBar' />
-                            <input type={'text'} placeholder={'Search someone...'} className='searchBar toggle' value={value} onChange={(e)=> changeValue(e.target.value)}/>
+                            <Image alt='search' src={Search} width={15} height={15} className={styles.logoSearchBar} />
+                            <input type={'text'} placeholder={'Search someone...'} className={`${styles.searchBar}  ${styles.toggle}`} value={value} onChange={(e)=> changeValue(e.target.value)}/>
                         </div>
                         <div className='fill small'>
                             <Image alt='avatar' src={`/avatar/avatar-${UserState.avatar_num}.png`} width={42} height={42} onClick={clickProfil}/>
@@ -88,20 +89,20 @@ function TopBar(): JSX.Element {
                 }
             </div>
             {openProfil? 
-            <div className={openToggle? 'elementTopBar toggle avatarMenu open' : 'elementTopBar toggle avatarMenu'}>
-                <div className='playMenuContainer'>
-                    <div className='playMenuEntity bar'>
-                    <Link href={{pathname:"/ProfilePage/Profil", query: {user : JSON.stringify(UserState)}} }style={{ textDecoration: 'none' }}><h3>profil</h3></Link>
+            <div className={openToggle? `${styles.elementTopBar}  ${styles.toggle}  ${styles.avatarMenu}  ${styles.open}` : `${styles.elementTopBar}  ${styles.toggle}  ${styles.avatarMenu}`}>
+                <div className={styles.contextMenuContainer}>
+                    <div className={`${styles.contextMenuEntity}  ${styles.bar}`}>
+                    <Link href={{pathname:"/ProfilePage/Profil", query: {user : JSON.stringify(UserState)}} }style={{ textDecoration: 'none' }}><h3 className={textStyles.laquer}>profil</h3></Link>
                     </div>
-                    <div className='playMenuEntity'>
-                        <h3>logout</h3>
+                    <div className={styles.contextMenuEntity}>
+                        <h3 className={textStyles.laquer}>logout</h3>
                     </div>
                 </div>
             </div>
             : ''
             }
             {value.length !== 0 ?
-            <div style={{position:'absolute', zIndex:'99', top:'52px', right: '117px', width:'250px'}}>
+            <div  className={styles.searchContainer}>
                 <div className='card'>
                     <div className='cardList'>
                         {friendList}

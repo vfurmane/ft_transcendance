@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import TopBar from "../TopBar";
+import TopBar from "../topBar/TopBar";
 import { useRouter } from "next/router";
 import Image from "next/image";
 import MatchEntity from "../HomePage/MatchEntity";
@@ -9,11 +9,9 @@ import User, {initUser} from "../../interface/UserInterface";
 import AchivementEntity from "./achivementEntity";
 import Achivement ,{ initAchivement} from "../../interface/AchivementInterface";
 import ChangePswrd from "./ChangePswrd";
-import ChatBar from "../chatBar";
-
-
-
-
+import ChatBar from "../chatBar/chatBar";
+import styles from 'styles/profil.module.scss';
+import textStyles from 'styles/text.module.scss';
 
 export default function Profil(): JSX.Element {
     let UserState = useSelector(selectUserState);
@@ -38,7 +36,6 @@ export default function Profil(): JSX.Element {
             else
                 setUserProfil(false);
         }
-            
     }, [router.query]);
 
 
@@ -76,42 +73,42 @@ export default function Profil(): JSX.Element {
             <TopBar />
             <div className='container margin_top' >
                 <div className='row'>
-                    <div className='col-10 offset-1 offset-md-0 offset-lg-1 col-md-2 ' style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column' }}>
+                    <div className={`col-10 offset-1 offset-md-0 offset-lg-1 col-md-2 ${styles.flexCenterColumn}`}>
                         <div className="fill">
                             <Image alt="avatar" src={`/avatar/avatar-${user.avatar_num}.png`} width={200} height={200} />
                         </div>
-                        <p>{user.status}</p>
+                        <p className={textStyles.saira} style={{color:'white'}}>{user.status}</p>
                     </div>
-                    <div className="col-10 offset-1  col-md-6 offset-lg-0" style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center', marginTop: '50px', marginBottom: '50px', width: 'auto' }}>
+                    <div className={`col-10 offset-1  col-md-6 offset-lg-0  ${styles.profilMenuContainer}`}>
                         <div>
-                            <h2 style={{ color: 'white', fontSize: '40px', marginBottom: '10px' }}>{user.name}</h2>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'end', flexWrap: 'wrap' }}>
+                            <h2 className={textStyles.pixel} style={{ color: 'white', fontSize: '40px', marginBottom: '10px' }}>{user.name}</h2>
+                            <div className={styles.buttonAndBarContainer}>
                                 <div style={{ width: '80%'}}>
-                                    <div style={{display:'flex', justifyContent: 'space-between', alignItems:'center'}}>
-                                        <p style={{color:'white'}}>{user.victory} victory</p>
-                                        <p style={{color:'white'}}>{user.defeat} defeat</p>
+                                    <div className={styles.flex_between}>
+                                        <p className={textStyles.saira} style={{color:'white'}}>{user.victory} victory</p>
+                                        <p className={textStyles.saira} style={{color:'white'}}>{user.defeat} defeat</p>
                                     </div>
-                                    <div style={{display:'flex', justifyContent: 'space-between', alignItems:'center',  borderRadius: '8px', overflow: 'hidden' }}>
+                                    <div className={`${styles.flex_between} ${styles.statBar}`}>
                                         <div style={{height:'30px', backgroundColor: '#03cea4', width: `${Math.floor((user.victory / (user.defeat + user.victory)) * 100)}%` }}></div>
                                         <div style={{ height:'30px', backgroundColor: '#e22d44', width: `${Math.floor((user.defeat / (user.defeat + user.victory)) * 100)}%` }}></div>
                                     </div>
                                 </div>
                                 <div style={{ display: 'flex'}}>
                                     <Image alt="achivement" src={`/achivement.png`} width={32} height={32} onClick={achivementListClick}/>
-                                    <h3 style={{ marginLeft: '10px' }}>10</h3>
+                                    <h3 className={textStyles.laquer} style={{ marginLeft: '10px' }}>10</h3>
                                 </div>
                             </div>
                             {userProfil?
-                            <div style={{ display: 'flex', textAlign: 'center', justifyContent: 'flex-start', flexWrap: 'wrap', borderRadius: '8px', marginTop: '10px' }}>
-                                <button className="buttonProfil" onClick={changePswrd}><h3 style={{ fontSize: '18px' }}>Change password</h3></button>
-                                <button className="buttonProfil"><h3 style={{ fontSize: '18px' }}>Configure TFA</h3></button>
-                                <button className="buttonProfil"><h3 style={{ fontSize: '18px' }}>Delete account</h3></button>
+                            <div className={styles.buttonProfilContainer}>
+                                <button className={styles.buttonProfil} onClick={changePswrd}><h3 className={textStyles.laquer} style={{ fontSize: '18px' }}>Change password</h3></button>
+                                <button className={styles.buttonProfil}><h3 className={textStyles.laquer} style={{ fontSize: '18px' }}>Configure TFA</h3></button>
+                                <button className={styles.buttonProfil}><h3 className={textStyles.laquer} style={{ fontSize: '18px' }}>Delete account</h3></button>
                             </div>:
-                            <div style={{ display: 'flex', textAlign: 'center', justifyContent: 'space-between', flexWrap: 'wrap', borderRadius: '8px', marginTop: '10px', width:'100%' }}>
-                                <button className="buttonProfil" style={{width:'100px', height:'40px'}}><Image alt="addFriend" src={`/addFriend.png`} width={20} height={20}/></button>
-                                <button className="buttonProfil" style={{width:'100px'}}><Image alt="message" src={`/message.png`} width={20} height={20}/></button>
-                                <button className="buttonProfil" style={{width:'100px'}}><h3 style={{ fontSize: '18px' }}>Play</h3></button>
-                                <button className="buttonProfil" style={{backgroundColor:'#e22d44', width:'100px'}} ><h3 style={{ fontSize: '18px' }}>block</h3></button>
+                            <div className={styles.buttonProfilContainer}>
+                                <button className={styles.buttonProfil} style={{width:'100px', height:'40px'}}><Image alt="addFriend" src={`/addFriend.png`} width={20} height={20}/></button>
+                                <button className={styles.buttonProfil} style={{width:'100px'}}><Image alt="message" src={`/message.png`} width={20} height={20}/></button>
+                                <button className={styles.buttonProfil} style={{width:'100px'}}><h3 className={textStyles.laquer} style={{ fontSize: '18px' }}>Play</h3></button>
+                                <button className={styles.buttonProfil} style={{backgroundColor:'#e22d44', width:'100px'}} ><h3 className={textStyles.laquer} style={{ fontSize: '18px' }}>block</h3></button>
                             </div>}
                         </div>
 
@@ -122,7 +119,7 @@ export default function Profil(): JSX.Element {
                     <div className="col-10 offset-1 col-lg-8" >
                          {!openAchivementList && !openConfigProfil? 
                          <div className='card' style={{ background: 'rgba(0,0,0,0)' }}> 
-                            <h2>Match history</h2>
+                            <h2 className={textStyles.pixel} >Match history</h2>
                             <div className="cardList">
                             {listOfMatch}
                             </div>
@@ -132,15 +129,17 @@ export default function Profil(): JSX.Element {
                             {openAchivementList?
                             <div style={{display:'flex'}}>
                                 <div className='card' style={{ background: 'rgba(0,0,0,0)' }} >  
-                                    <h2><Image alt="achivement" src={`/achivement.png`} width={32} height={32} onClick={achivementListClick}/> Achivement</h2>
+                                    <h2 className={textStyles.pixel}><Image alt="achivement" src={`/achivement.png`} width={32} height={32} onClick={achivementListClick}/> Achivement</h2>
                                     <div className="cardList">
                                         {achivementList}
                                     </div>
                                 </div>
                                 {openAchivement?
                                 <div className='card' style={{ background: 'rgba(0,0,0,0)' }}> 
-                                    <h3><Image alt="achivement" src={`/achivement.png`} width={32} height={32} onClick={achivementListClick}/>{achivementSelect.name}</h3>
-                                    <p>{achivementSelect.description}</p>
+                                    <h3 className={textStyles.laquer}><Image alt="achivement" src={`/achivement.png`} width={32} height={32} onClick={achivementListClick}/>{achivementSelect.name}</h3>
+                                    <div className="cardList">
+                                        <p className={textStyles.saira}>{achivementSelect.description}</p>
+                                    </div>
                                 </div>: <></>
                                 }
                             </div> : <div>{configProfil}</div> }
