@@ -49,6 +49,7 @@ export default function FtOauth2(): JSX.Element {
           if ("access_token" in response && response.access_token) {
             setMessage("Success! Redirecting...");
             localStorage.setItem("access_token", response.access_token);
+            localStorage.removeItem("state");
             router.replace("/");
           } else if (
             "message" in response &&
