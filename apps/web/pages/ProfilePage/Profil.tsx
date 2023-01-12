@@ -71,7 +71,7 @@ export default function Profil(): JSX.Element {
     return (
         <div>
             <TopBar />
-            <div className='container margin_top' >
+            <div className='container' style={{marginTop:'150px'}}>
                 <div className='row'>
                     <div className={`col-10 offset-1 offset-md-0 offset-lg-1 col-md-2 ${styles.flexCenterColumn}`}>
                         <div className="fill">

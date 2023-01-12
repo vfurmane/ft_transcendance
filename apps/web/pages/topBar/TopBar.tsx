@@ -10,12 +10,18 @@ import { useSelector } from "react-redux";
 import FriendEntity from '../HomePage/FriendEntity';
 import styles from 'styles/topBar.module.scss';
 import textStyles from 'styles/text.module.scss';
+import List from '../HomePage/List';
+import User, { initUser } from '../../interface/UserInterface';
 
 function TopBar(): JSX.Element {
 
     const [openToggle, setOpenToggle] = useState(false);
     const [openProfil, setOpenProfil] = useState(false);
     const [value, setValue] = useState('');
+    const [user, setUser] = useState(initUser);
+    const [openUserMenu, setOpenUserMenu] = useState(false);
+    const [indexOfUser, setIndexOfUser] = useState(0);
+    
 
     const UserState = useSelector(selectUserState);
 
@@ -32,14 +38,21 @@ function TopBar(): JSX.Element {
     }
 
     function changeValue(val : string){
-        setValue(val)
-        console.log(value);
+        setValue(val);
+        if (!val.length)
+            setOpenUserMenu(false);
+    }
+
+    function handleClickUserMenu( e : {user : User, index: number}) : void {
+        setOpenUserMenu(true);
+        setUser(e.user);
+        setIndexOfUser(e.index)
     }
 
     let friendList : JSX.Element[] = [];
     for (let i = 0; i < 22; i++)
     {
-        friendList.push(<FriendEntity del={false} user={{id:`${i + 1}`, avatar_num: Math.floor(Math.random() * 19) + 1, status:( Math.floor(Math.random() * 2)) === 0 ? 'onligne' : 'outligne', name : 'name' + (i + 1).toString(), victory: Math.floor(Math.random() * 1000), defeat: Math.floor(Math.random() * 1000)}}  key={i} index={i}  handleClick={(e)=>changeValue} />);
+        friendList.push(<FriendEntity small={true} del={false} user={{id:`${i + 1}`, avatar_num: Math.floor(Math.random() * 19) + 1, status:( Math.floor(Math.random() * 2)) === 0 ? 'onligne' : 'outligne', name : 'name' + (i + 1).toString(), victory: Math.floor(Math.random() * 1000), defeat: Math.floor(Math.random() * 1000)}}  key={i} index={i}  handleClick={handleClickUserMenu} />);
     }
 
     return (
@@ -74,7 +87,7 @@ function TopBar(): JSX.Element {
                 </div>
                 {openToggle?
                 <div>
-                    <div className='elementTopBar toggle menu'>
+                    <div className={`${styles.elementTopBar} ${styles.toggle} ${styles.menu}`}>
                         <div>
                             <Image alt='search' src={Search} width={15} height={15} className={styles.logoSearchBar} />
                             <input type={'text'} placeholder={'Search someone...'} className={`${styles.searchBar}  ${styles.toggle}`} value={value} onChange={(e)=> changeValue(e.target.value)}/>
@@ -102,11 +115,12 @@ function TopBar(): JSX.Element {
             : ''
             }
             {value.length !== 0 ?
-            <div  className={styles.searchContainer}>
-                <div className='card'>
-                    <div className='cardList'>
-                        {friendList}
-                    </div>
+            <div  className={`${styles.searchContainer} ${openToggle? styles.toggle : ''}`}>
+                <div className='card small d-none d-md-block' >
+                    <List list={friendList} title={''} open={openUserMenu} user={user} index={indexOfUser}/>
+                </div>
+                <div className='card xsmall d-block d-md-none' >
+                    <List list={friendList} title={''} open={openUserMenu} user={user} index={indexOfUser}/>
                 </div>
             </div>
             :<></>}

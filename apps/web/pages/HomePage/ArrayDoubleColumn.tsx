@@ -57,8 +57,8 @@ export default function ArrayDoubleColumn(props : {title: string, list : JSX.Ele
     }
     
     return (
-        <div className={`card ${styles.leaderBoard}`}>
-            <h2>{props.title}</h2>
+        <div className={`card ${styles.card} ${styles.leaderBoard}`}>
+            <h2 className={textStyle.pixel}>{props.title}</h2>
             <div className={styles.leaderBoardDoubleColumn}>
                 <div>
                     {getColumn(columnNum)}
@@ -68,11 +68,11 @@ export default function ArrayDoubleColumn(props : {title: string, list : JSX.Ele
                 </div>
             </div>
             <div className={entityStyles.shadowContainer}>
-                <h3 className={textStyle.laquer} onClick={()=>prevClick()}>{'<'}</h3>
-                <h3 className={textStyle.laquer}>{pageNum }</h3>
-                <h3 className={textStyle.laquer}>of</h3>
-                <h3 className={textStyle.laquer}>{typeof(props.list) !== 'undefined' ? Math.ceil(props.list.length / 10) : ''}</h3>
-                <h3 className={textStyle.laquer} onClick={()=>nextClick()}>{'>'}</h3>
+                <h3 className={textStyle.laquer} style={{marginLeft:'10px'}} onClick={()=>prevClick()}>{'<'}</h3>
+                <h3 className={textStyle.laquer} style={{marginLeft:'10px'}}>{pageNum }</h3>
+                <h3 className={textStyle.laquer} style={{marginLeft:'10px'}}>of</h3>
+                <h3 className={textStyle.laquer} style={{marginLeft:'10px'}}>{typeof(props.list) !== 'undefined' ? Math.ceil(props.list.length / 10) : ''}</h3>
+                <h3 className={textStyle.laquer} style={{marginLeft:'10px'}} onClick={()=>nextClick()}>{'>'}</h3>
             </div>
             
         </div>

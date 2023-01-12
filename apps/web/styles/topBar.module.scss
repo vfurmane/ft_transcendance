@@ -69,8 +69,6 @@
     color: $dark-neutral-white;
 }
 
-
-
 .logoSearchBar {
     position: absolute;
     margin-left: 230px;
@@ -126,4 +124,10 @@
     top: 52px;
     right: 117px;
     width: 250px;
+}
+
+.searchContainer.toggle
+{
+    top:105px;
+    right: 127px;
 }

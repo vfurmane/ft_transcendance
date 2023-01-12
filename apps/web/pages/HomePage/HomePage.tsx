@@ -14,6 +14,7 @@ import Link from 'next/link';
 import ChatBar from '../chatBar/chatBar';
 import playButtonStyles from 'styles/playButton.module.scss';
 import textStyles from 'styles/text.module.scss';
+import styles from 'styles/home.module.scss';
 
 
 
@@ -85,7 +86,7 @@ function Home() : JSX.Element {
 
     for (let i = 0; i < 22; i++)
     {
-        friendList.push(<FriendEntity del={true} user={{id:`${i + 1}`, avatar_num: Math.floor(Math.random() * 19) + 1, status:( Math.floor(Math.random() * 2)) === 0 ? 'onligne' : 'outligne', name : 'name' + (i + 1).toString(), victory: Math.floor(Math.random() * 1000), defeat: Math.floor(Math.random() * 1000)}}  key={i} index={i}  handleClick={handleClickFriendMenu} />);
+        friendList.push(<FriendEntity small={false} del={true} user={{id:`${i + 1}`, avatar_num: Math.floor(Math.random() * 19) + 1, status:( Math.floor(Math.random() * 2)) === 0 ? 'onligne' : 'outligne', name : 'name' + (i + 1).toString(), victory: Math.floor(Math.random() * 1000), defeat: Math.floor(Math.random() * 1000)}}  key={i} index={i}  handleClick={handleClickFriendMenu} />);
         matchList.push(<MatchEntity url1={`/avatar/avatar-${Math.floor(Math.random() * 19) + 1}.png`} url2={`/avatar/avatar-${Math.floor(Math.random() * 19) + 1}.png`} name={'name' + (i + 1).toString()} score={5} key={i} />);
         leaderboard.push(<LeaderboardEntity  user={{id:`${i + 1}`, avatar_num: Math.floor(Math.random() * 19) + 1, status:( Math.floor(Math.random() * 2)) === 0 ? 'onligne' : 'outligne', name : 'name' + (i + 1).toString(), victory: Math.floor(Math.random() * 1000), defeat: Math.floor(Math.random() * 1000)} } level={420} rank={i + 1} key={i} handleClick={handleClickFriendMenuLeaderBrd}/>)
     }
@@ -93,14 +94,14 @@ function Home() : JSX.Element {
     return (
         <div onClick={()=>close()} id={'top'} >
             <TopBar/>
-            <div className='illustration d-none d-lg-block'></div>
+            <div className={`${styles.illustration} d-none d-lg-block`}></div>
             <div className='container ' > 
                     <div className='row'>
                         <div className='col-12  d-none d-lg-block'>
-                            <h3 className='title'>Ft_Transcendence</h3>
+                            <h3 className={styles.title}>Ft_Transcendence</h3>
                         </div>
                         <div className='col-12 d-block d-lg-none'>
-                            <h3 className='title small d-block d-lg-none'>Ft_Transcendence</h3>
+                            <h3 className={`${styles.title} ${styles.small} d-block d-lg-none`}>Ft_Transcendence</h3>
                         </div>
                     </div>
                     <div className='row'>
@@ -113,7 +114,7 @@ function Home() : JSX.Element {
                             <div className={`{${playButtonStyles.playMenuContainer} d-block d-lg-none`}>
                                 <PlayMenu/>
                             </div> 
-                            <div className={`{${playButtonStyles.playMenuContainer} ${playButtonStyles.marge_top} d-none d-lg-block`}>
+                            <div className={`d-none d-lg-block ${playButtonStyles.playMenuContainer} ${playButtonStyles.marge_top} `}>
                                 <PlayMenu/>
                             </div> 
                         </div>
@@ -133,7 +134,7 @@ function Home() : JSX.Element {
                     </div>
                     <div className='row'>
                         <div className='col-8 offset-2'>
-                            <h3 className={`text ${textStyles.laquer}`}>These guy are the best pong player of the world ... we are so pround of them !!</h3>
+                            <h3 className={`${styles.text} ${textStyles.laquer}`}>These guy are the best pong player of the world ... we are so pround of them !!</h3>
                         </div>
                     </div>
                     <div className='row'>
