@@ -72,13 +72,14 @@ export class AuthController {
   })
   ftCallback(
     @User() user: UserEntity,
+    @State() state: StateEntity,
   ): AccessTokenResponse | TfaNeededResponse {
     if (user.tfa_setup) {
       this.logger.log(`${user.name} logged in using OAuth2, but TFA is needed`);
       return { message: 'Authentication factor needed', route: 'tfa' };
     }
     this.logger.log(`${user.name} logged in using OAuth2`);
-    return this.authService.login(user);
+    return this.authService.login(user, state);
   }
 
   @UseInterceptors(ClassSerializerInterceptor)
@@ -94,6 +95,7 @@ export class AuthController {
   @Post('login')
   async login(
     @User() user: UserEntity,
+    @State() state: StateEntity,
   ): Promise<AccessTokenResponse | TfaNeededResponse> {
     if (user.tfa_setup) {
       this.logger.log(
@@ -102,7 +104,7 @@ export class AuthController {
       return { message: 'Authentication factor needed', route: 'tfa' };
     }
     this.logger.log(`${user.name} logged in using username:password`);
-    return this.authService.login(user);
+    return this.authService.login(user, state);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -203,6 +205,6 @@ export class AuthController {
     await this.authService.checkTfa(state.user, body.token);
     await this.authService.removeState(state);
     this.logger.log(`${state.user.name} validated TFA`);
-    return this.authService.login(state.user);
+    return this.authService.login(state.user, state);
   }
 }
