@@ -20,7 +20,7 @@ enum Form{
 
 class Game {
 	private	isSolo = false;
-	private	boardType = Form.REC;
+	private	boardType = Form.HEX;
 	private	boardCanvasRef;
 	private	boardCanvas;
 	private	boardContext;
@@ -86,7 +86,7 @@ class Game {
 				else
 					racket.push(new Racket(i + 1, [p0, p1, p2, p3], this.player[i + 1].color));
 			}
-			return (racket/*[new Racket(this.createRect(10, this.boardCanvas.height / 2, 10, 40))]*/);
+			return (racket);
 		}
 	}
 
@@ -129,16 +129,18 @@ class Game {
 
 		for (let p of this.player) {
 			if (p.hp == 0) {
-				if (this.boardType == Form.REC)
-					return ;
-				this.player.splice(p.index, 1);
-				for (let i = 0; i < this.player.length; i++) {
-					if (this.player[i].index > p.index) {
-						this.player[i].index--;
+				if (this.boardType == Form.REC) {
+					this.boardType = Form.HEX;
+					this.player = undefined;
+				} else {
+					this.player.splice(p.index, 1);
+					for (let i = 0; i < this.player.length; i++) {
+						if (this.player[i].index > p.index) {
+							this.player[i].index--;
+						}
 					}
+					this.boardType--;
 				}
-				console.log(this.player);
-				this.boardType--;
 				this.init(this.boardCanvasRef);
 			}
 		}
@@ -156,7 +158,7 @@ class Game {
 			this.boardContext.fillText("❤️", (this.boardCanvas.width / 2) + (25 * i), 160)
 		}
 		this.countUpdate++;
-		this.ball.update(this.player, this.board.wall);
+		this.ball.update(this.player, this.board.wall, this.board);
 		for (let p of this.player)
 			p.update(this.ball, this.board.wall);
 		if (this.isSolo)
@@ -193,9 +195,9 @@ class Board {
 			size = 0.5;
 		}
 		if (boardType != Form.REC)
-			this.board = new Entity(/*this.createRect(0, 0, canvas.width, canvas.height)*/this.createRegularPolygon(new Point(0, height), canvas.height * size, boardType));
+			this.board = new Entity(this.createRegularPolygon(new Point(0, height), canvas.height * size, boardType));
 		else
-			this.board = new Entity(this.createRect(0, 0, canvas.width, canvas.height));
+			this.board = new Entity(this.createRect(0, 0, (canvas.height / 4) * 4, (canvas.height / 4) * 3));
 		this.wall = this.createWall(this.board);
 	}
 
@@ -479,7 +481,7 @@ class Target extends Entity {
 }
 
 class Ball extends Entity {
-	private defaultSpeed:number = 4;
+	private defaultSpeed:number = 6;
 
 	constructor(points) {
 		super(points);
@@ -501,11 +503,20 @@ class Ball extends Entity {
 		return (this.point[this.point.length - 1].midSegment(this.point[0]));
 	}
 
-	update(rackets:Racket, walls) {
+	update(rackets:Racket, walls,board) {
 		for (let racket of rackets) {
 			if (this.sat(racket)) {
 				let angle = 0;
-				let face = this.getFace(rackets.indexOf(racket));
+				let face;
+				if (rackets.length != 2)
+					face = this.getFace(rackets.indexOf(racket));
+				else {
+					let index = rackets.indexOf(racket);
+					if (index == 1)
+						face = this.getFace(2);
+					else
+						face = this.getFace(0);
+				}
 				let ratio = racket.point[2].intersect(racket.point[1], this.center(), face)
 				if (ratio > 1)
 					ratio = 1;
@@ -539,12 +550,22 @@ class Ball extends Entity {
 				this.moveTo(this.speed);
 				this.moveTo(this.speed);
 				let index = walls.indexOf(wall);
-				console.log(index);
-				if (index === walls.length - 1)
-					index = 0;
-				else
-					index++;
-				rackets[index].hp--;
+				if (rackets.length === 2) {
+					if (index === 1) {
+						rackets[1].hp--;
+						this.replaceTo(board.board.center());
+					} else if (index === 3) {
+						rackets[0].hp--;
+						this.replaceTo(board.board.center());
+					}
+				} else {
+					if (index === walls.length - 1)
+						index = 0;
+					else
+						index++;
+					rackets[index].hp--;
+					this.replaceTo(board.board.center());
+				}
 				return ;
 			}
 		}
@@ -568,7 +589,7 @@ class Racket extends Entity {
 	}
 
 	update(ball:Ball,walls) {
-		if (this.index == 0) {
+		if (this.index == 10) {
 			if (Game.keyPressed[Key.UP] && Game.keyPressed[Key.DOWN]) {
 			} else 
 			if (Game.keyPressed[Key.UP]) {
