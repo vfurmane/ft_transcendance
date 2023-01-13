@@ -425,7 +425,6 @@ export class ConversationsService {
             throw new ForbiddenException("Cannot leave direct message conversation")
         if (conversation.conversationRoles.length === 1)
         {
-            console.error("I am the last")
             await this.conversationRoleRepository.remove(userRole);
             await this.conversationRepository.remove(conversation);
             return userRole;
@@ -434,11 +433,9 @@ export class ConversationsService {
             throw new ForbiddenException("Please pick a new owner for this conversation before leaving it")
         if (userRole.restrictions.length)
         {
-            console.error("I am restricted")
             userRole.role = ConversationRoleEnum.LEFT
             return await this.conversationRoleRepository.save(userRole)
         }
-        console.error("Off I go")
         return  await this.conversationRoleRepository.remove(userRole);
     }
 

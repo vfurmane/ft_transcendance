@@ -6,11 +6,11 @@ import { ConversationsService } from './conversations.service';
 import { createConversationDto } from './dtos/createConversation.dto';
 import { sendMessageDto } from './dtos/sendMessage.dto';
 import { updateRoleDto } from './dtos/updateRole.dto';
-import { paramIsUUIDDto } from './dtos/paramIsUUID.dto';
+import { isUUIDDto } from './dtos/IsUUID.dto';
 import { muteUserDto } from './dtos/muteUser.dto';
 import { conversationRestrictionEnum } from './conversationRestriction.enum';
 import { isDateDto } from './dtos/isDate.dto';
-import { CurrentUser } from 'src/users/current-user.decorator';
+import { User as CurrentUser } from 'src/common/decorators/user.decorator';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @UseGuards(JwtAuthGuard)
@@ -26,7 +26,7 @@ export class ConversationsController {
     }
 
     @Put('/create')
-    createConversation(@Body() newConversation: createConversationDto, @CurrentUser() currentUser: User): Promise<Conversation>
+    createConversation(@CurrentUser() currentUser: User, @Body() newConversation: createConversationDto): Promise<Conversation>
     {
         return (this.conversationsService.createConversation(newConversation, currentUser));
     }
@@ -38,56 +38,56 @@ export class ConversationsController {
     }
 
     @Get('/:id')
-    getMessages(@CurrentUser() currentUser: User, @Param() conversationId: paramIsUUIDDto)
+    getMessages(@CurrentUser() currentUser: User, @Param() {id}: isUUIDDto)
     {
-        return (this.conversationsService.getMessages(currentUser, conversationId.id));
+        return (this.conversationsService.getMessages(currentUser, id));
     }
 
     @Post('/:id/post')
-    postMessage(@Param() conversationId: paramIsUUIDDto, @Body() content: sendMessageDto, @CurrentUser() currentUser: User)
+    postMessage(@CurrentUser() currentUser: User, @Param() {id}: isUUIDDto, @Body() {content} : sendMessageDto)
     {
-        return (this.conversationsService.postMessage(currentUser, conversationId.id, content.content));
+        return (this.conversationsService.postMessage(currentUser, id, content));
     }
 
     @Get('/:id/join')
-    joinConversation(@Param() conversationId: paramIsUUIDDto, @CurrentUser() currentUser : User)
+    joinConversation(@CurrentUser() currentUser : User, @Param() {id}: isUUIDDto)
     {
-        return this.conversationsService.joinConversation(currentUser, conversationId.id, null);
+        return this.conversationsService.joinConversation(currentUser, id, null);
     }
 
     @Post('/:id/join')
-    joinProtectedConversation(@Param() conversationId: paramIsUUIDDto, @CurrentUser() currentUser : User, @Body('password') password: string)
+    joinProtectedConversation(@CurrentUser() currentUser : User, @Param() {id}: isUUIDDto, @Body('password') password: string)
     {
-        return this.conversationsService.joinConversation(currentUser, conversationId.id, password);
+        return this.conversationsService.joinConversation(currentUser, id, password);
     }
 
     @Get('/:id/participants')
-    getConversationParticipants(@Param() conversationId: paramIsUUIDDto, @CurrentUser() currentUser : User)
+    getConversationParticipants(@CurrentUser() currentUser : User, @Param() {id}: isUUIDDto)
     {
-        return this.conversationsService.getConversationParticipants(currentUser, conversationId.id);
+        return this.conversationsService.getConversationParticipants(currentUser, id);
     }
 
     @Patch('/:id/updateRole')
-    updateRole(@Param() conversationId: paramIsUUIDDto, @Body() newRole: updateRoleDto, @CurrentUser() CurrentUser: User): Promise<boolean>
+    updateRole(@CurrentUser() CurrentUser: User, @Param() {id}: isUUIDDto, @Body() newRole: updateRoleDto): Promise<boolean>
     {
-        return this.conversationsService.updateRole(conversationId.id, newRole, CurrentUser);
+        return this.conversationsService.updateRole(id, newRole, CurrentUser);
     }
 
     @Delete('/:id/leave')
-    leaveConversation(@Param() conversationId : paramIsUUIDDto, @CurrentUser() currentUser : User)
+    leaveConversation(@CurrentUser() currentUser : User, @Param() {id} : isUUIDDto)
     {
-        return (this.conversationsService.leaveConversation(currentUser, conversationId.id));
+        return (this.conversationsService.leaveConversation(currentUser, id));
     }
 
     @Patch('/:id/mute/:username')
-    muteUser(@Body() timestamp: isDateDto, @Param() muteUser: muteUserDto, @CurrentUser() currentUser: User)
+    muteUser(@CurrentUser() currentUser: User, @Param() muteUser: muteUserDto, @Body() {date}: isDateDto)
     {
-        return (this.conversationsService.restrictUser(currentUser, muteUser.id, muteUser.username, conversationRestrictionEnum.MUTE, new Date(timestamp.date)))
+        return (this.conversationsService.restrictUser(currentUser, muteUser.id, muteUser.username, conversationRestrictionEnum.MUTE, new Date(date)))
     }
 
     @Patch('/:id/ban/:username')
-    banUser(@Body() timestamp: isDateDto, @Param() muteUser: muteUserDto, @CurrentUser() currentUser: User)
+    banUser(@CurrentUser() currentUser: User, @Param() muteUser: muteUserDto, @Body() {date}: isDateDto,  )
     {
-        return (this.conversationsService.restrictUser(currentUser, muteUser.id, muteUser.username, conversationRestrictionEnum.BAN, new Date(timestamp.date)))
+        return (this.conversationsService.restrictUser(currentUser, muteUser.id, muteUser.username, conversationRestrictionEnum.BAN, new Date(date)))
     }
 }
