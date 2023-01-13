@@ -10,10 +10,7 @@ import { ConversationRestriction } from './entities/conversationRestriction.enti
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Message]),
-    TypeOrmModule.forFeature([Conversation]),
-    TypeOrmModule.forFeature([ConversationRole]),
-    TypeOrmModule.forFeature([ConversationRestriction]),
+    TypeOrmModule.forFeature([Message, Conversation, ConversationRole, ConversationRestriction]),
     UsersModule
   ],
   controllers: [ConversationsController],
