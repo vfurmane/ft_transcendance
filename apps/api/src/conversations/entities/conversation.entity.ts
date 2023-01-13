@@ -24,7 +24,7 @@ export class Conversation {
 
   @Exclude()
   @Column('varchar', { length: 255, nullable: true, default: null })
-  password!: string
+  password!: string|null
 
   @CreateDateColumn()
   created_at!: Date;
