@@ -50,8 +50,10 @@ export class FriendshipsService {
         
         friendsList =  await queryBuilder.getRawMany();
 
+        //for debug :
         //const friendships =  await this.friendshipsRepository.find();
         //console.log(friendships);
+
         return friendsList;
     }
 
