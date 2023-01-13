@@ -84,8 +84,8 @@ export function LoginForm(): ReactElement {
       })
       .catch((error) => {
         setFormError(error?.message || "An unexpected error occured...");
+        setLoading(false);
       });
-    setLoading(false);
   };
 
   useEffect(() => {
