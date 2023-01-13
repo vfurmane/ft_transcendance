@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import TopBar from "../topBar/TopBar";
 import { useRouter } from "next/router";
 import Image from "next/image";
@@ -15,6 +15,7 @@ import textStyles from 'styles/text.module.scss';
 
 export default function Profil(): JSX.Element {
     let UserState = useSelector(selectUserState);
+    const prevAchivementRef = useRef(initAchivement);
     const router = useRouter();
     const [user, setUser] = useState(initUser);
     const [openAchivementList, setOpenAchivementList] = useState(false);
@@ -23,6 +24,33 @@ export default function Profil(): JSX.Element {
     const [userProfil, setUserProfil] = useState(false);
     const [openConfigProfil, setOpenConfigProfil] = useState(false);
     const [configProfil, setConfigProfil] = useState(<></>);
+
+
+    /*======for close topBar component when click on screen====*/
+    const [openToggle, setOpenToggle] = useState(false);
+    const [openProfil, setOpenProfil] = useState(false);
+    const [openUserList, setOpenUserList] = useState(false);
+    const [searchBarUser, setSearchBarUser] = useState(initUser);
+    const prevsearchBarUser = useRef({id:'-1', name:'', avatar_num: 1, status:'', victory: 0, defeat:0});
+
+    function clickTopBarToggle(){
+        setOpenToggle(!openToggle);
+    }
+    
+    function clickTopBarProfil (){
+        setOpenProfil(!openProfil);
+    }
+    
+    function writeSearchTopBar(e : boolean , user? : User){
+        setOpenUserList(e);
+        if (typeof user !== 'undefined')
+        {
+            setSearchBarUser(user);
+            prevsearchBarUser.current = searchBarUser;
+        }
+    }
+    /*==========================================================*/
+
 
     let listOfMatch = [];
     let achivementList : JSX.Element[] = [];
@@ -46,6 +74,7 @@ export default function Profil(): JSX.Element {
     function achivementClick(e : {achivement: Achivement}){
         setOpenAchivement(true);
         setAchivementSelect(e.achivement);
+        prevAchivementRef.current = achivementSelect;
     }
 
     function changePswrd(){
@@ -55,12 +84,14 @@ export default function Profil(): JSX.Element {
     }
 
     function close(){
-        if (openAchivementList)
-            setOpenAchivementList(!openAchivementList);
-        if (openAchivement)
+        if (openAchivementList && prevAchivementRef.current !== achivementSelect)
+            setOpenAchivementList(false);
+        if (openAchivement && prevAchivementRef.current !== achivementSelect)
             setOpenAchivement(false);
-        if (openConfigProfil)
-            setOpenConfigProfil(false);
+        if (openProfil)
+            setOpenProfil(false);
+        if (openUserList && prevsearchBarUser.current.id !== searchBarUser.id)
+            setOpenUserList(false);
     }
 
     for (let i = 0; i < 22; i++) {
@@ -69,8 +100,8 @@ export default function Profil(): JSX.Element {
     }
 
     return (
-        <div>
-            <TopBar />
+        <div onClick={close} style={{width:'100vw', height:'100vh'}}>
+            <TopBar openProfil={openProfil} openToggle={openToggle} openUserList={openUserList} clickTopBarProfil={clickTopBarProfil} clickTopBarToggle={clickTopBarToggle} writeSearchTopBar={writeSearchTopBar}/>
             <div className='container' style={{marginTop:'150px'}}>
                 <div className='row'>
                     <div className={`col-10 offset-1 offset-md-0 offset-lg-1 col-md-2 ${styles.flexCenterColumn}`}>
@@ -115,7 +146,6 @@ export default function Profil(): JSX.Element {
                     </div>
                 </div>
                 <div className="row">
-                    {openAchivementList || openConfigProfil? <p onClick={close}><Image alt="cross" src={'/toggleCross.png'} width={10} height={10} /> close</p>:<></>}
                     <div className="col-10 offset-1 col-lg-8" >
                          {!openAchivementList && !openConfigProfil? 
                          <div className='card' style={{ background: 'rgba(0,0,0,0)' }}> 
@@ -142,7 +172,11 @@ export default function Profil(): JSX.Element {
                                     </div>
                                 </div>: <></>
                                 }
-                            </div> : <div>{configProfil}</div> }
+                            </div> : 
+                            <div>
+                                <p className={textStyles.saira} style={{color:'white', width: 'auto'}}><Image alt="cross" src={'/toggleCross.png'} width={20} height={20} onClick={()=>setOpenConfigProfil(false)}/> close</p>
+                                {configProfil}
+                            </div> }
                         </div>
                         }
                     </div>

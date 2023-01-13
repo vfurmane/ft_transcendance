@@ -46,6 +46,35 @@ function Home() : JSX.Element {
             }))
     },[dispatch])
 
+
+     /*======for close topBar component when click on screen====*/
+     const [openToggle, setOpenToggle] = useState(false);
+     const [openProfil, setOpenProfil] = useState(false);
+     const [openUserList, setOpenUserList] = useState(false);
+     const [searchBarUser, setSearchBarUser] = useState(initUser);
+     const prevsearchBarUser = useRef({id:'-1', name:'', avatar_num: 1, status:'', victory: 0, defeat:0});
+
+ 
+     function clickTopBarToggle(){
+         setOpenToggle(!openToggle);
+     }
+     
+     function clickTopBarProfil (){
+         setOpenProfil(!openProfil);
+     }
+     
+     function writeSearchTopBar(e : boolean , user? : User){
+         setOpenUserList(e);
+         if (typeof user !== 'undefined')
+         {
+             setSearchBarUser(user);
+             prevsearchBarUser.current = searchBarUser;
+         }
+     }
+     /*==========================================================*/
+
+
+
     function handleClickPlayButton() : void {
         setOpenPlayButton(!openPlayButton);
     }
@@ -79,9 +108,12 @@ function Home() : JSX.Element {
             console.log(prevIndexOfFriendRef.current);
             setOpenFriendMenu(!openFriendMenu);
         }
-            
         if (openFriendMenuLeaderBrd && indexOfFriend !== prevIndexOfFriendMenuLeaderBordRef.current)
             setOpenFriendMenuLeaderBrd(!openFriendMenuLeaderBrd);
+        if (openProfil)
+            setOpenProfil(false);
+        if (openUserList && prevsearchBarUser.current.id !== searchBarUser.id)
+            setOpenUserList(false);
     }    
 
     for (let i = 0; i < 22; i++)
@@ -93,7 +125,7 @@ function Home() : JSX.Element {
 
     return (
         <div onClick={()=>close()} id={'top'} >
-            <TopBar/>
+            <TopBar openProfil={openProfil} openToggle={openToggle} openUserList={openUserList} clickTopBarProfil={clickTopBarProfil} clickTopBarToggle={clickTopBarToggle} writeSearchTopBar={writeSearchTopBar}/>
             <div className={`${styles.illustration} d-none d-lg-block`}></div>
             <div className='container ' > 
                     <div className='row'>

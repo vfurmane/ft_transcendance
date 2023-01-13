@@ -1,4 +1,4 @@
-import React , {use, useEffect, useState} from 'react';
+import React , {useRef, useEffect, useState} from 'react';
 import Image from 'next/image'
 import Logo from '../../public/Logo.png';
 import Search from '../../public/Search.png';
@@ -13,40 +13,64 @@ import textStyles from 'styles/text.module.scss';
 import List from '../HomePage/List';
 import User, { initUser } from '../../interface/UserInterface';
 
-function TopBar(): JSX.Element {
 
-    const [openToggle, setOpenToggle] = useState(false);
-    const [openProfil, setOpenProfil] = useState(false);
+interface propsTopBar  {
+    openToggle : boolean,
+    openProfil: boolean,
+    openUserList: boolean,
+    clickTopBarToggle : ()=>void,
+    clickTopBarProfil : ()=>void,
+    writeSearchTopBar : (e : boolean, user? : User)=>void,
+}
+
+function TopBar(props : propsTopBar): JSX.Element {
+
+    const [openUserMenu, setOpenUserMenu] = useState(false);
     const [value, setValue] = useState('');
     const [user, setUser] = useState(initUser);
-    const [openUserMenu, setOpenUserMenu] = useState(false);
     const [indexOfUser, setIndexOfUser] = useState(0);
     
 
     const UserState = useSelector(selectUserState);
 
     function clickToggle(){
-        setOpenToggle(!openToggle);
-        if (!openToggle && openProfil)
-            clickProfil();
-        if (openProfil)
-            clickProfil();
+        props.clickTopBarToggle();
+        if (!props.openToggle && props.openProfil)
+            props.clickTopBarProfil();
+        if (props.openProfil)
+            props.clickTopBarProfil();
     }
 
     function clickProfil(){
-        setOpenProfil(!openProfil);
+        props.clickTopBarProfil();
+    }
+
+    function clickSearchBar(){
+        if (value.length)
+            props.writeSearchTopBar(true);
+        else
+            props.writeSearchTopBar(false);
+        setOpenUserMenu(false);
     }
 
     function changeValue(val : string){
         setValue(val);
         if (!val.length)
+        {
+            props.writeSearchTopBar(false);
             setOpenUserMenu(false);
+        }
+        else
+        {
+            props.writeSearchTopBar(true);
+        }     
     }
 
     function handleClickUserMenu( e : {user : User, index: number}) : void {
         setOpenUserMenu(true);
         setUser(e.user);
-        setIndexOfUser(e.index)
+        setIndexOfUser(e.index);
+        props.writeSearchTopBar(true, e.user);
     }
 
     let friendList : JSX.Element[] = [];
@@ -67,7 +91,7 @@ function TopBar(): JSX.Element {
                 <div className={styles.elementTopBar}>
                     <div >
                         <Image alt='search' src={Search} width={20} height={20} className={styles.logoSearchBar} />
-                        <input type={'text'} placeholder={'Search someone...'} className={styles.searchBar}  value={value} onChange={(e)=> changeValue(e.target.value)}/>
+                        <input type={'text'} placeholder={'Search someone...'} className={styles.searchBar}  value={value} onClick={clickSearchBar} onChange={(e)=> changeValue(e.target.value)}/>
                     </div>
                     <div className='fill small'>
                         <Image alt='avatar' src={`/avatar/avatar-${UserState.avatar_num}.png`} width={45} height={45}  onClick={clickProfil}/>
@@ -81,16 +105,16 @@ function TopBar(): JSX.Element {
             </div>
             <div className='d-md-none'>
                 <div className={`${styles.elementTopBar}  ${styles.toggle}`} onClick={clickToggle} >
-                    {!openToggle ? 
+                    {!props.openToggle ? 
                     <Image alt='toggle' src={ToggleBar} width={35} height={35}/> :
                     <Image alt='toggle' src={ToggleCross} width={35} height={35}/>}
                 </div>
-                {openToggle?
+                {props.openToggle?
                 <div>
                     <div className={`${styles.elementTopBar} ${styles.toggle} ${styles.menu}`}>
                         <div>
                             <Image alt='search' src={Search} width={15} height={15} className={styles.logoSearchBar} />
-                            <input type={'text'} placeholder={'Search someone...'} className={`${styles.searchBar}  ${styles.toggle}`} value={value} onChange={(e)=> changeValue(e.target.value)}/>
+                            <input type={'text'} placeholder={'Search someone...'} className={`${styles.searchBar}  ${styles.toggle}`} value={value} onClick={clickSearchBar} onChange={(e)=> changeValue(e.target.value)}/>
                         </div>
                         <div className='fill small'>
                             <Image alt='avatar' src={`/avatar/avatar-${UserState.avatar_num}.png`} width={42} height={42} onClick={clickProfil}/>
@@ -101,8 +125,8 @@ function TopBar(): JSX.Element {
                 : ''
                 }
             </div>
-            {openProfil? 
-            <div className={openToggle? `${styles.elementTopBar}  ${styles.toggle}  ${styles.avatarMenu}  ${styles.open}` : `${styles.elementTopBar}  ${styles.toggle}  ${styles.avatarMenu}`}>
+            {props.openProfil? 
+            <div className={props.openToggle? `${styles.elementTopBar}  ${styles.toggle}  ${styles.avatarMenu}  ${styles.open}` : `${styles.elementTopBar}  ${styles.toggle}  ${styles.avatarMenu}`}>
                 <div className={styles.contextMenuContainer}>
                     <div className={`${styles.contextMenuEntity}  ${styles.bar}`}>
                     <Link href={{pathname:"/ProfilePage/Profil", query: {user : JSON.stringify(UserState)}} }style={{ textDecoration: 'none' }}><h3 className={textStyles.laquer}>profil</h3></Link>
@@ -114,8 +138,8 @@ function TopBar(): JSX.Element {
             </div>
             : ''
             }
-            {value.length !== 0 ?
-            <div  className={`${styles.searchContainer} ${openToggle? styles.toggle : ''}`}>
+            {props.openUserList ?
+            <div  className={`${styles.searchContainer} ${props.openToggle? styles.toggle : ''}`}>
                 <div className='card small d-none d-md-block' >
                     <List list={friendList} title={''} open={openUserMenu} user={user} index={indexOfUser}/>
                 </div>
