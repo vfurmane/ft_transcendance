@@ -70,11 +70,14 @@ export class AuthService {
     return null;
   }
 
-  login(user: User): AccessTokenResponse {
+  login(user: User, state?: State): AccessTokenResponse {
     const payload: JwtPayload = {
       sub: user.id,
       name: user.name,
     };
+    if (state) {
+      this.statesRepository.delete({ token: state.token });
+    }
     return {
       access_token: this.jwtService.sign(payload),
     };
