@@ -2,7 +2,7 @@ import { BadRequestException, ForbiddenException, Injectable, NotFoundException,
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/users/user.entity';
 import { MoreThan, Not, Repository, RepositoryNotTreeError } from 'typeorm';
-import { unreadMessagesResponse } from 'types';
+import { ConversationsDetails, ConversationWithUnread, unreadMessagesResponse } from 'types';
 import { Conversation } from './entities/conversation.entity';
 import { ConversationRoleEnum } from './conversationRole.enum';
 import { ConversationRole } from './entities/conversationRole.entity';
@@ -186,31 +186,72 @@ export class ConversationsService {
         return (true);
     }
 
-    async getConversations(currentUser: User): Promise<Conversation[]>
+    async getConversations(currentUser: User): Promise<ConversationsDetails>
     {
-        let conversations : Conversation[] = [];
-        const fullUser = await this.userRepository.findOne({
-            relations: 
+        let conversationsDetails : ConversationsDetails = {totalNumberOfUnreadMessages: 0, conversations: []};
+        const conversations = await this.conversationRepository.find({
+            relations:
             {
-                conversationRoles: {
-                    conversation: true
-                }
+                conversationRoles: true
             },
             where:
             {
-                id: currentUser.id,
+                conversationRoles:
+                {
+                    user:
+                    {
+                        id: currentUser.id
+                    },
+                    role: Not(ConversationRoleEnum.LEFT)
+                }
             }
         })
-        if (!fullUser)
+        if (!conversations)
+            return (conversationsDetails);
+        for (let conversation of conversations)
         {
-            throw new NotFoundException();
+            conversation.conversationRoles[0].restrictions = await this.verifyRestrictionsOnUser(conversation.conversationRoles[0].restrictions);
+            let currentConversationWithUnread: ConversationWithUnread = {conversation: conversation, numberOfUnreadMessages: 0, lastMessage: conversation.created_at};
+            if (! conversation.conversationRoles[0].restrictions.filter((restriction) => restriction.status === conversationRestrictionEnum.BAN).length)
+            {
+                currentConversationWithUnread.numberOfUnreadMessages = await this.messageRepository.count({
+                    relations:
+                    {
+                        conversation: true
+                    },
+                    where:
+                    {
+                        created_at: MoreThan(conversation.conversationRoles[0].lastRead),
+                        conversation:
+                        {
+                            id : conversation.id
+                        }
+                    }
+                })
+                let lastMessage = await this.messageRepository.findOne({
+                    relations:
+                    {
+                        conversation: true
+                        },
+                        where:
+                        {
+                            conversation:
+                            {
+                                id : conversation.id
+                            }
+                        },
+                        order:
+                        {
+                            created_at: 'DESC'
+                        }
+                    })
+                if (lastMessage)
+                    currentConversationWithUnread.lastMessage = lastMessage.created_at
+            }
+            conversationsDetails.totalNumberOfUnreadMessages += currentConversationWithUnread.numberOfUnreadMessages;
+            conversationsDetails.conversations.push(currentConversationWithUnread);
         }
-        for (let conversationRole of fullUser.conversationRoles.filter((role) => role.role !== ConversationRoleEnum.LEFT))
-        {
-            await this.clearRestrictions(conversationRole.conversation.id);
-            conversations.push(conversationRole.conversation);
-        }
-        return (conversations);
+        return (conversationsDetails);
     }
 
     async getMessages(currentUser: User, conversationId: string): Promise<Message[]>
@@ -274,7 +315,7 @@ export class ConversationsService {
         {
             if ((await this.verifyRestrictionsOnUser(role.restrictions)).filter((restriction) => restriction.status === conversationRestrictionEnum.BAN).length)
                 continue ;
-            const unreadMessages = await this.messageRepository.findAndCount({
+            const unreadMessages = await this.messageRepository.count({
                 relations:
                 {
                     conversation: true
@@ -288,10 +329,10 @@ export class ConversationsService {
                     }
                 }
             })
-            if (unreadMessages[1])
+            if (unreadMessages)
             {
-                response.totalNumberOfUnreadMessages += unreadMessages[1];
-                response.UnreadMessage.push({conversationId: unreadMessages[0][0].conversation.id, name: unreadMessages[0][0].conversation.name, numberOfUnreadMessages: unreadMessages[1]})
+                response.totalNumberOfUnreadMessages += unreadMessages;
+                response.UnreadMessage.push({conversationId: role.conversation.id, name: role.conversation.name, numberOfUnreadMessages: unreadMessages})
             }
         }
         return (response);
