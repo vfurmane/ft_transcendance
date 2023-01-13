@@ -59,20 +59,7 @@ class Game {
 			return ([new Racket(this.createRect(10, this.boardCanvas.height / 2, 10, 40))]);
 		} else {
 			let racket = [];
-			let j = wall.length - 1;
-			let wallDir = wall[j].point[0].vectorTo(wall[j].point[2]).normalized();
-			let wallPerp = wallDir.perp().normalized();
-			let wallCenter = wall[j].center();
-			let racketCenter = new Point(wallCenter.x + (wallPerp.x * 5), wallCenter.y + (wallPerp.y * 5));
-			let p3 = new Point((racketCenter.x - (wallDir.x * 40)), (racketCenter.y - (wallDir.y * 40)))
-			let p0 = new Point((racketCenter.x + (wallDir.x * 40)), (racketCenter.y + (wallDir.y * 40)))
-			let p1 = new Point((p0.x + (wallPerp.x * 10)), (p0.y + (wallPerp.y * 10)))
-			let p2 = new Point((p3.x + (wallPerp.x * 10)), (p3.y + (wallPerp.y * 10)))
-			if (this.player === undefined)
-				racket.push(new Racket(0, [p0, p1, p2, p3], this.color[0]));
-			else
-				racket.push(new Racket(0, [p0, p1, p2, p3], this.player[0].color));
-			for (let i = 0; i < wall.length - 1; i++) {
+			for (let i = 0; i < wall.length; i++) {
 				let wallDir = wall[i].point[0].vectorTo(wall[i].point[2]).normalized();
 				let wallPerp = wallDir.perp().normalized();
 				let wallCenter = wall[i].center();
@@ -82,9 +69,9 @@ class Game {
 				let p1 = new Point((p0.x + (wallPerp.x * 10)), (p0.y + (wallPerp.y * 10)))
 				let p2 = new Point((p3.x + (wallPerp.x * 10)), (p3.y + (wallPerp.y * 10)))
 				if (this.player === undefined)
-					racket.push(new Racket(i + 1, [p0, p1, p2, p3], this.color[i + 1]));
+					racket.push(new Racket(i, [p0, p1, p2, p3], this.color[i]));
 				else
-					racket.push(new Racket(i + 1, [p0, p1, p2, p3], this.player[i + 1].color));
+					racket.push(new Racket(i, [p0, p1, p2, p3], this.player[i].color));
 			}
 			return (racket);
 		}
@@ -108,10 +95,10 @@ class Game {
 		this.board = new Board(this.boardType, this.boardCanvas);
 		if (this.boardType != Form.REC) {
 			this.player = this.createRacket(this.isSolo, this.board.wall);
-			this.ball = new Ball(this.createRegularPolygon(this.board.board.center(), (30), this.boardType));
+			this.ball = new Ball(this.createRegularPolygon(this.board.board.center(), (30), this.boardType), this.player);
 		} else {
-			this.player = this.createRacket(this.isSolo, [this.board.wall[1], this.board.wall[3]]);
-			this.ball = new Ball(this.createRect(this.board.board.center().x, this.board.board.center().y, 10, 10));
+			this.player = this.createRacket(this.isSolo, [this.board.wall[0], this.board.wall[2]]);
+			this.ball = new Ball(this.createRect(this.board.board.center().x, this.board.board.center().y, 10, 10), this.player);
 		}
 		if (this.isSolo)
 			this.cible = new Target(this.createRect(this.boardCanvas.width * (2 / 3), this.boardCanvas.height / 2, 20, 20));
@@ -144,7 +131,6 @@ class Game {
 				this.init(this.boardCanvasRef);
 			}
 		}
-
 		this.boardContext.fillStyle = "#666666"
 		this.board.board.draw(this.boardContext, 'gray');
 		this.boardContext.font = "14px sherif"
@@ -226,10 +212,10 @@ class Board {
 
 	createWall(board:Entity) {
 		let wall = [];
+		wall.push(new Wall(board.point[board.point.length - 1], board.point[0]));
 		for (let i = 0; i < board.point.length - 1; i++) {
 			wall.push(new Wall(board.point[i], board.point[i + 1]));
 		}
-		wall.push(new Wall(board.point[board.point.length - 1], board.point[0]));
 		return (wall);
 	}
 }
@@ -337,6 +323,9 @@ class Entity {
 	}
 
 	center() {
+		if (this.point.length == 3) {
+			return (new Point((this.point[0].x + this.point[1].x + this.point[2].x) / 3, (this.point[0].y + this.point[1].y + this.point[2].y)/3));
+		}
 		if (this.point.length % 2) {
 			let tmp = this.point[0].midSegment(this.point[1]);
 			return (tmp.midSegment(this.point[Math.ceil(this.point.length/2)]));
@@ -481,12 +470,12 @@ class Target extends Entity {
 }
 
 class Ball extends Entity {
+	private	wait:number = 120;
 	private defaultSpeed:number = 6;
 
-	constructor(points) {
+	constructor(points, player) {
 		super(points);
-		let dir = (new Vector(Math.random() - Math.random(), Math.random() - Math.random())).normalized();
-		this.speed = new Vector(dir.x * this.defaultSpeed, dir.y * this.defaultSpeed);
+		this.goToRandomPlayer(player);
 	}
 
 	isParallel(from1, to1, from2, to2)
@@ -503,7 +492,20 @@ class Ball extends Entity {
 		return (this.point[this.point.length - 1].midSegment(this.point[0]));
 	}
 
+	goToRandomPlayer(player:Racket) {
+		let random = ((Math.floor(Math.random() * 10000)) % player.length)
+		let dir = player[random].point[1].midSegment(player[random].point[2]).vectorTo(player[random].point[0].midSegment(player[random].point[3])).normalized();
+		this.speed = new Vector(dir.x * this.defaultSpeed, dir.y * this.defaultSpeed);
+	}
+
 	update(rackets:Racket, walls,board) {
+		if (this.wait) {
+			this.wait--;
+			return ;
+		}
+		if (!this.sat(board.board)) {
+			this.replaceTo(board.board.center());
+		}
 		for (let racket of rackets) {
 			if (this.sat(racket)) {
 				let angle = 0;
@@ -551,20 +553,22 @@ class Ball extends Entity {
 				this.moveTo(this.speed);
 				let index = walls.indexOf(wall);
 				if (rackets.length === 2) {
-					if (index === 1) {
+					if (index === 2) {
 						rackets[1].hp--;
 						this.replaceTo(board.board.center());
-					} else if (index === 3) {
+						this.goToRandomPlayer(rackets);
+						this.wait = 120;
+					} else if (index === 0) {
 						rackets[0].hp--;
 						this.replaceTo(board.board.center());
+						this.goToRandomPlayer(rackets);
+						this.wait = 120;
 					}
 				} else {
-					if (index === walls.length - 1)
-						index = 0;
-					else
-						index++;
 					rackets[index].hp--;
 					this.replaceTo(board.board.center());
+					this.goToRandomPlayer(rackets);
+					this.wait = 120;
 				}
 				return ;
 			}
@@ -589,7 +593,7 @@ class Racket extends Entity {
 	}
 
 	update(ball:Ball,walls) {
-		if (this.index == 10) {
+		if (this.index == 0) {
 			if (Game.keyPressed[Key.UP] && Game.keyPressed[Key.DOWN]) {
 			} else 
 			if (Game.keyPressed[Key.UP]) {
