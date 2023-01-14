@@ -6,7 +6,7 @@ import * as speakeasy from 'speakeasy';
 import { SpeakeasyGeneratedSecretDto } from '../auth/speakeasy-generated-secret.dto';
 import { AccessTokenResponse } from 'types';
 import * as bcrypt from 'bcrypt';
-import { ChangeUserPasswordDto } from './change-user-password.dto';
+import { UpdateUserPasswordDto } from './update-user-password.dto';
 import { Jwt as JwtEntity } from '../auth/jwt.entity';
 import { AuthService } from '../auth/auth.service';
 
@@ -74,13 +74,13 @@ export class UsersService {
     return this.usersRepository.update({ id: userId }, { tfa_setup: false });
   }
 
-  async changeUserPassword(
+  async updateUserPassword(
     user: User,
-    changeUserPasswordDto: ChangeUserPasswordDto,
+    updateUserPasswordDto: UpdateUserPasswordDto,
   ): Promise<AccessTokenResponse> {
     const salt = await bcrypt.genSalt();
-    changeUserPasswordDto.password = await bcrypt.hash(
-      changeUserPasswordDto.password,
+    updateUserPasswordDto.password = await bcrypt.hash(
+      updateUserPasswordDto.password,
       salt,
     );
 
@@ -96,7 +96,7 @@ export class UsersService {
 
     await this.usersRepository.update(
       { id: user.id },
-      { password: changeUserPasswordDto.password },
+      { password: updateUserPasswordDto.password },
     );
     return this.authService.login(user);
   }

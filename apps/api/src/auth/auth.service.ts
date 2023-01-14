@@ -89,7 +89,6 @@ export class AuthService {
     return user;
   }
 
-
   async login(user: User, state?: State): Promise<AccessTokenResponse> {
     const jwtEntity = new Jwt();
     jwtEntity.user = user;
