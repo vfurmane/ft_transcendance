@@ -11,7 +11,7 @@ import {
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { User } from '../common/decorators/user.decorator';
 import { AccessTokenResponse, User as UserEntity } from 'types';
-import { ChangeUserPasswordDto } from './change-user-password.dto';
+import { UpdateUserPasswordDto } from './update-user-password.dto';
 import { UsersService } from './users.service';
 
 @Controller('users')
@@ -29,11 +29,11 @@ export class UsersController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Post('change_user_password')
-  async changeUserPassword(
+  @Post('update-password')
+  async updateUserPassword(
     @User() user: UserEntity,
-    @Body() changeUserPasswordDto: ChangeUserPasswordDto,
+    @Body() updateUserPasswordDto: UpdateUserPasswordDto,
   ): Promise<AccessTokenResponse> {
-    return this.usersService.changeUserPassword(user, changeUserPasswordDto);
+    return this.usersService.updateUserPassword(user, updateUserPasswordDto);
   }
 }

@@ -55,7 +55,7 @@ export class User {
     (conversationRole) => conversationRole.user,
   )
   conversationRoles!: ConversationRole[];
-  
+
   @OneToMany(() => Jwt, (jwt) => jwt.user)
   jwts!: Jwt[];
 }
