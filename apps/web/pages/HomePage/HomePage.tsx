@@ -9,19 +9,17 @@ import ArrayDoubleColumn from './ArrayDoubleColumn';
 import PlayMenu from './PlayMenu';
 import { setUserState } from "../../store/UserSlice";
 import { useDispatch } from "react-redux";
-import User , { initUser } from '../../interface/UserInterface';
+import User , { initUser, UserBack } from '../../interface/UserInterface';
+
 import Link from 'next/link';
 import ChatBar from '../chatBar/chatBar';
 import playButtonStyles from 'styles/playButton.module.scss';
 import textStyles from 'styles/text.module.scss';
 import styles from 'styles/home.module.scss';
 
-
-
-
+var user_id ='a6801c4d-37b8-4fce-ac65-c43c365a2d12';
 
 function Home() : JSX.Element {
-    let friendList : JSX.Element[] = [];
     let matchList : JSX.Element[] = [];
     let leaderboard : JSX.Element[] = [];
     const [openPlayButton, setOpenPlayButton] = useState(false);
@@ -29,15 +27,17 @@ function Home() : JSX.Element {
     const [openFriendMenuLeaderBrd, setOpenFriendMenuLeaderBrd] = useState(false);
     const [friend, setFriend] = useState(initUser)
     const [indexOfFriend, setIndexOfFriend] = useState(0);
+    const [friendList, setFriendList] = useState([<FriendEntity small={false} del={false} user={{id:'-1', avatar_num:1, status:'', name :'', victory: 0, defeat:0}}  key={0} index={0}  handleClick={handleClickFriendMenu} delFriendClick={()=>{}}/>]);
 
     const prevIndexOfFriendRef = useRef(0);
     const prevIndexOfFriendMenuLeaderBordRef = useRef(0);
 
     const dispatch = useDispatch();
+
     useEffect(() => {
         dispatch(setUserState(
             {
-                id: 'store is working',
+                id: user_id,
                 name: 'maxence',
                 avatar_num: 6,
                 status: 'Store Ok',
@@ -52,7 +52,7 @@ function Home() : JSX.Element {
      const [openProfil, setOpenProfil] = useState(false);
      const [openUserList, setOpenUserList] = useState(false);
      const [searchBarUser, setSearchBarUser] = useState(initUser);
-     const prevsearchBarUser = useRef({id:'-1', name:'', avatar_num: 1, status:'', victory: 0, defeat:0});
+     const prevsearchBarUser = useRef({id:'-1', name:'', avatar_num:1, status:'', victory: 0, defeat:0});
 
  
      function clickTopBarToggle(){
@@ -86,7 +86,7 @@ function Home() : JSX.Element {
             prevIndexOfFriendRef.current = indexOfFriend - 1;
         else
             prevIndexOfFriendRef.current = indexOfFriend;
-        setIndexOfFriend( e.index);
+        setIndexOfFriend(e.index);
     }
 
     function handleClickFriendMenuLeaderBrd( e : {user : User, index: number}) : void {
@@ -102,25 +102,62 @@ function Home() : JSX.Element {
     function close() :void {
         if (openPlayButton)
             setOpenPlayButton(!openPlayButton);
-        if (openFriendMenu && indexOfFriend !== prevIndexOfFriendRef.current)
-        {
-            console.log(indexOfFriend);
-            console.log(prevIndexOfFriendRef.current);
+        if (openFriendMenu && indexOfFriend != prevIndexOfFriendRef.current)
             setOpenFriendMenu(!openFriendMenu);
-        }
         if (openFriendMenuLeaderBrd && indexOfFriend !== prevIndexOfFriendMenuLeaderBordRef.current)
             setOpenFriendMenuLeaderBrd(!openFriendMenuLeaderBrd);
         if (openProfil)
             setOpenProfil(false);
         if (openUserList && prevsearchBarUser.current.id !== searchBarUser.id)
             setOpenUserList(false);
-    }    
+    }
 
-    for (let i = 0; i < 22; i++)
+    function delFriendClick(e : {idToDelete: string}){
+        //let friendListTmp = friendList.filter(el => el.props.user.id !== e.idToDelete);
+        fetch(`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/friendships?user_id=${user_id}&userToDelete=${e.idToDelete}`, {
+            method: 'DELETE'
+        }).catch(function(error) {
+            console.log('Il y a eu un problème avec l\'opération fetch : ' + error.message);
+        });
+        //setFriendList([...friendListTmp]);
+    }
+
+
+    //get the friend list of the user
+    useEffect(()=>{ 
+        fetch(`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/friendships?user_id=${user_id}`).then(function(response){
+            if (response.ok)
+            {
+                return (response.json().then(function(json){
+                    let friendListTmp : JSX.Element[] = [];
+                    json.map((e : UserBack , i : number)=> {
+                        let user = {
+                            id:`${e.id}`,
+                            avatar_num: i + 1,
+                            status:( i % 2) === 0 ? 'onligne' : 'outligne',
+                            name :`${e.name}`,
+                            victory: Math.floor(Math.random() * 1000),
+                            defeat: Math.floor(Math.random() * 1000)
+                        };
+                        let friendEntity = <FriendEntity small={false} del={true} user={user}  key={i} index={i}  handleClick={handleClickFriendMenu} delFriendClick={delFriendClick}/>; 
+                        friendListTmp.push(friendEntity);
+                    });
+                    setFriendList([...friendListTmp]);
+                }));
+            }
+            
+                
+        }).catch(function(error) {
+            console.log('Il y a eu un problème avec l\'opération fetchiii : ' + error.message);
+        });
+    },[friendList])
+
+
+    for (let i = 0; i < 19; i++)
     {
-        friendList.push(<FriendEntity small={false} del={true} user={{id:`${i + 1}`, avatar_num: Math.floor(Math.random() * 19) + 1, status:( Math.floor(Math.random() * 2)) === 0 ? 'onligne' : 'outligne', name : 'name' + (i + 1).toString(), victory: Math.floor(Math.random() * 1000), defeat: Math.floor(Math.random() * 1000)}}  key={i} index={i}  handleClick={handleClickFriendMenu} />);
-        matchList.push(<MatchEntity url1={`/avatar/avatar-${Math.floor(Math.random() * 19) + 1}.png`} url2={`/avatar/avatar-${Math.floor(Math.random() * 19) + 1}.png`} name={'name' + (i + 1).toString()} score={5} key={i} />);
-        leaderboard.push(<LeaderboardEntity  user={{id:`${i + 1}`, avatar_num: Math.floor(Math.random() * 19) + 1, status:( Math.floor(Math.random() * 2)) === 0 ? 'onligne' : 'outligne', name : 'name' + (i + 1).toString(), victory: Math.floor(Math.random() * 1000), defeat: Math.floor(Math.random() * 1000)} } level={420} rank={i + 1} key={i} handleClick={handleClickFriendMenuLeaderBrd}/>)
+        //friendListTmp.push(<FriendEntity small={false} del={true} user={{id:`${i + 1}`, avatar_num: Math.floor(Math.random() * 19) + 1, status:( Math.floor(Math.random() * 2)) === 0 ? 'onligne' : 'outligne', name : 'name' + (i + 1).toString(), victory: Math.floor(Math.random() * 1000), defeat: Math.floor(Math.random() * 1000)}}  key={i} index={i}  handleClick={handleClickFriendMenu} />);
+        matchList.push(<MatchEntity url1={`/avatar/avatar-${i + 2}.png`} url2={`/avatar/avatar-${i + 1}.png`} name={'name' + (i + 1).toString()} score={5} key={i} />);
+        leaderboard.push(<LeaderboardEntity  user={{id:`${i + 1}`, avatar_num: i + 1, status:(i % 2) === 0 ? 'onligne' : 'outligne', name : 'name' + (i + 1).toString(), victory: Math.floor(Math.random() * 1000), defeat: Math.floor(Math.random() * 1000)} } level={420} rank={i + 1} key={i} handleClick={handleClickFriendMenuLeaderBrd}/>)
     }
 
     return (

@@ -3,7 +3,7 @@ import { FriendshipsService } from "./friendships.service";
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { User } from "src/users/user.entity";
 
-@UseGuards(JwtAuthGuard)
+//@UseGuards(JwtAuthGuard)
 @Controller('friendships')
 export class FriendshipsController {
     constructor(

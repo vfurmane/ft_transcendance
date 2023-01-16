@@ -15,7 +15,7 @@ import textStyles from 'styles/text.module.scss';
 
 export default function Profil(): JSX.Element {
     let UserState = useSelector(selectUserState);
-    const prevAchivementRef = useRef(initAchivement);
+    const prevAchivementRef = useRef({name: '', status:'', description:''});
     const router = useRouter();
     const [user, setUser] = useState(initUser);
     const [openAchivementList, setOpenAchivementList] = useState(false);
@@ -94,6 +94,30 @@ export default function Profil(): JSX.Element {
             setOpenUserList(false);
     }
 
+    function addFriend(){
+        const data = {
+            initiator_id: UserState.id,
+            target_id: user.id
+        }
+
+        fetch(`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/friendships`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data),
+        }).then(function(response){
+            response.json().then((res)=>{
+                if (res === 1)
+                    console.log('friend add');
+                else
+                    console.log('friend allready add');
+            });
+        }).catch(function(error) {
+            console.log('Il y a eu un problème avec l\'opération fetch : ' + error.message);
+        });
+    }
+
     for (let i = 0; i < 22; i++) {
         achivementList.push(<AchivementEntity achivement={{name:'achivement' + (i + 1).toString(), status:'done', description:'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Leo duis ut diam quam nulla. Et ligula ullamcorper malesuada proin libero nunc consequat. Tincidunt eget nullam non nisi est sit amet facilisis magna. Eu turpis egestas pretium aenean. Nunc consequat interdum varius sit amet. Cras adipiscing enim eu turpis egestas pretium. Integer eget aliquet nibh praesent. Ut sem viverra aliquet eget sit amet. Auctor augue mauris augue neque gravida in. Ut eu sem integer vitae. Viverra accumsan in nisl nisi scelerisque eu ultrices vitae auctor. Orci ac auctor augue mauris. Tempor id eu nisl nunc mi ipsum faucibus vitae.'}} key={i}  handleClick={achivementClick} />);
         listOfMatch.push(<MatchEntity url1={`/avatar/avatar-${Math.floor(Math.random() * 19) + 1}.png`} url2={`/avatar/avatar-${Math.floor(Math.random() * 19) + 1}.png`} name={'name' + (i + 1).toString()} score={5} key={i} />);
@@ -136,7 +160,7 @@ export default function Profil(): JSX.Element {
                                 <button className={styles.buttonProfil}><h3 className={textStyles.laquer} style={{ fontSize: '18px' }}>Delete account</h3></button>
                             </div>:
                             <div className={styles.buttonProfilContainer}>
-                                <button className={styles.buttonProfil} style={{width:'100px', height:'40px'}}><Image alt="addFriend" src={`/addFriend.png`} width={20} height={20}/></button>
+                                <button className={styles.buttonProfil} style={{width:'100px', height:'40px'}} onClick={addFriend}><Image alt="addFriend" src={`/addFriend.png`} width={20} height={20}/></button>
                                 <button className={styles.buttonProfil} style={{width:'100px'}}><Image alt="message" src={`/message.png`} width={20} height={20}/></button>
                                 <button className={styles.buttonProfil} style={{width:'100px'}}><h3 className={textStyles.laquer} style={{ fontSize: '18px' }}>Play</h3></button>
                                 <button className={styles.buttonProfil} style={{backgroundColor:'#e22d44', width:'100px'}} ><h3 className={textStyles.laquer} style={{ fontSize: '18px' }}>block</h3></button>
@@ -148,7 +172,7 @@ export default function Profil(): JSX.Element {
                 <div className="row">
                     <div className="col-10 offset-1 col-lg-8" >
                          {!openAchivementList && !openConfigProfil? 
-                         <div className='card' style={{ background: 'rgba(0,0,0,0)' }}> 
+                         <div className='card' style={{ background: 'rgba(0, 0, 0, 0)' }}> 
                             <h2 className={textStyles.pixel} >Match history</h2>
                             <div className="cardList">
                             {listOfMatch}

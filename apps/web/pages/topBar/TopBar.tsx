@@ -11,8 +11,7 @@ import FriendEntity from '../HomePage/FriendEntity';
 import styles from 'styles/topBar.module.scss';
 import textStyles from 'styles/text.module.scss';
 import List from '../HomePage/List';
-import User, { initUser } from '../../interface/UserInterface';
-
+import User, { initUser , UserBack} from '../../interface/UserInterface';
 
 interface propsTopBar  {
     openToggle : boolean,
@@ -29,7 +28,7 @@ function TopBar(props : propsTopBar): JSX.Element {
     const [value, setValue] = useState('');
     const [user, setUser] = useState(initUser);
     const [indexOfUser, setIndexOfUser] = useState(0);
-    
+    const [userList, setUserList] = useState([<></>]);
 
     const UserState = useSelector(selectUserState);
 
@@ -66,6 +65,33 @@ function TopBar(props : propsTopBar): JSX.Element {
         }     
     }
 
+    useEffect(()=>{
+        if (value.length)
+        {
+            fetch(`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/search?letters=${value}`).then(function(response){
+                response.json().then(function(json){
+                    let userListTmp : JSX.Element[] = [];
+                    json.map((e : UserBack, i : number) => {
+                        let user = {
+                            id:`${e.id}`,
+                            avatar_num:i + 1,
+                            status:(i % 2) === 0? 'outligne': 'inligne',
+                            name :`${e.name}`,
+                            victory: Math.floor(Math.random() * 1000),
+                            defeat:Math.floor(Math.random() * 1000)
+                        }
+                        let userEntity = <FriendEntity small={true} del={false} user={user}  key={i} index={i}  handleClick={handleClickUserMenu} delFriendClick={()=>{}} />;
+                        userListTmp.push(userEntity);
+                    });
+                    setUserList([...userListTmp]);
+                });
+            }).catch(function(error) {
+                console.log('Il y a eu un problème avec l\'opération fetch : ' + error.message);
+            });
+        }
+
+    }, [value, userList]);
+
     function handleClickUserMenu( e : {user : User, index: number}) : void {
         setOpenUserMenu(true);
         setUser(e.user);
@@ -73,11 +99,11 @@ function TopBar(props : propsTopBar): JSX.Element {
         props.writeSearchTopBar(true, e.user);
     }
 
-    let friendList : JSX.Element[] = [];
-    for (let i = 0; i < 22; i++)
+    /*let friendList : JSX.Element[] = [];
+    for (let i = 0; i < 19; i++)
     {
-        friendList.push(<FriendEntity small={true} del={false} user={{id:`${i + 1}`, avatar_num: Math.floor(Math.random() * 19) + 1, status:( Math.floor(Math.random() * 2)) === 0 ? 'onligne' : 'outligne', name : 'name' + (i + 1).toString(), victory: Math.floor(Math.random() * 1000), defeat: Math.floor(Math.random() * 1000)}}  key={i} index={i}  handleClick={handleClickUserMenu} />);
-    }
+        friendList.push(<FriendEntity small={true} del={false} user={{id:`${i + 1}`, avatar_num: i + 1, status:( i % 2) === 0 ? 'onligne' : 'outligne', name : 'name' + (i + 1).toString(), victory: Math.floor(Math.random() * 1000), defeat: Math.floor(Math.random() * 1000)}}  key={i} index={i}  handleClick={handleClickUserMenu} />);
+    }*/
 
     return (
         <div className={styles.containerTopBar}>
@@ -141,10 +167,10 @@ function TopBar(props : propsTopBar): JSX.Element {
             {props.openUserList ?
             <div  className={`${styles.searchContainer} ${props.openToggle? styles.toggle : ''}`}>
                 <div className='card small d-none d-md-block' >
-                    <List list={friendList} title={''} open={openUserMenu} user={user} index={indexOfUser}/>
+                    <List list={userList} title={''} open={openUserMenu} user={user} index={indexOfUser}/>
                 </div>
                 <div className='card xsmall d-block d-md-none' >
-                    <List list={friendList} title={''} open={openUserMenu} user={user} index={indexOfUser}/>
+                    <List list={userList} title={''} open={openUserMenu} user={user} index={indexOfUser}/>
                 </div>
             </div>
             :<></>}

@@ -33,7 +33,7 @@ export default function leaderboardEntity(props : {user : User, level: number, r
    return (
         <div className={leaderBoardStyles.leaderBoardContainer}>
             {div1}
-            <FriendEntity key={props.rank} small={true} del={false} user={props.user}  index={props.rank - 1} handleClick={props.handleClick}/>
+            <FriendEntity key={props.rank} small={true} del={false} user={props.user}  index={props.rank - 1} handleClick={props.handleClick} delFriendClick={()=>{}}/>
             {div2}
         </div>
         );

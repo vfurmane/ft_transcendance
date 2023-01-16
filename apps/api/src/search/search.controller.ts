@@ -3,7 +3,7 @@ import {SearchService }from './search.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { User } from 'src/users/user.entity';
 
-@UseGuards(JwtAuthGuard)
+//@UseGuards(JwtAuthGuard)
 @Controller('search')
 export class SearchController {
     constructor(private readonly searchService : SearchService){}
