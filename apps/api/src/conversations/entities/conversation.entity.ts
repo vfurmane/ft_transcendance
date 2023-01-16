@@ -17,14 +17,14 @@ export class Conversation {
   id!: string;
 
   @Column()
-  name!: string
+  name!: string;
 
-  @Column({default: false})
-  groupConversation!: boolean
+  @Column({ default: false })
+  groupConversation!: boolean;
 
   @Exclude()
   @Column('varchar', { length: 255, nullable: true, default: null })
-  password!: string|null
+  password!: string | null;
 
   @CreateDateColumn()
   created_at!: Date;
@@ -32,9 +32,15 @@ export class Conversation {
   @UpdateDateColumn()
   updated_at!: Date;
 
-  @OneToMany(() => Message, (message) => message.conversation, {cascade: true})
-  messages!: Message[]
+  @OneToMany(() => Message, (message) => message.conversation, {
+    cascade: true,
+  })
+  messages!: Message[];
 
-  @OneToMany(() => ConversationRole, (conversationRole) => conversationRole.conversation, {cascade: true})
+  @OneToMany(
+    () => ConversationRole,
+    (conversationRole) => conversationRole.conversation,
+    { cascade: true },
+  )
   conversationRoles!: ConversationRole[];
 }

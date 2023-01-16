@@ -1,4 +1,4 @@
-import { Expose, Transform } from 'class-transformer';
+import { Expose } from 'class-transformer';
 import {
   Column,
   CreateDateColumn,
@@ -16,14 +16,14 @@ export class Message {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
-  @ManyToOne(() => User, (user) => user.messages, {eager: true})
-  sender!: User
+  @ManyToOne(() => User, (user) => user.messages, { eager: true })
+  sender!: User;
 
   @ManyToOne(() => Conversation, (conversation) => conversation.messages)
-  conversation!: Conversation
+  conversation!: Conversation;
 
-  @Column("text")
-  content!: string
+  @Column('text')
+  content!: string;
 
   @CreateDateColumn()
   created_at!: Date;

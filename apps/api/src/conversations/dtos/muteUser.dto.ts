@@ -1,12 +1,11 @@
-import { IsNotEmpty, IsString, IsUUID } from "class-validator";
+import { IsNotEmpty, IsString, IsUUID } from 'class-validator';
 
-export class muteUserDto
-{
-    @IsNotEmpty()
-    @IsUUID()
-    id!: string;
+export class muteUserDto {
+  @IsNotEmpty()
+  @IsUUID()
+  id!: string;
 
-    @IsNotEmpty()
-    @IsString()
-    username!: string;
+  @IsNotEmpty()
+  @IsString()
+  username!: string;
 }

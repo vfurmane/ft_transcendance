@@ -21,6 +21,8 @@ const user: User = {
   password: faker.internet.password(),
   tfa_secret: null,
   tfa_setup: false,
+  messages: [],
+  conversationRoles: [],
 };
 
 describe('AuthController', () => {

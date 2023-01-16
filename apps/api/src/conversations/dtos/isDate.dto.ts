@@ -1,8 +1,7 @@
-import { IsDateString, IsNotEmpty, IsString, IsUUID } from "class-validator";
+import { IsDateString, IsNotEmpty } from 'class-validator';
 
-export class isDateDto
-{
-    @IsNotEmpty()
-    @IsDateString()
-    date!: Date;
+export class isDateDto {
+  @IsNotEmpty()
+  @IsDateString()
+  date!: Date;
 }

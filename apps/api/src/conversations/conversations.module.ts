@@ -10,11 +10,16 @@ import { ConversationRestriction } from './entities/conversationRestriction.enti
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Message, Conversation, ConversationRole, ConversationRestriction]),
-    UsersModule
+    TypeOrmModule.forFeature([
+      Message,
+      Conversation,
+      ConversationRole,
+      ConversationRestriction,
+    ]),
+    UsersModule,
   ],
   controllers: [ConversationsController],
   providers: [ConversationsService],
-  exports: [ConversationsService]
+  exports: [ConversationsService, TypeOrmModule],
 })
 export class ConversationsModule {}

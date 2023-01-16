@@ -32,7 +32,7 @@ import { ConversationsModule } from './conversations/conversations.module';
     }),
     UsersModule,
     AuthModule,
-    ConversationsModule
+    ConversationsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

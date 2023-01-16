@@ -1,4 +1,4 @@
-import { User } from 'src/users/user.entity';
+import { User } from '../../users/user.entity';
 import {
   Column,
   Entity,
@@ -19,21 +19,28 @@ export class ConversationRole {
   id!: string;
 
   @Column({
-    type: "enum",
+    type: 'enum',
     enum: ConversationRoleEnum,
-    default: ConversationRoleEnum.USER
+    default: ConversationRoleEnum.USER,
   })
   role!: ConversationRoleEnum;
 
   @Column()
   lastRead!: Date;
 
-  @ManyToOne(() => User, (user) => user.conversationRoles, {eager: true})
+  @ManyToOne(() => User, (user) => user.conversationRoles, { eager: true })
   user!: User;
 
-  @ManyToOne(()=> Conversation, (conversation) => conversation.conversationRoles)
+  @ManyToOne(
+    () => Conversation,
+    (conversation) => conversation.conversationRoles,
+  )
   conversation!: Conversation;
 
-  @OneToMany(() => ConversationRestriction, (conversationRestriction) => conversationRestriction.target, {eager: true, cascade: true})
+  @OneToMany(
+    () => ConversationRestriction,
+    (conversationRestriction) => conversationRestriction.target,
+    { eager: true, cascade: true },
+  )
   restrictions!: ConversationRestriction[];
 }

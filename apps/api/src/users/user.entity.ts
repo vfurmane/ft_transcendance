@@ -8,8 +8,8 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Exclude, Expose } from 'class-transformer';
-import { Message } from 'src/conversations/entities/message.entity';
-import { ConversationRole } from 'src/conversations/entities/conversationRole.entity';
+import { Message } from '../conversations/entities/message.entity';
+import { ConversationRole } from '../conversations/entities/conversationRole.entity';
 
 @Exclude()
 @Entity()
@@ -45,10 +45,13 @@ export class User {
   tfa_setup!: boolean;
 
   @Expose()
-  @OneToMany(()=> Message, (message) => message.sender)
+  @OneToMany(() => Message, (message) => message.sender)
   messages!: Message[];
 
   @Expose()
-  @OneToMany(() => ConversationRole, (conversationRole) => conversationRole.user)
-  conversationRoles!: ConversationRole[]; 
+  @OneToMany(
+    () => ConversationRole,
+    (conversationRole) => conversationRole.user,
+  )
+  conversationRoles!: ConversationRole[];
 }
