@@ -4,6 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'types';
 import * as speakeasy from 'speakeasy';
 import { SpeakeasyGeneratedSecretDto } from 'src/auth/speakeasy-generated-secret.dto';
+import { RegisterUserDto } from './register-user.dto';
 
 export interface AddUserData {
   name: string;
@@ -34,6 +35,15 @@ export class UsersService {
     return this.usersRepository.findOneBy({
       email,
     });
+  }
+
+  async userExists(user: RegisterUserDto): Promise<boolean> {
+    return (
+      (await this.usersRepository.findOneBy([
+        { name: user.name },
+        { email: user.email },
+      ])) !== null
+    );
   }
 
   async addUser(user: AddUserData): Promise<User> {
