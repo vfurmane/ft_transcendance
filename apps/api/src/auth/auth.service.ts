@@ -53,6 +53,8 @@ export class AuthService {
   }
 
   async createUser(user: RegisterUserDto): Promise<User> {
+    if (await this.usersService.userExists(user))
+      throw new BadRequestException('`username` or `email` is already in use');
     const salt = await bcrypt.genSalt();
     user.password = await bcrypt.hash(user.password, salt);
     return this.usersService.addUser(user);
