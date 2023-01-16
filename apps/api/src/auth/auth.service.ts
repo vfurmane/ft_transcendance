@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { AxiosError } from 'axios';
-import { catchError, firstValueFrom, throwError } from 'rxjs';
+import { catchError, firstValueFrom, subscribeOn, throwError } from 'rxjs';
 import { AccessTokenResponse, FtUser, JwtPayload } from 'types';
 import * as speakeasy from 'speakeasy';
 import { JwtService } from '@nestjs/jwt';
@@ -50,6 +50,17 @@ export class AuthService {
         ),
     );
     return data;
+  }
+
+  verifyUserFromToken(access_token: string): JwtPayload | null
+  {
+    let user: JwtPayload;
+    try {
+      user = this.jwtService.verify<JwtPayload>(access_token);
+    } catch (error) {
+      return (null);
+    }
+    return (user)    
   }
 
   async createUser(user: RegisterUserDto): Promise<User> {
