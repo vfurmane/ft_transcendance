@@ -1,12 +1,5 @@
-<<<<<<< HEAD
-import { Body, Controller, Get, Post, Query } from "@nestjs/common";
-import { MatchService } from "./Match.service";
-import { MatcFront, MatchService } from "./Match.service";
-import { User } from "types";
-=======
 import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 import { MatcFront, MatchService } from './Match.service';
->>>>>>> d219be5 (match, gamedata and leaderboard fix)
 
 
 @Controller('match')

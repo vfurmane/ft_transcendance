@@ -45,6 +45,6 @@ import { TransformUserService } from 'src/TransformUser/TransformUser.service';
     TransformUserService,
   ],
   controllers: [AuthController],
-  exports: [AuthService],
+  exports: [AuthService, JwtStrategy],
 })
 export class AuthModule {}
