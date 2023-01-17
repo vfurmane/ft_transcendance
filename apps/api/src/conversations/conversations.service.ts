@@ -239,6 +239,27 @@ export class ConversationsService {
     return true;
   }
 
+  async getConversationsIds(userId: string)
+  {
+    const conversations = await this.conversationRepository.find({
+      relations: {
+        conversationRoles: true
+      },
+      where:
+      {
+        conversationRoles:
+        {
+          user:
+          {
+            id: userId
+          },
+          role: Not(ConversationRoleEnum.LEFT)
+        }
+      }
+    })
+    return conversations.map((el) => el.id)
+  }
+
   async getConversations(currentUser: User): Promise<ConversationsDetails> {
     const conversationsDetails: ConversationsDetails = {
       totalNumberOfUnreadMessages: 0,
