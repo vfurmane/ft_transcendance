@@ -1,6 +1,6 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { User } from '../users/user.entity';
+import { User } from 'types';
 
 @Injectable()
 export class FtOauth2AuthGuard extends AuthGuard('oauth2') {

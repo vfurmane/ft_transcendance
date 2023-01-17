@@ -1,7 +1,7 @@
 import { Exclude, Expose } from 'class-transformer';
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
-import { User } from '../../users/user.entity';
-import { conversationRestrictionEnum } from '../conversationRestriction.enum';
+import { User } from './user.entity';
+import { conversationRestrictionEnum } from '../enums/conversationRestriction.enum';
 import { ConversationRole } from './conversationRole.entity';
 
 @Exclude()

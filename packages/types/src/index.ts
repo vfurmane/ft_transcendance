@@ -1,4 +1,4 @@
-import { Conversation } from "src/conversations/entities/conversation.entity";
+import { Conversation } from "./entities/conversation.entity";
 
 export interface FtUser {
   login: string;
@@ -46,3 +46,6 @@ export interface ConversationWithUnread {
   numberOfUnreadMessages: number;
   lastMessage: Date;
 }
+
+export * from '../src/enums';
+export * from '../src/entities';
