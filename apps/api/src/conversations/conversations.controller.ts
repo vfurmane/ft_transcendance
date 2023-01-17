@@ -12,20 +12,20 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth-guard';
-import { User } from '../users/user.entity';
-import { Conversation } from './entities/conversation.entity';
+import { User } from 'types';
+import { Conversation } from 'types';
 import { ConversationsService } from './conversations.service';
 import { createConversationDto } from './dtos/createConversation.dto';
 import { sendMessageDto } from './dtos/sendMessage.dto';
 import { updateRoleDto } from './dtos/updateRole.dto';
 import { isUUIDDto } from './dtos/IsUUID.dto';
 import { muteUserDto } from './dtos/muteUser.dto';
-import { conversationRestrictionEnum } from './conversationRestriction.enum';
+import { conversationRestrictionEnum } from 'types';
 import { isDateDto } from './dtos/isDate.dto';
 import { User as CurrentUser } from '../common/decorators/user.decorator';
 import { ConversationsDetails, unreadMessagesResponse } from 'types';
-import { Message } from './entities/message.entity';
-import { ConversationRole } from './entities/conversationRole.entity';
+import { Message } from 'types';
+import { ConversationRole } from 'types';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @UseGuards(JwtAuthGuard)

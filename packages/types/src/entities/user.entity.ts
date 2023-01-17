@@ -1,4 +1,4 @@
-import { State } from '../auth/state.entity';
+import { State } from './state.entity';
 import {
   Column,
   CreateDateColumn,
@@ -8,8 +8,8 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Exclude, Expose } from 'class-transformer';
-import { Message } from '../conversations/entities/message.entity';
-import { ConversationRole } from '../conversations/entities/conversationRole.entity';
+import { Message } from './message.entity';
+import { ConversationRole } from './conversationRole.entity';
 
 @Exclude()
 @Entity()
