@@ -10,17 +10,16 @@ import { ConversationsService } from "./conversations.service";
 })
 export class ConversationsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @WebSocketServer() server!: Server;
-    clients!: {[key: string]: Socket[]};
+    // clients!: Set<Socket>;
 
     constructor (private readonly conversationsService: ConversationsService,
         private readonly authService: AuthService){
-            this.clients = {};
+            // this.clients = new Set<Socket>();
             console.error("Constructor");
         }
 
     handleConnection(client : Socket) {
-        console.log('New client connected');
-        console.log("handshake", client.handshake.headers.authorization);
+        console.log('New client trying to connected');
         if (! client.handshake.headers?.authorization)
         {
             client.emit('unauthorized', "No token provided");
@@ -34,31 +33,26 @@ export class ConversationsGateway implements OnGatewayConnection, OnGatewayDisco
             {
                 client.emit('unauthorized', "Invalid token");
                 client.disconnect(true);
-                console.error("No user found");
+                // console.error("No user found");
             }
             else
             {
-                console.error("current id", currentUser);
-                if (!this.clients[currentUser.sub])
-                    this.clients[currentUser.sub] = [];
-                this.clients[currentUser.sub].push(client);
-                client.on('disconnect', (reason) =>
-                {
-                    if (this.clients[currentUser.sub].length === 1)
-                        delete this.clients[currentUser.sub]
-                    else
-                        this.clients[currentUser.sub] = this.clients[currentUser.sub].filter((el) => el !== client)
-                })
+                // console.error("current id", currentUser);
+                client.data.userId = currentUser.sub;
+                client.data.name = currentUser.name;
+                // console.error("data start", client.data, "data end");
+                // this.clients.add(client);
             }
         }
-        console.error(this.clients)
-        // console.log(this.jwtStrategy.validate())
-        // this.authService.fetchProfileWithToken(client.handshake.headers.authorization).catch((error) => console.error(error))
+        console.error("object.keys", this.server.sockets);
+        // console.error("set of clients on connection", this.clients)
         client.emit('connection', 'Successfully connected to server');
     }
     
     handleDisconnect(client : any) {
-        console.error(this.clients)
+        console.error("object.keys", this.server.sockets);
+        // this.clients.delete(client)
+        // console.error("set of clients on disconnection", this.clients);
         console.log('Client disconnected');
     }
 
