@@ -1,0 +1,41 @@
+@import 'variables';
+
+.container {
+  border-radius: 12px;
+  padding: 30px;
+  width: 367px;
+
+  display: flex;
+  gap: 14px;
+  flex-direction: column;
+  align-items: center;
+
+  background: $dark-background-lighter-rgba-overlay, url('/noise.png');
+  background-repeat: repeat;
+  color: #E8E8E8;
+  text-align: center;
+
+  * {
+    margin: 0;
+  }
+}
+
+.form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+p.error,
+p.success {
+  margin: 6px 0;
+}
+
+p.error {
+  color: $dark-system-red;
+}
+
+p.success {
+  color: $dark-system-green;
+}
