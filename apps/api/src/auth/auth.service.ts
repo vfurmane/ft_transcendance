@@ -55,7 +55,7 @@ export class AuthService {
   async createUser(user: RegisterUserDto): Promise<User> {
     const salt = await bcrypt.genSalt();
     user.password = await bcrypt.hash(user.password, salt);
-    return this.usersService.addUser(user);
+    return this.usersService.addUser({ ...user, name: user.username });
   }
 
   async validateUser(username: string, pass: string): Promise<User | null> {
