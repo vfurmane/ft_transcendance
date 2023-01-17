@@ -99,12 +99,6 @@ function TopBar(props : propsTopBar): JSX.Element {
         props.writeSearchTopBar(true, e.user);
     }
 
-    /*let friendList : JSX.Element[] = [];
-    for (let i = 0; i < 19; i++)
-    {
-        friendList.push(<FriendEntity small={true} del={false} user={{id:`${i + 1}`, avatar_num: i + 1, status:( i % 2) === 0 ? 'onligne' : 'outligne', name : 'name' + (i + 1).toString(), victory: Math.floor(Math.random() * 1000), defeat: Math.floor(Math.random() * 1000)}}  key={i} index={i}  handleClick={handleClickUserMenu} />);
-    }*/
-
     return (
         <div className={styles.containerTopBar}>
             <div className='d-none d-md-block'>

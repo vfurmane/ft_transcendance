@@ -19,14 +19,24 @@ export default function List(props: { title: string, list: JSX.Element[], open?:
                                     <div className={`${styles.entityShadow} ${props.title.length === 0 ? styles.small : ''} d-none d-sm-block`} ></div>
                                 </div>
     }
+
     return (
         <div>
             {typeof props.title === 'string' && props.title.length?
             <h2 className={textStyle.pixel}>{props.title}</h2>:<></>}
-            <div className='cardList'>
-                {props.list}
-            </div>
-            
+            {
+                props.list[0] && props.list[0].props.user && props.list[0].props.user.id === '-1'?
+                <div className={styles.shadowContainer} style={{height:'300px'}}>
+                    <p className={textStyle.saira}>Add some friend ...</p>
+                </div> :
+                <div className='cardList'>
+                    {!props.list.length?
+                     <div className={styles.shadowContainer} style={{height:'200px'}}>
+                        <p className={textStyle.saira} style={{color: 'white'}}>I didn't find anyone ...</p>
+                    </div> :
+                    props.list}
+                </div>
+            }
         </div>
            
        

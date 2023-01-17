@@ -62,6 +62,7 @@ export class FriendshipsService {
         const initiatorSide = await this.friendshipsRepository.findOneBy({initiator_id : user_id, target_id: userToDelete_id});
         if (initiatorSide)
         {
+            console.log(`initside ${initiatorSide.id}`);
             this.friendshipsRepository.delete({id: initiatorSide.id});
             return 1;
         }
@@ -70,6 +71,7 @@ export class FriendshipsService {
             const targetSide = await this.friendshipsRepository.findOneBy({target_id : user_id, initiator_id: userToDelete_id});
             if (targetSide)
             {
+                console.log(`targetside ${targetSide.id}`);
                 this.friendshipsRepository.delete({id: targetSide.id});
                 return 1;
             }
