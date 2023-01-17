@@ -98,6 +98,7 @@ export function LoginForm(): ReactElement {
         <h1>Login</h1>
         <Input
           {...register("username", { required: "'username' is required" })}
+          autofocus
           disabled={loading}
           error={errors.username}
           placeholder="username"

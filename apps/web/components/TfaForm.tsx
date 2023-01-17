@@ -77,6 +77,7 @@ export function TfaForm(props: TfaFormProps): ReactElement {
         <p>Open your authentication app and type in your OTP.</p>
         <Input
           {...register("token", { required: "'token' is required" })}
+          autofocus
           disabled={loading}
           error={errors.token}
           placeholder="token"
