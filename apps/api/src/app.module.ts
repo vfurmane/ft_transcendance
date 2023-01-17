@@ -35,6 +35,7 @@ import { FriendshipsModule  } from './friendships/friendships.module';
     AuthModule,
     SearchModule,
     FriendshipsModule,
+    UsersModule
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -40,15 +40,24 @@ export class FriendshipsService {
 
         const initiatorArray = await this.friendshipsRepository.findBy({initiator_id : user_id});
         const targetArray = await this.friendshipsRepository.findBy({target_id : user_id});
+        console.log(targetArray);
         
         initiatorArray.forEach(e => ids.push(e.target_id));
         targetArray.forEach(e => ids.push(e.initiator_id));
 
         const queryBuilder = this.userRepository?.createQueryBuilder().select('*');
 
-        queryBuilder.where("id IN (:...Ids)", { Ids: ids});
+        if (ids.length)
+        {
+            queryBuilder.where("id IN (:...Ids)", { Ids: ids});
+            friendsList =  await queryBuilder.getRawMany();
+        }
+        else
+        {
+            friendsList = [];
+        }
         
-        friendsList =  await queryBuilder.getRawMany();
+        
 
         //for debug :
         //const friendships =  await this.friendshipsRepository.find();
@@ -62,7 +71,7 @@ export class FriendshipsService {
         const initiatorSide = await this.friendshipsRepository.findOneBy({initiator_id : user_id, target_id: userToDelete_id});
         if (initiatorSide)
         {
-            console.log(`initside ${initiatorSide.id}`);
+            console.log(`initside ${initiatorSide}`);
             this.friendshipsRepository.delete({id: initiatorSide.id});
             return 1;
         }

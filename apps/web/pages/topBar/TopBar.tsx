@@ -89,8 +89,7 @@ function TopBar(props : propsTopBar): JSX.Element {
                 console.log('Il y a eu un problème avec l\'opération fetch : ' + error.message);
             });
         }
-
-    }, [value, userList]);
+    }, [value]);
 
     function handleClickUserMenu( e : {user : User, index: number}) : void {
         setOpenUserMenu(true);
@@ -148,9 +147,11 @@ function TopBar(props : propsTopBar): JSX.Element {
             {props.openProfil? 
             <div className={props.openToggle? `${styles.elementTopBar}  ${styles.toggle}  ${styles.avatarMenu}  ${styles.open}` : `${styles.elementTopBar}  ${styles.toggle}  ${styles.avatarMenu}`}>
                 <div className={styles.contextMenuContainer}>
-                    <div className={`${styles.contextMenuEntity}  ${styles.bar}`}>
-                    <Link href={{pathname:"/ProfilePage/Profil", query: {user : JSON.stringify(UserState)}} }style={{ textDecoration: 'none' }}><h3 className={textStyles.laquer}>profil</h3></Link>
-                    </div>
+                    <Link href={{pathname:"/ProfilePage/Profil", query: {user : JSON.stringify(UserState)}} }style={{ textDecoration: 'none' }} >
+                        <div className={`${styles.contextMenuEntity}  ${styles.bar}`}>
+                            <h3 className={textStyles.laquer}>profil</h3>
+                        </div>
+                    </Link>
                     <div className={styles.contextMenuEntity}>
                         <h3 className={textStyles.laquer}>logout</h3>
                     </div>

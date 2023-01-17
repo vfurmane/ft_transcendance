@@ -9,6 +9,9 @@ import styles from 'styles/entity.module.scss';
 
 export default function List(props: { title: string, list: JSX.Element[], open?: boolean, user?: User, index?: number }): JSX.Element {
 
+    if (!props.list)
+        return <></>;
+
     if (props.open === true && typeof(props.index) !== 'undefined'  && typeof(props.title) === 'string') {
     props.list[props.index] =   <div className={styles.shadowContainer}>
                                     <div className={`${styles.entityContainer} ${styles.entity} ${props.title.length === 0 ? styles.small : ''}`}>
