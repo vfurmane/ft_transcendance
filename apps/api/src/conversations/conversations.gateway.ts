@@ -30,6 +30,7 @@ import { ConversationsDetails, unreadMessagesResponse } from 'types';
 import { Message } from './entities/message.entity';
 import { ConversationRole } from './entities/conversationRole.entity';
 import { UsersService } from '../users/users.service';
+import { instanceToPlain } from 'class-transformer';
 
 @UseFilters(HttpExceptionTransformationFilter)
 @UsePipes(new ValidationPipe())
@@ -104,7 +105,7 @@ export class ConversationsGateway implements OnGatewayConnection {
       }
       client
         .to(`conversation_${conversation.id}`)
-        .emit('newConversation', conversation);
+        .emit('newConversation', instanceToPlain(conversation));
     }
     return conversation;
   }
@@ -136,7 +137,9 @@ export class ConversationsGateway implements OnGatewayConnection {
       content,
     );
     if (ret)
-      client.to(`conversation_${id}`).emit('newMessage', { id, message: ret });
+      client
+        .to(`conversation_${id}`)
+        .emit('newMessage', { id, message: instanceToPlain(ret) });
     return ret;
   }
 
@@ -156,18 +159,22 @@ export class ConversationsGateway implements OnGatewayConnection {
       this.server
         .in(`user_${client.data.id}`)
         .socketsJoin(`conversation_${conversation.id}`);
-      client.to(`user_${client.data.id}`).emit('newConversation', conversation);
+      client
+        .to(`user_${client.data.id}`)
+        .emit('newConversation', instanceToPlain(conversation));
       this.server
         .in(`conversation_${conversation.id}`)
         .except(`user_${client.data.id}`)
         .emit('userJoined', {
           id,
-          user: await this.usersService.getById(client.data.id),
+          user: instanceToPlain(
+            await this.usersService.getById(client.data.id),
+          ),
         });
       this.server
         .in(`conversation_${conversation.id}`)
         .except(`user_${client.data.id}`)
-        .emit('newMessage', { id, message: joinMessage });
+        .emit('newMessage', { id, message: instanceToPlain(joinMessage) });
     }
     return conversation;
   }
@@ -195,7 +202,7 @@ export class ConversationsGateway implements OnGatewayConnection {
       client.data as User,
     );
     if (role) {
-      client.to(`conversation_${id}`).emit('newRole', newRole);
+      client.to(`conversation_${id}`).emit('newRole', instanceToPlain(newRole));
     }
     return newRole;
   }
@@ -217,10 +224,10 @@ export class ConversationsGateway implements OnGatewayConnection {
       client.to(`user_${client.data.id}`).emit('leaveConversation', id);
       this.server
         .in(`conversation_${id}`)
-        .emit('userLeft', { id, user: userRole.user });
+        .emit('userLeft', { id, user: instanceToPlain(userRole.user) });
       this.server
         .in(`conversation_${id}`)
-        .emit('newMessage', { id, message: leftMessage });
+        .emit('newMessage', { id, message: instanceToPlain(leftMessage) });
     }
     return userRole;
   }
@@ -238,7 +245,9 @@ export class ConversationsGateway implements OnGatewayConnection {
       conversationRestrictionEnum.MUTE,
       new Date(date),
     );
-    client.to(`conversation_${id}`).emit('mutedUser', restriction);
+    client
+      .to(`conversation_${id}`)
+      .emit('mutedUser', instanceToPlain(restriction));
     return restriction;
   }
 
@@ -255,7 +264,9 @@ export class ConversationsGateway implements OnGatewayConnection {
       conversationRestrictionEnum.BAN,
       new Date(date),
     );
-    client.to(`conversation_${id}`).emit('bannedUser', restriction);
+    client
+      .to(`conversation_${id}`)
+      .emit('bannedUser', instanceToPlain(restriction));
     this.server.in(`user_${id}`).socketsLeave(`conversation_${id}`);
     return restriction;
   }
@@ -272,7 +283,9 @@ export class ConversationsGateway implements OnGatewayConnection {
       conversationRestrictionEnum.BAN,
       null,
     );
-    client.to(`conversation_${id}`).emit('bannedUser', restriction);
+    client
+      .to(`conversation_${id}`)
+      .emit('bannedUser', instanceToPlain(restriction));
     this.server.in(`user_${id}`).socketsLeave(`conversation_${id}`);
     return restriction;
   }
