@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from 'react'
+import React, { useRef, useEffect, useState, ReactComponentElement } from 'react'
 
 enum Axe{
 	X = 1,
@@ -19,28 +19,29 @@ enum Form{
 }
 
 class Game {
-	private	isSolo = false;
-	private	boardType = Form.HEX;
-	private	boardCanvasRef;
-	private	boardCanvas;
-	private	boardContext;
-	private	board;
-	private	countUpdate:number = 0;
+	public	isSolo:boolean = false;
+	public	boardType = Form.REC;
+	public	boardCanvasRef!:React.RefObject<HTMLCanvasElement>;
+	public	boardCanvas!:HTMLCanvasElement | null;
+	public	boardContext!:CanvasRenderingContext2D | null;
+
+	public	board !: Board;
+	public	countUpdate:number = 0;
 	public	static point:number = 0;
 	public	static live:number = 3;
-	private	ball: Ball;
-	private	player: Racket;
-	private	cible: Target;
-	public static keyPressed: [] = [];
-	private	start = Date.now();
-	private	wall:Wall = [];
-	private	color = ['blue', 'red', 'orange', 'white', 'pink', 'black']
+	public	ball!: Ball;
+	public	player: Racket[] = [];
+	public	cible!: Target;
+	public  static keyPressed = {up: false, down: false};
+	public	start = Date.now();
+	public	wall:Wall[] = [];
+	public	color:string[] = ['blue', 'red', 'orange', 'white', 'pink', 'black']
 
 	constructor() {
 	}
 
 	createRegularPolygon(point:Point,side:number,n:number) {
-		let points = [];
+		let points : Point[] = [];
 		let angle = (-(360 - ((n - 2)*180)/n) * (Math.PI / 180))
 		points[0] = new Point(point.x, point.y);
 		let vector = point.vectorTo(new Point(points[0].x, points[0].y - side));
@@ -53,12 +54,35 @@ class Game {
 		return (points);
 	}
 
+	refresh(player:Racket[], ball:Point, ballVector:Vector) {
+		this.player = this.updatePlayer(player, this.wall);
+		this.ball = new Ball(this.createRegularPolygon(ball, (30), this.boardType), this.player);
+		this.ball.speed = ballVector;
+	}
 
-	createRacket(isSolo,wall) {
+	updatePlayer(player:Racket[], wall:Wall[]) {
+		let racket : Racket[] = [];
+		for (let i = 0; i < wall.length; i++) {
+			let wallDir = wall[i].point[0].vectorTo(wall[i].point[2]).normalized();
+			let wallPerp = wallDir.perp().normalized();
+			let racketCenter = player[i].center();
+			let p3 = new Point((racketCenter.x - (wallDir.x * 40)), (racketCenter.y - (wallDir.y * 40)))
+			let p0 = new Point((racketCenter.x + (wallDir.x * 40)), (racketCenter.y + (wallDir.y * 40)))
+			let p1 = new Point((p0.x + (wallPerp.x * 10)), (p0.y + (wallPerp.y * 10)))
+			let p2 = new Point((p3.x + (wallPerp.x * 10)), (p3.y + (wallPerp.y * 10)))
+			if (this.player === undefined)
+				racket.push(new Racket(i, [p0, p1, p2, p3], this.color[i]));
+			else
+				racket.push(new Racket(i, [p0, p1, p2, p3], this.player[i].color));
+		}
+		return (racket);
+	}
+
+	createRacket(isSolo : boolean, wall : Wall[]) {
 		if (isSolo) {
-			return ([new Racket(this.createRect(10, this.boardCanvas.height / 2, 10, 40))]);
+			return ([new Racket(0, this.createRect(10, this.boardCanvas!.height / 2, 10, 40), this.color[0])]);
 		} else {
-			let racket = [];
+			let racket:Racket[] = [];
 			for (let i = 0; i < wall.length; i++) {
 				let wallDir = wall[i].point[0].vectorTo(wall[i].point[2]).normalized();
 				let wallPerp = wallDir.perp().normalized();
@@ -68,7 +92,7 @@ class Game {
 				let p0 = new Point((racketCenter.x + (wallDir.x * 40)), (racketCenter.y + (wallDir.y * 40)))
 				let p1 = new Point((p0.x + (wallPerp.x * 10)), (p0.y + (wallPerp.y * 10)))
 				let p2 = new Point((p3.x + (wallPerp.x * 10)), (p3.y + (wallPerp.y * 10)))
-				if (this.player === undefined)
+				if (this.player.length === 0)
 					racket.push(new Racket(i, [p0, p1, p2, p3], this.color[i]));
 				else
 					racket.push(new Racket(i, [p0, p1, p2, p3], this.player[i].color));
@@ -78,7 +102,7 @@ class Game {
 	}
 
 	createRect(x:number,y:number,w:number,h:number) {
-		let point = [];
+		let point : Point[] = [];
 		point[0] = new Point(x,y);
 		point[1] = new Point(x+w,y);
 		point[2] = new Point(x+w,y+h);
@@ -86,9 +110,13 @@ class Game {
 		return point;
 	}
 
-	init(ref) {
+	init(ref : React.RefObject<HTMLCanvasElement> | undefined) {
+		if (ref === undefined)
+			return ;
 		this.boardCanvasRef = ref;
 		this.boardCanvas = this.boardCanvasRef.current;
+		if (!this.boardCanvas)
+			return ;
 		this.boardContext = this.boardCanvas.getContext('2d');
 		this.boardCanvas.width = window.innerWidth * 0.9;
 		this.boardCanvas.height = window.innerHeight * 0.9;
@@ -103,22 +131,24 @@ class Game {
 		if (this.isSolo)
 			this.cible = new Target(this.createRect(this.boardCanvas.width * (2 / 3), this.boardCanvas.height / 2, 20, 20));
 		window.addEventListener("keydown",function(e){
-			Game.keyPressed[e.which] = true;
+			if (e.key === "ArrowUp") Game.keyPressed.up = true
+			else if (e.key === "ArrowDown") Game.keyPressed.down = true
 		});
 		window.addEventListener("keyup",function(e){
-			Game.keyPressed[e.which] = false;
+			if (e.key === "ArrowUp") Game.keyPressed.up = false
+			else if (e.key === "ArrowDown") Game.keyPressed.down = false
 		});
 	}
 
 	updateGame() {
-		this.boardCanvas.width = window.innerWidth * 0.9
-		this.boardCanvas.height = window.innerHeight * 0.9
+		this.boardCanvas!.width = window.innerWidth * 0.9
+		this.boardCanvas!.height = window.innerHeight * 0.9
 
 		for (let p of this.player) {
 			if (p.hp == 0) {
 				if (this.boardType == Form.REC) {
 					this.boardType = Form.HEX;
-					this.player = undefined;
+					this.player = [];
 				} else {
 					this.player.splice(p.index, 1);
 					for (let i = 0; i < this.player.length; i++) {
@@ -131,17 +161,17 @@ class Game {
 				this.init(this.boardCanvasRef);
 			}
 		}
-		this.boardContext.fillStyle = "#666666"
+		this.boardContext!.fillStyle = "#666666"
 		this.board.board.draw(this.boardContext, 'gray');
-		this.boardContext.font = "14px sherif"
-		this.boardContext.fillStyle = "#000000"
-		this.boardContext.fillText(Math.round(this.countUpdate / (Math.round((Date.now() - this.start) / 1000))) + " Print from class Board : " + this.boardCanvas.width + " " + this.boardCanvas.height, 0 , 10)
-		this.boardContext.font = "50px sherif";
-		this.boardContext.fillText(Game.point, this.boardCanvas.width / 2, 50)
-		this.boardContext.fillText(Math.round((Date.now() - this.start) / 1000), this.boardCanvas.width / 2, 110)
-		this.boardContext.font = "20px sherif";
+		this.boardContext!.font = "14px sherif"
+		this.boardContext!.fillStyle = "#000000"
+		this.boardContext!.fillText(Math.round(this.countUpdate / (Math.round((Date.now() - this.start) / 1000))) + " Print from class Board : " + this.boardCanvas!.width + " " + this.boardCanvas!.height, 0 , 10)
+		this.boardContext!.font = "50px sherif";
+		this.boardContext!.fillText(Game.point.toString(), this.boardCanvas!.width / 2, 50)
+		this.boardContext!.fillText(Math.round((Date.now() - this.start) / 1000).toString(), this.boardCanvas!.width / 2, 110)
+		this.boardContext!.font = "20px sherif";
 		for (let i:number = 0; i < Game.live; i++) {
-			this.boardContext.fillText("❤️", (this.boardCanvas.width / 2) + (25 * i), 160)
+			this.boardContext!.fillText("❤️", (this.boardCanvas!.width / 2) + (25 * i), 160)
 		}
 		this.countUpdate++;
 		this.ball.update(this.player, this.board.wall, this.board);
@@ -150,14 +180,14 @@ class Game {
 		if (this.isSolo)
 			this.cible.update(this.ball, this.boardCanvas);
 		for (let wall of this.board.wall) {
-			wall.draw(this.boardContext);
+			wall.draw(this.boardContext, undefined);
 		}
-		this.ball.draw(this.boardContext);
+		this.ball.draw(this.boardContext, undefined);
 		for (let p of this.player) {
 			p.draw(this.boardContext, p.color);
 			p.printPoint(this.boardContext, 0, 'red');
 			p.printPoint(this.boardContext, 3, 'green');
-			this.boardContext.fillText(p.hp, this.boardCanvas.width / 1.2, 50 + (20 * p.index));
+			this.boardContext!.fillText(p.hp.toString(), this.boardCanvas!.width / 1.2, 50 + (20 * p.index));
 		}
 		if (this.isSolo)
 			this.cible.draw(this.boardContext);
@@ -170,28 +200,28 @@ class Game {
 }
 
 class Board {
-	private	board;
-	private	wall;
+	public	board!:Entity;
+	public	wall!:Wall[];
 
-	constructor(boardType, canvas) {
+	constructor(boardType:number, canvas:HTMLCanvasElement | null) {
 		let height = 0;
 		let size = 1;
 		if (boardType == Form.HEX || boardType == Form.PEN) {
-			height = canvas.height / 4;
+			height = canvas!.height / 4;
 			size = 0.5;
 		}
 		if (boardType != Form.REC)
-			this.board = new Entity(this.createRegularPolygon(new Point(0, height), canvas.height * size, boardType));
+			this.board = new Entity(this.createRegularPolygon(new Point(0, height), canvas!.height * size, boardType));
 		else
-			this.board = new Entity(this.createRect(0, 0, (canvas.height / 4) * 4, (canvas.height / 4) * 3));
+			this.board = new Entity(this.createRect(0, 0, (canvas!.height / 4) * 4, (canvas!.height / 4) * 3));
 		this.wall = this.createWall(this.board);
 	}
 
 	createRegularPolygon(point:Point,side:number,n:number) {
-		let points = [];
-		let angle = (-(360 - ((n - 2)*180)/n) * (Math.PI / 180))
+		let points:Point[] = [];
+		let angle:number = (-(360 - ((n - 2)*180)/n) * (Math.PI / 180))
 		points[0] = new Point(point.x, point.y);
-		let vector = point.vectorTo(new Point(points[0].x, points[0].y - side));
+		let vector:Vector = point.vectorTo(new Point(points[0].x, points[0].y - side));
 		for (let i:number = 0; i < n - 1; i++) {
 			points[i + 1] = new Point(points[i].x, points[i].y);
 			[vector.x, vector.y] = [-((vector.x * Math.cos(angle)) + (vector.y * Math.sin(angle))), ((vector.x * Math.sin(angle)) - (vector.y * Math.cos(angle)))]
@@ -202,7 +232,7 @@ class Board {
 	}
 
 	createRect(x:number,y:number,w:number,h:number) {
-		let point = [];
+		let point:Point[] = [];
 		point[0] = new Point(x,y);
 		point[1] = new Point(x+w,y);
 		point[2] = new Point(x+w,y+h);
@@ -211,7 +241,7 @@ class Board {
 	}
 
 	createWall(board:Entity) {
-		let wall = [];
+		let wall:Wall[] = [];
 		wall.push(new Wall(board.point[board.point.length - 1], board.point[0]));
 		for (let i = 0; i < board.point.length - 1; i++) {
 			wall.push(new Wall(board.point[i], board.point[i + 1]));
@@ -221,15 +251,9 @@ class Board {
 }
 
 class Vector {
-	public	x;
-	public	y;
+	constructor(public x :number, public y:number) {}
 
-	constructor(x:number,y:number) {
-		this.x = x;
-		this.y = y;
-	}
-
-	product(other) {
+	product(other:Vector | Point) {
 		return ((this.x * other.x) + (this.y * other.y));
 	}
 
@@ -245,27 +269,22 @@ class Vector {
 		return (new Vector(this.x / this.norm(), this.y / this.norm()));
 	}
 
-	add(other) {
+	add(other:Vector | Point) {
 		return (new Vector(this.x + other.x, this.y + other.y));
 	}
 
-	sub(other) {
+	sub(other:Vector | Point) {
 		return (new Vector(this.x - other.x, this.y - other.y));
 	}
 
-	crossProduct(other) {
+	crossProduct(other:Vector) {
 		return ((this.x * other.y) - (this.y * other.x))
 	}
 }
 
 class Point {
-	public	x;
-	public	y;
 
-	constructor(x:number,y:number) {
-		this.x = x;
-		this.y = y;
-	}
+	constructor(public x :number, public y:number) {}
 
 	vectorTo(other:Point) {
 		return (new Vector((other.x - this.x), (other.y - this.y)));
@@ -275,7 +294,7 @@ class Point {
 		return (new Point((this.x + other.x)/2, (this.y + other.y)/2));
 	}
 
-	intersect(to1,from2,to2) {
+	intersect(to1:Point,from2:Point,to2:Point) {
 		let from1 = new Point(this.x, this.y);
 		let v1 = from1.vectorTo(to1);
 		let v2 = from2.vectorTo(to2);
@@ -290,28 +309,25 @@ class Point {
 }
 
 class Entity {
-	private	point:Point = [];
-	private	speed:Vector;
+	public	speed!:Vector;
 
-	constructor(points) {
-		let i = 0;
-		for (let point of points) {
-			this.point[i] = point;
-			i++;
-		}
+	constructor(public point:Point[]) {}
+
+	getSpeed() {
+		return this.speed;
 	}
 
-	printPoint(context, n:number, color) {
-		context.beginPath();
-		context.moveTo(this.point[n].x, this.point[n].y);
-		context.lineTo(this.point[n].x + 5, this.point[n].y);
-		context.lineTo(this.point[n].x + 5, this.point[n].y + 5);
-		context.lineTo(this.point[n].x, this.point[n].y + 5);
-		context.closePath();
-		context.strokeStyle = color 
-		context.fillStyle = color;
-		context.stroke();
-		context.fill();
+	printPoint(context:CanvasRenderingContext2D | null, n:number, color:string) {
+		context!.beginPath();
+		context!.moveTo(this.point[n].x, this.point[n].y);
+		context!.lineTo(this.point[n].x + 5, this.point[n].y);
+		context!.lineTo(this.point[n].x + 5, this.point[n].y + 5);
+		context!.lineTo(this.point[n].x, this.point[n].y + 5);
+		context!.closePath();
+		context!.strokeStyle = color 
+		context!.fillStyle = color;
+		context!.stroke();
+		context!.fill();
 	}
 
 	getx() {
@@ -351,12 +367,12 @@ class Entity {
 	}
 
 	sat(other:Entity) {
-		let lines = this.getPerps().concat(other.getPerps());
-		let amax;
-		let amin;
-		let bmax;
-		let bmin;
-		let dot;
+		let lines:Vector[] = this.getPerps().concat(other.getPerps());
+		let amax:number|null;
+		let amin:number|null;
+		let bmax:number|null;
+		let bmin:number|null;
+		let dot:number|null;
 
 		for (let line of lines) {
 			amax = null;
@@ -381,7 +397,7 @@ class Entity {
 					bmin = dot;
 				}
 			}
-			if ((amin < bmax && amin > bmin) || (bmin < amax && bmin > amin)) {
+			if ((amin != null && bmax != null && bmin != null && amax != null) && ((amin < bmax && amin > bmin) || (bmin < amax && bmin > amin))) {
 				continue;
 			} else {
 				return false;
@@ -390,47 +406,47 @@ class Entity {
 		return true;
 	}
 
-	draw(context,color){
+	draw(context:CanvasRenderingContext2D | null,color:string | undefined){
 		if (color === undefined)
 			color = 'white'
-		context.beginPath();
-		context.moveTo(this.getx(), this.gety());
+		context!.beginPath();
+		context!.moveTo(this.getx(), this.gety());
 		for (let point of this.point) {
-			context.lineTo(point.x, point.y);
+			context!.lineTo(point.x, point.y);
 		}
-		context.closePath();
-		context.strokeStyle = color
-		context.stroke();
-		context.fillStyle = color
-		context.fill();
+		context!.closePath();
+		context!.strokeStyle = color
+		context!.stroke();
+		context!.fillStyle = color
+		context!.fill();
 	}
 
-	printPos(context) {
-		context.font = "14px sherif"
-		context.fillStyle = "#000";
+	printPos(context:CanvasRenderingContext2D | null) {
+		context!.font = "14px sherif"
+		context!.fillStyle = "#000";
 	}
 
 	getEdges() {
-		let edges = [];
+		let edges:Vector[] = [];
 		for (let i:number = 0; i < this.point.length - 1; i++) {
 			edges.push(this.point[i].vectorTo(this.point[i + 1]));
 		}
-		edges.push(this.point.at(-1).vectorTo(this.point[0]));
+		edges.push(this.point.at(-1)!.vectorTo(this.point[0]));
 		return (edges);
 	}
 
 	getPerps() {
-		let edges = [];
+		let edges:Vector[] = [];
 		for (let i:number = 0; i < this.point.length - 1; i++) {
 			edges.push((this.point[i].vectorTo(this.point[i + 1])).perp());
 		}
-		edges.push(this.point.at(-1).vectorTo(this.point[0]).perp());
+		edges.push(this.point.at(-1)!.vectorTo(this.point[0]).perp());
 		return (edges);
 	}
 }
 
 class Wall extends Entity {
-	constructor(p1, p2) {
+	constructor(p1:Point, p2:Point) {
 		let p0 = new Point(p1.x - 1, p1.y);
 		let p3 = new Point(p2.x, p2.y - 1);
 		super([p0, p1, p2, p3]);
@@ -438,67 +454,66 @@ class Wall extends Entity {
 }
 
 class Target extends Entity {
-	private	speed:number = 0;
 
-	constructor(points) {
+	constructor(points:Point[]) {
 		super(points);
 	}
 
-	draw(context){
-		context.beginPath();
-		context.moveTo(this.getx(), this.gety());
+	draw(context:CanvasRenderingContext2D | null){
+		context!.beginPath();
+		context!.moveTo(this.getx(), this.gety());
 		for (let point of this.point) {
-			context.lineTo(point.x, point.y);
+			context!.lineTo(point.x, point.y);
 		}
-		context.closePath();
-		context.strokeStyle = 'red'
-		context.stroke();
-		context.fillStyle = 'red'
-		context.fill();
+		context!.closePath();
+		context!.strokeStyle = 'red'
+		context!.stroke();
+		context!.fillStyle = 'red'
+		context!.fill();
 	}
 
-	randomVal(min, max) {
+	randomVal(min:number, max:number) {
 		return Math.floor(Math.random() * (max - min + 1) + min);
 	}
 
-	update(ball:Ball, canvas) {
-		if (this.sat(ball)/*this.collision(ball)*/) {
+	update(ball:Ball, canvas:HTMLCanvasElement | null) {
+		if (this.sat(ball)) {
 			Game.point++;
-			this.replaceTo(new Point(this.randomVal(canvas.width / 2, (canvas.width - 30)), this.randomVal(30, ((canvas.height) - 30))));
+			this.replaceTo(new Point(this.randomVal(canvas!.width / 2, (canvas!.width - 30)), this.randomVal(30, ((canvas!.height) - 30))));
 		}
 	}
 }
 
 class Ball extends Entity {
-	private	wait:number = 120;
-	private defaultSpeed:number = 6;
+	public	wait:number = 120;
+	public defaultSpeed:number = 3;
 
-	constructor(points, player) {
+	constructor(points:Point[], player:Racket[]) {
 		super(points);
 		this.goToRandomPlayer(player);
 	}
 
-	isParallel(from1, to1, from2, to2)
+	isParallel(from1:Point, to1:Point, from2:Point, to2:Point)
 	{
 		let v1 = from1.vectorTo(to1);
 		let v2 = from2.vectorTo(to2);
 		return (v1.crossProduct(v2));
 	}
 
-	getFace(n) {
+	getFace(n:number) {
 		if (n) {
 			return (this.point[n - 1].midSegment(this.point[n]));
 		}
 		return (this.point[this.point.length - 1].midSegment(this.point[0]));
 	}
 
-	goToRandomPlayer(player:Racket) {
+	goToRandomPlayer(player:Racket[]) {
 		let random = ((Math.floor(Math.random() * 10000)) % player.length)
 		let dir = player[random].point[1].midSegment(player[random].point[2]).vectorTo(player[random].point[0].midSegment(player[random].point[3])).normalized();
 		this.speed = new Vector(dir.x * this.defaultSpeed, dir.y * this.defaultSpeed);
 	}
 
-	update(rackets:Racket, walls,board) {
+	update(rackets:Racket[], walls:Wall[],board:Board) {
 		if (this.wait) {
 			this.wait--;
 			return ;
@@ -578,30 +593,27 @@ class Ball extends Entity {
 }
 
 class Racket extends Entity {
-	private defaultSpeed:number = 3;
-	private hp = 3;
-	private index;
-	private dir;
-	private	color;
+	public defaultSpeed:number = 1.5;
+	public hp = 3;
+	public dir!: Vector;
 
-	constructor(index, points, color) {
+	constructor(public index:number, points:Point[], public color:string) {
 		super(points);
-		this.index = index;
-		this.color = color;
 		this.dir = this.point[2].vectorTo(this.point[1]).normalized()
 		this.speed = new Vector(this.dir.x * this.defaultSpeed, this.dir.y * this.defaultSpeed);
 	}
 
-	update(ball:Ball,walls) {
+	update(ball:Ball,walls:Wall[]) {
 		if (this.index == 0) {
-			if (Game.keyPressed[Key.UP] && Game.keyPressed[Key.DOWN]) {
-			} else 
-			if (Game.keyPressed[Key.UP]) {
+			if (Game.keyPressed.up && Game.keyPressed.down) {}
+			else if (Game.keyPressed.up) {
 				this.speed = new Vector(this.dir.x * this.defaultSpeed, this.dir.y * this.defaultSpeed)
 				this.moveTo(this.speed);
-			} else if (Game.keyPressed[Key.DOWN]) {
+				//socket.emit('up', this.index);
+			} else if (Game.keyPressed.down) {
 				this.speed = new Vector(-this.dir.x * this.defaultSpeed, -this.dir.y * this.defaultSpeed)
 				this.moveTo(this.speed);
+				//socket.emit('down');
 			}
 		} else {
 			if (this.center().vectorTo(ball.point[0]).norm() > (new Point(this.center().x + this.dir.x * this.defaultSpeed, this.center().y + this.dir.y * this.defaultSpeed)).vectorTo(ball.point[0]).norm()) {
@@ -621,21 +633,27 @@ class Racket extends Entity {
 	}
 }
 
-const Canvas = props => {
-	const canvasRef = useRef(null);
-	let game = new Game();
-	function handleResize() {
-		game.updateGame();
-		requestAnimationFrame(handleResize);
-	}
+function handleResize(game : Game) {
+	game.updateGame();
+}
 
-	useEffect(() => {
-		game.init(canvasRef);
-		handleResize();
-		window.addEventListener('resize', handleResize);
-	}, [])
+const Canvas = ( { ref } : any ) => {
+	const canvasRef = useRef(ref);
+	if (canvasRef)
+	{
+		let game = new Game();
+
+		useEffect(() => {
+			game.init(canvasRef);
+			setInterval(handleResize, 8, game);
+		}, [])
+	}
 
 	return <canvas width='1500' height='1500' ref={canvasRef}/>
 }
+
+// type Props = {
+// 	ref: React.RefObject<HTMLCanvasElement> | undefined
+//   }
 
 export default Canvas
