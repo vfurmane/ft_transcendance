@@ -57,7 +57,7 @@ function Home() : JSX.Element {
                 }))
         })
         .catch(function(error){
-            console.log(`probleme with fetchx: ${error.message}`);
+            console.log(`probleme with fetch: ${error.message}`);
         });
     },[dispatch])
 
@@ -141,19 +141,19 @@ function Home() : JSX.Element {
             {
                 return (response.json().then(function(json){
                     let friendListTmp : JSX.Element[] = [];
-                    json.map((e : UserBack , i : number)=> {
+                    json.map((e : {friend: UserBack, accept: boolean, ask: boolean} , i : number)=> {
                         let key = i;
                         let user = {
-                            id:`${e.id}`,
+                            id:`${e.friend.id}`,
                             avatar_num: i + 1,
                             status:( i % 2) === 0 ? 'onligne' : 'outligne',
-                            name :`${e.name}`,
+                            name :`${e.friend.name}`,
                             victory: Math.floor(Math.random() * 1000),
                             defeat: Math.floor(Math.random() * 1000),
                             rank: Math.floor(Math.random() * 1000),
                             level: Math.floor(Math.random() * 1000)
                         };
-                        let userEntity = <UserEntity small={false} del={true} user={user}  key={key} index={i}  handleClick={handleClickUserMenu} delFriendClick={delFriendClick}/>; 
+                        let userEntity = <UserEntity small={false} option={{del:true, accept: e.accept, ask: e.ask}} user={user}  key={key} index={i}   handleClick={handleClickUserMenu} delFriendClick={delFriendClick}/>; 
                         friendListTmp.push(userEntity);
                     });
                     setFriendList([...friendListTmp]);
@@ -173,10 +173,10 @@ function Home() : JSX.Element {
             id:`${i + 1}`,
             avatar_num: i + 1,
             status:(i % 2) === 0 ? 'onligne' : 'outligne',
-            name : 'name' + (i + 1).toString(),
+            name : 'name ' + (i + 1).toString(),
             victory: Math.floor(Math.random() * 1000),
             defeat: Math.floor(Math.random() * 1000),
-            rank:i + 1,
+            rank: i + 1,
             level: Math.floor(Math.random() * 1000)
         };
        leaderboard.push(<LeaderboardEntity  user={user}  key={i} index={i}  handleClick={handleClickUserMenu} />)

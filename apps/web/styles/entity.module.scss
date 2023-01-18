@@ -124,3 +124,20 @@
     background-repeat: no-repeat;
     background-size: 20px 20px;
 }
+
+
+.valideButton
+{
+    width: 30px;
+    height: 30px;
+    margin-right: 15px;
+    margin-top: 5px;
+    position: relative;
+    border-radius: 50%;
+    transition: transform 0.2s ease;
+}
+
+.valideButton:hover
+{
+    transform: scale(1.2, 1);
+}

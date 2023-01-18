@@ -3,6 +3,7 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { Friendships as friendshipsEntity } from "./frienships.entity";
 import { User } from "src/users/user.entity";
+import { UUIDVersion } from "class-validator";
 
 
 @Injectable()
@@ -33,14 +34,14 @@ export class FriendshipsService {
         return 1;
     }
 
-    async getFriendsList ( user_id : string ) : Promise<(User | null)[]> {
+    async getFriendsList ( user_id : string ) : Promise<{friend : User | null , accept: boolean, ask: boolean}[]> {
 
         let friendsList :  (User| null)[] = [];
         let ids : string[] = [];
+        let response : {friend : User | null , accept: boolean, ask: boolean}[] = [];
 
         const initiatorArray = await this.friendshipsRepository.findBy({initiator_id : user_id});
         const targetArray = await this.friendshipsRepository.findBy({target_id : user_id});
-        console.log(targetArray);
         
         initiatorArray.forEach(e => ids.push(e.target_id));
         targetArray.forEach(e => ids.push(e.initiator_id));
@@ -56,14 +57,16 @@ export class FriendshipsService {
         {
             friendsList = [];
         }
-        
-        
 
+        let i = 0;
+        initiatorArray.map((e) => {response.push({friend: friendsList.filter(el => el?.id === e.target_id)[0], accept: e.accepted, ask: true});i++;});
+        targetArray.map((e) => {response.push({friend: friendsList.filter(el => el?.id === e.initiator_id)[0], accept: e.accepted, ask: false});i++;});
+        
         //for debug :
         //const friendships =  await this.friendshipsRepository.find();
         //console.log(friendships);
 
-        return friendsList;
+        return response;
     }
 
     async delete (user_id : string, userToDelete_id: string) : Promise<number>{
@@ -86,5 +89,18 @@ export class FriendshipsService {
             }
             return 0;
         }
+    }
+
+    async update (initiator_id: string, target_id: string ) : Promise<number> {
+        
+        const friendContract = await this.friendshipsRepository.findOneBy({initiator_id: initiator_id, target_id : target_id});
+        const queryBuilder = this.friendshipsRepository.createQueryBuilder().select('*');
+        queryBuilder.update().set({accepted: true}).where("id =  :id", {id: friendContract?.id}).execute();
+
+        //debug
+        //const friendships =  await this.friendshipsRepository.find();
+        //console.log(friendships);
+
+        return (1);
     }
 }

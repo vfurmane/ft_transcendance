@@ -7,12 +7,46 @@ import styles from 'styles/entity.module.scss';
 import textStyles from 'styles/text.module.scss';
 import Link from "next/link";
 import Message from '../../public/message.png';
+import valide from '../../public/valide.png';
+import refuse from '../../public/crossRed.png';
+import { useSelector } from "react-redux";
+import { selectUserState } from "../../store/UserSlice";
 
 
-export default function UserEntity (props : {user : User, key: number, index: number, del: boolean, small: boolean, handleClick: (e : {index: number, openMenu: boolean, setOpenMenu : React.Dispatch<React.SetStateAction<boolean>>})=>void, delFriendClick:(e : {idToDelete : string, index: number})=>void}): JSX.Element {
-    if (typeof props.user === 'undefined')
+export default function UserEntity (props : {user : User, key: number, index: number, option : { del?: boolean, accept?:boolean, ask: boolean}, small: boolean, handleClick: (e : {index: number, openMenu: boolean, setOpenMenu : React.Dispatch<React.SetStateAction<boolean>>})=>void, delFriendClick:(e : {idToDelete : string, index: number})=>void}): JSX.Element {
+    if (typeof props.user === 'undefined' || !props.option)
         return <></>;
     const [openMenu, setOpenMenu] = useState(false);
+    const [accept, setAccept] = useState(props.option.accept);
+
+    const UserState = useSelector(selectUserState);
+
+    function valideClick(){
+        const data = {
+            initiator_id: props.user.id,
+            target_id: UserState.id
+        }
+
+        fetch(`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/friendships/valide`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data),
+        }).then(function(response){
+            response.json().then((res)=>{
+                if (res === 1)
+                {
+                    console.log('validation succes');
+                    setAccept(true);
+                }
+            });
+        }).catch(function(error) {
+            console.log('Il y a eu un problème avec l\'opération fetch : ' + error.message);
+        });
+
+
+    }
 
     if (openMenu)
     {
@@ -43,8 +77,25 @@ export default function UserEntity (props : {user : User, key: number, index: nu
                         <p className={textStyles.saira}>{props.user.status}</p>
                     </div>
                 </div>
-                {props.del?
-                    <div className={styles.supr} onClick={()=>{props.delFriendClick({idToDelete: props.user.id, index: props.index})}}></div>
+                {props.option.del?
+                    <div>
+                    {!accept?
+                    <div >
+                        {props.option.ask?
+                        <p className={textStyles.saira}>on hold...</p>:
+                        <div className={styles.entityContainer}>
+                            <div className={styles.valideButton} onClick={valideClick}>
+                                <Image alt='valide' src={valide} width={20} height={20} style={{position: 'relative' , zIndex:'-1'}}/>
+                            </div>
+                            <div className={styles.valideButton} onClick={()=>{props.delFriendClick({idToDelete: props.user.id, index: props.index})}}>
+                                <Image alt='valide' src={refuse} width={20} height={20} style={{position: 'relative' , zIndex:'-1'}}/>
+                            </div>
+                        </div>
+                        }
+                    </div>
+                    :<div className={styles.supr} onClick={()=>{props.delFriendClick({idToDelete: props.user.id, index: props.index})}}></div>
+                    }
+                    </div>
                 :<></>}
             </div>
             <div className={`${styles.entityShadow}  ${props.small? styles.small : ''} d-none d-sm-block`}></div>

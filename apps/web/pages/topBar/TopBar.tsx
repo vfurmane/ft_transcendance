@@ -75,7 +75,7 @@ function TopBar(props : propsTopBar): JSX.Element {
                             rank:i,
                             level: Math.floor(Math.random() * 1000)
                         }
-                        let userEntity = <UserEntity small={true} del={false} user={user}  key={i} index={i}  handleClick={props.handleClickUserMenu} delFriendClick={()=>{}} />;
+                        let userEntity = <UserEntity small={true} option={{del:false, accept: true, ask: false}} user={user}  key={i} index={i}  handleClick={props.handleClickUserMenu} delFriendClick={()=>{}} />;
                         userListTmp.push(userEntity);
                     });
                     setUserList([...userListTmp]);

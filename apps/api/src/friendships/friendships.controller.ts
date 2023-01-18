@@ -16,12 +16,17 @@ export class FriendshipsController {
     }
 
     @Get()
-    async getFriendsList(@Query() query : {user_id: string}) : Promise<(User | null)[]> {
+    async getFriendsList(@Query() query : {user_id: string}) : Promise<{friend : User | null , accept: boolean, ask: boolean}[]> {
         return this.fiendshipsService.getFriendsList(query.user_id);
     }
 
     @Delete()
     async delete (@Body() body : {user_id: string,  userToDelete_id: string}) : Promise<number> {
         return this.fiendshipsService.delete(body.user_id, body.userToDelete_id);
+    }
+
+    @Post('/valide')
+    async valide (@Body() body : {initiator_id: string, target_id: string}) : Promise<number> {
+        return this.fiendshipsService.update(body.initiator_id, body.target_id);
     }
 }

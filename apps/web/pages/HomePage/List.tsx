@@ -1,8 +1,4 @@
 import React, { useState } from 'react';
-import Image from 'next/image';
-import Message from '../../public/message.png';
-import Link from 'next/link';
-import User from '../../interface/UserInterface';
 import textStyle from 'styles/text.module.scss';
 import styles from 'styles/entity.module.scss';
 
