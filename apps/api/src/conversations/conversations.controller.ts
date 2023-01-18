@@ -41,14 +41,16 @@ export class ConversationsController {
   }
 
   @Put('/create')
-  createConversation(
+  async createConversation(
     @CurrentUser() currentUser: User,
     @Body() newConversation: createConversationDto,
   ): Promise<Conversation> {
-    return this.conversationsService.createConversation(
-      newConversation,
-      currentUser,
-    );
+    return (
+      await this.conversationsService.createConversation(
+        newConversation,
+        currentUser,
+      )
+    ).conversation;
   }
 
   @Get('/unread')
@@ -71,29 +73,33 @@ export class ConversationsController {
     @CurrentUser() currentUser: User,
     @Param() { id }: isUUIDDto,
     @Body() { content }: sendMessageDto,
-  ): Promise<boolean> {
+  ): Promise<Message> {
     return this.conversationsService.postMessage(currentUser, id, content);
   }
 
   @Get('/:id/join')
-  joinConversation(
+  async joinConversation(
     @CurrentUser() currentUser: User,
     @Param() { id }: isUUIDDto,
   ): Promise<Conversation> {
-    return this.conversationsService.joinConversation(currentUser, id, null);
+    return (
+      await this.conversationsService.joinConversation(currentUser, id, null)
+    ).conversation;
   }
 
   @Post('/:id/join')
-  joinProtectedConversation(
+  async joinProtectedConversation(
     @CurrentUser() currentUser: User,
     @Param() { id }: isUUIDDto,
     @Body('password') password: string,
   ): Promise<Conversation> {
-    return this.conversationsService.joinConversation(
-      currentUser,
-      id,
-      password,
-    );
+    return (
+      await this.conversationsService.joinConversation(
+        currentUser,
+        id,
+        password,
+      )
+    ).conversation;
   }
 
   @Get('/:id/participants')
@@ -117,11 +123,12 @@ export class ConversationsController {
   }
 
   @Delete('/:id/leave')
-  leaveConversation(
+  async leaveConversation(
     @CurrentUser() currentUser: User,
     @Param() { id }: isUUIDDto,
   ): Promise<ConversationRole> {
-    return this.conversationsService.leaveConversation(currentUser, id);
+    return (await this.conversationsService.leaveConversation(currentUser, id))
+      .userRole;
   }
 
   @Patch('/:id/mute/:username')
@@ -157,7 +164,7 @@ export class ConversationsController {
   @Get('/:id/ban/:username')
   banUserIndefinitely(
     @CurrentUser() currentUser: User,
-    @Param() muteUser: muteUserDto
+    @Param() muteUser: muteUserDto,
   ): Promise<string> {
     return this.conversationsService.restrictUser(
       currentUser,
