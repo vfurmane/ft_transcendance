@@ -153,4 +153,18 @@ export class ConversationsController {
       new Date(date),
     );
   }
+
+  @Get('/:id/ban/:username')
+  banUserIndefinitely(
+    @CurrentUser() currentUser: User,
+    @Param() muteUser: muteUserDto
+  ): Promise<string> {
+    return this.conversationsService.restrictUser(
+      currentUser,
+      muteUser.id,
+      muteUser.username,
+      conversationRestrictionEnum.BAN,
+      null,
+    );
+  }
 }
