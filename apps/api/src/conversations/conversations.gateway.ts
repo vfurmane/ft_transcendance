@@ -8,7 +8,11 @@ import { isUUIDDto } from './dtos/IsUUID.dto';
 import { BadRequestTransformationFilter } from "../common/decorators/BadRequestFilter.decorator";
 import { User } from "../users/user.entity";
 import { createConversationDto } from "./dtos/createConversation.dto";
+import { updateRoleDto } from "./dtos/updateRole.dto";
 import { Conversation } from "./entities/conversation.entity";
+import { muteUserDto } from "./dtos/muteUser.dto";
+import { isDateDto } from "./dtos/isDate.dto";
+import { conversationRestrictionEnum } from "./conversationRestriction.enum";
 
 @UseFilters(BadRequestTransformationFilter)
 @UsePipes(new ValidationPipe())
@@ -18,12 +22,9 @@ import { Conversation } from "./entities/conversation.entity";
 })
 export class ConversationsGateway implements OnGatewayConnection {
     @WebSocketServer() server!: Server;
-    // clients!: Map<string, Set<string> >;
 
     constructor (private readonly conversationsService: ConversationsService,
-        private readonly authService: AuthService){
-            // this.clients = new Map<string, Set<string> >();
-        }
+        private readonly authService: AuthService){}
 
     async handleConnection(client : Socket): Promise<WsResponse<unknown>> {
         console.log('New client trying to connected');
@@ -50,9 +51,6 @@ export class ConversationsGateway implements OnGatewayConnection {
             {
                 client.data.id = currentUser.sub;
                 client.data.name = currentUser.name;
-                // if (!this.clients.has(currentUser.sub)) this.clients.set(currentUser.sub, new Set<string>([client.id]))
-                // else this.clients.get(currentUser.sub)?.add(client.id)
-                // console.error("Added socket: ", this.clients);
                 client.join(`user_${currentUser.sub}`)
                 const conversations = await this.conversationsService.getConversationsIds(currentUser.sub)
                 conversations.forEach((el) => {
@@ -72,19 +70,10 @@ export class ConversationsGateway implements OnGatewayConnection {
         // console.error("Removed socket", this.clients);
     // }
 
-    @SubscribeMessage('postMessage')
-    async postMessage(@ConnectedSocket() client: Socket, @MessageBody() { content }: sendMessageDto, @MessageBody() { id } : isUUIDDto)
-    {
-        const ret = await this.conversationsService.postMessage(client.data as User, id, content);
-        if (ret)
-            client.to(`conversation_${id}`).emit('newMessage', { id, content })
-        return true
-    }
-
     @SubscribeMessage('getConversations')
-    getConversations(@ConnectedSocket() client: Socket)
+    async getConversations(@ConnectedSocket() client: Socket)
     {
-        return this.conversationsService.getConversations(client.data as User)
+        return await this.conversationsService.getConversations(client.data as User)
     }
 
     @SubscribeMessage('createConversation')
@@ -99,14 +88,125 @@ export class ConversationsGateway implements OnGatewayConnection {
         );
         if (conversation)
         {
-            console.error("passed room id", `user_${client.data.id}`)
             this.server.in(`user_${client.data.id}`).socketsJoin(`conversation_${conversation.id}`)
             for (let participant of newConversation.participants)
             {
                 this.server.in(`user_${participant}`).socketsJoin(`conversation_${conversation.id}`)
             }
-            console.error(await this.server.in(`user_${client.data.id}`).fetchSockets())
+            client.to(`conversation_${conversation.id}`).emit('newConversation', conversation)
         }
         return (conversation)
+      }
+
+      @SubscribeMessage('getUnread')
+      async unreadCount(@ConnectedSocket() client : Socket)
+      {
+        return await this.conversationsService.unreadCount(client.data as User);
+      }
+
+      @SubscribeMessage('getMessages')
+      async getMessages(@ConnectedSocket() client : Socket, @MessageBody() { id } : isUUIDDto)
+      {
+        return await this.conversationsService.getMessages(client.data as User, id);
+      }
+
+
+      @SubscribeMessage('postMessage')
+      async postMessage(@ConnectedSocket() client: Socket, @MessageBody() { content }: sendMessageDto, @MessageBody() { id } : isUUIDDto)
+      {
+          const ret = await this.conversationsService.postMessage(client.data as User, id, content);
+          if (ret)
+              client.to(`conversation_${id}`).emit('newMessage', { id, content })
+          return true
+      }
+
+      @SubscribeMessage('joinConversation')
+      async joinConversation(@ConnectedSocket() client : Socket, @MessageBody() { id } : isUUIDDto, @MessageBody('password') password : string)
+      {
+        const conversation = await this.conversationsService.joinConversation(
+            client.data as User,
+            id,
+            password,
+          );
+        if (conversation)
+        {
+            this.server.in(`user_${client.data.id}`).socketsJoin(`conversation_${conversation.id}`)
+            client.to(`user_${client.data.id}`).emit('newConversation', conversation)
+        }
+        return (conversation)
+      }
+
+      @SubscribeMessage('getParticipants')
+      async getConversationPartipants(@ConnectedSocket() client : Socket, @MessageBody() { id } : isUUIDDto)
+      {
+        return await this.conversationsService.getConversationParticipants(
+            client.data as User,
+            id,
+          );
+      }
+
+      @SubscribeMessage('updateRole')
+      async updateRole(@ConnectedSocket() client : Socket, @MessageBody() { id } : isUUIDDto, @MessageBody() newRole : updateRoleDto)
+      {
+        const role = await this.conversationsService.updateRole(id, newRole, client.data as User);
+        if (role)
+        {
+            client.to(`conversation_${id}`).emit('newRole', newRole)
+        }
+        return (newRole)
+      }
+
+      @SubscribeMessage('leaveConversation')
+      async leaveConversation(@ConnectedSocket() client : Socket, @MessageBody() { id } : isUUIDDto)
+      {
+        const role = await this.conversationsService.leaveConversation(client.data as User, id);
+        if (role)
+        {
+            this.server.in(`user_${client.data.id}`).socketsLeave(`conversation_${id}`)
+            client.to(`user_${client.data.id}`).emit('leaveConversation', id)
+        }
+        return id
+      }
+
+      @SubscribeMessage('muteUser')
+      async muteUser(@ConnectedSocket() client : Socket, @MessageBody() { id, username } : muteUserDto, @MessageBody() { date } : isDateDto)
+      {
+        const restriction = await this.conversationsService.restrictUser(
+            client.data as User,
+            id,
+            username,
+            conversationRestrictionEnum.MUTE,
+            new Date(date),
+          );
+        client.to(`conversation_${id}`).emit('mutedUser', restriction)
+        return (restriction);
+      }
+
+      @SubscribeMessage('banUser')
+      async banUser(@ConnectedSocket() client : Socket, @MessageBody() { id, username } : muteUserDto, @MessageBody() { date } : isDateDto)
+      {
+        const restriction = this.conversationsService.restrictUser(
+            client.data as User,
+            id,
+            username,
+            conversationRestrictionEnum.BAN,
+            new Date(date),
+          );
+        client.to(`conversation_${id}`).emit('bannedUser', restriction)
+        return (restriction);
+      }
+
+      @SubscribeMessage('banUserIndefinitely')
+      async banUserIndefinitely(@ConnectedSocket() client : Socket, @MessageBody() { id, username } : muteUserDto)
+      {
+        const restriction = this.conversationsService.restrictUser(
+            client.data as User,
+            id,
+            username,
+            conversationRestrictionEnum.BAN,
+            null,
+          );
+        client.to(`conversation_${id}`).emit('bannedUser', restriction)
+        return (restriction);
       }
 }
