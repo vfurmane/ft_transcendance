@@ -97,7 +97,7 @@ export class AuthController {
     @User() user: UserEntity,
     @State() state: StateEntity,
   ): Promise<AccessTokenResponse | TfaNeededResponse> {
-    console.error("In controller")
+    console.error('In controller');
     if (user.tfa_setup) {
       this.logger.log(
         `${user.name} logged in using username:password, but TFA is needed`,

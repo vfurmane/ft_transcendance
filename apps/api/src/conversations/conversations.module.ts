@@ -19,7 +19,7 @@ import { AuthModule } from '../auth/auth.module';
       ConversationRestriction,
     ]),
     UsersModule,
-    AuthModule
+    AuthModule,
   ],
   controllers: [ConversationsController],
   providers: [ConversationsService, ConversationsGateway],

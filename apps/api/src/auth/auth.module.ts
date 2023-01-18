@@ -1,5 +1,5 @@
 import { HttpModule } from '@nestjs/axios';
-import { Logger, Module } from '@nestjs/common';
+import { forwardRef, Logger, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
@@ -20,7 +20,7 @@ import { LocalStrategy } from './local.strategy';
       load: [ftOauth2Configuration],
     }),
     HttpModule,
-    UsersModule,
+    forwardRef(() => UsersModule),
     PassportModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
@@ -32,7 +32,6 @@ import { LocalStrategy } from './local.strategy';
     }),
     PassportModule,
     TypeOrmModule.forFeature([State]),
-    UsersModule,
   ],
   providers: [
     AuthService,
