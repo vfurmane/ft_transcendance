@@ -2,15 +2,14 @@ import React, {useEffect, useRef, useState} from 'react';
 import TopBar from '../topBar/TopBar';
 import PlayButton  from './PlayButton';
 import List  from './List';
-import FriendEntity from './FriendEntity';
+import UserEntity from './UserEntity';
 import MatchEntity from './MatchEntity';
 import LeaderboardEntity from './LeaderboardEntity';
 import ArrayDoubleColumn from './ArrayDoubleColumn';
 import PlayMenu from './PlayMenu';
 import { setUserState } from "../../store/UserSlice";
 import { useDispatch } from "react-redux";
-import User , { initUser, UserBack } from '../../interface/UserInterface';
-
+import User ,{ initUser, UserBack } from '../../interface/UserInterface';
 import Link from 'next/link';
 import ChatBar from '../chatBar/chatBar';
 import playButtonStyles from 'styles/playButton.module.scss';
@@ -18,21 +17,26 @@ import textStyles from 'styles/text.module.scss';
 import styles from 'styles/home.module.scss';
 
 //temporary before the login page
-var user_id ='0dd12bbf-3e65-4635-8225-7a50cdd35dd3';
+var user_id ='485dfa3a-92f1-415f-bcdc-0b60ea5ffafc';
+
+
+
 
 function Home() : JSX.Element {
     let matchList : JSX.Element[] = [];
     let leaderboard : JSX.Element[] = [];
-    const [openPlayButton, setOpenPlayButton] = useState(false);
-    const [openFriendMenu, setOpenFriendMenu] = useState(false);
-    const [openFriendMenuLeaderBrd, setOpenFriendMenuLeaderBrd] = useState(false);
-    const [friend, setFriend] = useState(initUser)
-    const [indexOfFriend, setIndexOfFriend] = useState(0);
-    const [friendList, setFriendList] = useState([<FriendEntity small={false} del={false} user={{id:'-1', avatar_num:1, status:'', name :'', victory: 0, defeat:0}}  key={0} index={0}  handleClick={handleClickFriendMenu} delFriendClick={()=>{}}/>]);
+    let friendListRef = [<></>]; 
+    let setterInit : React.Dispatch<React.SetStateAction<boolean>> = ()=>{};
+    
 
-    const prevIndexOfFriendRef = useRef(0);
-    const prevIndexOfFriendMenuLeaderBordRef = useRef(0);
-    const friendListRef = useRef([<></>]);
+    const [openPlayButton, setOpenPlayButton] = useState(false);
+    const [openUserMenu, setOpenUserMenu] = useState(false); 
+    const [indexOfUser, setIndexOfUser] = useState(-1);
+    const [friendList, setFriendList] = useState([<></>]);
+
+    const prevIndexOfUserRef = useRef(0);
+    const prevSetterUsermenuRef = useRef(setterInit);
+    
 
     //get user info end dispatch them in the redux store
     const dispatch = useDispatch();
@@ -47,11 +51,13 @@ function Home() : JSX.Element {
                     avatar_num: 6,
                     status: 'Store Ok',
                     victory: 1000,
-                    defeat: 70
+                    defeat: 70,
+                    rank : 10,
+                    level : 489
                 }))
         })
         .catch(function(error){
-            console.log(`probleme with fetchaa: ${error.message}`);
+            console.log(`probleme with fetchx: ${error.message}`);
         });
     },[dispatch])
 
@@ -60,10 +66,7 @@ function Home() : JSX.Element {
      const [openToggle, setOpenToggle] = useState(false);
      const [openProfil, setOpenProfil] = useState(false);
      const [openUserList, setOpenUserList] = useState(false);
-     const [searchBarUser, setSearchBarUser] = useState(initUser);
-     const prevsearchBarUser = useRef({id:'-1', name:'', avatar_num:1, status:'', victory: 0, defeat:0});
 
- 
      function clickTopBarToggle(){
          setOpenToggle(!openToggle);
      }
@@ -72,13 +75,8 @@ function Home() : JSX.Element {
          setOpenProfil(!openProfil);
      }
      
-     function writeSearchTopBar(e : boolean , user? : User){
-         setOpenUserList(e);
-         if (typeof user !== 'undefined')
-         {
-             setSearchBarUser(user);
-             prevsearchBarUser.current = searchBarUser;
-         }
+     function writeSearchTopBar(e : boolean , index? : number){
+        setOpenUserList(e);
      }
      /*==========================================================*/
 
@@ -88,45 +86,34 @@ function Home() : JSX.Element {
         setOpenPlayButton(!openPlayButton);
     }
 
-    function handleClickFriendMenu( e : {user : User, index: number}) : void {
-        setOpenFriendMenu(true);
-        setFriend(e.user);
-        setFriendList([...friendListRef.current]);
-        setIndexOfFriend(e.index);
-        if (indexOfFriend === e.index)
-            prevIndexOfFriendRef.current = indexOfFriend - 1;
-        else
-            prevIndexOfFriendRef.current = indexOfFriend;
+    function handleClickUserMenu( e : {index: number, openMenu: boolean, setOpenMenu : React.Dispatch<React.SetStateAction<boolean>>}) : void {
+        setOpenUserMenu(true);
+        e.setOpenMenu(true);
+        if (prevSetterUsermenuRef.current !== setterInit && prevSetterUsermenuRef.current !== e.setOpenMenu)
+            prevSetterUsermenuRef.current(false);
+        prevSetterUsermenuRef.current = e.setOpenMenu;
+        setIndexOfUser(e.index);
+        prevIndexOfUserRef.current = e.index;  
     }
 
-    function handleClickFriendMenuLeaderBrd( e : {user : User, index: number}) : void {
-        setOpenFriendMenuLeaderBrd(true);
-        setFriend(e.user);
-        if (indexOfFriend === e.index)
-            prevIndexOfFriendMenuLeaderBordRef.current = indexOfFriend - 1;
-        else
-            prevIndexOfFriendMenuLeaderBordRef.current = indexOfFriend;
-        setIndexOfFriend(e.index);
-    }
 
     function close() :void {
         if (openPlayButton)
             setOpenPlayButton(!openPlayButton);
-        if (openFriendMenu && indexOfFriend != prevIndexOfFriendRef.current)
+        if ((openUserMenu || openUserList) && indexOfUser === prevIndexOfUserRef.current)
         {
-            setOpenFriendMenu(!openFriendMenu);
-            setFriendList([...friendListRef.current]);
+            if (openUserList)
+                setOpenUserList(false);
+            else
+                setOpenUserMenu(!openUserMenu);
+            prevSetterUsermenuRef.current(false);
+            setIndexOfUser(-1);
         }
-        if (openFriendMenuLeaderBrd && indexOfFriend !== prevIndexOfFriendMenuLeaderBordRef.current)
-            setOpenFriendMenuLeaderBrd(!openFriendMenuLeaderBrd);
         if (openProfil)
             setOpenProfil(false);
-        if (openUserList && prevsearchBarUser.current.id !== searchBarUser.id)
-            setOpenUserList(false);
-        
     }
 
-    function delFriendClick(e : {idToDelete: string}){
+    function delFriendClick(e : {idToDelete: string, index: number}){
         
         const data = {
             user_id : user_id,
@@ -142,8 +129,8 @@ function Home() : JSX.Element {
             console.log('Il y a eu un problème avec l\'opération fetch : ' + error.message);
         });
 
-        friendListRef.current = friendListRef.current.filter(el => el.props.user.id !== e.idToDelete);
-        setFriendList([...friendListRef.current]);
+        friendListRef = friendListRef.filter(el => el.props.user.id !== e.idToDelete);
+        setFriendList([...friendListRef]);
     }
 
 
@@ -162,13 +149,15 @@ function Home() : JSX.Element {
                             status:( i % 2) === 0 ? 'onligne' : 'outligne',
                             name :`${e.name}`,
                             victory: Math.floor(Math.random() * 1000),
-                            defeat: Math.floor(Math.random() * 1000)
+                            defeat: Math.floor(Math.random() * 1000),
+                            rank: Math.floor(Math.random() * 1000),
+                            level: Math.floor(Math.random() * 1000)
                         };
-                        let friendEntity = <FriendEntity small={false} del={true} user={user}  key={key} index={i}  handleClick={handleClickFriendMenu} delFriendClick={delFriendClick}/>; 
-                        friendListTmp.push(friendEntity);
+                        let userEntity = <UserEntity small={false} del={true} user={user}  key={key} index={i}  handleClick={handleClickUserMenu} delFriendClick={delFriendClick}/>; 
+                        friendListTmp.push(userEntity);
                     });
                     setFriendList([...friendListTmp]);
-                    friendListRef.current = friendListTmp;
+                    friendListRef = friendListTmp;
                 }));
             }
         }).catch(function(error) {
@@ -179,13 +168,23 @@ function Home() : JSX.Element {
 
     for (let i = 0; i < 19; i++)
     {
-        matchList.push(<MatchEntity url1={`/avatar/avatar-${i + 2}.png`} url2={`/avatar/avatar-${i + 1}.png`} name={'name' + (i + 1).toString()} score={5} key={i} />);
-        leaderboard.push(<LeaderboardEntity  user={{id:`${i + 1}`, avatar_num: i + 1, status:(i % 2) === 0 ? 'onligne' : 'outligne', name : 'name' + (i + 1).toString(), victory: Math.floor(Math.random() * 1000), defeat: Math.floor(Math.random() * 1000)} } level={420} rank={i + 1} key={i} handleClick={handleClickFriendMenuLeaderBrd}/>)
+       matchList.push(<MatchEntity url1={`/avatar/avatar-${i + 2}.png`} url2={`/avatar/avatar-${i + 1}.png`} name={'name' + (i + 1).toString()} score={5} key={i} />);
+       let user = {
+            id:`${i + 1}`,
+            avatar_num: i + 1,
+            status:(i % 2) === 0 ? 'onligne' : 'outligne',
+            name : 'name' + (i + 1).toString(),
+            victory: Math.floor(Math.random() * 1000),
+            defeat: Math.floor(Math.random() * 1000),
+            rank:i + 1,
+            level: Math.floor(Math.random() * 1000)
+        };
+       leaderboard.push(<LeaderboardEntity  user={user}  key={i} index={i}  handleClick={handleClickUserMenu} />)
     }
 
     return (
         <div onClick={()=>close()} id={'top'} >
-            <TopBar openProfil={openProfil} openToggle={openToggle} openUserList={openUserList} clickTopBarProfil={clickTopBarProfil} clickTopBarToggle={clickTopBarToggle} writeSearchTopBar={writeSearchTopBar}/>
+            <TopBar openProfil={openProfil} openToggle={openToggle} openUserList={openUserList} clickTopBarProfil={clickTopBarProfil} clickTopBarToggle={clickTopBarToggle} writeSearchTopBar={writeSearchTopBar} handleClickUserMenu={handleClickUserMenu}/>
             <div className={`${styles.illustration} d-none d-lg-block`}></div>
             <div className='container ' > 
                     <div className='row'>
@@ -215,7 +214,7 @@ function Home() : JSX.Element {
                     <div className='row'>
                         <div className='col-10 offset-1 col-lg-4'>
                             <div className='card'>
-                                 <List title='Friends List' list={friendList} open={openFriendMenu} user={friend} index={indexOfFriend}/>
+                                 <List title='Friends List' list={friendList}/>
                             </div>
                         </div>
                         <div className='col-10 offset-1  offset-lg-0 col-lg-6'>
@@ -231,7 +230,7 @@ function Home() : JSX.Element {
                     </div>
                     <div className='row'>
                         <div className='col-10 offset-1' id='leaderBoard'>
-                            <ArrayDoubleColumn title='leaderboard' list={leaderboard} open={openFriendMenuLeaderBrd}  user={friend} index={indexOfFriend}/>
+                            <ArrayDoubleColumn title='leaderboard' list={leaderboard} />
                         </div>
                     </div>
                     <div className='row'>

@@ -4,10 +4,21 @@ export default interface User {
     avatar_num: number,
     status: string,
     victory: number,
-    defeat: number
+    defeat: number,
+    rank : number,
+    level: number
 }
 
-export const initUser = {id:'', name:'', avatar_num: 1, status:'', victory: 0, defeat:0};
+export const initUser = {
+    id:'',
+    name:'',
+    avatar_num: 1,
+    status:'',
+    victory: 0,
+    defeat:0,
+    rank: 0,
+    level: 0
+};
 
 export interface UserBack {
     id?: string,

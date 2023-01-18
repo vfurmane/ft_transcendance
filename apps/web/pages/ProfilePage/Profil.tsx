@@ -15,6 +15,9 @@ import textStyles from 'styles/text.module.scss';
 
 export default function Profil(): JSX.Element {
     let UserState = useSelector(selectUserState);
+    let setterInit : React.Dispatch<React.SetStateAction<boolean>> = ()=>{};
+
+    const prevSetterUsermenuRef = useRef(setterInit);
     const prevAchivementRef = useRef({name: '', status:'', description:''});
     const router = useRouter();
     const [user, setUser] = useState(initUser);
@@ -30,8 +33,8 @@ export default function Profil(): JSX.Element {
     const [openToggle, setOpenToggle] = useState(false);
     const [openProfil, setOpenProfil] = useState(false);
     const [openUserList, setOpenUserList] = useState(false);
-    const [searchBarUser, setSearchBarUser] = useState(initUser);
-    const prevsearchBarUser = useRef({id:'-1', name:'', avatar_num: 1, status:'', victory: 0, defeat:0});
+    const [indexOfUser, setIndexOfUser] = useState(-1);
+    const prevIndexOfUserRef = useRef(0);
 
     function clickTopBarToggle(){
         setOpenToggle(!openToggle);
@@ -41,19 +44,19 @@ export default function Profil(): JSX.Element {
         setOpenProfil(!openProfil);
     }
     
-    function writeSearchTopBar(e : boolean , user? : User){
+    function writeSearchTopBar(e : boolean , index? : number){
         setOpenUserList(e);
-        if (typeof user !== 'undefined')
-        {
-            setSearchBarUser(user);
-            prevsearchBarUser.current = searchBarUser;
-        }
+    }
+
+    function handleClickUserMenu( e : {index: number, openMenu: boolean, setOpenMenu : React.Dispatch<React.SetStateAction<boolean>>}) : void {
+        e.setOpenMenu(true);
+        if (prevSetterUsermenuRef.current !== setterInit && prevSetterUsermenuRef.current !== e.setOpenMenu)
+            prevSetterUsermenuRef.current(false);
+        prevSetterUsermenuRef.current = e.setOpenMenu;
+        setIndexOfUser(e.index);
+        prevIndexOfUserRef.current = e.index;  
     }
     /*==========================================================*/
-
-
-    let listOfMatch = [];
-    let achivementList : JSX.Element[] = [];
 
     useEffect(() => {
         if (typeof router.query.user === 'string')
@@ -90,8 +93,12 @@ export default function Profil(): JSX.Element {
             setOpenAchivement(false);
         if (openProfil)
             setOpenProfil(false);
-        if (openUserList && prevsearchBarUser.current.id !== searchBarUser.id)
+        if (openUserList && indexOfUser === prevIndexOfUserRef.current)
+        {
             setOpenUserList(false);
+            prevSetterUsermenuRef.current(false);
+            setIndexOfUser(-1);
+        }
     }
 
     function addFriend(){
@@ -118,6 +125,10 @@ export default function Profil(): JSX.Element {
         });
     }
 
+
+    //temporary before get the real data
+    let listOfMatch = [];
+    let achivementList : JSX.Element[] = [];
     for (let i = 0; i < 22; i++) {
         achivementList.push(<AchivementEntity achivement={{name:'achivement' + (i + 1).toString(), status:'done', description:'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Leo duis ut diam quam nulla. Et ligula ullamcorper malesuada proin libero nunc consequat. Tincidunt eget nullam non nisi est sit amet facilisis magna. Eu turpis egestas pretium aenean. Nunc consequat interdum varius sit amet. Cras adipiscing enim eu turpis egestas pretium. Integer eget aliquet nibh praesent. Ut sem viverra aliquet eget sit amet. Auctor augue mauris augue neque gravida in. Ut eu sem integer vitae. Viverra accumsan in nisl nisi scelerisque eu ultrices vitae auctor. Orci ac auctor augue mauris. Tempor id eu nisl nunc mi ipsum faucibus vitae.'}} key={i}  handleClick={achivementClick} />);
         listOfMatch.push(<MatchEntity url1={`/avatar/avatar-${Math.floor(Math.random() * 19) + 1}.png`} url2={`/avatar/avatar-${Math.floor(Math.random() * 19) + 1}.png`} name={'name' + (i + 1).toString()} score={5} key={i} />);
@@ -125,7 +136,7 @@ export default function Profil(): JSX.Element {
 
     return (
         <div onClick={close} style={{width:'100vw', height:'100vh'}}>
-            <TopBar openProfil={openProfil} openToggle={openToggle} openUserList={openUserList} clickTopBarProfil={clickTopBarProfil} clickTopBarToggle={clickTopBarToggle} writeSearchTopBar={writeSearchTopBar}/>
+            <TopBar openProfil={openProfil} openToggle={openToggle} openUserList={openUserList} clickTopBarProfil={clickTopBarProfil} clickTopBarToggle={clickTopBarToggle} writeSearchTopBar={writeSearchTopBar} handleClickUserMenu={handleClickUserMenu}/>
             <div className='container' style={{marginTop:'150px'}}>
                 <div className='row'>
                     <div className={`col-10 offset-1 offset-md-0 offset-lg-1 col-md-2 ${styles.flexCenterColumn}`}>

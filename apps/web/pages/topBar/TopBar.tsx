@@ -7,7 +7,7 @@ import ToggleCross from '../../public/toggleCross.png';
 import Link from 'next/link';
 import { selectUserState } from "../../store/UserSlice";
 import { useSelector } from "react-redux";
-import FriendEntity from '../HomePage/FriendEntity';
+import UserEntity from '../HomePage/UserEntity';
 import styles from 'styles/topBar.module.scss';
 import textStyles from 'styles/text.module.scss';
 import List from '../HomePage/List';
@@ -19,15 +19,14 @@ interface propsTopBar  {
     openUserList: boolean,
     clickTopBarToggle : ()=>void,
     clickTopBarProfil : ()=>void,
-    writeSearchTopBar : (e : boolean, user? : User)=>void,
+    writeSearchTopBar : (e : boolean, index? : number)=>void,
+    handleClickUserMenu( e : {index: number, openMenu: boolean, setOpenMenu : React.Dispatch<React.SetStateAction<boolean>>}) : void
+
 }
 
 function TopBar(props : propsTopBar): JSX.Element {
 
-    const [openUserMenu, setOpenUserMenu] = useState(false);
     const [value, setValue] = useState('');
-    const [user, setUser] = useState(initUser);
-    const [indexOfUser, setIndexOfUser] = useState(0);
     const [userList, setUserList] = useState([<></>]);
 
     const UserState = useSelector(selectUserState);
@@ -49,20 +48,14 @@ function TopBar(props : propsTopBar): JSX.Element {
             props.writeSearchTopBar(true);
         else
             props.writeSearchTopBar(false);
-        setOpenUserMenu(false);
     }
 
     function changeValue(val : string){
         setValue(val);
         if (!val.length)
-        {
             props.writeSearchTopBar(false);
-            setOpenUserMenu(false);
-        }
         else
-        {
             props.writeSearchTopBar(true);
-        }     
     }
 
     useEffect(()=>{
@@ -78,9 +71,11 @@ function TopBar(props : propsTopBar): JSX.Element {
                             status:(i % 2) === 0? 'outligne': 'inligne',
                             name :`${e.name}`,
                             victory: Math.floor(Math.random() * 1000),
-                            defeat:Math.floor(Math.random() * 1000)
+                            defeat:Math.floor(Math.random() * 1000),
+                            rank:i,
+                            level: Math.floor(Math.random() * 1000)
                         }
-                        let userEntity = <FriendEntity small={true} del={false} user={user}  key={i} index={i}  handleClick={handleClickUserMenu} delFriendClick={()=>{}} />;
+                        let userEntity = <UserEntity small={true} del={false} user={user}  key={i} index={i}  handleClick={props.handleClickUserMenu} delFriendClick={()=>{}} />;
                         userListTmp.push(userEntity);
                     });
                     setUserList([...userListTmp]);
@@ -91,12 +86,6 @@ function TopBar(props : propsTopBar): JSX.Element {
         }
     }, [value]);
 
-    function handleClickUserMenu( e : {user : User, index: number}) : void {
-        setOpenUserMenu(true);
-        setUser(e.user);
-        setIndexOfUser(e.index);
-        props.writeSearchTopBar(true, e.user);
-    }
 
     return (
         <div className={styles.containerTopBar}>
@@ -162,10 +151,10 @@ function TopBar(props : propsTopBar): JSX.Element {
             {props.openUserList ?
             <div  className={`${styles.searchContainer} ${props.openToggle? styles.toggle : ''}`}>
                 <div className='card small d-none d-md-block' >
-                    <List list={userList} title={''} open={openUserMenu} user={user} index={indexOfUser}/>
+                    <List list={userList} title={''}/>
                 </div>
                 <div className='card xsmall d-block d-md-none' >
-                    <List list={userList} title={''} open={openUserMenu} user={user} index={indexOfUser}/>
+                    <List list={userList} title={''}/>
                 </div>
             </div>
             :<></>}
