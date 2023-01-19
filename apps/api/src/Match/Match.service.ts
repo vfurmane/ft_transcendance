@@ -1,12 +1,17 @@
+<<<<<<< HEAD
 import { Injectable, BadRequestException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { Match, User} from "types";
 import { UsersService } from "../users/users.service";
+=======
+import { Injectable } from "@nestjs/common";
+>>>>>>> 6a17e2e (game data first commit)
 
 @Injectable()
 export class MatchService{
     constructor(
+<<<<<<< HEAD
         @InjectRepository(Match)
         private readonly matchRepository : Repository<Match>,
         @InjectRepository(User)
@@ -57,6 +62,17 @@ export class MatchService{
         
         
         return user;
+=======
+
+    ){}
+
+    async addMatch( winner_id : string, looser_id: string, score_winner: number, score_looser: number, date: Date) : Promise<Number> {
+        return 1;
+    }
+
+    async getMatch (user_id: string) : Promise<number>{
+        return 1;
+>>>>>>> 6a17e2e (game data first commit)
     }
 
 }
