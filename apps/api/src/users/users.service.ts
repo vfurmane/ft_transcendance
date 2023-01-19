@@ -1,10 +1,9 @@
-import { Injectable } from '@nestjs/common';
-import { Repository, UpdateResult } from 'typeorm';
-import { InjectRepository } from '@nestjs/typeorm';
-import { User } from 'types';
 import * as speakeasy from 'speakeasy';
+import { Repository, UpdateResult } from 'typeorm';
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
 import { SpeakeasyGeneratedSecretDto } from 'src/auth/speakeasy-generated-secret.dto';
-import { RegisterUserDto } from './register-user.dto';
+import { User } from 'types';
 
 export interface AddUserData {
   name: string;

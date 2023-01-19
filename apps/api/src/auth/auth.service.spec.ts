@@ -1,20 +1,20 @@
-import { HttpService } from '@nestjs/axios';
+import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { JwtModule, JwtService } from '@nestjs/jwt';
+import { of, throwError } from 'rxjs';
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthService } from './auth.service';
-import { faker } from '@faker-js/faker';
-import { FtUser } from 'types';
-import { Logger } from '@nestjs/common';
-import { createMock, DeepMocked } from '@golevelup/ts-jest';
-import { of, throwError } from 'rxjs';
 import { AxiosResponse } from 'axios';
 import { ConfigModule } from '@nestjs/config';
+import { faker } from '@faker-js/faker';
 import ftOauth2Configuration from '../config/ft-oauth2';
-import { User } from '../users/user.entity';
-import { UsersService } from '../users/users.service';
+import { FtUser } from 'types';
 import { getRepositoryToken } from '@nestjs/typeorm';
+import { HttpService } from '@nestjs/axios';
+import { Logger } from '@nestjs/common';
 import { State } from './state.entity';
+import { User } from '../users/user.entity';
 import { User as UserEntity } from '../users/user.entity';
+import { UsersService } from '../users/users.service';
 
 const JWT_SECRET = faker.random.alphaNumeric(20);
 const code = faker.random.alphaNumeric(20);

@@ -1,5 +1,5 @@
-import type { ReactElement } from "react";
 import { OAuth2Button } from "./OAuth2Button";
+import type { ReactElement } from "react";
 
 export interface FtOAuth2ButtonProps {
   disabled?: boolean;

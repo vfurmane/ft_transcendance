@@ -1,5 +1,5 @@
-import styles from "styles/TextDivider.module.scss";
 import type { ReactElement } from "react";
+import styles from "styles/TextDivider.module.scss";
 
 export interface TextDividerProps {
   children: string;

@@ -1,3 +1,4 @@
+import * as bcrypt from 'bcrypt';
 import {
   BadRequestException,
   ForbiddenException,
@@ -5,23 +6,22 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { User } from 'types';
-import { MoreThan, Not, Repository } from 'typeorm';
 import {
   ConversationsDetails,
   ConversationWithUnread,
   unreadMessagesResponse,
 } from 'types';
+import { MoreThan, Not, Repository } from 'typeorm';
 import { Conversation } from 'types';
-import { ConversationRoleEnum } from 'types';
-import { ConversationRole } from 'types';
-import { createConversationDto } from './dtos/createConversation.dto';
-import { updateRoleDto } from './dtos/updateRole.dto';
-import { Message } from 'types';
-import * as bcrypt from 'bcrypt';
-import { conversationRestrictionEnum } from 'types';
 import { ConversationRestriction } from 'types';
+import { conversationRestrictionEnum } from 'types';
+import { ConversationRole } from 'types';
+import { ConversationRoleEnum } from 'types';
+import { createConversationDto } from './dtos/createConversation.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Message } from 'types';
+import { updateRoleDto } from './dtos/updateRole.dto';
+import { User } from 'types';
 
 @Injectable()
 export class ConversationsService {

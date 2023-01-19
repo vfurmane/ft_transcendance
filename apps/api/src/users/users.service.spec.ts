@@ -1,10 +1,10 @@
-import { faker } from '@faker-js/faker';
+import { AddUserData, UsersService } from './users.service';
 import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { Test, TestingModule } from '@nestjs/testing';
+import { faker } from '@faker-js/faker';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User as UserEntity } from './user.entity';
-import { AddUserData, UsersService } from './users.service';
 
 const name = faker.internet.userName();
 const email = faker.internet.email();

@@ -1,18 +1,18 @@
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
-import { HttpService } from '@nestjs/axios';
-import { AxiosError } from 'axios';
-import { catchError, firstValueFrom, throwError } from 'rxjs';
-import { AccessTokenResponse, FtUser, JwtPayload } from 'types';
+import * as bcrypt from 'bcrypt';
 import * as speakeasy from 'speakeasy';
-import { JwtService } from '@nestjs/jwt';
+import { AccessTokenResponse, FtUser, JwtPayload } from 'types';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import { catchError, firstValueFrom, throwError } from 'rxjs';
+import { AxiosError } from 'axios';
 import { ConfigService } from '@nestjs/config';
+import { HttpService } from '@nestjs/axios';
+import { InjectRepository } from '@nestjs/typeorm';
+import { JwtService } from '@nestjs/jwt';
+import { RegisterUserDto } from 'src/users/register-user.dto';
+import { Repository } from 'typeorm';
+import { State } from 'types';
 import { User } from 'types';
 import { UsersService } from '../users/users.service';
-import { InjectRepository } from '@nestjs/typeorm';
-import { State } from 'types';
-import { Repository } from 'typeorm';
-import * as bcrypt from 'bcrypt';
-import { RegisterUserDto } from 'src/users/register-user.dto';
 
 @Injectable()
 export class AuthService {

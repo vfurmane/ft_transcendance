@@ -13,5 +13,6 @@ module.exports = {
     '@typescript-eslint/no-explicit-any': ['warn'],
     '@typescript-eslint/prefer-readonly': ['warn'],
     '@typescript-eslint/no-unused-vars': ['warn', { 'ignoreRestSiblings': true }],
+    'sort-imports': ['warn', { 'ignoreCase': true }]
   },
 };

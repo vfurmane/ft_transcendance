@@ -11,21 +11,21 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { JwtAuthGuard } from '../auth/jwt-auth-guard';
-import { User } from 'types';
+import { ConversationsDetails, unreadMessagesResponse } from 'types';
 import { Conversation } from 'types';
+import { conversationRestrictionEnum } from 'types';
+import { ConversationRole } from 'types';
 import { ConversationsService } from './conversations.service';
 import { createConversationDto } from './dtos/createConversation.dto';
+import { User as CurrentUser } from '../common/decorators/user.decorator';
+import { isDateDto } from './dtos/isDate.dto';
+import { isUUIDDto } from './dtos/IsUUID.dto';
+import { JwtAuthGuard } from '../auth/jwt-auth-guard';
+import { Message } from 'types';
+import { muteUserDto } from './dtos/muteUser.dto';
 import { sendMessageDto } from './dtos/sendMessage.dto';
 import { updateRoleDto } from './dtos/updateRole.dto';
-import { isUUIDDto } from './dtos/IsUUID.dto';
-import { muteUserDto } from './dtos/muteUser.dto';
-import { conversationRestrictionEnum } from 'types';
-import { isDateDto } from './dtos/isDate.dto';
-import { User as CurrentUser } from '../common/decorators/user.decorator';
-import { ConversationsDetails, unreadMessagesResponse } from 'types';
-import { Message } from 'types';
-import { ConversationRole } from 'types';
+import { User } from 'types';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @UseGuards(JwtAuthGuard)

@@ -1,5 +1,5 @@
-import type { ReactElement } from "react";
 import { Button } from "./Button";
+import type { ReactElement } from "react";
 
 export interface OAuth2ButtonProps {
   children: string;

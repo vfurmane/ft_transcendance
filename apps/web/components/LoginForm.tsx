@@ -1,9 +1,9 @@
 import { ReactElement, useState } from "react";
-import { useForm } from "react-hook-form";
-import { Input } from "../components/Input";
-import { TextDivider } from "../components/TextDivider";
-import styles from "styles/LoginForm.module.scss";
 import { FtOAuth2Button } from "./FtOAuth2Button";
+import { Input } from "../components/Input";
+import styles from "styles/LoginForm.module.scss";
+import { TextDivider } from "../components/TextDivider";
+import { useForm } from "react-hook-form";
 
 interface LoginFormData {
   username: string;

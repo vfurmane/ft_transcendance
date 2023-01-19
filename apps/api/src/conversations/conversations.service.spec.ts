@@ -1,13 +1,13 @@
-import { createMock } from '@golevelup/ts-jest';
 import { Test, TestingModule } from '@nestjs/testing';
-import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { User } from '../users/user.entity';
-import { ConversationsService } from './conversations.service';
 import { Conversation } from './entities/conversation.entity';
 import { ConversationRestriction } from './entities/conversationRestriction.entity';
 import { ConversationRole } from './entities/conversationRole.entity';
+import { ConversationsService } from './conversations.service';
+import { createMock } from '@golevelup/ts-jest';
+import { getRepositoryToken } from '@nestjs/typeorm';
 import { Message } from './entities/message.entity';
+import { Repository } from 'typeorm';
+import { User } from '../users/user.entity';
 
 describe('ConversationsService', () => {
   let service: ConversationsService;

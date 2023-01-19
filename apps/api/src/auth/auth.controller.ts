@@ -1,3 +1,17 @@
+import { AccessTokenResponse, TfaNeededResponse } from 'types';
+import {
+  ApiBadRequestResponse,
+  ApiBearerAuth,
+  ApiBody,
+  ApiCreatedResponse,
+  ApiMovedPermanentlyResponse,
+  ApiNoContentResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiQuery,
+  ApiTags,
+  ApiUnauthorizedResponse,
+} from '@nestjs/swagger';
 import {
   BadRequestException,
   Body,
@@ -13,37 +27,23 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import {
-  ApiBadRequestResponse,
-  ApiBearerAuth,
-  ApiBody,
-  ApiCreatedResponse,
-  ApiMovedPermanentlyResponse,
-  ApiNoContentResponse,
-  ApiOkResponse,
-  ApiOperation,
-  ApiQuery,
-  ApiTags,
-  ApiUnauthorizedResponse,
-} from '@nestjs/swagger';
-import { AccessTokenResponse, TfaNeededResponse } from 'types';
-import { UsersService } from '../users/users.service';
 import { AccessTokenResponseDto } from './access-token-response.dto';
 import { AuthService } from './auth.service';
-import { CheckTfaTokenStateDto } from './check-tfa-token-state.dto';
 import { CheckTfaTokenDto } from './check-tfa-token.dto';
+import { CheckTfaTokenStateDto } from './check-tfa-token-state.dto';
 import { FtOauth2AuthGuard } from './ft-oauth2-auth.guard';
 import { FtOauth2Dto } from './ft-oauth2.dto';
 import { JwtAuthGuard } from './jwt-auth.guard';
-import { SpeakeasyGeneratedSecretDto } from './speakeasy-generated-secret.dto';
-import { User as UserEntity } from 'types';
-import { User } from '../common/decorators/user.decorator';
-import { StateGetGuard } from './state-get.guard';
-import { StatePostGuard } from './state-post.guard';
-import { State } from '../common/decorators/state.decorator';
-import { State as StateEntity } from 'types';
 import { LocalAuthGuard } from './local-auth.guard';
 import { RegisterUserDto } from '../users/register-user.dto';
+import { SpeakeasyGeneratedSecretDto } from './speakeasy-generated-secret.dto';
+import { State } from '../common/decorators/state.decorator';
+import { State as StateEntity } from 'types';
+import { StateGetGuard } from './state-get.guard';
+import { StatePostGuard } from './state-post.guard';
+import { User } from '../common/decorators/user.decorator';
+import { User as UserEntity } from 'types';
+import { UsersService } from '../users/users.service';
 
 @ApiTags()
 @Controller('auth')

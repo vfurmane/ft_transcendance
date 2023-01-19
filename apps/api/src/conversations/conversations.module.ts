@@ -1,12 +1,12 @@
-import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import { Conversation } from 'types';
-import { Message } from 'types';
+import { ConversationRestriction } from 'types';
+import { ConversationRole } from 'types';
 import { ConversationsController } from './conversations.controller';
 import { ConversationsService } from './conversations.service';
-import { ConversationRole } from 'types';
+import { Message } from 'types';
+import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersModule } from 'src/users/users.module';
-import { ConversationRestriction } from 'types';
 
 @Module({
   imports: [

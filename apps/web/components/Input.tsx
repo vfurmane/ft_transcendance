@@ -1,5 +1,5 @@
-import React from "react";
 import { FieldError } from "react-hook-form";
+import React from "react";
 import styles from "styles/Input.module.scss";
 
 export interface InputProps {

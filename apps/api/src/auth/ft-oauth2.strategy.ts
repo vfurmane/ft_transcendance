@@ -1,10 +1,10 @@
-import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, VerifyCallback } from 'passport-oauth2';
-import { UsersService } from 'src/users/users.service';
-import { User } from 'types';
 import { AuthService } from './auth.service';
+import { ConfigService } from '@nestjs/config';
+import { Injectable } from '@nestjs/common';
+import { PassportStrategy } from '@nestjs/passport';
+import { User } from 'types';
+import { UsersService } from 'src/users/users.service';
 
 @Injectable()
 export class FtOauth2Strategy extends PassportStrategy(Strategy) {
