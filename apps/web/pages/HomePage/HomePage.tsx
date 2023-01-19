@@ -17,7 +17,7 @@ import textStyles from 'styles/text.module.scss';
 import styles from 'styles/home.module.scss';
 
 //temporary before the login page
-var user_id ='485dfa3a-92f1-415f-bcdc-0b60ea5ffafc';
+var user_id ='1edffd5a-863d-442c-a962-a5dbd9b2c686';
 
 
 
