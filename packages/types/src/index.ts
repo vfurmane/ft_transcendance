@@ -21,3 +21,32 @@ export interface JwtPayload {
   sub: string;
   name: string;
 }
+<<<<<<< HEAD
+=======
+
+export interface unreadMessagesResponse
+{
+  totalNumberOfUnreadMessages: number;
+  UnreadMessage: unreadMessages[];
+}
+
+export interface unreadMessages {
+  conversationId: string;
+  name: string;
+  numberOfUnreadMessages: number;
+}
+
+export interface ConversationsDetails {
+  totalNumberOfUnreadMessages: number;
+  conversations: ConversationWithUnread[];
+}
+
+export interface ConversationWithUnread {
+  conversation: Conversation;
+  numberOfUnreadMessages: number;
+  lastMessage: Date;
+}
+
+export * from './enums';
+export * from './entities';
+>>>>>>> 11d043f (build: build repo before running dev servers)
