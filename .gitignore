@@ -19,6 +19,9 @@ dist
 # misc
 .DS_Store
 *.pem
+nohup.out
+*.swp
+.vscode/
 
 # debug
 npm-debug.log*

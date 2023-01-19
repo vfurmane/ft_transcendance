@@ -7,6 +7,7 @@ import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { SearchModule } from './search/search.module';
 import { FriendshipsModule  } from './friendships/friendships.module';
+import { ConversationsModule } from './conversations/conversations.module';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { FriendshipsModule  } from './friendships/friendships.module';
     SearchModule,
     FriendshipsModule,
     UsersModule
+    ConversationsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
