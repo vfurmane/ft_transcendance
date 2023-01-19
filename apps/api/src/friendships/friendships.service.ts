@@ -27,8 +27,6 @@ export class FriendshipsService {
             return 0;
         else if (targetAlreadyAsk.length !== 0)
             return this.update(target_id, initiator_id);
-        //else if (userAlreadyAsk.length !== 0)
-        //    return this.update(initiator_id, target_id);
 
         const newFriendship = new friendshipsEntity();
         newFriendship.initiator_id = initiator_id;

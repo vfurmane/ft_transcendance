@@ -54,4 +54,6 @@ export class User {
     (conversationRole) => conversationRole.user,
   )
   conversationRoles!: ConversationRole[];
+  @Column('number', {default: 0})
+  level!: number;
 }
