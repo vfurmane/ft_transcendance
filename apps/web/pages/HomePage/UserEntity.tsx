@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState,  Dispatch, SetStateAction } from "react";
 import Image from 'next/image';
 import Connect from '../../public/statusConnect.png'
 import RemoveFriend from '../../public/RemoveFriend.png';

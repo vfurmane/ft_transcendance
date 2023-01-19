@@ -34,7 +34,7 @@ export default function Profil(): JSX.Element {
     const [openProfil, setOpenProfil] = useState(false);
     const [openUserList, setOpenUserList] = useState(false);
     const [indexOfUser, setIndexOfUser] = useState(-1);
-    const prevIndexOfUserRef = useRef(0);
+    const prevIndexOfUserRef = useRef(-1);
 
     function clickTopBarToggle(){
         setOpenToggle(!openToggle);
@@ -98,6 +98,7 @@ export default function Profil(): JSX.Element {
             setOpenUserList(false);
             prevSetterUsermenuRef.current(false);
             setIndexOfUser(-1);
+            prevIndexOfUserRef.current = -1;
         }
     }
 

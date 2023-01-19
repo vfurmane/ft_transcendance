@@ -31,7 +31,7 @@ function Home() : JSX.Element {
 
     const [openPlayButton, setOpenPlayButton] = useState(false);
     const [openUserMenu, setOpenUserMenu] = useState(false); 
-    const [indexOfUser, setIndexOfUser] = useState(-1);
+    const [indexOfUser, setIndexOfUser] = useState(0);
     const [friendList, setFriendList] = useState([<></>]);
 
     const prevIndexOfUserRef = useRef(0);
@@ -108,6 +108,7 @@ function Home() : JSX.Element {
                 setOpenUserMenu(!openUserMenu);
             prevSetterUsermenuRef.current(false);
             setIndexOfUser(-1);
+            prevIndexOfUserRef.current = -1;
         }
         if (openProfil)
             setOpenProfil(false);
@@ -153,7 +154,7 @@ function Home() : JSX.Element {
                             rank: Math.floor(Math.random() * 1000),
                             level: Math.floor(Math.random() * 1000)
                         };
-                        let userEntity = <UserEntity small={false} option={{del:true, accept: e.accept, ask: e.ask}} user={user}  key={key} index={i}   handleClick={handleClickUserMenu} delFriendClick={delFriendClick}/>; 
+                        let userEntity = <UserEntity small={false} option={{del:true, accept: e.accept, ask: e.ask}} user={user}  key={key} index={i}  handleClick={handleClickUserMenu} delFriendClick={delFriendClick}/>; 
                         friendListTmp.push(userEntity);
                     });
                     setFriendList([...friendListTmp]);

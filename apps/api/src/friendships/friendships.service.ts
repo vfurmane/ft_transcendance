@@ -20,9 +20,16 @@ export class FriendshipsService {
 
         const initiatorFriend = await this.friendshipsRepository.findBy({initiator_id : initiator_id});
         const targetFriend = await this.friendshipsRepository.findBy({target_id : initiator_id});
-        if ((initiatorFriend).filter(e => e.target_id === target_id).length !== 0
-            || targetFriend.filter(e => e.initiator_id === target_id).length !== 0)
+
+        const targetAlreadyAsk = targetFriend.filter(e => e.initiator_id === target_id);
+        const userAlreadyAsk = (initiatorFriend).filter(e => e.target_id === target_id);
+
+        if ((targetAlreadyAsk.length !== 0 && targetAlreadyAsk[0].accepted) || (userAlreadyAsk.length !== 0))
             return 0;
+        else if (targetAlreadyAsk.length !== 0)
+            return this.update(target_id, initiator_id);
+        //else if (userAlreadyAsk.length !== 0)
+        //    return this.update(initiator_id, target_id);
 
         const newFriendship = new friendshipsEntity();
         newFriendship.initiator_id = initiator_id;
