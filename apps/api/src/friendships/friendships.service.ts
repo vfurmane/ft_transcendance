@@ -1,9 +1,8 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
-import { Friendships as friendshipsEntity } from "./frienships.entity";
-import { User } from "src/users/user.entity";
-import { UUIDVersion } from "class-validator";
+import { Friendships as friendshipsEntity } from 'types';
+import { User } from "types";
 
 
 @Injectable()

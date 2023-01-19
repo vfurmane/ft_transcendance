@@ -1,41 +1,37 @@
-@import 'variables';
+@import "variables";
 
 .illustration {
-    background: url('../public/Illustration.png'), url('../public/red.png'), url('../public/red.png');
-    background-size: 80% 80%, 30% 30%, 40% 40%;
-    background-position: center, top 20px left 20px, bottom 100px right 0px;
-    position: absolute;
-    z-index: -1;
-    margin-top: 80px;
-    background-repeat: no-repeat, no-repeat, no-repeat;
-    width: 100%;
-    height: 2000px;
-    background-attachment: fixed, fixed, fixed;
-
+  background: url("../public/Illustration.png"), url("../public/red.png"),
+    url("../public/red.png");
+  background-size: 80% 80%, 30% 30%, 40% 40%;
+  background-position: center, top 20px left 20px, bottom 100px right 0px;
+  position: absolute;
+  z-index: -1;
+  margin-top: 80px;
+  background-repeat: no-repeat, no-repeat, no-repeat;
+  width: 100%;
+  height: 2000px;
+  background-attachment: fixed, fixed, fixed;
 }
 
 .title {
-    color: white;
-    font-family: 'Lacquer', cursive;
-    font-size: 100px;
-    margin-top: 150px;
-    text-align: center;
-    text-align: center;
-    width: 100%;
+  color: white;
+  font-family: "Lacquer", cursive;
+  font-size: 100px;
+  margin-top: 150px;
+  text-align: center;
+  text-align: center;
+  width: 100%;
 }
 
 .title.small {
-    font-size: 8vw;
+  font-size: 8vw;
 }
 
 .text {
-    font-size: 30px;
-    text-align: center;
-    text-shadow: 0px 0px 0px;
-    color: white;
-    margin-top: 100px;
+  font-size: 30px;
+  text-align: center;
+  text-shadow: 0px 0px 0px;
+  color: white;
+  margin-top: 100px;
 }
-
-
-
-

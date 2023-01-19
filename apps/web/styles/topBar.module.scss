@@ -1,133 +1,127 @@
-@import 'variables';
+@import "variables";
 
 .containerTopBar {
-    width: 100vw;
-    height: 80px;
-    background: url('../public/texture.png'),$dark-neutral-black;
-    background-repeat: repeat, no-repeat;
-    background-size: 50px 50px;
-    display: flex;
-    justify-content: space-between;
-    position: fixed;
-    top: 0;
-    z-index: 99;
+  width: 100vw;
+  height: 80px;
+  background: url("../public/texture.png"), $dark-neutral-black;
+  background-repeat: repeat, no-repeat;
+  background-size: 50px 50px;
+  display: flex;
+  justify-content: space-between;
+  position: fixed;
+  top: 0;
+  z-index: 99;
 }
 
 .elementTopBar {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-top: 20px;
-    margin-left: 10px;
-    margin-right: 10px;
-    height: 50px;
-
-
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+  margin-left: 10px;
+  margin-right: 10px;
+  height: 50px;
 }
 
 .elementTopBar.toggle {
-    position: absolute;
-    top: 15px;
-    right: 20px;
-    margin: 0px;
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  margin: 0px;
 }
 
 .elementTopBar.toggle.menu {
-    top: 70px;
-    right: 10px;
-    background: url('../public/texture.png'), $dark-neutral-black;
-    background-repeat: repeat, no-repeat;
-    background-size: 50px 50px;
-    border-radius: 10px;
-    padding: 10px;
-    width: 100vw;
-    justify-content: flex-end;
+  top: 70px;
+  right: 10px;
+  background: url("../public/texture.png"), $dark-neutral-black;
+  background-repeat: repeat, no-repeat;
+  background-size: 50px 50px;
+  border-radius: 10px;
+  padding: 10px;
+  width: 100vw;
+  justify-content: flex-end;
 }
 
 .elementTopBar.toggle.avatarMenu {
-    top: 110px;
-    right: 10px;
-    color: $dark-neutral-white;
-    border-radius: 10px;
-    padding: 10px;
+  top: 110px;
+  right: 10px;
+  color: $dark-neutral-white;
+  border-radius: 10px;
+  padding: 10px;
 }
 
-.elementTopBar.toggle.avatarMenu.open{
-    top: 150px;
+.elementTopBar.toggle.avatarMenu.open {
+  top: 150px;
 }
 
 .searchBar {
-    border-top: 0px;
-    border-bottom: solid $dark-neutral-white 1px;
-    border-left: 0px;
-    border-right: 0px;
-    background-color: rgba(0, 0, 0, 0);
-    margin-right: 50px;
-    width: 250px;
-    font-family: 'Saira', sans-serif;
-    font-size: 20px;
-    color: $dark-neutral-white;
+  border-top: 0px;
+  border-bottom: solid $dark-neutral-white 1px;
+  border-left: 0px;
+  border-right: 0px;
+  background-color: rgba(0, 0, 0, 0);
+  margin-right: 50px;
+  width: 250px;
+  font-family: "Saira", sans-serif;
+  font-size: 20px;
+  color: $dark-neutral-white;
 }
 
 .logoSearchBar {
-    position: absolute;
-    margin-left: 230px;
-    margin-top: 5px;
-
+  position: absolute;
+  margin-left: 230px;
+  margin-top: 5px;
 }
 
 .leaderBoardLink {
-    color: $dark-neutral-white;
-    text-decoration: none;
-    margin-left: 20px;
-    margin-top: 6px;
-    font-family: 'Rubik Vinyl', cursive;
-    font-family: 'Press Start 2P', cursive;
-    font-size: 20px;
-    font-size: 15px;
-    margin-top: 16px;
+  color: $dark-neutral-white;
+  text-decoration: none;
+  margin-left: 20px;
+  margin-top: 6px;
+  font-family: "Rubik Vinyl", cursive;
+  font-family: "Press Start 2P", cursive;
+  font-size: 20px;
+  font-size: 15px;
+  margin-top: 16px;
 }
 
 .contextMenuContainer {
-    background: url('../public/texture.png'), rgba(255, 255, 255, 0.1);
-    background-size: 50px 50px;
-    color: $dark-neutral-white;
-    text-align: start;
-    border-radius: 8px;
-    font-family: 'Saira', sans-serif;
-    width: 100%;
+  background: url("../public/texture.png"), rgba(255, 255, 255, 0.1);
+  background-size: 50px 50px;
+  color: $dark-neutral-white;
+  text-align: start;
+  border-radius: 8px;
+  font-family: "Saira", sans-serif;
+  width: 100%;
 }
 
-.contextMenuContainer.marge_top
-{
-    margin-top: 50px;
+.contextMenuContainer.marge_top {
+  margin-top: 50px;
 }
 
 .contextMenuEntity {
-    width: 100%;
-    padding: 10px;
+  width: 100%;
+  padding: 10px;
 }
 
 .contextMenuEntity:hover {
-    background: url('../public/texture.png'), rgba(255, 255, 255, 0.1);
-    background-size: 50px 50px;
+  background: url("../public/texture.png"), rgba(255, 255, 255, 0.1);
+  background-size: 50px 50px;
 }
 
 .contextMenuEntity.bar {
-    border-bottom: 1px solid $dark-neutral-white;
+  border-bottom: 1px solid $dark-neutral-white;
 }
 
-.searchContainer
-{
-    position: absolute;
-    z-index: 99;
-    top: 52px;
-    right: 117px;
-    width: 250px;
+.searchContainer {
+  position: absolute;
+  z-index: 99;
+  top: 52px;
+  right: 117px;
+  width: 250px;
 }
 
-.searchContainer.toggle
-{
-    top:105px;
-    right: 127px;
+.searchContainer.toggle {
+  top: 105px;
+  right: 127px;
 }

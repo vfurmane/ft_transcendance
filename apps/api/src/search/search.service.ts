@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User as UserEntity } from '../users/user.entity';
+import { User as UserEntity } from 'types';
 
 @Injectable()
 export class SearchService {

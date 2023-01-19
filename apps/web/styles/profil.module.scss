@@ -1,67 +1,66 @@
-@import 'variables';
+@import "variables";
 
-.flexCenterColumn
-{
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
+.flexCenterColumn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
 }
 
-.profilMenuContainer
-{
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
-    margin-top: 50px;
-    margin-bottom: 50px;
-    width: auto;
+.profilMenuContainer {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  margin-top: 50px;
+  margin-bottom: 50px;
+  width: auto;
 }
 
-.buttonAndBarContainer
-{
-    display: flex;
-    justify-content: space-between;
-    align-items: end;
-    flex-wrap: wrap;
+.buttonAndBarContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  flex-wrap: wrap;
 }
 
-.flex_between
-{
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+.flex_between {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-.statBar
-{
-    border-radius: 8px;
-    overflow: hidden;
+.statBar {
+  border-radius: 8px;
+  overflow: hidden;
 }
 
-.buttonProfilContainer
-{
-    display: flex;
-    text-align: center;
-    justify-content: flex-start;
-    flex-wrap: wrap;
-    border-radius: 8px;
-    margin-top: 10px;
+.buttonProfilContainer {
+  display: flex;
+  text-align: center;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  border-radius: 8px;
+  margin-top: 10px;
 }
 
 .buttonProfil {
-  
-    border-radius: 3px;
-    color: $dark-neutral-white;
-    background-color: $dark-neutral-black;
-    border: solid 1px $dark-neutral-white;
-    font-size: 15px;
-    margin-right: 5px;
+  border-radius: 3px;
+  color: $dark-neutral-white;
+  background-color: $dark-neutral-black;
+  border: solid 1px $dark-neutral-white;
+  font-size: 15px;
+  margin-right: 5px;
 }
 
 .buttonProfil:hover {
-    background: url('../public/texture.png'), linear-gradient(160deg, rgba(234, 196, 53, 1) 45%, rgb(233, 110, 9) 70%, rgb(218, 74, 8) 100%);
-    background-repeat: repeat, no-repeat;
-    background-size: 50px 50px, 100% 100%;
-    border: 1px solid $dark-neutral-white;
+  background: url("../public/texture.png"),
+    linear-gradient(
+      160deg,
+      rgba(234, 196, 53, 1) 45%,
+      rgb(233, 110, 9) 70%,
+      rgb(218, 74, 8) 100%
+    );
+  background-repeat: repeat, no-repeat;
+  background-size: 50px 50px, 100% 100%;
+  border: 1px solid $dark-neutral-white;
 }

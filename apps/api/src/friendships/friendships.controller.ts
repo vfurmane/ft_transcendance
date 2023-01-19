@@ -1,7 +1,7 @@
 import { Controller, Post, Delete, Body, Get, Query, UseGuards } from "@nestjs/common";
 import { FriendshipsService } from "./friendships.service";
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { User } from "src/users/user.entity";
+// import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { User } from "types";
 
 //@UseGuards(JwtAuthGuard)
 @Controller('friendships')

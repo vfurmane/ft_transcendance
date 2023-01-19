@@ -1,7 +1,7 @@
 import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 import {SearchService }from './search.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { User } from 'src/users/user.entity';
+import { User } from 'types';
 
 //@UseGuards(JwtAuthGuard)
 @Controller('search')

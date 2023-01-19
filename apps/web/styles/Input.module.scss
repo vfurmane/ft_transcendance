@@ -1,4 +1,4 @@
-@import 'variables';
+@import "variables";
 
 .container {
   display: flex;
@@ -14,7 +14,7 @@
   padding: 12px 6px;
 
   background: none;
-  color: #E8E8E8;
+  color: #e8e8e8;
   font-size: 16px;
 }
 
@@ -33,7 +33,7 @@
   opacity: 1;
 }
 
-.input[type='submit'] {
+.input[type="submit"] {
   margin: 0;
   border: none;
   border-radius: 8px;
@@ -41,7 +41,7 @@
   overflow: visible;
 
   background: $dark-neutral-grey;
-  color: #1E1E1E;
+  color: #1e1e1e;
   font: inherit;
 
   line-height: normal;
@@ -53,15 +53,15 @@
   -webkit-appearance: none;
 }
 
-.input[type='submit']:hover {
+.input[type="submit"]:hover {
   cursor: pointer;
 }
 
-.input[type='submit'].primary {
+.input[type="submit"].primary {
   background-color: $dark-primary-yellow;
 }
 
-.input[type='submit'].primary:disabled {
+.input[type="submit"].primary:disabled {
   background-color: $dark-primary-yellow-lighter;
 }
 

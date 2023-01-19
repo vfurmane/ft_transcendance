@@ -1,248 +1,314 @@
-import React, {useEffect, useRef, useState} from 'react';
-import TopBar from '../topBar/TopBar';
-import PlayButton  from './PlayButton';
-import List  from './List';
-import UserEntity from './UserEntity';
-import MatchEntity from './MatchEntity';
-import LeaderboardEntity from './LeaderboardEntity';
-import ArrayDoubleColumn from './ArrayDoubleColumn';
-import PlayMenu from './PlayMenu';
+import React, { useEffect, useRef, useState } from "react";
+import TopBar from "../topBar/TopBar";
+import PlayButton from "./PlayButton";
+import List from "./List";
+import UserEntity from "./UserEntity";
+import MatchEntity from "./MatchEntity";
+import LeaderboardEntity from "./LeaderboardEntity";
+import ArrayDoubleColumn from "./ArrayDoubleColumn";
+import PlayMenu from "./PlayMenu";
 import { setUserState } from "../../store/UserSlice";
 import { useDispatch } from "react-redux";
-import User ,{ initUser, UserBack } from '../../interface/UserInterface';
-import Link from 'next/link';
-import ChatBar from '../chatBar/chatBar';
-import playButtonStyles from 'styles/playButton.module.scss';
-import textStyles from 'styles/text.module.scss';
-import styles from 'styles/home.module.scss';
+import { UserBack } from "../../interface/UserInterface";
+import Link from "next/link";
+import ChatBar from "../chatBar/chatBar";
+import playButtonStyles from "styles/playButton.module.scss";
+import textStyles from "styles/text.module.scss";
+import styles from "styles/home.module.scss";
 
 //temporary before the login page
-var user_id ='1edffd5a-863d-442c-a962-a5dbd9b2c686';
+const user_id = "1edffd5a-863d-442c-a962-a5dbd9b2c686";
 
+function Home(): JSX.Element {
+  const matchList: JSX.Element[] = [];
+  const leaderboard: JSX.Element[] = [];
+  let friendListRef = [<></>];
+  const setterInit: React.Dispatch<React.SetStateAction<boolean>> = () => false;
 
+  const [openPlayButton, setOpenPlayButton] = useState(false);
+  const [openUserMenu, setOpenUserMenu] = useState(false);
+  const [indexOfUser, setIndexOfUser] = useState(0);
+  const [friendList, setFriendList] = useState([<></>]);
 
+  const prevIndexOfUserRef = useRef(0);
+  const prevSetterUsermenuRef = useRef(setterInit);
 
-function Home() : JSX.Element {
-    let matchList : JSX.Element[] = [];
-    let leaderboard : JSX.Element[] = [];
-    let friendListRef = [<></>]; 
-    let setterInit : React.Dispatch<React.SetStateAction<boolean>> = ()=>{};
-    
+  //get user info end dispatch them in the redux store
+  const dispatch = useDispatch();
+  useEffect(() => {
+    fetch(`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/user?user_id=${user_id}`)
+      .then(function (response) {
+        return response.json();
+      })
+      .then((data) => {
+        dispatch(
+          setUserState({
+            id: data.id,
+            name: data.name,
+            avatar_num: 6,
+            status: "Store Ok",
+            victory: 1000,
+            defeat: 70,
+            rank: 10,
+            level: 489,
+          })
+        );
+      })
+      .catch(function (error) {
+        console.log(`probleme with fetch: ${error.message}`);
+      });
+  }, [dispatch]);
 
-    const [openPlayButton, setOpenPlayButton] = useState(false);
-    const [openUserMenu, setOpenUserMenu] = useState(false); 
-    const [indexOfUser, setIndexOfUser] = useState(0);
-    const [friendList, setFriendList] = useState([<></>]);
+  /*======for close topBar component when click on screen====*/
+  const [openToggle, setOpenToggle] = useState(false);
+  const [openProfil, setOpenProfil] = useState(false);
+  const [openUserList, setOpenUserList] = useState(false);
 
-    const prevIndexOfUserRef = useRef(0);
-    const prevSetterUsermenuRef = useRef(setterInit);
-    
+  function clickTopBarToggle(): void {
+    setOpenToggle(!openToggle);
+  }
 
-    //get user info end dispatch them in the redux store
-    const dispatch = useDispatch();
-    useEffect(() => {
-        fetch(`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/user?user_id=${user_id}`)
-        .then(function(response){return response.json()})
-        .then((data)=>{
-            dispatch(setUserState(
-                {
-                    id: data.id,
-                    name: data.name,
-                    avatar_num: 6,
-                    status: 'Store Ok',
-                    victory: 1000,
-                    defeat: 70,
-                    rank : 10,
-                    level : 489
-                }))
-        })
-        .catch(function(error){
-            console.log(`probleme with fetch: ${error.message}`);
-        });
-    },[dispatch])
+  function clickTopBarProfil(): void {
+    setOpenProfil(!openProfil);
+  }
 
+  function writeSearchTopBar(e: boolean): void {
+    setOpenUserList(e);
+  }
+  /*==========================================================*/
 
-     /*======for close topBar component when click on screen====*/
-     const [openToggle, setOpenToggle] = useState(false);
-     const [openProfil, setOpenProfil] = useState(false);
-     const [openUserList, setOpenUserList] = useState(false);
+  function handleClickPlayButton(): void {
+    setOpenPlayButton(!openPlayButton);
+  }
 
-     function clickTopBarToggle(){
-         setOpenToggle(!openToggle);
-     }
-     
-     function clickTopBarProfil (){
-         setOpenProfil(!openProfil);
-     }
-     
-     function writeSearchTopBar(e : boolean , index? : number){
-        setOpenUserList(e);
-     }
-     /*==========================================================*/
+  function handleClickUserMenu(e: {
+    index: number;
+    openMenu: boolean;
+    setOpenMenu: React.Dispatch<React.SetStateAction<boolean>>;
+  }): void {
+    setOpenUserMenu(true);
+    e.setOpenMenu(true);
+    if (
+      prevSetterUsermenuRef.current !== setterInit &&
+      prevSetterUsermenuRef.current !== e.setOpenMenu
+    )
+      prevSetterUsermenuRef.current(false);
+    prevSetterUsermenuRef.current = e.setOpenMenu;
+    setIndexOfUser(e.index);
+    prevIndexOfUserRef.current = e.index;
+  }
 
-
-
-    function handleClickPlayButton() : void {
-        setOpenPlayButton(!openPlayButton);
+  function close(): void {
+    if (openPlayButton) setOpenPlayButton(!openPlayButton);
+    if (
+      (openUserMenu || openUserList) &&
+      indexOfUser === prevIndexOfUserRef.current
+    ) {
+      if (openUserList) setOpenUserList(false);
+      else setOpenUserMenu(!openUserMenu);
+      prevSetterUsermenuRef.current(false);
+      setIndexOfUser(-1);
+      prevIndexOfUserRef.current = -1;
     }
+    if (openProfil) setOpenProfil(false);
+  }
 
-    function handleClickUserMenu( e : {index: number, openMenu: boolean, setOpenMenu : React.Dispatch<React.SetStateAction<boolean>>}) : void {
-        setOpenUserMenu(true);
-        e.setOpenMenu(true);
-        if (prevSetterUsermenuRef.current !== setterInit && prevSetterUsermenuRef.current !== e.setOpenMenu)
-            prevSetterUsermenuRef.current(false);
-        prevSetterUsermenuRef.current = e.setOpenMenu;
-        setIndexOfUser(e.index);
-        prevIndexOfUserRef.current = e.index;  
-    }
+  function delFriendClick(e: { idToDelete: string; index: number }): void {
+    const data = {
+      user_id: user_id,
+      userToDelete_id: e.idToDelete,
+    };
+    fetch(`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/friendships`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    }).catch(function (error) {
+      console.log(
+        "Il y a eu un problème avec l'opération fetch : " + error.message
+      );
+    });
 
-
-    function close() :void {
-        if (openPlayButton)
-            setOpenPlayButton(!openPlayButton);
-        if ((openUserMenu || openUserList) && indexOfUser === prevIndexOfUserRef.current)
-        {
-            if (openUserList)
-                setOpenUserList(false);
-            else
-                setOpenUserMenu(!openUserMenu);
-            prevSetterUsermenuRef.current(false);
-            setIndexOfUser(-1);
-            prevIndexOfUserRef.current = -1;
-        }
-        if (openProfil)
-            setOpenProfil(false);
-    }
-
-    function delFriendClick(e : {idToDelete: string, index: number}){
-        
-        const data = {
-            user_id : user_id,
-            userToDelete_id: e.idToDelete
-        }
-        fetch(`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/friendships`, {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(data)
-        }).catch(function(error) {
-            console.log('Il y a eu un problème avec l\'opération fetch : ' + error.message);
-        });
-
-        friendListRef = friendListRef.filter(el => el.props.user.id !== e.idToDelete);
-        setFriendList([...friendListRef]);
-    }
-
-
-    //get the friend list of the user
-    useEffect(()=>{
-        fetch(`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/friendships?user_id=${user_id}`).then(function(response){
-            if (response.ok)
-            {
-                return (response.json().then(function(json){
-                    let friendListTmp : JSX.Element[] = [];
-                    json.map((e : {friend: UserBack, accept: boolean, ask: boolean} , i : number)=> {
-                        let key = i;
-                        let user = {
-                            id:`${e.friend.id}`,
-                            avatar_num: i + 1,
-                            status:( i % 2) === 0 ? 'onligne' : 'outligne',
-                            name :`${e.friend.name}`,
-                            victory: Math.floor(Math.random() * 1000),
-                            defeat: Math.floor(Math.random() * 1000),
-                            rank: Math.floor(Math.random() * 1000),
-                            level: Math.floor(Math.random() * 1000)
-                        };
-                        let userEntity = <UserEntity small={false} option={{del:true, accept: e.accept, ask: e.ask}} user={user}  key={key} index={i}  handleClick={handleClickUserMenu} delFriendClick={delFriendClick}/>; 
-                        friendListTmp.push(userEntity);
-                    });
-                    setFriendList([...friendListTmp]);
-                    friendListRef = friendListTmp;
-                }));
-            }
-        }).catch(function(error) {
-            console.log('Il y a eu un problème avec l\'opération fetchiii : ' + error.message);
-        });
-    },[]);
-
-
-    for (let i = 0; i < 19; i++)
-    {
-       matchList.push(<MatchEntity url1={`/avatar/avatar-${i + 2}.png`} url2={`/avatar/avatar-${i + 1}.png`} name={'name' + (i + 1).toString()} score={5} key={i} />);
-       let user = {
-            id:`${i + 1}`,
-            avatar_num: i + 1,
-            status:(i % 2) === 0 ? 'onligne' : 'outligne',
-            name : 'name ' + (i + 1).toString(),
-            victory: Math.floor(Math.random() * 1000),
-            defeat: Math.floor(Math.random() * 1000),
-            rank: i + 1,
-            level: Math.floor(Math.random() * 1000)
-        };
-       leaderboard.push(<LeaderboardEntity  user={user}  key={i} index={i}  handleClick={handleClickUserMenu} />)
-    }
-
-    return (
-        <div onClick={()=>close()} id={'top'} >
-            <TopBar openProfil={openProfil} openToggle={openToggle} openUserList={openUserList} clickTopBarProfil={clickTopBarProfil} clickTopBarToggle={clickTopBarToggle} writeSearchTopBar={writeSearchTopBar} handleClickUserMenu={handleClickUserMenu}/>
-            <div className={`${styles.illustration} d-none d-lg-block`}></div>
-            <div className='container ' > 
-                    <div className='row'>
-                        <div className='col-12  d-none d-lg-block'>
-                            <h3 className={styles.title}>Ft_Transcendence</h3>
-                        </div>
-                        <div className='col-12 d-block d-lg-none'>
-                            <h3 className={`${styles.title} ${styles.small} d-block d-lg-none`}>Ft_Transcendence</h3>
-                        </div>
-                    </div>
-                    <div className='row'>
-                        
-                        <div className={openPlayButton ? 'col-12 col-lg-3 offset-lg-4' : 'col-12'}>
-                            <PlayButton handleClick={handleClickPlayButton} open={openPlayButton}/>
-                        </div>
-                        {openPlayButton ? 
-                        <div className='col-10 offset-1 offset-xl-0 offset-lg-1 col-lg-3 offset-xl-1 '>
-                            <div className={`{${playButtonStyles.playMenuContainer} d-block d-lg-none`}>
-                                <PlayMenu/>
-                            </div> 
-                            <div className={`d-none d-lg-block ${playButtonStyles.playMenuContainer} ${playButtonStyles.marge_top} `}>
-                                <PlayMenu/>
-                            </div> 
-                        </div>
-                        : <></>}
-                    </div>
-                    <div className='row'>
-                        <div className='col-10 offset-1 col-lg-4'>
-                            <div className='card'>
-                                 <List title='Friends List' list={friendList}/>
-                            </div>
-                        </div>
-                        <div className='col-10 offset-1  offset-lg-0 col-lg-6'>
-                            <div className='card'>
-                                 <List title='featuring' list={matchList} />
-                            </div>
-                        </div>
-                    </div>
-                    <div className='row'>
-                        <div className='col-8 offset-2'>
-                            <h3 className={`${styles.text} ${textStyles.laquer}`}>These guy are the best pong player of the world ... we are so pround of them !!</h3>
-                        </div>
-                    </div>
-                    <div className='row'>
-                        <div className='col-10 offset-1' id='leaderBoard'>
-                            <ArrayDoubleColumn title='leaderboard' list={leaderboard} />
-                        </div>
-                    </div>
-                    <div className='row'>
-                        <div className='col-4 offset-4'>
-                            <Link href={'#top'} style={{ textDecoration:'none'}}><p className={textStyles.saira} style={{textAlign:'center', marginTop:'50px'}}>Go back to top</p></Link>
-                        </div>
-                    </div>
-            </div>
-            <ChatBar/>
-        </div>  
+    friendListRef = friendListRef.filter(
+      (el) => el.props.user.id !== e.idToDelete
     );
+    setFriendList([...friendListRef]);
+  }
+
+  //get the friend list of the user
+  useEffect(() => {
+    fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/friendships?user_id=${user_id}`
+    )
+      .then(function (response) {
+        if (response.ok) {
+          return response.json().then(function (json) {
+            const friendListTmp: JSX.Element[] = [];
+            json.map(
+              (
+                e: { friend: UserBack; accept: boolean; ask: boolean },
+                i: number
+              ) => {
+                const key = i;
+                const user = {
+                  id: `${e.friend.id}`,
+                  avatar_num: i + 1,
+                  status: i % 2 === 0 ? "onligne" : "outligne",
+                  name: `${e.friend.name}`,
+                  victory: Math.floor(Math.random() * 1000),
+                  defeat: Math.floor(Math.random() * 1000),
+                  rank: Math.floor(Math.random() * 1000),
+                  level: Math.floor(Math.random() * 1000),
+                };
+                const userEntity = (
+                  <UserEntity
+                    small={false}
+                    option={{ del: true, accept: e.accept, ask: e.ask }}
+                    user={user}
+                    key={key}
+                    index={i}
+                    handleClick={handleClickUserMenu}
+                    delFriendClick={delFriendClick}
+                  />
+                );
+                friendListTmp.push(userEntity);
+              }
+            );
+            setFriendList([...friendListTmp]);
+            friendListRef = friendListTmp;
+          });
+        }
+      })
+      .catch(function (error) {
+        console.log(
+          "Il y a eu un problème avec l'opération fetchiii : " + error.message
+        );
+      });
+  }, []);
+
+  for (let i = 0; i < 19; i++) {
+    matchList.push(
+      <MatchEntity
+        url1={`/avatar/avatar-${i + 2}.png`}
+        url2={`/avatar/avatar-${i + 1}.png`}
+        name={"name" + (i + 1).toString()}
+        score={5}
+        key={i}
+      />
+    );
+    const user = {
+      id: `${i + 1}`,
+      avatar_num: i + 1,
+      status: i % 2 === 0 ? "onligne" : "outligne",
+      name: "name " + (i + 1).toString(),
+      victory: Math.floor(Math.random() * 1000),
+      defeat: Math.floor(Math.random() * 1000),
+      rank: i + 1,
+      level: Math.floor(Math.random() * 1000),
+    };
+    leaderboard.push(
+      <LeaderboardEntity
+        user={user}
+        key={i}
+        index={i}
+        handleClick={handleClickUserMenu}
+      />
+    );
+  }
+
+  return (
+    <div onClick={(): void => close()} id={"top"}>
+      <TopBar
+        openProfil={openProfil}
+        openToggle={openToggle}
+        openUserList={openUserList}
+        clickTopBarProfil={clickTopBarProfil}
+        clickTopBarToggle={clickTopBarToggle}
+        writeSearchTopBar={writeSearchTopBar}
+        handleClickUserMenu={handleClickUserMenu}
+      />
+      <div className={`${styles.illustration} d-none d-lg-block`}></div>
+      <div className="container ">
+        <div className="row">
+          <div className="col-12  d-none d-lg-block">
+            <h3 className={styles.title}>Ft_Transcendence</h3>
+          </div>
+          <div className="col-12 d-block d-lg-none">
+            <h3 className={`${styles.title} ${styles.small} d-block d-lg-none`}>
+              Ft_Transcendence
+            </h3>
+          </div>
+        </div>
+        <div className="row">
+          <div
+            className={
+              openPlayButton ? "col-12 col-lg-3 offset-lg-4" : "col-12"
+            }
+          >
+            <PlayButton
+              handleClick={handleClickPlayButton}
+              open={openPlayButton}
+            />
+          </div>
+          {openPlayButton ? (
+            <div className="col-10 offset-1 offset-xl-0 offset-lg-1 col-lg-3 offset-xl-1 ">
+              <div
+                className={`{${playButtonStyles.playMenuContainer} d-block d-lg-none`}
+              >
+                <PlayMenu />
+              </div>
+              <div
+                className={`d-none d-lg-block ${playButtonStyles.playMenuContainer} ${playButtonStyles.marge_top} `}
+              >
+                <PlayMenu />
+              </div>
+            </div>
+          ) : (
+            <></>
+          )}
+        </div>
+        <div className="row">
+          <div className="col-10 offset-1 col-lg-4">
+            <div className="card">
+              <List title="Friends List" list={friendList} />
+            </div>
+          </div>
+          <div className="col-10 offset-1  offset-lg-0 col-lg-6">
+            <div className="card">
+              <List title="featuring" list={matchList} />
+            </div>
+          </div>
+        </div>
+        <div className="row">
+          <div className="col-8 offset-2">
+            <h3 className={`${styles.text} ${textStyles.laquer}`}>
+              These guy are the best pong player of the world ... we are so
+              pround of them !!
+            </h3>
+          </div>
+        </div>
+        <div className="row">
+          <div className="col-10 offset-1" id="leaderBoard">
+            <ArrayDoubleColumn title="leaderboard" list={leaderboard} />
+          </div>
+        </div>
+        <div className="row">
+          <div className="col-4 offset-4">
+            <Link href={"#top"} style={{ textDecoration: "none" }}>
+              <p
+                className={textStyles.saira}
+                style={{ textAlign: "center", marginTop: "50px" }}
+              >
+                Go back to top
+              </p>
+            </Link>
+          </div>
+        </div>
+      </div>
+      <ChatBar />
+    </div>
+  );
 }
 
 export default Home;

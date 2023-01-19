@@ -36,7 +36,7 @@ import { ConversationsModule } from './conversations/conversations.module';
     AuthModule,
     SearchModule,
     FriendshipsModule,
-    UsersModule
+    UsersModule,
     ConversationsModule,
   ],
   controllers: [AppController],
