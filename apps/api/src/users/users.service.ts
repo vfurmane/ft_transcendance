@@ -64,4 +64,12 @@ export class UsersService {
   async removeTfa(userId: string): Promise<UpdateResult> {
     return this.usersRepository.update({ id: userId }, { tfa_setup: false });
   }
+
+  async updateLevel(user_id: string, xp: number) : Promise<number> {
+    const user = await this.usersRepository.findOneBy({id: user_id});
+    const level = user?.level;
+    const queryBuilder = this.usersRepository.createQueryBuilder().select('*');
+    queryBuilder.update().set({level: (level? level : 0) + xp}).where("id =  :id", {id: user_id}).execute();
+    return (1);
+  }
 }

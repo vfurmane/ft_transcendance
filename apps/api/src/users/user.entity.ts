@@ -40,4 +40,7 @@ export class User {
 
   @Column('boolean', { default: false })
   tfa_setup!: boolean;
+
+  @Column('number', {default: 0})
+  level!: number;
 }

@@ -7,6 +7,8 @@ import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { SearchModule } from './search/search.module';
 import { FriendshipsModule  } from './friendships/friendships.module';
+import { MatchModule } from './Match/Match.module';
+import { LeaderBoardModule } from './leaderBoard/leaderBoard.module';
 
 @Module({
   imports: [
@@ -35,7 +37,9 @@ import { FriendshipsModule  } from './friendships/friendships.module';
     AuthModule,
     SearchModule,
     FriendshipsModule,
-    UsersModule
+    UsersModule,
+    MatchModule,
+    LeaderBoardModule
   ],
   controllers: [AppController],
   providers: [AppService],
