@@ -37,7 +37,7 @@ export class UsersService {
     });
   }
 
-  async userExists(user: RegisterUserDto): Promise<boolean> {
+  async userExists(user: AddUserData): Promise<boolean> {
     return (
       (await this.usersRepository.findOneBy([
         { name: user.name },
