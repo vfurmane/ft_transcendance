@@ -1,11 +1,13 @@
 import { User } from './user.entity';
 import {
+  Column,
   CreateDateColumn,
   Entity,
   ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { TokenTypeEnum } from '../enums/token-type.enum';
 
 @Entity()
 export class Jwt {
@@ -18,6 +20,16 @@ export class Jwt {
   @UpdateDateColumn()
   updated_at!: Date;
 
-  @ManyToOne(() => User, (user) => user.jwts)
+  @ManyToOne(() => User, (user) => user.jwts, { eager: true })
   user!: User;
+
+  @Column({
+    type: 'enum',
+    enum: TokenTypeEnum,
+    default: TokenTypeEnum.ACCESS_TOKEN,
+  })
+  token_type!: TokenTypeEnum;
+
+  @Column('boolean', { default: false })
+  consumed!: boolean;
 }

@@ -14,6 +14,7 @@ import { State } from 'types';
 import ftOauth2Configuration from '../config/ft-oauth2';
 import { LocalStrategy } from './local.strategy';
 import { Jwt } from 'types';
+import { JwtRefreshStrategy } from './jwt-refresh.strategy';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { Jwt } from 'types';
     AuthService,
     FtOauth2Strategy,
     JwtStrategy,
+    JwtRefreshStrategy,
     LocalStrategy,
     Logger,
     UsersService,

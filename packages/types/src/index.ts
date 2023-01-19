@@ -8,6 +8,7 @@ export interface FtUser {
 
 export interface AccessTokenResponse {
   access_token: string;
+  refresh_token: string;
 }
 
 export interface TfaNeededResponse {

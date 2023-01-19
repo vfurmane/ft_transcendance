@@ -44,6 +44,7 @@ import { State } from '../common/decorators/state.decorator';
 import { State as StateEntity } from 'types';
 import { LocalAuthGuard } from './local-auth.guard';
 import { RegisterUserDto } from '../users/register-user.dto';
+import { JwtRefreshAuthGuard } from './jwt-refresh-auth.guard';
 
 @ApiTags()
 @Controller('auth')
@@ -193,5 +194,11 @@ export class AuthController {
     await this.authService.removeState(state);
     this.logger.log(`${state.user.name} validated TFA`);
     return this.authService.login(state.user, state);
+  }
+
+  @Post('refresh')
+  @UseGuards(JwtRefreshAuthGuard)
+  refreshToken(@User() user: UserEntity): Promise<AccessTokenResponse> {
+    return this.authService.login(user);
   }
 }
