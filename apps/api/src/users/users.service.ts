@@ -4,7 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'types';
 import * as speakeasy from 'speakeasy';
 import { SpeakeasyGeneratedSecretDto } from 'src/auth/speakeasy-generated-secret.dto';
-import { RegisterUserDto } from './register-user.dto';
+// import { RegisterUserDto } from './register-user.dto';
 
 export interface AddUserData {
   name: string;
