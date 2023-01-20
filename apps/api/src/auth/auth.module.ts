@@ -13,6 +13,7 @@ import { JwtStrategy } from './jwt.strategy';
 import { State } from './state.entity';
 import ftOauth2Configuration from '../config/ft-oauth2';
 import { LocalStrategy } from './local.strategy';
+import { TransformUserService } from 'src/TransformUser/TransformUser.service';
 
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import { LocalStrategy } from './local.strategy';
     LocalStrategy,
     Logger,
     UsersService,
+    TransformUserService,
   ],
   controllers: [AuthController],
   exports: [AuthService],

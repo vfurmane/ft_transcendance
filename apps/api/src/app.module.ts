@@ -10,6 +10,7 @@ import { FriendshipsModule  } from './friendships/friendships.module';
 import { ConversationsModule } from './conversations/conversations.module';
 import { MatchModule } from './Match/Match.module';
 import { LeaderBoardModule } from './leaderBoard/leaderBoard.module';
+import { TransformUserModule } from './TransformUser/TransformUser.module';
 
 @Module({
   imports: [
@@ -41,7 +42,8 @@ import { LeaderBoardModule } from './leaderBoard/leaderBoard.module';
     UsersModule,
     ConversationsModule,
     MatchModule,
-    LeaderBoardModule
+    LeaderBoardModule,
+    TransformUserModule
   ],
   controllers: [AppController],
   providers: [AppService],

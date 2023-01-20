@@ -5,4 +5,4 @@ export * from './message.entity';
 export * from './state.entity';
 export * from './user.entity';
 export * from './frienships.entity';
-export * from './Match.entity';
+export * from './match.entity';

@@ -4,6 +4,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './user.entity';
 import * as speakeasy from 'speakeasy';
 import { SpeakeasyGeneratedSecretDto } from 'src/auth/speakeasy-generated-secret.dto';
+import { RegisterUserDto } from './register-user.dto';
+import { TransformUserService, Userfront } from 'src/TransformUser/TransformUser.service';
 
 export interface AddUserData {
   name: string;
@@ -16,6 +18,7 @@ export class UsersService {
   constructor(
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
+    private readonly transformUserService : TransformUserService,
   ) {}
 
   async getById(id: string): Promise<User | null> {
@@ -63,6 +66,11 @@ export class UsersService {
 
   async removeTfa(userId: string): Promise<UpdateResult> {
     return this.usersRepository.update({ id: userId }, { tfa_setup: false });
+  }
+
+  async getUser(user_id : string) : Promise<Userfront | null>{
+    const user = await this.getById(user_id);
+    return await this.transformUserService.transform(user);
   }
 
   async updateLevel(user_id: string, xp: number) : Promise<number> {

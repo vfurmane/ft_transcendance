@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { Userfront } from "src/TransformUserbackToUserfront/TransformUserbackToUserfront";
+import { Userfront } from "src/TransformUser/TransformUser.service";
 
 @Injectable()
 export class LeaderBoardService{
