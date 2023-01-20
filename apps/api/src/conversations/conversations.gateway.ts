@@ -113,15 +113,15 @@ export class ConversationsGateway implements OnGatewayConnection {
   async unreadCount(
     @ConnectedSocket() client: Socket,
   ): Promise<unreadMessagesResponse> {
-    return await this.conversationsService.unreadCount(client.data as User);
+    return this.conversationsService.unreadCount(client.data as User);
   }
 
   @SubscribeMessage('getMessages')
-  async getMessages(
+  getMessages(
     @ConnectedSocket() client: Socket,
     @MessageBody() { id }: isUUIDDto,
-  ): Promise<Message[]> {
-    return await this.conversationsService.getMessages(client.data as User, id);
+  ): Message[] {
+    return this.conversationsService.getMessages(client.data as User, id);
   }
 
   @SubscribeMessage('postMessage')
@@ -179,11 +179,11 @@ export class ConversationsGateway implements OnGatewayConnection {
   }
 
   @SubscribeMessage('getParticipants')
-  async getConversationPartipants(
+  getConversationPartipants(
     @ConnectedSocket() client: Socket,
     @MessageBody() { id }: isUUIDDto,
-  ): Promise<ConversationRole[]> {
-    return await this.conversationsService.getConversationParticipants(
+  ): ConversationRole[] {
+    return this.conversationsService.getConversationParticipants(
       client.data as User,
       id,
     );
