@@ -1,17 +1,15 @@
 import React, { useEffect, useRef, useState } from "react";
-import TopBar from "../topBar/TopBar";
+import TopBar from "../components/TopBar";
 import { useRouter } from "next/router";
 import Image from "next/image";
-import MatchEntity from "../HomePage/MatchEntity";
-import { selectUserState } from "../../store/UserSlice";
+import MatchEntity from "../components/HomePage/MatchEntity";
+import { selectUserState } from "../store/UserSlice";
 import { useSelector } from "react-redux";
-import { initUser } from "../../interface/UserInterface";
-import AchivementEntity from "./achivementEntity";
-import Achivement, {
-  initAchivement,
-} from "../../interface/AchivementInterface";
-import ChangePswrd from "./ChangePswrd";
-import ChatBar from "../chatBar/chatBar";
+import { initUser } from "../interface/UserInterface";
+import AchivementEntity from "../components/ProfilePage/achivementEntity";
+import Achivement, { initAchivement } from "../interface/AchivementInterface";
+import ChangePswrd from "../components/ProfilePage/ChangePswrd";
+import ChatBar from "../components/chatBar";
 import styles from "styles/profil.module.scss";
 import textStyles from "styles/text.module.scss";
 

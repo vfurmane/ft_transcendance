@@ -5,21 +5,20 @@ import { User as UserEntity } from 'types';
 
 @Injectable()
 export class SearchService {
-    constructor(
+  constructor(
     @InjectRepository(UserEntity)
-    private readonly usersRepository: Repository<UserEntity>
-    ) {}
+    private readonly usersRepository: Repository<UserEntity>,
+  ) {}
 
-    async findAll(letters : string): Promise<UserEntity[]> {
+  async findAll(letters: string): Promise<UserEntity[]> {
+    const queryBuilder = this.usersRepository?.createQueryBuilder().select('*');
 
-        const queryBuilder = this.usersRepository?.createQueryBuilder().select('*');
-
-        queryBuilder.where(
-            `LOWER(SUBSTRING(name, 1, ${letters.length})) IN (:letters)`,
-            {
-                letters,
-            },
-        );
-        return  await queryBuilder.getRawMany();
-    }
+    queryBuilder.where(
+      `LOWER(SUBSTRING(name, 1, ${letters.length})) IN (:letters)`,
+      {
+        letters,
+      },
+    );
+    return await queryBuilder.getRawMany();
+  }
 }
