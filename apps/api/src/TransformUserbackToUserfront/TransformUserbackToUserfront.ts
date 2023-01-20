@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 import { User } from "types";
+=======
+import { User } from "src/users/user.entity";
+>>>>>>> 6a17e2e9810b4e52016e6b8b06d278d95d2fc673
 
 export interface Userfront {
     id: string,
