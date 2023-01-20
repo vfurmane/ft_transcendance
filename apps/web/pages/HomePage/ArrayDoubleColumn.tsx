@@ -9,6 +9,7 @@ export default function ArrayDoubleColumn(props: {
 }): JSX.Element {
   const [columnNum, setColumnNum] = useState(1);
   const [pageNum, setPageNum] = useState(1);
+  const [leaderBoardList, setLeatderBoardList] = useState([<></>]);
 
   function prevClick(): void {
     if (columnNum > 1) {

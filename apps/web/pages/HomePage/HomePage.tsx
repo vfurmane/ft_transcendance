@@ -3,13 +3,12 @@ import TopBar from "../topBar/TopBar";
 import PlayButton from "./PlayButton";
 import List from "./List";
 import UserEntity from "./UserEntity";
-import MatchEntity from "./MatchEntity";
 import LeaderboardEntity from "./LeaderboardEntity";
 import ArrayDoubleColumn from "./ArrayDoubleColumn";
 import PlayMenu from "./PlayMenu";
 import { setUserState } from "../../store/UserSlice";
 import { useDispatch } from "react-redux";
-import { UserBack } from "../../interface/UserInterface";
+import User, { UserBack } from "../../interface/UserInterface";
 import Link from "next/link";
 import ChatBar from "../chatBar/chatBar";
 import playButtonStyles from "styles/playButton.module.scss";
@@ -17,10 +16,9 @@ import textStyles from "styles/text.module.scss";
 import styles from "styles/home.module.scss";
 
 //temporary before the login page
-const user_id = "4942a5c6-459b-4c4a-b771-c79bd2fa0962";
+const user_id = "07400ae0-3751-4f99-884f-29f5682aa374";
 
 function Home(): JSX.Element {
-  const matchList: JSX.Element[] = [];
   const leaderboard: JSX.Element[] = [];
   const friendListRef = useRef([<></>]);
   const setterInit: React.Dispatch<React.SetStateAction<boolean>> = () => false;
@@ -41,16 +39,7 @@ function Home(): JSX.Element {
       })
       .then((data) => {
         dispatch(
-          setUserState({
-            id: data.id,
-            name: data.name,
-            avatar_num: 6,
-            status: "Store Ok",
-            victory: 1000,
-            defeat: 70,
-            rank: 10,
-            level: 489,
-          })
+          setUserState(data)
         );
       })
       .catch(function (error) {
@@ -149,20 +138,11 @@ function Home(): JSX.Element {
             const friendListTmp: JSX.Element[] = [];
             json.map(
               (
-                e: { friend: UserBack; accept: boolean; ask: boolean },
+                e: { friend: User; accept: boolean; ask: boolean },
                 i: number
               ) => {
                 const key = i;
-                const user = {
-                  id: `${e.friend.id}`,
-                  avatar_num: i + 1,
-                  status: i % 2 === 0 ? "onligne" : "outligne",
-                  name: `${e.friend.name}`,
-                  victory: Math.floor(Math.random() * 1000),
-                  defeat: Math.floor(Math.random() * 1000),
-                  rank: Math.floor(Math.random() * 1000),
-                  level: Math.floor(Math.random() * 1000),
-                };
+                const user = e.friend;
                 const userEntity = (
                   <UserEntity
                     small={false}
@@ -190,15 +170,6 @@ function Home(): JSX.Element {
   }, [handleClickUserMenu]);
 
   for (let i = 0; i < 19; i++) {
-    matchList.push(
-      <MatchEntity
-        url1={`/avatar/avatar-${i + 2}.png`}
-        url2={`/avatar/avatar-${i + 1}.png`}
-        name={"name" + (i + 1).toString()}
-        score={5}
-        key={i}
-      />
-    );
     const user = {
       id: `${i + 1}`,
       avatar_num: i + 1,
@@ -278,7 +249,7 @@ function Home(): JSX.Element {
           </div>
           <div className="col-10 offset-1  offset-lg-0 col-lg-6">
             <div className="card">
-              <List title="featuring" list={matchList} />
+              <List title="featuring" list={[<></>]} />
             </div>
           </div>
         </div>

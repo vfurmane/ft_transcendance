@@ -93,8 +93,6 @@ export class MatchService{
                 })
         }
 
-
-
         return [...winArray, ...looseArray];
     }
 

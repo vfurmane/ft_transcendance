@@ -11,7 +11,7 @@ import UserEntity from "../HomePage/UserEntity";
 import styles from "styles/topBar.module.scss";
 import textStyles from "styles/text.module.scss";
 import List from "../HomePage/List";
-import { UserBack } from "../../interface/UserInterface";
+import User, { UserBack } from "../../interface/UserInterface";
 
 interface propsTopBar {
   openToggle: boolean;
@@ -62,17 +62,8 @@ function TopBar(props: propsTopBar): JSX.Element {
         .then(function (response) {
           response.json().then(function (json) {
             const userListTmp: JSX.Element[] = [];
-            json.map((e: UserBack, i: number) => {
-              const user = {
-                id: `${e.id}`,
-                avatar_num: i + 1,
-                status: i % 2 === 0 ? "outligne" : "inligne",
-                name: `${e.name}`,
-                victory: Math.floor(Math.random() * 1000),
-                defeat: Math.floor(Math.random() * 1000),
-                rank: i,
-                level: Math.floor(Math.random() * 1000),
-              };
+            json.map((e: User, i: number) => {
+              const user = e;
               const userEntity = (
                 <UserEntity
                   small={true}

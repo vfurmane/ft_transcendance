@@ -14,6 +14,7 @@ import ChangePswrd from "./ChangePswrd";
 import ChatBar from "../chatBar/chatBar";
 import styles from "styles/profil.module.scss";
 import textStyles from "styles/text.module.scss";
+import { initMatch, Match } from "../../interface/Match.interface";
 
 export default function Profil(): JSX.Element {
   const UserState = useSelector(selectUserState);
@@ -31,6 +32,8 @@ export default function Profil(): JSX.Element {
   const [userProfil, setUserProfil] = useState(false);
   const [openConfigProfil, setOpenConfigProfil] = useState(false);
   const [configProfil, setConfigProfil] = useState(<></>);
+  const [matchHistory, setMatchHistory] = useState([initMatch]);
+  const [listOfMatch, setListOfMatch] = useState([<></>]);
 
   /*======for close topBar component when click on screen====*/
   const [openToggle, setOpenToggle] = useState(false);
@@ -74,8 +77,29 @@ export default function Profil(): JSX.Element {
       if (JSON.parse(router.query.user).id === UserState.id)
         setUserProfil(true);
       else setUserProfil(false);
+    
+    fetch(`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/match?user_id${JSON.parse(router.query.user).id}`)
+    .then(res => res.json())
+    .then(data => {
+      setMatchHistory(data);
+    }).catch(error => {
+      console.log(`problem with fetch : ${error.message}`);
+    })
     }
   }, [router.query, UserState]);
+
+  useEffect(() => {
+    let tmp : JSX.Element[] = [];
+    for (let i = 0; i < matchHistory.length; i++)
+    {
+      tmp.push(<MatchEntity
+        match={matchHistory[i]}
+        user={user}
+        key={i}
+      />)
+    }
+    setListOfMatch([...tmp]);
+  }, [matchHistory])
 
   function achivementListClick(): void {
     setOpenAchivementList(true);
@@ -134,7 +158,7 @@ export default function Profil(): JSX.Element {
   }
 
   //temporary before get the real data
-  const listOfMatch = [];
+  //const listOfMatch = [];
   const achivementList: JSX.Element[] = [];
   for (let i = 0; i < 22; i++) {
     achivementList.push(
@@ -149,7 +173,7 @@ export default function Profil(): JSX.Element {
         handleClick={achivementClick}
       />
     );
-    listOfMatch.push(
+    /*listOfMatch.push(
       <MatchEntity
         url1={`/avatar/avatar-${Math.floor(Math.random() * 19) + 1}.png`}
         url2={`/avatar/avatar-${Math.floor(Math.random() * 19) + 1}.png`}
@@ -157,7 +181,7 @@ export default function Profil(): JSX.Element {
         score={5}
         key={i}
       />
-    );
+    );*/
   }
 
   return (
