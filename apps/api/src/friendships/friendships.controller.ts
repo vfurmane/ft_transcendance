@@ -5,11 +5,11 @@ import {
   Body,
   Get,
   Query,
-  //UseGuards,
+  // UseGuards,
 } from '@nestjs/common';
 import { FriendshipsService } from './friendships.service';
 // import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { Userfront } from 'src/TransformUser/TransformUser.service';
+import { User } from 'types';
 
 //@UseGuards(JwtAuthGuard)
 @Controller('friendships')

@@ -1,17 +1,17 @@
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
-import Logo from "../../public/Logo.png";
-import Search from "../../public/Search.png";
-import ToggleBar from "../../public/toggleBar.png";
-import ToggleCross from "../../public/toggleCross.png";
+import Logo from "../public/Logo.png";
+import Search from "../public/Search.png";
+import ToggleBar from "../public/toggleBar.png";
+import ToggleCross from "../public/toggleCross.png";
 import Link from "next/link";
-import { selectUserState } from "../../store/UserSlice";
+import { selectUserState } from "../store/UserSlice";
 import { useSelector } from "react-redux";
-import UserEntity from "../HomePage/UserEntity";
+import UserEntity from "./HomePage/UserEntity";
 import styles from "styles/topBar.module.scss";
 import textStyles from "styles/text.module.scss";
-import List from "../HomePage/List";
-import User from "../../interface/UserInterface";
+import List from "./HomePage/List";
+import { UserBack } from "../interface/UserInterface";
 
 interface propsTopBar {
   openToggle: boolean;
@@ -94,13 +94,10 @@ function TopBar(props: propsTopBar): JSX.Element {
     <div className={styles.containerTopBar}>
       <div className="d-none d-md-block">
         <div className={styles.elementTopBar}>
-          <Link href={"/HomePage/HomePage"}>
+          <Link href={"/home"}>
             <Image alt="logo" src={Logo} width={200} height={30} />
           </Link>
-          <Link
-            className={styles.leaderBoardLink}
-            href="/HomePage/HomePage#leaderBoard"
-          >
+          <Link className={styles.leaderBoardLink} href="/home#leaderBoard">
             Learderbord
           </Link>
         </div>
@@ -137,7 +134,7 @@ function TopBar(props: propsTopBar): JSX.Element {
       </div>
       <div className="d-md-none">
         <div className={styles.elementTopBar}>
-          <Link href={"/HomePage/HomePage"}>
+          <Link href={"/home"}>
             <Image alt="logo" src={Logo} width={170} height={20} />
           </Link>
         </div>
@@ -201,7 +198,7 @@ function TopBar(props: propsTopBar): JSX.Element {
           <div className={styles.contextMenuContainer}>
             <Link
               href={{
-                pathname: "/ProfilePage/Profil",
+                pathname: "/profile",
                 query: { user: JSON.stringify(UserState) },
               }}
               style={{ textDecoration: "none" }}
