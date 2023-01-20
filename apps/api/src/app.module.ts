@@ -6,6 +6,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { PongModule } from './pong/pong.module';
+import { ConversationsModule } from './conversations/conversations.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { PongModule } from './pong/pong.module';
     UsersModule,
     AuthModule,
     PongModule,
+    ConversationsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
