@@ -6,10 +6,10 @@ import { AccessTokenResponse, FtUser, JwtPayload } from 'types';
 import * as speakeasy from 'speakeasy';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { User } from '../users/user.entity';
+import { User } from 'types';
 import { UsersService } from '../users/users.service';
 import { InjectRepository } from '@nestjs/typeorm';
-import { State } from './state.entity';
+import { State } from 'types';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { RegisterUserDto } from 'src/users/register-user.dto';
@@ -63,9 +63,11 @@ export class AuthService {
   }
 
   async createUser(user: RegisterUserDto): Promise<User> {
+    if (await this.usersService.userExists({ ...user, name: user.username }))
+      throw new BadRequestException('`username` or `email` is already in use');
     const salt = await bcrypt.genSalt();
     user.password = await bcrypt.hash(user.password, salt);
-    return this.usersService.addUser(user);
+    return this.usersService.addUser({ ...user, name: user.username });
   }
 
   async validateUser(username: string, pass: string): Promise<User | null> {

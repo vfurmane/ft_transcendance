@@ -1,4 +1,4 @@
-export default function Web() {
+export default function Web(): JSX.Element {
   return (
     <div>
       <h1>Web</h1>

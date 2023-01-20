@@ -1,4 +1,4 @@
-import { User } from '../../users/user.entity';
+import { User } from './user.entity';
 import {
   Column,
   Entity,
@@ -7,7 +7,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Conversation } from './conversation.entity';
-import { ConversationRoleEnum } from '../conversationRole.enum';
+import { ConversationRoleEnum } from '../enums/conversationRole.enum';
 import { Exclude, Expose } from 'class-transformer';
 import { ConversationRestriction } from './conversationRestriction.entity';
 

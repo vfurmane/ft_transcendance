@@ -17,7 +17,7 @@ import { Server, Socket } from 'socket.io';
 import { AuthService } from '../auth/auth.service';
 import { HttpExceptionTransformationFilter } from '../common/filters/HttpExceptionFilter.filter';
 import { isUUIDDto } from '../conversations/dtos/IsUUID.dto';
-import { User } from './user.entity';
+import { User } from 'types';
 import { UsersService } from './users.service';
 
 @UseFilters(HttpExceptionTransformationFilter)
