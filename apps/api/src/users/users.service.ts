@@ -70,6 +70,6 @@ export class UsersService {
     const level = user?.level;
     const queryBuilder = this.usersRepository.createQueryBuilder().select('*');
     queryBuilder.update().set({level: (level? level : 0) + xp}).where("id =  :id", {id: user_id}).execute();
-    return (1);
+    return ((level? level : 0) + xp);
   }
 }

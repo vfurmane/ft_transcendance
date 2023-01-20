@@ -33,7 +33,7 @@ export class FriendshipsService {
         newFriendship.target_id = target_id;
         newFriendship.accepted = false;
 
-        this.friendshipsRepository.save(newFriendship);
+        await this.friendshipsRepository.save(newFriendship);
 
         return 1;
     }

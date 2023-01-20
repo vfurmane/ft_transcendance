@@ -7,7 +7,10 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Exclude } from 'class-transformer';
+import { Exclude, Expose } from 'class-transformer';
+import { Message } from './message.entity';
+import { ConversationRole } from './conversationRole.entity';
+import { Match } from './Match.entity';
 
 @Entity()
 export class User {
@@ -51,6 +54,15 @@ export class User {
     (conversationRole) => conversationRole.user,
   )
   conversationRoles!: ConversationRole[];
-  @Column('number', {default: 0})
+
+  @Expose()
+  @OneToMany(() => Match, (match) => match.winner_id)
+  win!: Match[];
+
+  @Expose()
+  @OneToMany(() => Match, (match) => match.looser_id)
+  defeat!: Match[];
+
+  @Column('smallint', {default: 0})
   level!: number;
 }

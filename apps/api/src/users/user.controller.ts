@@ -15,7 +15,7 @@ export class UsersController {
         return this.usersService.getById(query.user_id);
     }
 
-    @Post()
+    @Post('updateLevel')
     async updateLevel(@Body() body : {user_id: string, xp: number}) : Promise<number> {
         return this.usersService.updateLevel(body.user_id, body.xp);
     }

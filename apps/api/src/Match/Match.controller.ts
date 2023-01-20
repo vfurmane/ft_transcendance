@@ -1,5 +1,6 @@
 import { Body, Controller, Get, Post, Query } from "@nestjs/common";
 import { MatchService } from "./Match.service";
+import { User } from "types";
 
 @Controller('match')
 export class MatchController{
@@ -8,12 +9,12 @@ export class MatchController{
     ){}
 
     @Post()
-    addMatch(@Body() body : {winner_id : string, looser_id: string, score_winner: number, score_looser: number, date: Date}) : Promise<Number>{
-        return this.matchService.addMatch(body.winner_id, body.looser_id, body.score_winner, body.score_looser, body.date);
+    addMatch(@Body() body : {winner_id : string, looser_id: string, score_winner: number, score_looser: number}) : Promise<Number>{
+        return this.matchService.addMatch(body.winner_id, body.looser_id, body.score_winner, body.score_looser);
     }
 
     @Get()
-    getMatch(@Query() query : {user_id: string}) : Promise<number> {
+    getMatch(@Query() query : {user_id: string}) : Promise<User> {
         return this.matchService.getMatch(query.user_id);
     }
 }
