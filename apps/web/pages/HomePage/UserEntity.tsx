@@ -25,11 +25,11 @@ export default function UserEntity(props: {
   }) => void;
   delFriendClick: (e: { idToDelete: string; index: number }) => void;
 }): JSX.Element {
-  if (typeof props.user === "undefined" || !props.option) return <></>;
-  const [openMenu, setOpenMenu] = useState(false);
-  const [accept, setAccept] = useState(props.option.accept);
-
   const UserState = useSelector(selectUserState);
+  const [openMenu, setOpenMenu] = useState(false);
+  const [accept, setAccept] = useState(props.option?.accept);
+
+  if (typeof props.user === "undefined" || !props.option) return <></>;
 
   function valideClick(): void {
     const data = {

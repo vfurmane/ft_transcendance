@@ -75,7 +75,7 @@ export default function Profil(): JSX.Element {
         setUserProfil(true);
       else setUserProfil(false);
     }
-  }, [router.query]);
+  }, [router.query, UserState]);
 
   function achivementListClick(): void {
     setOpenAchivementList(true);

@@ -24,7 +24,7 @@ export interface UserBack {
   id?: string;
   created_at?: Date;
   updated_at?: Date;
-  states?: any[];
+  states?: string[];
   email?: string;
   name?: string;
   password?: string | null;

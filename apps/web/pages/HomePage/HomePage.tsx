@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import TopBar from "../topBar/TopBar";
 import PlayButton from "./PlayButton";
 import List from "./List";
@@ -22,7 +22,7 @@ const user_id = "1edffd5a-863d-442c-a962-a5dbd9b2c686";
 function Home(): JSX.Element {
   const matchList: JSX.Element[] = [];
   const leaderboard: JSX.Element[] = [];
-  let friendListRef = [<></>];
+  const friendListRef = useRef([<></>]);
   const setterInit: React.Dispatch<React.SetStateAction<boolean>> = () => false;
 
   const [openPlayButton, setOpenPlayButton] = useState(false);
@@ -81,22 +81,25 @@ function Home(): JSX.Element {
     setOpenPlayButton(!openPlayButton);
   }
 
-  function handleClickUserMenu(e: {
-    index: number;
-    openMenu: boolean;
-    setOpenMenu: React.Dispatch<React.SetStateAction<boolean>>;
-  }): void {
-    setOpenUserMenu(true);
-    e.setOpenMenu(true);
-    if (
-      prevSetterUsermenuRef.current !== setterInit &&
-      prevSetterUsermenuRef.current !== e.setOpenMenu
-    )
-      prevSetterUsermenuRef.current(false);
-    prevSetterUsermenuRef.current = e.setOpenMenu;
-    setIndexOfUser(e.index);
-    prevIndexOfUserRef.current = e.index;
-  }
+  const handleClickUserMenu = useCallback(
+    (e: {
+      index: number;
+      openMenu: boolean;
+      setOpenMenu: React.Dispatch<React.SetStateAction<boolean>>;
+    }): void => {
+      setOpenUserMenu(true);
+      e.setOpenMenu(true);
+      if (
+        prevSetterUsermenuRef.current !== setterInit &&
+        prevSetterUsermenuRef.current !== e.setOpenMenu
+      )
+        prevSetterUsermenuRef.current(false);
+      prevSetterUsermenuRef.current = e.setOpenMenu;
+      setIndexOfUser(e.index);
+      prevIndexOfUserRef.current = e.index;
+    },
+    []
+  );
 
   function close(): void {
     if (openPlayButton) setOpenPlayButton(!openPlayButton);
@@ -130,10 +133,10 @@ function Home(): JSX.Element {
       );
     });
 
-    friendListRef = friendListRef.filter(
+    friendListRef.current = friendListRef.current.filter(
       (el) => el.props.user.id !== e.idToDelete
     );
-    setFriendList([...friendListRef]);
+    setFriendList([...friendListRef.current]);
   }
 
   //get the friend list of the user
@@ -176,7 +179,7 @@ function Home(): JSX.Element {
               }
             );
             setFriendList([...friendListTmp]);
-            friendListRef = friendListTmp;
+            friendListRef.current = friendListTmp;
           });
         }
       })
@@ -185,7 +188,7 @@ function Home(): JSX.Element {
           "Il y a eu un problème avec l'opération fetchiii : " + error.message
         );
       });
-  }, []);
+  }, [handleClickUserMenu]);
 
   for (let i = 0; i < 19; i++) {
     matchList.push(

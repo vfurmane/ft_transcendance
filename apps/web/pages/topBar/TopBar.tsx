@@ -97,7 +97,7 @@ function TopBar(props: propsTopBar): JSX.Element {
           );
         });
     }
-  }, [value]);
+  }, [value, props.handleClickUserMenu]);
 
   return (
     <div className={styles.containerTopBar}>
