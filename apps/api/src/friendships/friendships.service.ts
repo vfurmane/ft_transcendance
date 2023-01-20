@@ -1,5 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
+import { TransformUserService, Userfront } from "src/TransformUser/TransformUser.service";
 import { Repository } from "typeorm";
 import { Friendships as friendshipsEntity } from 'types';
 import { User } from "types";
@@ -11,7 +12,8 @@ export class FriendshipsService {
         @InjectRepository(User)
         private readonly userRepository : Repository<User>,
         @InjectRepository(friendshipsEntity)
-        private readonly friendshipsRepository : Repository<friendshipsEntity>
+        private readonly friendshipsRepository : Repository<friendshipsEntity>,
+        private readonly transformUserService : TransformUserService,
     ) {}
 
     async add (initiator_id : string, target_id : string) : Promise<number> {
@@ -38,11 +40,11 @@ export class FriendshipsService {
         return 1;
     }
 
-    async getFriendsList ( user_id : string ) : Promise<{friend : User | null , accept: boolean, ask: boolean}[]> {
+    async getFriendsList ( user_id : string ) : Promise<{friend : Userfront | null , accept: boolean, ask: boolean}[]> {
 
         let friendsList :  (User| null)[] = [];
         let ids : string[] = [];
-        let response : {friend : User | null , accept: boolean, ask: boolean}[] = [];
+        let response : {friend : Userfront | null , accept: boolean, ask: boolean}[] = [];
 
         const initiatorArray = await this.friendshipsRepository.findBy({initiator_id : user_id});
         const targetArray = await this.friendshipsRepository.findBy({target_id : user_id});
@@ -62,9 +64,25 @@ export class FriendshipsService {
             friendsList = [];
         }
 
-        let i = 0;
-        initiatorArray.map((e) => {response.push({friend: friendsList.filter(el => el?.id === e.target_id)[0], accept: e.accepted, ask: true});i++;});
-        targetArray.map((e) => {response.push({friend: friendsList.filter(el => el?.id === e.initiator_id)[0], accept: e.accepted, ask: false});i++;});
+        for (let i = 0; i < initiatorArray.length; i++)
+        {
+            response.push({
+                friend: await this.transformUserService.transform(friendsList.filter(el => el?.id === initiatorArray[i].target_id)[0]),
+                accept: initiatorArray[i].accepted, 
+                ask: true
+            });
+            i++;
+        }
+
+        for (let i = 0; i < targetArray.length; i++)
+        {
+            response.push({
+                friend: await this.transformUserService.transform(friendsList.filter(el => el?.id === targetArray[i].initiator_id)[0]),
+                accept: targetArray[i].accepted, 
+                ask: false
+            });
+            i++;
+        }
         
         //for debug :
         //const friendships =  await this.friendshipsRepository.find();

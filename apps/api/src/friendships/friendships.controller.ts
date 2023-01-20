@@ -2,6 +2,7 @@ import { Controller, Post, Delete, Body, Get, Query, UseGuards } from "@nestjs/c
 import { FriendshipsService } from "./friendships.service";
 // import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { User } from "types";
+import { Userfront } from "src/TransformUser/TransformUser.service";
 
 //@UseGuards(JwtAuthGuard)
 @Controller('friendships')
@@ -16,7 +17,7 @@ export class FriendshipsController {
     }
 
     @Get()
-    async getFriendsList(@Query() query : {user_id: string}) : Promise<{friend : User | null , accept: boolean, ask: boolean}[]> {
+    async getFriendsList(@Query() query : {user_id: string}) : Promise<{friend : Userfront | null , accept: boolean, ask: boolean}[]> {
         return this.fiendshipsService.getFriendsList(query.user_id);
     }
 

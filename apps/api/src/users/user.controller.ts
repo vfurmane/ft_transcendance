@@ -2,17 +2,19 @@ import { Body, Controller, Get, Post, Query, UseGuards } from "@nestjs/common";
 import { UsersService } from "./users.service";
 // import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { User } from "types";
+import { Userfront } from "src/TransformUser/TransformUser.service";
+
 
 //@UseGuards(JwtAuthGuard)
 @Controller('user')
 export class UsersController {
     constructor(
-        private readonly usersService : UsersService
+        private readonly usersService : UsersService,
     ) {}
 
     @Get()
-    async getFriendsList(@Query() query : {user_id: string}) : Promise<(User | null)> {
-        return this.usersService.getById(query.user_id);
+    async getUser(@Query() query : {user_id: string}) : Promise<(Userfront | null)> {
+        return this.usersService.getUser(query.user_id);
     }
 
     @Post('updateLevel')

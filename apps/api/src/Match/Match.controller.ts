@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Post, Query } from "@nestjs/common";
-import { MatchService } from "./Match.service";
+import { MatcFront, MatchService } from "./Match.service";
 import { User } from "types";
 
 @Controller('match')
@@ -14,7 +14,7 @@ export class MatchController{
     }
 
     @Get()
-    getMatch(@Query() query : {user_id: string}) : Promise<User> {
+    getMatch(@Query() query : {user_id: string}) : Promise<MatcFront[]> {
         return this.matchService.getMatch(query.user_id);
     }
 }

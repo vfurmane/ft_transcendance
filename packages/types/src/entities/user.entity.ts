@@ -10,7 +10,7 @@ import {
 import { Exclude, Expose } from 'class-transformer';
 import { Message } from './message.entity';
 import { ConversationRole } from './conversationRole.entity';
-import { Match } from './Match.entity';
+import { Match } from './match.entity';
 
 @Exclude()
 @Entity()
