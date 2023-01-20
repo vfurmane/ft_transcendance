@@ -101,7 +101,7 @@ export default function UserEntity(props: {
       >
         <div
           className={styles.imageText}
-          onClick={() =>
+          onClick={() : void =>
             props.handleClick({
               index: props.index,
               openMenu: openMenu,
