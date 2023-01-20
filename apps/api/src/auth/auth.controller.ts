@@ -192,12 +192,6 @@ export class AuthController {
     @State() state: StateEntity,
     @Body() body: CheckTfaTokenStateDto,
   ): Promise<AccessTokenResponse> {
-    if (!state) {
-      this.logger.error(
-        'This is the impossible type error where the state is registered but the `req.state` is `undefined`',
-      );
-      throw new InternalServerErrorException('Unexpected error');
-    }
     if (!state.user)
       throw new UnauthorizedException('Missing first factor authentication.');
     await this.authService.checkTfa(state.user, body.token);
