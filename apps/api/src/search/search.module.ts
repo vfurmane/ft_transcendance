@@ -7,5 +7,6 @@ import { SearchService } from './search.service';
   imports: [UsersModule],
   controllers: [SearchController],
   providers: [SearchService],
+  exports: [SearchService],
 })
 export class SearchModule {}
