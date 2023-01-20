@@ -7,12 +7,9 @@ import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { SearchModule } from './search/search.module';
 import { FriendshipsModule  } from './friendships/friendships.module';
-<<<<<<< HEAD
 import { ConversationsModule } from './conversations/conversations.module';
-=======
 import { MatchModule } from './Match/Match.module';
 import { LeaderBoardModule } from './leaderBoard/leaderBoard.module';
->>>>>>> 6a17e2e (game data first commit)
 
 @Module({
   imports: [
@@ -42,12 +39,9 @@ import { LeaderBoardModule } from './leaderBoard/leaderBoard.module';
     SearchModule,
     FriendshipsModule,
     UsersModule,
-<<<<<<< HEAD
     ConversationsModule,
-=======
     MatchModule,
     LeaderBoardModule
->>>>>>> 6a17e2e (game data first commit)
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -17,7 +17,7 @@ import textStyles from "styles/text.module.scss";
 import styles from "styles/home.module.scss";
 
 //temporary before the login page
-const user_id = "1edffd5a-863d-442c-a962-a5dbd9b2c686";
+const user_id = "4942a5c6-459b-4c4a-b771-c79bd2fa0962";
 
 function Home(): JSX.Element {
   const matchList: JSX.Element[] = [];
@@ -33,7 +33,6 @@ function Home(): JSX.Element {
   const prevIndexOfUserRef = useRef(0);
   const prevSetterUsermenuRef = useRef(setterInit);
 
-  //get user info end dispatch them in the redux store
   const dispatch = useDispatch();
   useEffect(() => {
     fetch(`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/user?user_id=${user_id}`)

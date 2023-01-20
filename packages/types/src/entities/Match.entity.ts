@@ -1,30 +1,27 @@
 import {
     Column,
     Entity,
-    JoinColumn,
-    OneToOne,
     PrimaryGeneratedColumn,
     CreateDateColumn,
+    ManyToOne,
 } from 'typeorm';
-import { User } from 'src/users/user.entity';
+import { User } from './user.entity';
 
   @Entity()
-  export class MatchEntity {
+  export class Match {
     @PrimaryGeneratedColumn('uuid')
     id!: string;
-
-    @OneToOne(()=> User)
-    @JoinColumn()
+    
+    @ManyToOne(() => User, (user) => user.win)
     winner_id!: User;
 
-    @OneToOne(()=> User)
-    @JoinColumn()
+    @ManyToOne(() => User, (user) => user.defeat)
     looser_id!: User;
 
-    @Column('number', {default: 0})
+    @Column('smallint', {default: 0})
     score_winner!: number;
   
-    @Column('number', {default: 0})
+    @Column('smallint', {default: 0})
     score_looser!: number;
 
     @CreateDateColumn()

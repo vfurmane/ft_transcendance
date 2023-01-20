@@ -1,14 +1,14 @@
 import { Module } from "@nestjs/common";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { MatchController} from "./Match.controller";
-import { MatchEntity } from "./Match.entity";
 import { MatchService } from "./Match.service";
-import { User } from "src/users/user.entity";
+import { User, Match } from "types";
+import { UsersService } from "../users/users.service";
 
 @Module({
-    imports: [TypeOrmModule.forFeature([MatchEntity, User])],
+    imports: [TypeOrmModule.forFeature([Match, User])],
     controllers: [MatchController],
-    providers: [MatchService],
+    providers: [MatchService , UsersService],
     exports: [TypeOrmModule]
 })
 export class MatchModule{};
