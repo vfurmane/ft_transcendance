@@ -1,9 +1,10 @@
 import { Module } from '@nestjs/common';
-import { PongGateway } from 'dist/pong/pong.gateway';
+import { AuthModule } from 'src/auth/auth.module';
+import { PongGateway } from './pong.gateway';
 import { PongService } from './pong.service';
 
 @Module({
-	imports: [],
+	imports: [AuthModule],
 	controllers: [],
 	providers: [ PongService, PongGateway ],
 })

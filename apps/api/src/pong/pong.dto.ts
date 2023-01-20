@@ -1,5 +1,5 @@
 export class RacketDto {
-	key: boolean;
+	key!: boolean;
 }
 
 export class GameDto {

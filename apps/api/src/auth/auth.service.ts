@@ -127,4 +127,14 @@ export class AuthService {
     state;
     return;
   }
+
+  verifyUserFromToken(access_token: string): JwtPayload | null {
+    let user: JwtPayload;
+    try {
+      user = this.jwtService.verify<JwtPayload>(access_token);
+    } catch (error) {
+      return null;
+    }
+    return user;
+  }
 }
