@@ -8,5 +8,6 @@ import { TransformUserService } from 'src/TransformUser/TransformUser.service';
   imports: [UsersModule],
   controllers: [SearchController],
   providers: [SearchService, TransformUserService],
+  exports: [SearchService],
 })
 export class SearchModule {}

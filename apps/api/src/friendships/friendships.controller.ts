@@ -1,46 +1,51 @@
 import {
   Controller,
-  Post,
   Delete,
-  Body,
   Get,
-  Query,
-  // UseGuards,
+  UseGuards,
+  Put,
+  Param,
+  Patch,
 } from '@nestjs/common';
 import { FriendshipsService } from './friendships.service';
-// import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { User } from 'types';
+import { User as CurrentUser } from '../common/decorators/user.decorator';
+import { isUUIDDto } from '../conversations/dtos/IsUUID.dto';
 
-//@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard)
 @Controller('friendships')
 export class FriendshipsController {
   constructor(private readonly fiendshipsService: FriendshipsService) {}
 
-  @Post()
-  async add(
-    @Body() body: { initiator_id: string; target_id: string },
+  @Put('/:id')
+  add(
+    @CurrentUser() currentUser: User,
+    @Param() { id }: isUUIDDto,
   ): Promise<number> {
-    return this.fiendshipsService.add(body.initiator_id, body.target_id);
+    return this.fiendshipsService.add(currentUser, id);
   }
 
   @Get()
-  async getFriendsList(
-    @Query() query: { user_id: string },
-  ): Promise<{ friend: Userfront | null; accept: boolean; ask: boolean }[]> {
-    return this.fiendshipsService.getFriendsList(query.user_id);
+  getFriendsList(
+    @CurrentUser() currentUser: User,
+  ): Promise<{ friend: User | null; accept: boolean; ask: boolean }[]> {
+    return this.fiendshipsService.getFriendsList(currentUser);
   }
 
-  @Delete()
+  @Delete('/:id')
   async delete(
-    @Body() body: { user_id: string; userToDelete_id: string },
+    @CurrentUser() currentUser: User,
+    @Param() { id }: isUUIDDto,
   ): Promise<number> {
-    return this.fiendshipsService.delete(body.user_id, body.userToDelete_id);
+    return this.fiendshipsService.delete(currentUser, id);
   }
 
-  @Post('/valide')
-  async valide(
-    @Body() body: { initiator_id: string; target_id: string },
+  @Patch('/validate/:id')
+  async validate(
+    @CurrentUser() currentUser: User,
+    @Param() { id }: isUUIDDto,
   ): Promise<number> {
-    return this.fiendshipsService.update(body.initiator_id, body.target_id);
+    return this.fiendshipsService.update(currentUser, id);
   }
 }
