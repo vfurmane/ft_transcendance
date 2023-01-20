@@ -115,8 +115,6 @@ export class MatchService{
                 })
         }
 
-
-
         return [...winArray, ...looseArray];
 >>>>>>> 7591658 (transform userBack to userFront)
     }

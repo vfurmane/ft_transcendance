@@ -75,8 +75,8 @@ export class TransformUserService{
         return ({
             id: userBack.id,
             name: userBack.name,
-            avatar_num: 1,
-            status:'',
+            avatar_num: Math.floor(Math.random() * 19) + 1,
+            status: Math.floor(Math.random() * 1) + 1? 'onligne' : 'outligne',
             victory: await this.#getVictoryNumber(userBack.id),
             defeat: await this.#getDefeatNumber(userBack.id),
             rank: await this.#getRank(userBack.id),
