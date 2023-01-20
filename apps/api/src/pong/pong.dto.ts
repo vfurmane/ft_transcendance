@@ -3,7 +3,7 @@ export class RacketDto {
 }
 
 export class GameDto {
-	player : Player[];
-	ball : Point;
-	ballVector : Vector;
+//	player : Player[];
+//	ball : Point;
+//	ballVector : Vector;
 }

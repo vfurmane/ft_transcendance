@@ -21,7 +21,12 @@
     "node": ">=14.0.0"
   },
   "dependencies": {
-    "passport-jwt": "^4.0.1"
+    "@nestjs/common": "^9.2.1",
+    "@nestjs/core": "^9.2.1",
+    "@nestjs/platform-express": "^9.2.1",
+    "@nestjs/websockets": "^9.2.1",
+    "passport-jwt": "^4.0.1",
+    "socket.io": "^4.5.4"
   },
   "packageManager": "npm@8.19.2"
 }
