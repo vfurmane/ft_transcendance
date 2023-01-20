@@ -12,6 +12,8 @@ services:
     restart: always
     ports:
       - 8080:8080
+    environment:
+      TZ: Europe/Paris
     networks:
       - app
   api:
@@ -27,6 +29,7 @@ services:
     ports:
       - 3000:3000
     environment:
+      TZ: Europe/Paris
       POSTGRES_HOST: database
       POSTGRES_USERNAME: ${DATABASE_USERNAME}
       POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
@@ -44,6 +47,7 @@ services:
     networks:
       - app
     environment:
+      TZ: Europe/Paris
       POSTGRES_RANDOM_ROOT_PASSWORD: true
       POSTGRES_DB: ${DATABASE_NAME}
       POSTGRES_USER: ${DATABASE_USERNAME}
