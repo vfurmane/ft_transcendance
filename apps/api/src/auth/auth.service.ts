@@ -52,6 +52,16 @@ export class AuthService {
     return data;
   }
 
+  verifyUserFromToken(access_token: string): JwtPayload | null {
+    let user: JwtPayload;
+    try {
+      user = this.jwtService.verify<JwtPayload>(access_token);
+    } catch (error) {
+      return null;
+    }
+    return user;
+  }
+
   async createUser(user: RegisterUserDto): Promise<User> {
     if (await this.usersService.userExists({ ...user, name: user.username }))
       throw new BadRequestException('`username` or `email` is already in use');

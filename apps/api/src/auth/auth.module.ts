@@ -1,3 +1,5 @@
+import { HttpModule } from '@nestjs/axios';
+import { forwardRef, Logger, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { Logger, Module } from '@nestjs/common';
 import { AuthController } from './auth.controller';
@@ -20,7 +22,7 @@ import { UsersService } from 'src/users/users.service';
       load: [ftOauth2Configuration],
     }),
     HttpModule,
-    UsersModule,
+    forwardRef(() => UsersModule),
     PassportModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
@@ -30,9 +32,7 @@ import { UsersService } from 'src/users/users.service';
         signOptions: { expiresIn: '5m' },
       }),
     }),
-    PassportModule,
     TypeOrmModule.forFeature([State]),
-    UsersModule,
   ],
   providers: [
     AuthService,

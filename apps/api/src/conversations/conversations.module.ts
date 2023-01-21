@@ -7,6 +7,9 @@ import { Message } from 'types';
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersModule } from 'src/users/users.module';
+import { ConversationsGateway } from './conversations.gateway';
+import { AuthModule } from '../auth/auth.module';
+import { ConversationRestriction } from 'types';
 
 @Module({
   imports: [
@@ -17,9 +20,10 @@ import { UsersModule } from 'src/users/users.module';
       ConversationRestriction,
     ]),
     UsersModule,
+    AuthModule,
   ],
   controllers: [ConversationsController],
-  providers: [ConversationsService],
+  providers: [ConversationsService, ConversationsGateway],
   exports: [ConversationsService, TypeOrmModule],
 })
 export class ConversationsModule {}

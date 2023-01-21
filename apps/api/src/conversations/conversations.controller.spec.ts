@@ -1,18 +1,17 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { Conversation } from './entities/conversation.entity';
-import { ConversationRestriction } from './entities/conversationRestriction.entity';
-import { ConversationRole } from './entities/conversationRole.entity';
+import { getRepositoryToken } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { User } from 'types';
 import { ConversationsController } from './conversations.controller';
 import { ConversationsService } from './conversations.service';
+import { Conversation } from 'types';
+import { ConversationRestriction } from 'types';
+import { ConversationRole } from 'types';
+import { Message } from 'types';
 import { createMock } from '@golevelup/ts-jest';
-import { getRepositoryToken } from '@nestjs/typeorm';
-import { Message } from './entities/message.entity';
-import { Repository } from 'typeorm';
-import { User } from '../users/user.entity';
 
 describe('ConversationsController', () => {
   let controller: ConversationsController;
-  // let service: DeepMocked<ConversationsService>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -46,7 +45,6 @@ describe('ConversationsController', () => {
     }).compile();
 
     controller = module.get<ConversationsController>(ConversationsController);
-    // service = module.get(ConversationsService);
   });
 
   it('should be defined', () => {
