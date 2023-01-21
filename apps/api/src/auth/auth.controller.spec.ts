@@ -6,8 +6,8 @@ import { faker } from '@faker-js/faker';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Logger } from '@nestjs/common';
 import { Repository } from 'typeorm';
-import { State } from './state.entity';
-import { User } from '../users/user.entity';
+import { State } from 'types';
+import { User } from 'types';
 import { UsersService } from '../users/users.service';
 
 const accessToken = faker.random.alphaNumeric(20);

@@ -4,7 +4,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { faker } from '@faker-js/faker';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { User as UserEntity } from './user.entity';
+import { User as UserEntity } from 'types';
 
 const name = faker.internet.userName();
 const email = faker.internet.email();

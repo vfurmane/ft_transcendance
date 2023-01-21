@@ -9,7 +9,6 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersModule } from 'src/users/users.module';
 import { ConversationsGateway } from './conversations.gateway';
 import { AuthModule } from '../auth/auth.module';
-import { ConversationRestriction } from 'types';
 
 @Module({
   imports: [

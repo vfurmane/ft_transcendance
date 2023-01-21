@@ -1,12 +1,9 @@
-import { HttpModule } from '@nestjs/axios';
 import { forwardRef, Logger, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { Logger, Module } from '@nestjs/common';
+import { HttpModule } from '@nestjs/axios';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
-import ftOauth2Configuration from '../config/ft-oauth2';
 import { FtOauth2Strategy } from './ft-oauth2.strategy';
-import { HttpModule } from '@nestjs/axios';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from './jwt.strategy';
 import { LocalStrategy } from './local.strategy';
@@ -15,6 +12,7 @@ import { State } from 'types';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersModule } from 'src/users/users.module';
 import { UsersService } from 'src/users/users.service';
+import ftOauth2Configuration from '../config/ft-oauth2';
 
 @Module({
   imports: [
