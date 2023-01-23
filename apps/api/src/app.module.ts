@@ -5,6 +5,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
+import { SearchModule } from './search/search.module';
+import { FriendshipsModule } from './friendships/friendships.module';
 import { ConversationsModule } from './conversations/conversations.module';
 
 @Module({
@@ -31,6 +33,9 @@ import { ConversationsModule } from './conversations/conversations.module';
     }),
     UsersModule,
     AuthModule,
+    SearchModule,
+    FriendshipsModule,
+    UsersModule,
     ConversationsModule,
   ],
   controllers: [AppController],

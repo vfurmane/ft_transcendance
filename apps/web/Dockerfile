@@ -1,4 +1,5 @@
-FROM node:19-alpine AS builder
+# Builder
+FROM node:19-alpine3.16 AS builder
 RUN apk add --no-cache libc6-compat git
 RUN apk update
 WORKDIR /usr/src
@@ -7,7 +8,7 @@ COPY . .
 RUN turbo prune --scope=web --docker
 
 # Installer
-FROM node:19-alpine AS installer
+FROM node:19-alpine3.16 AS installer
 RUN apk add --no-cache libc6-compat git
 RUN apk update
 WORKDIR /usr/src
@@ -21,7 +22,7 @@ COPY turbo.json turbo.json
 RUN npx turbo run build --filter=web...
 
 # Runner
-FROM node:19-alpine AS runner
+FROM node:19-alpine3.16 AS runner
 WORKDIR /usr/src
 
 RUN addgroup --system --gid 1001 nodejs

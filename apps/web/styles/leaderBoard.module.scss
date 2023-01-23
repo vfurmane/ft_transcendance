@@ -1,0 +1,46 @@
+@import "variables";
+
+.shadowContainer.leaderBoard {
+  flex-direction: row;
+}
+
+.leaderBoardContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 350px;
+}
+
+.card.leaderBoard {
+  height: auto;
+  width: 100%;
+  margin-top: 10%;
+  margin-bottom: 10%;
+}
+
+.rank {
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  margin-bottom: 10px;
+  font-family: "Saira", sans-serif;
+  color: $dark-neutral-white;
+  text-align: center;
+}
+
+.level {
+  border-radius: 10px;
+  background-color: $dark-neutral-grey;
+  font-family: "Saira", sans-serif;
+  color: $dark-neutral-white;
+  width: 55px;
+  height: 30px;
+  padding-top: 5px;
+  margin-bottom: 15px;
+}
+
+.leaderBoardDoubleColumn {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
