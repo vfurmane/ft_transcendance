@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common';
 import { FriendshipsService } from './friendships.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { User } from 'types';
+import { FriendshipRequestStatus, User } from 'types';
 import { User as CurrentUser } from '../common/decorators/user.decorator';
 import { isUUIDDto } from '../conversations/dtos/IsUUID.dto';
 
@@ -22,14 +22,14 @@ export class FriendshipsController {
   add(
     @CurrentUser() currentUser: User,
     @Param() { id }: isUUIDDto,
-  ): Promise<number> {
+  ): Promise<boolean> {
     return this.fiendshipsService.add(currentUser, id);
   }
 
   @Get()
   getFriendsList(
     @CurrentUser() currentUser: User,
-  ): Promise<{ friend: User | null; accept: boolean; ask: boolean }[]> {
+  ): Promise<FriendshipRequestStatus[]> {
     return this.fiendshipsService.getFriendsList(currentUser);
   }
 
@@ -37,7 +37,7 @@ export class FriendshipsController {
   async delete(
     @CurrentUser() currentUser: User,
     @Param() { id }: isUUIDDto,
-  ): Promise<number> {
+  ): Promise<boolean> {
     return this.fiendshipsService.delete(currentUser, id);
   }
 
@@ -45,7 +45,7 @@ export class FriendshipsController {
   async validate(
     @CurrentUser() currentUser: User,
     @Param() { id }: isUUIDDto,
-  ): Promise<number> {
+  ): Promise<boolean> {
     return this.fiendshipsService.update(currentUser, id);
   }
 }

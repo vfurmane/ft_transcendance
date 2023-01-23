@@ -1,3 +1,9 @@
+<<<<<<< HEAD
+=======
+import { User } from "./entities";
+import { Conversation } from "./entities/conversation.entity";
+
+>>>>>>> 1efb144 (Couple changes)
 export interface FtUser {
   login: string;
   email: string;
@@ -21,8 +27,6 @@ export interface JwtPayload {
   sub: string;
   name: string;
 }
-<<<<<<< HEAD
-=======
 
 export interface unreadMessagesResponse
 {
@@ -47,6 +51,11 @@ export interface ConversationWithUnread {
   lastMessage: Date;
 }
 
+export interface FriendshipRequestStatus {
+  friend : User | null,
+  accept: boolean,
+  ask: boolean
+}
+
 export * from './enums';
 export * from './entities';
->>>>>>> 11d043f (build: build repo before running dev servers)

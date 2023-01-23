@@ -117,7 +117,7 @@ export default function UserEntity(props: {
               height={47}
             />
           </div>
-          {props.user.status === "onligne" ? (
+          {props.user.status === "online" ? (
             <Image
               alt="status"
               src={Connect}
