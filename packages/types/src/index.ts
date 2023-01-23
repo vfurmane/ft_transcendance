@@ -47,5 +47,5 @@ export interface ConversationWithUnread {
   lastMessage: Date;
 }
 
-export * from '../src/enums';
-export * from '../src/entities';
+export * from './enums';
+export * from './entities';

@@ -4,6 +4,7 @@
     "module": "commonjs",
     "removeComments": true,
     "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
     "allowSyntheticDefaultImports": true,
     "target": "es2017",
     "sourceMap": true,

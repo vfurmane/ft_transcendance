@@ -1,4 +1,4 @@
-@import 'variables';
+@import "variables";
 
 .container {
   border-radius: 12px;
@@ -11,7 +11,7 @@
   align-items: center;
 
   background-color: $dark-background-grey-lighter;
-  color: #E8E8E8;
+  color: #e8e8e8;
   text-align: center;
 
   * {

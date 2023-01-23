@@ -16,14 +16,20 @@ export class Message {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
-  @ManyToOne(() => User, (user) => user.messages, { eager: true })
-  sender!: User;
+  @ManyToOne(() => User, (user) => user.messages, {
+    eager: true,
+    nullable: true,
+  })
+  sender!: User | null;
 
   @ManyToOne(() => Conversation, (conversation) => conversation.messages)
   conversation!: Conversation;
 
   @Column('text')
   content!: string;
+
+  @Column('boolean', { default: false })
+  system_generated!: boolean;
 
   @CreateDateColumn()
   created_at!: Date;

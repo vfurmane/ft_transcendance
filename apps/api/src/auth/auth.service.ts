@@ -52,6 +52,16 @@ export class AuthService {
     return data;
   }
 
+  verifyUserFromToken(access_token: string): JwtPayload | null {
+    let user: JwtPayload;
+    try {
+      user = this.jwtService.verify<JwtPayload>(access_token);
+    } catch (error) {
+      return null;
+    }
+    return user;
+  }
+
   async createUser(user: RegisterUserDto): Promise<User> {
     if (await this.usersService.userExists({ ...user, name: user.username }))
       throw new BadRequestException('`username` or `email` is already in use');
@@ -86,7 +96,8 @@ export class AuthService {
   }
 
   async getRequestState(stateToken: string, user: User): Promise<State> {
-    if (!stateToken) throw 'State parameter is needed.';
+    if (!stateToken)
+      throw new BadRequestException('State parameter is needed.');
 
     let state = await this.statesRepository.findOneBy({
       token: stateToken,
