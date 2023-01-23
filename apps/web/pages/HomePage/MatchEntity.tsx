@@ -10,7 +10,7 @@ export default function MatchEntity(props: {
   user: User,
   key: number
 }): JSX.Element {
-  if (!props)
+  if (!props || !props.match)
     return <></>;
   return (
     <div className={styles.shadowContainer}>

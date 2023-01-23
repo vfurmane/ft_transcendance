@@ -9,7 +9,7 @@ export class LeaderBoardController{
     ){}
 
     @Get()
-    getLeaderBoard() : Promise<Userfront> {
+    getLeaderBoard() : Promise<Userfront[]> {
         return this.leaderBoardService.getLeaderBoard();
     }
 }
