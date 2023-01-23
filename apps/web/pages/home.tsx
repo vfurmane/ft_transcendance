@@ -1,15 +1,15 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import TopBar from "../topBar/TopBar";
-import PlayButton from "./PlayButton";
-import List from "./List";
-import UserEntity from "./UserEntity";
-import ArrayDoubleColumn from "./ArrayDoubleColumn";
-import PlayMenu from "./PlayMenu";
-import { setUserState } from "../../store/UserSlice";
+import TopBar from "../components/TopBar";
+import PlayButton from "../components/HomePage/PlayButton";
+import List from "../components/HomePage/List";
+import UserEntity from "../components/HomePage/UserEntity";
+import ArrayDoubleColumn from "../components/HomePage/ArrayDoubleColumn";
+import PlayMenu from "../components/HomePage/PlayMenu";
+import { setUserState } from "../store/UserSlice";
 import { useDispatch } from "react-redux";
-import User from "../../interface/UserInterface";
+import { Userfront as User } from "types";
 import Link from "next/link";
-import ChatBar from "../chatBar/chatBar";
+import ChatBar from "../components/chatBar";
 import playButtonStyles from "styles/playButton.module.scss";
 import textStyles from "styles/text.module.scss";
 import styles from "styles/home.module.scss";
@@ -160,7 +160,8 @@ function Home(): JSX.Element {
       })
       .catch(function (error) {
         console.log(
-          "Il y a eu un problème avec l'opération fetchiii : " + error.message
+          "Now that's embarassing... there has been an issue while fetching data : " +
+            error.message
         );
       });
   }, [handleClickUserMenu]);

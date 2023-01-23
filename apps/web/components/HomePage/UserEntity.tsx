@@ -69,7 +69,7 @@ export default function UserEntity(props: {
         >
           <Link
             href={{
-              pathname: "../ProfilePage/Profil",
+              pathname: "../profile",
               query: { user: JSON.stringify(props.user) },
             }}
             className={styles.buttonEntity}
@@ -117,7 +117,7 @@ export default function UserEntity(props: {
               height={47}
             />
           </div>
-          {props.user.status === "onligne" ? (
+          {props.user.status === "online" ? (
             <Image
               alt="status"
               src={Connect}

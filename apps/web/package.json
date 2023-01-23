@@ -9,14 +9,16 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@next/font": "^13.1.1",
-    "react-hook-form": "^7.41.5",
+    "@next/font": "^13.1.4",
     "@reduxjs/toolkit": "^1.9.1",
     "next": "13.0.0",
     "next-redux-wrapper": "^8.1.0",
+    "node-fetch": "^3.3.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-hook-form": "^7.41.5",
     "react-redux": "^8.0.5",
+    "socket.io": "^4.5.4",
     "ui": "*"
   },
   "devDependencies": {
@@ -28,6 +30,7 @@
     "eslint-config-custom": "*",
     "sass": "^1.57.1",
     "tsconfig": "*",
+    "types": "*",
     "typescript": "^4.5.3"
   }
 }

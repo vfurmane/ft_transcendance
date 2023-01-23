@@ -1,4 +1,4 @@
-import Home from "./HomePage/HomePage";
+import Home from "./home";
 
 export default function Web(): JSX.Element {
   return (
