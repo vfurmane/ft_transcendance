@@ -14,7 +14,7 @@ import ChangePswrd from "./ChangePswrd";
 import ChatBar from "../chatBar/chatBar";
 import styles from "styles/profil.module.scss";
 import textStyles from "styles/text.module.scss";
-import { initMatch, Match } from "../../interface/Match.interface";
+import { initMatch } from "../../interface/Match.interface";
 
 export default function Profil(): JSX.Element {
   const UserState = useSelector(selectUserState);
@@ -77,29 +77,29 @@ export default function Profil(): JSX.Element {
       if (JSON.parse(router.query.user).id === UserState.id)
         setUserProfil(true);
       else setUserProfil(false);
-    
-    fetch(`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/match?user_id${JSON.parse(router.query.user).id}`)
-    .then(res => res.json())
-    .then(data => {
-      setMatchHistory(data);
-    }).catch(error => {
-      console.log(`problem with fetch : ${error.message}`);
-    })
+
+      fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/match?user_id${
+          JSON.parse(router.query.user).id
+        }`
+      )
+        .then((res) => res.json())
+        .then((data) => {
+          setMatchHistory(data);
+        })
+        .catch((error) => {
+          console.log(`problem with fetch : ${error.message}`);
+        });
     }
   }, [router.query, UserState]);
 
   useEffect(() => {
-    let tmp : JSX.Element[] = [];
-    for (let i = 0; i < matchHistory.length; i++)
-    {
-      tmp.push(<MatchEntity
-        match={matchHistory[i]}
-        user={user}
-        key={i}
-      />)
+    const tmp: JSX.Element[] = [];
+    for (let i = 0; i < matchHistory.length; i++) {
+      tmp.push(<MatchEntity match={matchHistory[i]} user={user} key={i} />);
     }
     setListOfMatch([...tmp]);
-  }, [matchHistory])
+  }, [matchHistory, user]);
 
   function achivementListClick(): void {
     setOpenAchivementList(true);

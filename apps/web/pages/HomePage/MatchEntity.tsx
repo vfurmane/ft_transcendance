@@ -1,17 +1,16 @@
 import React from "react";
-import Image, { StaticImageData } from "next/image";
+import Image from "next/image";
 import textStyle from "styles/text.module.scss";
 import styles from "styles/entity.module.scss";
 import { Match } from "../../interface/Match.interface";
 import User from "../../interface/UserInterface";
 
 export default function MatchEntity(props: {
-  match: Match,
-  user: User,
-  key: number
+  match: Match;
+  user: User;
+  key: number;
 }): JSX.Element {
-  if (!props || !props.match)
-    return <></>;
+  if (!props || !props.match) return <></>;
   return (
     <div className={styles.shadowContainer}>
       <div
@@ -19,10 +18,21 @@ export default function MatchEntity(props: {
       >
         <div className={`${styles.entityContainer} ${styles.start}`}>
           <div className="fill small">
-            <Image alt="avatar" src={`/avatar/avatar-${props.match.winner? props.match.winner.avatar_num: props.user.avatar_num}.png`} width={47} height={47} />
+            <Image
+              alt="avatar"
+              src={`/avatar/avatar-${
+                props.match.winner
+                  ? props.match.winner.avatar_num
+                  : props.user.avatar_num
+              }.png`}
+              width={47}
+              height={47}
+            />
           </div>
           <div className={styles.entityText}>
-            <h3 className={textStyle.laquer}>{props.match.winner? props.match.winner.name : props.user.name}</h3>
+            <h3 className={textStyle.laquer}>
+              {props.match.winner ? props.match.winner.name : props.user.name}
+            </h3>
             <p className={textStyle.saira} style={{ textAlign: "center" }}>
               {props.match.score_winner}
             </p>
@@ -31,13 +41,24 @@ export default function MatchEntity(props: {
         <span>VS</span>
         <div className={`${styles.entityContainer} ${styles.end}`}>
           <div className={styles.entityText}>
-            <h3 className={textStyle.laquer}>{props.match.looser? props.match.looser.name : props.user.name}</h3>
+            <h3 className={textStyle.laquer}>
+              {props.match.looser ? props.match.looser.name : props.user.name}
+            </h3>
             <p className={textStyle.saira} style={{ textAlign: "center" }}>
               {props.match.score_looser}
             </p>
           </div>
           <div className="fill small">
-            <Image alt="avatar" src={`/avatar/avatar-${props.match.looser? props.match.looser.avatar_num: props.user.avatar_num}.png`} width={47} height={47} />
+            <Image
+              alt="avatar"
+              src={`/avatar/avatar-${
+                props.match.looser
+                  ? props.match.looser.avatar_num
+                  : props.user.avatar_num
+              }.png`}
+              width={47}
+              height={47}
+            />
           </div>
         </div>
       </div>

@@ -11,7 +11,7 @@ import UserEntity from "../HomePage/UserEntity";
 import styles from "styles/topBar.module.scss";
 import textStyles from "styles/text.module.scss";
 import List from "../HomePage/List";
-import User, { UserBack } from "../../interface/UserInterface";
+import User from "../../interface/UserInterface";
 
 interface propsTopBar {
   openToggle: boolean;

@@ -5,14 +5,13 @@ import entityStyles from "styles/entity.module.scss";
 import LeaderboardEntity from "./LeaderboardEntity";
 import User from "../../interface/UserInterface";
 
-
 export default function ArrayDoubleColumn(props: {
   title: string;
   handleClick: (e: {
     index: number;
     openMenu: boolean;
     setOpenMenu: React.Dispatch<React.SetStateAction<boolean>>;
-}) => void;
+  }) => void;
 }): JSX.Element {
   const [columnNum, setColumnNum] = useState(1);
   const [pageNum, setPageNum] = useState(1);
@@ -21,14 +20,24 @@ export default function ArrayDoubleColumn(props: {
   const [column2, setColumn2] = useState([<></>]);
 
   useEffect(() => {
-    let tmp : JSX.Element[] = [];
+    const tmp: JSX.Element[] = [];
     fetch(`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/leaderBoard`)
-    .then(res => res.json())
-    .then(data => {
-      data.map((e : User, i : number) => tmp.push(<LeaderboardEntity key={i} user={e} index={i} handleClick={props.handleClick}/>));
-      setLeaderBoardList([...tmp]);
-    }).catch(error => console.log(`error fetch : ${error.message}`));
-  }, []);
+      .then((res) => res.json())
+      .then((data) => {
+        data.map((e: User, i: number) =>
+          tmp.push(
+            <LeaderboardEntity
+              key={i}
+              user={e}
+              index={i}
+              handleClick={props.handleClick}
+            />
+          )
+        );
+        setLeaderBoardList([...tmp]);
+      })
+      .catch((error) => console.log(`error fetch : ${error.message}`));
+  }, [props.handleClick]);
 
   function prevClick(): void {
     if (columnNum > 1) {
@@ -44,19 +53,20 @@ export default function ArrayDoubleColumn(props: {
     }
   }
 
-  function getColumn(num: number): JSX.Element[] {
-    const column: JSX.Element[] = [];
-    if (num > 0 && leaderBoardList) {
-      for (let i = 0; i < 5; i++) column.push(leaderBoardList[i + 5 * (num - 1)]);
-    }
-    return column;
-  }
-
   useEffect(() => {
+    function getColumn(num: number): JSX.Element[] {
+      const column: JSX.Element[] = [];
+      if (num > 0 && leaderBoardList) {
+        for (let i = 0; i < 5; i++)
+          column.push(leaderBoardList[i + 5 * (num - 1)]);
+      }
+      return column;
+    }
+
     setColumn1(getColumn(columnNum));
     setColumn2(getColumn(columnNum + 1));
-  }, [leaderBoardList, columnNum])
-  
+  }, [leaderBoardList, columnNum]);
+
   return (
     <div className={`card ${styles.card} ${styles.leaderBoard}`}>
       <h2 className={textStyle.pixel}>{props.title}</h2>

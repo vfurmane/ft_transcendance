@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { Module } from "@nestjs/common";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { MatchController} from "./Match.controller";
@@ -26,5 +27,20 @@ import { User } from "src/users/user.entity";
     providers: [MatchService , UsersService, TransformUserService],
 >>>>>>> 7591658 (transform userBack to userFront)
     exports: [TypeOrmModule]
+=======
+import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { MatchController } from './Match.controller';
+import { MatchService } from './Match.service';
+import { User, Match } from 'types';
+import { UsersService } from '../users/users.service';
+import { TransformUserService } from 'src/TransformUser/TransformUser.service';
+
+@Module({
+  imports: [TypeOrmModule.forFeature([Match, User])],
+  controllers: [MatchController],
+  providers: [MatchService, UsersService, TransformUserService],
+  exports: [TypeOrmModule],
+>>>>>>> d219be5 (match, gamedata and leaderboard fix)
 })
-export class MatchModule{};
+export class MatchModule {}
