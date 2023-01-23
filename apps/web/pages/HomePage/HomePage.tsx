@@ -3,12 +3,11 @@ import TopBar from "../topBar/TopBar";
 import PlayButton from "./PlayButton";
 import List from "./List";
 import UserEntity from "./UserEntity";
-import LeaderboardEntity from "./LeaderboardEntity";
 import ArrayDoubleColumn from "./ArrayDoubleColumn";
 import PlayMenu from "./PlayMenu";
 import { setUserState } from "../../store/UserSlice";
 import { useDispatch } from "react-redux";
-import User, { UserBack } from "../../interface/UserInterface";
+import User from "../../interface/UserInterface";
 import Link from "next/link";
 import ChatBar from "../chatBar/chatBar";
 import playButtonStyles from "styles/playButton.module.scss";
@@ -19,7 +18,6 @@ import styles from "styles/home.module.scss";
 const user_id = "bc5ab5fb-842f-47ab-a2df-1eec056346bb";
 
 function Home(): JSX.Element {
-  const leaderboard: JSX.Element[] = [];
   const friendListRef = useRef([<></>]);
   const setterInit: React.Dispatch<React.SetStateAction<boolean>> = () => false;
 
@@ -38,9 +36,7 @@ function Home(): JSX.Element {
         return response.json();
       })
       .then((data) => {
-        dispatch(
-          setUserState(data)
-        );
+        dispatch(setUserState(data));
       })
       .catch(function (error) {
         console.log(`probleme with fetch: ${error.message}`);
@@ -169,7 +165,6 @@ function Home(): JSX.Element {
       });
   }, [handleClickUserMenu]);
 
-
   return (
     <div onClick={(): void => close()} id={"top"}>
       <TopBar
@@ -243,7 +238,10 @@ function Home(): JSX.Element {
         </div>
         <div className="row">
           <div className="col-10 offset-1" id="leaderBoard">
-            <ArrayDoubleColumn title="leaderboard" handleClick={handleClickUserMenu} />
+            <ArrayDoubleColumn
+              title="leaderboard"
+              handleClick={handleClickUserMenu}
+            />
           </div>
         </div>
         <div className="row">

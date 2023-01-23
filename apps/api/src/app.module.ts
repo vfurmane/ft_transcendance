@@ -6,7 +6,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { SearchModule } from './search/search.module';
-import { FriendshipsModule  } from './friendships/friendships.module';
+import { FriendshipsModule } from './friendships/friendships.module';
 import { ConversationsModule } from './conversations/conversations.module';
 import { MatchModule } from './Match/Match.module';
 import { LeaderBoardModule } from './leaderBoard/leaderBoard.module';
@@ -43,7 +43,7 @@ import { TransformUserModule } from './TransformUser/TransformUser.module';
     ConversationsModule,
     MatchModule,
     LeaderBoardModule,
-    TransformUserModule
+    TransformUserModule,
   ],
   controllers: [AppController],
   providers: [AppService],
