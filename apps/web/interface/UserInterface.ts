@@ -19,15 +19,3 @@ export const initUser = {
   rank: 0,
   level: 0,
 };
-
-export interface UserBack {
-  id?: string;
-  created_at?: Date;
-  updated_at?: Date;
-  states?: string[];
-  email?: string;
-  name?: string;
-  password?: string | null;
-  tfa_secret?: string | null;
-  tfa_setup?: boolean;
-}

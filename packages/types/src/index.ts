@@ -1,3 +1,4 @@
+import { User } from "./entities";
 import { Conversation } from "./entities/conversation.entity";
 
 export interface FtUser {
@@ -45,6 +46,12 @@ export interface ConversationWithUnread {
   conversation: Conversation;
   numberOfUnreadMessages: number;
   lastMessage: Date;
+}
+
+export interface FriendshipRequestStatus {
+  friend : User | null,
+  accept: boolean,
+  ask: boolean
 }
 
 export * from './enums';

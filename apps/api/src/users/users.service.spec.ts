@@ -3,7 +3,7 @@ import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { User as UserEntity } from './user.entity';
+import { User as UserEntity } from 'types';
 import { AddUserData, UsersService } from './users.service';
 
 const name = faker.internet.userName();
@@ -19,7 +19,7 @@ const userEntity: UserEntity = {
   updated_at: faker.datatype.datetime(),
   email,
   name,
-  password: null,
+  password: faker.internet.password(),
   states: [],
   tfa_secret: null,
   tfa_setup: false,

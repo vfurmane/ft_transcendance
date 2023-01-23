@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Friendships as friendshipsEntity } from 'types';
+import { FriendshipRequestStatus, Friendships as friendshipsEntity } from 'types';
 import { User } from 'types';
 
 @Injectable()
@@ -13,7 +13,7 @@ export class FriendshipsService {
     private readonly friendshipsRepository: Repository<friendshipsEntity>,
   ) {}
 
-  async add(currentUser: User, target_id: string): Promise<number> {
+  async add(currentUser: User, target_id: string): Promise<boolean> {
     const initiatorFriend = await this.friendshipsRepository.findOne({
       where: {
         initiator: {
@@ -35,7 +35,7 @@ export class FriendshipsService {
       },
     });
 
-    if ((targetFriend && targetFriend.accepted) || initiatorFriend) return 0;
+    if ((targetFriend && targetFriend.accepted) || initiatorFriend) return false;
     const target = await this.userRepository.findOne({
       where: {
         id: target_id,
@@ -47,12 +47,12 @@ export class FriendshipsService {
     newFriendship.initiator = currentUser;
     newFriendship.target = target;
     this.friendshipsRepository.save(newFriendship);
-    return 1;
+    return true;
   }
 
   async getFriendsList(
     currentUser: User,
-  ): Promise<{ friend: User | null; accept: boolean; ask: boolean }[]> {
+  ): Promise<FriendshipRequestStatus[]> {
     const response: { friend: User | null; accept: boolean; ask: boolean }[] =
       [];
 
@@ -79,7 +79,7 @@ export class FriendshipsService {
     return response;
   }
 
-  async delete(currentUser: User, userToDelete_id: string): Promise<number> {
+  async delete(currentUser: User, userToDelete_id: string): Promise<boolean> {
     const friendship = await this.friendshipsRepository.findOne({
       where: [
         {
@@ -102,12 +102,12 @@ export class FriendshipsService {
     });
     if (friendship) {
       this.friendshipsRepository.remove(friendship);
-      return 1;
+      return true;
     }
-    return 0;
+    return false;
   }
 
-  async update(currentUser: User, target_id: string): Promise<number> {
+  async update(currentUser: User, target_id: string): Promise<boolean> {
     const friendContract = await this.friendshipsRepository.findOne({
       where: {
         initiator: {
@@ -119,12 +119,12 @@ export class FriendshipsService {
       },
     });
     if (friendContract) {
-      if (friendContract.accepted === true) return 1;
+      if (friendContract.accepted === true) return true;
       friendContract.accepted = true;
       this.friendshipsRepository.save(friendContract);
-      return 1;
+      return true;
     }
 
-    return 0;
+    return false;
   }
 }

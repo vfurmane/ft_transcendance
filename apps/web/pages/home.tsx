@@ -9,12 +9,12 @@ import ArrayDoubleColumn from "../components/HomePage/ArrayDoubleColumn";
 import PlayMenu from "../components/HomePage/PlayMenu";
 import { setUserState } from "../store/UserSlice";
 import { useDispatch } from "react-redux";
-import { UserBack } from "../interface/UserInterface";
 import Link from "next/link";
 import ChatBar from "../components/chatBar";
 import playButtonStyles from "styles/playButton.module.scss";
 import textStyles from "styles/text.module.scss";
 import styles from "styles/home.module.scss";
+import { FriendshipRequestStatus } from "types";
 
 //temporary before the login page
 const user_id = "1edffd5a-863d-442c-a962-a5dbd9b2c686";
@@ -148,36 +148,31 @@ function Home(): JSX.Element {
         if (response.ok) {
           return response.json().then(function (json) {
             const friendListTmp: JSX.Element[] = [];
-            json.map(
-              (
-                e: { friend: UserBack; accept: boolean; ask: boolean },
-                i: number
-              ) => {
-                const key = i;
-                const user = {
-                  id: `${e.friend.id}`,
-                  avatar_num: i + 1,
-                  status: i % 2 === 0 ? "onligne" : "outligne",
-                  name: `${e.friend.name}`,
-                  victory: Math.floor(Math.random() * 1000),
-                  defeat: Math.floor(Math.random() * 1000),
-                  rank: Math.floor(Math.random() * 1000),
-                  level: Math.floor(Math.random() * 1000),
-                };
-                const userEntity = (
-                  <UserEntity
-                    small={false}
-                    option={{ del: true, accept: e.accept, ask: e.ask }}
-                    user={user}
-                    key={key}
-                    index={i}
-                    handleClick={handleClickUserMenu}
-                    delFriendClick={delFriendClick}
-                  />
-                );
-                friendListTmp.push(userEntity);
-              }
-            );
+            json.map((e: FriendshipRequestStatus, i: number) => {
+              const key = i;
+              const user = {
+                id: `${e.friend?.id}`,
+                avatar_num: i + 1,
+                status: i % 2 === 0 ? "online" : "offline",
+                name: `${e.friend?.name}`,
+                victory: Math.floor(Math.random() * 1000),
+                defeat: Math.floor(Math.random() * 1000),
+                rank: Math.floor(Math.random() * 1000),
+                level: Math.floor(Math.random() * 1000),
+              };
+              const userEntity = (
+                <UserEntity
+                  small={false}
+                  option={{ del: true, accept: e.accept, ask: e.ask }}
+                  user={user}
+                  key={key}
+                  index={i}
+                  handleClick={handleClickUserMenu}
+                  delFriendClick={delFriendClick}
+                />
+              );
+              friendListTmp.push(userEntity);
+            });
             setFriendList([...friendListTmp]);
             friendListRef.current = friendListTmp;
           });
@@ -185,7 +180,8 @@ function Home(): JSX.Element {
       })
       .catch(function (error) {
         console.log(
-          "Il y a eu un problème avec l'opération fetchiii : " + error.message
+          "Now that's embarassing... there has been an issue while fetching data : " +
+            error.message
         );
       });
   }, [handleClickUserMenu]);
@@ -203,7 +199,7 @@ function Home(): JSX.Element {
     const user = {
       id: `${i + 1}`,
       avatar_num: i + 1,
-      status: i % 2 === 0 ? "onligne" : "outligne",
+      status: i % 2 === 0 ? "online" : "offline",
       name: "name " + (i + 1).toString(),
       victory: Math.floor(Math.random() * 1000),
       defeat: Math.floor(Math.random() * 1000),
