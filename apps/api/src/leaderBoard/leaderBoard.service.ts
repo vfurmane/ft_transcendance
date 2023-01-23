@@ -1,5 +1,5 @@
 import { Controller, Get } from '@nestjs/common';
-import { Userfront } from 'src/TransformUser/TransformUser.service';
+import { Userfront } from 'types';
 import { LeaderBoardService } from './leaderBoard.controller';
 
 @Controller('leaderBoard')

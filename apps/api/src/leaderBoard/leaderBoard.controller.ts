@@ -1,11 +1,8 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import {
-  TransformUserService,
-  Userfront,
-} from 'src/TransformUser/TransformUser.service';
+import { TransformUserService } from 'src/TransformUser/TransformUser.service';
 import { Repository } from 'typeorm';
-import { User } from 'types';
+import { User, Userfront } from 'types';
 
 @Injectable()
 export class LeaderBoardService {
