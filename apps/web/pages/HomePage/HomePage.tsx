@@ -16,7 +16,7 @@ import textStyles from "styles/text.module.scss";
 import styles from "styles/home.module.scss";
 
 //temporary before the login page
-const user_id = "07400ae0-3751-4f99-884f-29f5682aa374";
+const user_id = "bc5ab5fb-842f-47ab-a2df-1eec056346bb";
 
 function Home(): JSX.Element {
   const leaderboard: JSX.Element[] = [];
@@ -169,26 +169,6 @@ function Home(): JSX.Element {
       });
   }, [handleClickUserMenu]);
 
-  for (let i = 0; i < 19; i++) {
-    const user = {
-      id: `${i + 1}`,
-      avatar_num: i + 1,
-      status: i % 2 === 0 ? "onligne" : "outligne",
-      name: "name " + (i + 1).toString(),
-      victory: Math.floor(Math.random() * 1000),
-      defeat: Math.floor(Math.random() * 1000),
-      rank: i + 1,
-      level: Math.floor(Math.random() * 1000),
-    };
-    leaderboard.push(
-      <LeaderboardEntity
-        user={user}
-        key={i}
-        index={i}
-        handleClick={handleClickUserMenu}
-      />
-    );
-  }
 
   return (
     <div onClick={(): void => close()} id={"top"}>
@@ -263,7 +243,7 @@ function Home(): JSX.Element {
         </div>
         <div className="row">
           <div className="col-10 offset-1" id="leaderBoard">
-            <ArrayDoubleColumn title="leaderboard" list={leaderboard} />
+            <ArrayDoubleColumn title="leaderboard" handleClick={handleClickUserMenu} />
           </div>
         </div>
         <div className="row">

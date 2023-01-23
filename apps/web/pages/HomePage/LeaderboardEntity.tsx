@@ -3,11 +3,11 @@ import User from "../../interface/UserInterface";
 import leaderBoardStyles from "styles/leaderBoard.module.scss";
 import UserEntity from "./UserEntity";
 
-export default function leaderboardEntity(props: {
+export default function LeaderboardEntity(props: {
   user: User;
   index: number;
   key: number;
-  handleClick: (e: {
+  handleClick: (e : {
     index: number;
     openMenu: boolean;
     setOpenMenu: React.Dispatch<React.SetStateAction<boolean>>;
