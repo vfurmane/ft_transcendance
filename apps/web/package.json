@@ -10,10 +10,17 @@
   },
   "dependencies": {
     "@next/font": "^13.1.1",
+<<<<<<< HEAD
     "next": "^13.1.1",
+=======
+    "@reduxjs/toolkit": "^1.9.1",
+    "next": "13.0.0",
+    "next-redux-wrapper": "^8.1.0",
+>>>>>>> ce74228 (Fixed import of sass and jwt in general package.json)
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-hook-form": "^7.41.5",
+    "react-redux": "^8.0.5",
     "socket.io": "^4.5.4",
     "ui": "*"
   },
