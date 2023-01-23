@@ -23,11 +23,10 @@ import { ConversationsModule } from './conversations/conversations.module';
         password: configService.get('POSTGRES_PASSWORD'),
         database: configService.get('POSTGRES_DATABASE'),
         autoLoadEntities: true,
-        // TODO check NODE_ENV
-        //
         // From NestJS docs:
         // Setting `synchronize: true` shouldn't be used in production - otherwise you can lose production data.
-        synchronize: true,
+        synchronize: configService.get('NODE_ENV') === 'development',
+        logging: configService.get('NODE_ENV') === 'development',
       }),
     }),
     UsersModule,
