@@ -96,7 +96,8 @@ export class AuthService {
   }
 
   async getRequestState(stateToken: string, user: User): Promise<State> {
-    if (!stateToken) throw 'State parameter is needed.';
+    if (!stateToken)
+      throw new BadRequestException('State parameter is needed.');
 
     let state = await this.statesRepository.findOneBy({
       token: stateToken,
