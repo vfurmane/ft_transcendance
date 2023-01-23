@@ -1,14 +1,13 @@
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import { LeaderBoardController } from './leaderBoard.service';
 import { LeaderBoardService } from './leaderBoard.controller';
-import { User } from 'types';
-import { TransformUserService } from 'src/TransformUser/TransformUser.service';
+import { UsersModule } from '../users/users.module';
+import { TransformUserModule } from '../TransformUser/TransformUser.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User])],
+  imports: [UsersModule, TransformUserModule],
   controllers: [LeaderBoardController],
-  providers: [LeaderBoardService, TransformUserService],
-  exports: [TypeOrmModule],
+  providers: [LeaderBoardService],
+  exports: [LeaderBoardService],
 })
 export class LeaderBoardModule {}

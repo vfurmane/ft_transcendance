@@ -6,12 +6,12 @@ import { UsersGateway } from './users.gateway';
 import { UsersService } from './users.service';
 
 import { UsersController } from './user.controller';
-import { TransformUserService } from 'src/TransformUser/TransformUser.service';
+import { TransformUserModule } from '../TransformUser/TransformUser.module';
 
 @Module({
+  imports: [TypeOrmModule.forFeature([User]), forwardRef(() => AuthModule), forwardRef(() => TransformUserModule)],
   controllers: [UsersController],
-  providers: [UsersService, TransformUserService, UsersGateway],
-  imports: [TypeOrmModule.forFeature([User]), forwardRef(() => AuthModule)],
+  providers: [UsersService, UsersGateway],
   exports: [TypeOrmModule, UsersService],
 })
 export class UsersModule {}

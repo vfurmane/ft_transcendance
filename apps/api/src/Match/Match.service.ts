@@ -1,12 +1,9 @@
 
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import {
-  TransformUserService,
-  Userfront,
-} from 'src/TransformUser/TransformUser.service';
+import { TransformUserService } from 'src/TransformUser/TransformUser.service';
 import { Repository } from 'typeorm';
-import { Match, User } from 'types';
+import { Match, User, Userfront } from 'types';
 import { UsersService } from '../users/users.service';
 
 export interface MatcFront {
