@@ -1,11 +1,4 @@
-import { GameState, PlayerInterface } from 'types'
-
-import React, {
-  useRef,
-  useEffect,
-  useState,
-  ReactComponentElement,
-} from "react";
+import { GameState } from 'types'
 
 enum Axe {
   X = 1,
@@ -25,13 +18,13 @@ enum Form {
   HEX = 6,
 }
 
-class Game {
+export class Game {
+  public boardCanvas = {
+	  height : 1080,
+	  width : 1920,
+  }
   public isSolo: boolean = false;
   public boardType = Form.REC;
-  public boardCanvasRef!: React.RefObject<HTMLCanvasElement>;
-  public boardCanvas!: HTMLCanvasElement | null;
-  public boardContext!: CanvasRenderingContext2D | null;
-
   public board!: Board;
   public countUpdate: number = 0;
   public static point: number = 0;
@@ -44,7 +37,29 @@ class Game {
   public wall: Wall[] = [];
   public color: string[] = ["blue", "red", "orange", "white", "pink", "black"];
 
-  constructor() {}
+  constructor(playerNumber:number) {
+    this.boardType = playerNumber;
+  }
+
+  getState () {
+    let state : GameState = {
+      numberPlayer : this.boardType,
+      players : [],
+      ball : {
+        point : this.ball.point[0],
+        dir : this.ball.speed,
+      }
+    }
+    for (let player of this.player) {
+      state.players.push({point: player.center(), dir: player.dir, hp: player.hp})
+    }
+    return state
+  }
+
+  movePlayer (playerPosition : number, dir : boolean) {
+    let player = this.player[playerPosition];
+    player.move(dir);
+  }
 
   createRegularPolygon(point: Point, side: number, n: number) {
     let points: Point[] = [];
@@ -63,13 +78,6 @@ class Game {
     return points;
   }
 
-  refresh(state: GameState) {
-    this.player = this.updatePlayer(state.players, this.wall);
-    this.ball = new Ball (this.createRegularPolygon(new Point(state.ball.point.x, state.ball.point.y), 30, this.boardType), this.player);
-    this.ball.speed = new Vector(state.ball.dir.x, state.ball.dir.y);
-  }
-
-/*
   refresh(player: Racket[], ball: Point, ballVector: Vector) {
     this.player = this.updatePlayer(player, this.wall);
     this.ball = new Ball(
@@ -77,14 +85,14 @@ class Game {
       this.player
     );
     this.ball.speed = ballVector;
-  }*/
+  }
 
-  updatePlayer(player: PlayerInterface[], wall: Wall[]) {
+  updatePlayer(player: Racket[], wall: Wall[]) {
     let racket: Racket[] = [];
     for (let i = 0; i < wall.length; i++) {
       let wallDir = wall[i].point[0].vectorTo(wall[i].point[2]).normalized();
       let wallPerp = wallDir.perp().normalized();
-      let racketCenter = player[i].point;
+      let racketCenter = player[i].center();
       let p3 = new Point(
         racketCenter.x - wallDir.x * 40,
         racketCenter.y - wallDir.y * 40
@@ -148,14 +156,7 @@ class Game {
     return point;
   }
 
-  init(ref: React.RefObject<HTMLCanvasElement> | undefined) {
-    if (ref === undefined) return;
-    this.boardCanvasRef = ref;
-    this.boardCanvas = this.boardCanvasRef.current;
-    if (!this.boardCanvas) return;
-    this.boardContext = this.boardCanvas.getContext("2d");
-    this.boardCanvas.width = window.innerWidth * 0.9;
-    this.boardCanvas.height = window.innerHeight * 0.9;
+  init() {
     this.board = new Board(this.boardType, this.boardCanvas);
     if (this.boardType != Form.REC) {
       this.player = this.createRacket(this.isSolo, this.board.wall);
@@ -191,20 +192,9 @@ class Game {
           20
         )
       );
-    window.addEventListener("keydown", function (e) {
-      if (e.key === "ArrowUp") Game.keyPressed.up = true;
-      else if (e.key === "ArrowDown") Game.keyPressed.down = true;
-    });
-    window.addEventListener("keyup", function (e) {
-      if (e.key === "ArrowUp") Game.keyPressed.up = false;
-      else if (e.key === "ArrowDown") Game.keyPressed.down = false;
-    });
   }
 
   updateGame() {
-    this.boardCanvas!.width = window.innerWidth * 0.9;
-    this.boardCanvas!.height = window.innerHeight * 0.9;
-
     for (let p of this.player) {
       if (p.hp == 0) {
         if (this.boardType == Form.REC) {
@@ -219,62 +209,13 @@ class Game {
           }
           this.boardType--;
         }
-        this.init(this.boardCanvasRef);
+		this.init();
       }
-    }
-    this.boardContext!.fillStyle = "#666666";
-    this.board.board.draw(this.boardContext, "gray");
-    this.boardContext!.font = "14px sherif";
-    this.boardContext!.fillStyle = "#000000";
-    this.boardContext!.fillText(
-      Math.round(
-        this.countUpdate / Math.round((Date.now() - this.start) / 1000)
-      ) +
-        " Print from class Board : " +
-        this.boardCanvas!.width +
-        " " +
-        this.boardCanvas!.height,
-      0,
-      10
-    );
-    this.boardContext!.font = "50px sherif";
-    this.boardContext!.fillText(
-      Game.point.toString(),
-      this.boardCanvas!.width / 2,
-      50
-    );
-    this.boardContext!.fillText(
-      Math.round((Date.now() - this.start) / 1000).toString(),
-      this.boardCanvas!.width / 2,
-      110
-    );
-    this.boardContext!.font = "20px sherif";
-    for (let i: number = 0; i < Game.live; i++) {
-      this.boardContext!.fillText(
-        "❤️",
-        this.boardCanvas!.width / 2 + 25 * i,
-        160
-      );
     }
     this.countUpdate++;
     this.ball.update(this.player, this.board.wall, this.board);
     for (let p of this.player) p.update(this.ball, this.board.wall);
     if (this.isSolo) this.cible.update(this.ball, this.boardCanvas);
-    for (let wall of this.board.wall) {
-      wall.draw(this.boardContext, undefined);
-    }
-    this.ball.draw(this.boardContext, undefined);
-    for (let p of this.player) {
-      p.draw(this.boardContext, p.color);
-      p.printPoint(this.boardContext, 0, "red");
-      p.printPoint(this.boardContext, 3, "green");
-      this.boardContext!.fillText(
-        p.hp.toString(),
-        this.boardCanvas!.width / 1.2,
-        50 + 20 * p.index
-      );
-    }
-    if (this.isSolo) this.cible.draw(this.boardContext);
     if (Game.live == 0) {
       Game.point = 0;
       Game.live = 3;
@@ -283,11 +224,11 @@ class Game {
   }
 }
 
-class Board {
+export class Board {
   public board!: Entity;
   public wall!: Wall[];
 
-  constructor(boardType: number, canvas: HTMLCanvasElement | null) {
+  constructor(boardType: number, canvas : any) {
     let height = 0;
     let size = 1;
     if (boardType == Form.HEX || boardType == Form.PEN) {
@@ -352,7 +293,7 @@ class Board {
   }
 }
 
-class Vector {
+export class Vector {
   constructor(public x: number, public y: number) {}
 
   product(other: Vector | Point) {
@@ -384,7 +325,7 @@ class Vector {
   }
 }
 
-class Point {
+export class Point {
   constructor(public x: number, public y: number) {}
 
   vectorTo(other: Point) {
@@ -409,7 +350,7 @@ class Point {
   }
 }
 
-class Entity {
+export class Entity {
   public speed!: Vector;
 
   constructor(public point: Point[]) {}
@@ -520,25 +461,6 @@ class Entity {
     return true;
   }
 
-  draw(context: CanvasRenderingContext2D | null, color: string | undefined) {
-    if (color === undefined) color = "white";
-    context!.beginPath();
-    context!.moveTo(this.getx(), this.gety());
-    for (let point of this.point) {
-      context!.lineTo(point.x, point.y);
-    }
-    context!.closePath();
-    context!.strokeStyle = color;
-    context!.stroke();
-    context!.fillStyle = color;
-    context!.fill();
-  }
-
-  printPos(context: CanvasRenderingContext2D | null) {
-    context!.font = "14px sherif";
-    context!.fillStyle = "#000";
-  }
-
   getEdges() {
     let edges: Vector[] = [];
     for (let i: number = 0; i < this.point.length - 1; i++) {
@@ -558,7 +480,7 @@ class Entity {
   }
 }
 
-class Wall extends Entity {
+export class Wall extends Entity {
   constructor(p1: Point, p2: Point) {
     let p0 = new Point(p1.x - 1, p1.y);
     let p3 = new Point(p2.x, p2.y - 1);
@@ -566,29 +488,16 @@ class Wall extends Entity {
   }
 }
 
-class Target extends Entity {
+export class Target extends Entity {
   constructor(points: Point[]) {
     super(points);
-  }
-
-  draw(context: CanvasRenderingContext2D | null) {
-    context!.beginPath();
-    context!.moveTo(this.getx(), this.gety());
-    for (let point of this.point) {
-      context!.lineTo(point.x, point.y);
-    }
-    context!.closePath();
-    context!.strokeStyle = "red";
-    context!.stroke();
-    context!.fillStyle = "red";
-    context!.fill();
   }
 
   randomVal(min: number, max: number) {
     return Math.floor(Math.random() * (max - min + 1) + min);
   }
 
-  update(ball: Ball, canvas: HTMLCanvasElement | null) {
+  update(ball: Ball, canvas : any) {
     if (this.sat(ball)) {
       Game.point++;
       this.replaceTo(
@@ -601,7 +510,7 @@ class Target extends Entity {
   }
 }
 
-class Ball extends Entity {
+export class Ball extends Entity {
   public wait: number = 120;
   public defaultSpeed: number = 3;
 
@@ -724,7 +633,7 @@ class Ball extends Entity {
   }
 }
 
-class Racket extends Entity {
+export class Racket extends Entity {
   public defaultSpeed: number = 1.5;
   public hp = 3;
   public dir!: Vector;
@@ -736,6 +645,21 @@ class Racket extends Entity {
       this.dir.x * this.defaultSpeed,
       this.dir.y * this.defaultSpeed
     );
+  }
+
+  move(dir : boolean) {
+    if (dir) {
+      this.speed = new Vector(
+        this.dir.x * this.defaultSpeed,
+        this.dir.y * this.defaultSpeed
+      );
+    } else {
+      this.speed = new Vector(
+        -this.dir.x * this.defaultSpeed,
+        -this.dir.y * this.defaultSpeed
+      );
+    }
+    this.moveTo(this.speed);
   }
 
   update(ball: Ball, walls: Wall[]) {
@@ -787,26 +711,3 @@ class Racket extends Entity {
   }
 }
 
-function handleResize(game: Game) {
-  game.updateGame();
-}
-
-const Canvas = ({ ref }: any) => {
-  const canvasRef = useRef(ref);
-  if (canvasRef) {
-    let game = new Game();
-
-    useEffect(() => {
-      game.init(canvasRef);
-      setInterval(handleResize, 8, game);
-    }, []);
-  }
-
-  return <canvas width="1500" height="1500" ref={canvasRef} />;
-};
-
-// type Props = {
-// 	ref: React.RefObject<HTMLCanvasElement> | undefined
-//   }
-
-export default Canvas;

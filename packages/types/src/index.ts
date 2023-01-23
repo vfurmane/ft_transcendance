@@ -47,5 +47,32 @@ export interface ConversationWithUnread {
   lastMessage: Date;
 }
 
+export interface Point {
+  x: number;
+  y: number;
+}
+
+export interface Vector {
+  x: number;
+  y: number;
+}
+
+export interface Ball {
+  point : Point;
+  dir : Vector;
+}
+
+export interface PlayerInterface {
+  point : Point;
+  dir : Vector;
+  hp : number;
+}
+
+export interface GameState {
+  numberPlayer : number;
+  players : PlayerInterface[]
+  ball : Ball;
+}
+
 export * from './enums';
 export * from './entities';

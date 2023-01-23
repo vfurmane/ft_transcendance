@@ -6,6 +6,8 @@ import { ClassSerializerInterceptor, UseInterceptors, UsePipes, ValidationPipe }
 import { AuthService } from "src/auth/auth.service";
 import { UUIDVersion } from "class-validator";
 import { arrayBuffer } from "stream/consumers";
+import { Game } from "./game.service"
+import { Interval } from "@nestjs/schedule";
 
 @UsePipes(new ValidationPipe())
 @UseInterceptors(ClassSerializerInterceptor)
@@ -13,7 +15,7 @@ import { arrayBuffer } from "stream/consumers";
  export class PongGateway implements OnGatewayConnection  {
 	@WebSocketServer() server !: Server;
 	room_id !: string[];
-	//  private game: Game;
+	games !: Map<string, Game>; 
 
 	constructor(private readonly authService : AuthService) {
 	}
@@ -36,8 +38,26 @@ import { arrayBuffer } from "stream/consumers";
 		  return 'Connection established';
 	}
 
+	@Interval(100)
+	refresh() {
+		if (!this.games || this.games === undefined) {
+			return ;
+		}
+		if (!this.room_id || this.room_id === undefined) {
+			return ;
+		}
+		for (let room of this.room_id) {
+			let game = this.games.get(room);
+			if (!game) {
+				return ;
+			}
+			game.updateGame();
+			this.server.in(room).emit('refresh', { GameState : game.getState() });
+		}
+	}
+
 	@SubscribeMessage('move')
-	async	registerMove(@ConnectedSocket() client : Socket) {
+	async	registerMove(@ConnectedSocket() client : Socket, dir : boolean) {
 		const clientSockets = await this.server.in(`user_${client.data.id}`).fetchSockets();
 		const room = client.data.room;
 		if (room === undefined)
@@ -49,6 +69,13 @@ import { arrayBuffer } from "stream/consumers";
 		if (client.data.position === -1) {
 			return 'You are not a player !'
 		}
+		const game = this.games.get(room);
+		if (!game) {
+			return 'Fatal error : No game !'
+		}
+		game.movePlayer(client.data.position, dir)
+		this.server.in(room).emit('refresh', { GameState : game.getState()});
+		return 'You moved ' + (dir ? 'up' : 'down')
 	}
 
 	@SubscribeMessage('startGame')
@@ -66,6 +93,7 @@ import { arrayBuffer } from "stream/consumers";
 			(await this.server.in(room).fetchSockets()).forEach(element => {
 				this.server.in(`user_${element.data.id}`).emit('startGame', { number_player: numberPlayer, position : element.data.position});
 			});
+			this.games.set(room, new Game(numberPlayer))
 			return 'Launching the game for room ' + room;
 		}
 		return 'You are not player 1 !'
@@ -87,6 +115,7 @@ import { arrayBuffer } from "stream/consumers";
 						(await this.server.in(id).fetchSockets()).forEach(element => {
 							this.server.in(`user_${element.data.id}`).emit('startGame', { number_player: 5, position : element.data.position});
 						});
+						this.games.set(id, new Game(5))
 						return 'Launched game for room ' + id;
 					}
 					return 'Joined room of id ' + id;
@@ -103,22 +132,4 @@ import { arrayBuffer } from "stream/consumers";
 		client.data.room = '0';
 		return 'Created the first ever room !'
 	}
-
-
-
-/*
-	 updateGame() : void {
-		 let game : GameDto;
-		 game.player = this.game.player
-		io.in(this.room_id).emit('update', {game});
-	 }
-
-	 @SubscribeMessage('move')
-	 async move(@MessageBody() data: RacketDto, @ConnectedSocket() socket: Socket) {
-		 if (socket.rooms.has(this.room_id + '/player')) {
-			 this.updateGame(data); //data is the key pressed (either up/true or down/false
-		 } else {
-			 throw new WsException('Sender is not a player');
-		 }
-	 }*/
  }
