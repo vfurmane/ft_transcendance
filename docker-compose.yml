@@ -54,6 +54,12 @@ services:
       interval: 5s
       timeout: 5s
       retries: 50
+  redis:
+    image: redis:7.0.8-alpine3.17
+    container_name: redis
+    restart: always
+    networks:
+      - app
 
 networks:
   app:
