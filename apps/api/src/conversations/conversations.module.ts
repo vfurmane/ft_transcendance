@@ -6,6 +6,8 @@ import { ConversationsController } from './conversations.controller';
 import { ConversationsService } from './conversations.service';
 import { ConversationRole } from 'types';
 import { UsersModule } from 'src/users/users.module';
+import { ConversationsGateway } from './conversations.gateway';
+import { AuthModule } from '../auth/auth.module';
 import { ConversationRestriction } from 'types';
 
 @Module({
@@ -17,9 +19,10 @@ import { ConversationRestriction } from 'types';
       ConversationRestriction,
     ]),
     UsersModule,
+    AuthModule,
   ],
   controllers: [ConversationsController],
-  providers: [ConversationsService],
+  providers: [ConversationsService, ConversationsGateway],
   exports: [ConversationsService, TypeOrmModule],
 })
 export class ConversationsModule {}

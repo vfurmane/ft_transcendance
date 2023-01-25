@@ -62,7 +62,10 @@ export class ConversationsService {
   async createConversation(
     newConversation: createConversationDto,
     creator: User,
-  ): Promise<Conversation> {
+  ): Promise<{
+    conversation: Conversation;
+    newConversationMessage: Message | null;
+  }> {
     const users: User[] = [];
     if (newConversation.participants.length === 0)
       throw new BadRequestException(
@@ -105,7 +108,7 @@ export class ConversationsService {
       const recipientDMs = await this.getListOfDMs(users[0]);
       for (const creatorDM of creatorDMs) {
         if (recipientDMs.filter((el) => el.id === creatorDM.id).length)
-          return creatorDM;
+          return { conversation: creatorDM, newConversationMessage: null };
       }
     }
     const createdConversation =
@@ -147,8 +150,14 @@ export class ConversationsService {
       conversation: createdConversation,
     });
     await this.conversationRoleRepository.save(conversationRole);
-
-    return createdConversation;
+    const newConversationMessage = this.messageRepository.create({
+      sender: null,
+      conversation: createdConversation,
+      content: `This is the beginning of your conversation`,
+      system_generated: true,
+    });
+    this.messageRepository.save(newConversationMessage);
+    return { conversation: createdConversation, newConversationMessage };
   }
 
   async updateRole(
@@ -237,6 +246,23 @@ export class ConversationsService {
     }
     this.conversationRoleRepository.save(targetUserRole);
     return true;
+  }
+
+  async getConversationsIds(userId: string): Promise<string[]> {
+    const conversations = await this.conversationRepository.find({
+      relations: {
+        conversationRoles: true,
+      },
+      where: {
+        conversationRoles: {
+          user: {
+            id: userId,
+          },
+          role: Not(ConversationRoleEnum.LEFT),
+        },
+      },
+    });
+    return conversations.map((el) => el.id);
   }
 
   async getConversations(currentUser: User): Promise<ConversationsDetails> {
@@ -404,7 +430,7 @@ export class ConversationsService {
     currentUser: User,
     conversationId: string,
     content: string,
-  ): Promise<boolean> {
+  ): Promise<Message> {
     await this.clearRestrictions(conversationId);
     const conversation = await this.conversationRepository.findOne({
       relations: {
@@ -440,14 +466,14 @@ export class ConversationsService {
     await this.messageRepository.save(newMessage);
     userRole.lastRead = new Date();
     this.conversationRoleRepository.save(userRole);
-    return true;
+    return newMessage;
   }
 
   async joinConversation(
     currentUser: User,
     conversationId: string,
     password: string | null,
-  ): Promise<Conversation> {
+  ): Promise<{ conversation: Conversation; joinMessage: Message | null }> {
     await this.clearRestrictions(conversationId);
     const conversation = await this.conversationRepository.findOne({
       relations: {
@@ -475,7 +501,7 @@ export class ConversationsService {
         currentUserRole.role = ConversationRoleEnum.USER;
         await this.conversationRoleRepository.save(currentUserRole);
       }
-      return conversation;
+      return { conversation, joinMessage: null };
     }
     if (conversation.groupConversation === false)
       throw new ForbiddenException();
@@ -494,7 +520,14 @@ export class ConversationsService {
       conversation: conversation,
     });
     this.conversationRoleRepository.save(joined);
-    return conversation;
+    const joinMessage = this.messageRepository.create({
+      sender: null,
+      conversation: conversation,
+      content: `${currentUser.name} has joined the conversation`,
+      system_generated: true,
+    });
+    this.messageRepository.save(joinMessage);
+    return { conversation, joinMessage };
   }
 
   async getConversationParticipants(
@@ -533,7 +566,7 @@ export class ConversationsService {
   async leaveConversation(
     currentUser: User,
     conversationId: string,
-  ): Promise<ConversationRole> {
+  ): Promise<{ userRole: ConversationRole; leftMessage: Message | null }> {
     await this.clearRestrictions(conversationId);
     const conversation = await this.conversationRepository.findOne({
       relations: {
@@ -555,17 +588,30 @@ export class ConversationsService {
     if (conversation.conversationRoles.length === 1) {
       await this.conversationRoleRepository.remove(userRole);
       await this.conversationRepository.remove(conversation);
-      return userRole;
+      return { userRole, leftMessage: null };
     }
     if (userRole.role === ConversationRoleEnum.OWNER)
       throw new ForbiddenException(
         'Please pick a new owner for this conversation before leaving it',
       );
+    const leftMessage = this.messageRepository.create({
+      sender: null,
+      conversation: conversation,
+      content: `${currentUser.name} has left the conversation`,
+      system_generated: true,
+    });
+    this.messageRepository.save(leftMessage);
     if (userRole.restrictions.length) {
       userRole.role = ConversationRoleEnum.LEFT;
-      return await this.conversationRoleRepository.save(userRole);
+      return {
+        userRole: await this.conversationRoleRepository.save(userRole),
+        leftMessage,
+      };
     }
-    return await this.conversationRoleRepository.remove(userRole);
+    return {
+      userRole: await this.conversationRoleRepository.remove(userRole),
+      leftMessage,
+    };
   }
 
   async clearRestrictions(conversationId: string): Promise<void> {

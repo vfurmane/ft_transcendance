@@ -1,3 +1,4 @@
+import { User } from "./entities";
 import { Conversation } from "./entities/conversation.entity";
 
 export interface FtUser {
@@ -72,6 +73,12 @@ export interface GameState {
   numberPlayer : number;
   players : PlayerInterface[]
   ball : Ball;
+}
+
+export interface FriendshipRequestStatus {
+  friend : User | null,
+  accept: boolean,
+  ask: boolean
 }
 
 export * from './enums';
