@@ -43,6 +43,7 @@
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",
     "rxjs": "^7.2.0",
+    "sanitize-html": "^2.8.1",
     "socket.io": "^4.5.4",
     "speakeasy": "^2.0.0",
     "typeorm": "^0.3.11"
@@ -60,6 +61,7 @@
     "@types/passport-jwt": "^3.0.8",
     "@types/passport-local": "^1.0.34",
     "@types/passport-oauth2": "^1.4.11",
+    "@types/sanitize-html": "^2.8.0",
     "@types/speakeasy": "^2.0.7",
     "@types/supertest": "^2.0.11",
     "@types/validator": "^13.7.10",
