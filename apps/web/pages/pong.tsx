@@ -25,6 +25,12 @@ enum Form {
   HEX = 6,
 }
 
+/*
+socket.on('refresh', GameState) {
+  
+}
+*/
+
 class Game {
   public isSolo: boolean = false;
   public boardType = Form.REC;
