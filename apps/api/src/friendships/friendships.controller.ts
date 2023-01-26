@@ -16,21 +16,21 @@ import { isUUIDDto } from '../conversations/dtos/IsUUID.dto';
 @UseGuards(JwtAuthGuard)
 @Controller('friendships')
 export class FriendshipsController {
-  constructor(private readonly fiendshipsService: FriendshipsService) {}
+  constructor(private readonly friendshipsService: FriendshipsService) {}
 
   @Put('/:id')
   add(
     @CurrentUser() currentUser: User,
     @Param() { id }: isUUIDDto,
   ): Promise<boolean> {
-    return this.fiendshipsService.add(currentUser, id);
+    return this.friendshipsService.add(currentUser, id);
   }
 
   @Get()
   getFriendsList(
     @CurrentUser() currentUser: User,
   ): Promise<FriendshipRequestStatus[]> {
-    return this.fiendshipsService.getFriendsList(currentUser);
+    return this.friendshipsService.getFriendsList(currentUser);
   }
 
   @Delete('/:id')
@@ -38,7 +38,7 @@ export class FriendshipsController {
     @CurrentUser() currentUser: User,
     @Param() { id }: isUUIDDto,
   ): Promise<boolean> {
-    return this.fiendshipsService.delete(currentUser, id);
+    return this.friendshipsService.delete(currentUser, id);
   }
 
   @Patch('/validate/:id')
@@ -46,6 +46,6 @@ export class FriendshipsController {
     @CurrentUser() currentUser: User,
     @Param() { id }: isUUIDDto,
   ): Promise<boolean> {
-    return this.fiendshipsService.update(currentUser, id);
+    return this.friendshipsService.update(currentUser, id);
   }
 }

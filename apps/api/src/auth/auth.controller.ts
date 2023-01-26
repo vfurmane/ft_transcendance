@@ -87,6 +87,7 @@ export class AuthController {
   async register(
     @Body() registerUserDto: RegisterUserDto,
   ): Promise<UserEntity> {
+    console.error("registering")
     const user = await this.authService.createUser(registerUserDto);
     return user;
   }
