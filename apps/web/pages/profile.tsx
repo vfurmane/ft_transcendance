@@ -110,7 +110,7 @@ export default function Profil(): JSX.Element {
       id: user.id,
     };
 
-    fetch(`api/friendships`, {
+    fetch(`/api/friendships`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",

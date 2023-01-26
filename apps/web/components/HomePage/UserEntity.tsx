@@ -37,7 +37,7 @@ export default function UserEntity(props: {
       target_id: UserState.id,
     };
 
-    fetch(`api/friendships/validate`, {
+    fetch(`/api/friendships/validate`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

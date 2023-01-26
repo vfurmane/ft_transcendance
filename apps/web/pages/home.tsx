@@ -36,7 +36,7 @@ function Home(): JSX.Element {
   //get user info end dispatch them in the redux store
   const dispatch = useDispatch();
   useEffect(() => {
-    fetch(`api/user/${user_id}`)
+    fetch(`/api/user/${user_id}`)
       .then(function (response) {
         return response.json();
       })
@@ -121,7 +121,7 @@ function Home(): JSX.Element {
       user_id: user_id,
       userToDelete_id: e.idToDelete,
     };
-    fetch(`api/friendships`, {
+    fetch(`/api/friendships`, {
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",
@@ -141,9 +141,7 @@ function Home(): JSX.Element {
 
   //get the friend list of the user
   useEffect(() => {
-    fetch(
-      `api/friendships`
-    )
+    fetch(`/api/friendships`)
       .then(function (response) {
         if (response.ok) {
           return response.json().then(function (json) {
