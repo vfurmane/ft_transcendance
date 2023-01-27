@@ -28,8 +28,6 @@ services:
       database:
         condition: service_healthy
     restart: always
-    ports:
-      - 3000:3000
     environment:
       POSTGRES_HOST: database
       POSTGRES_USERNAME: ${DATABASE_USERNAME}
@@ -58,6 +56,21 @@ services:
       interval: 5s
       timeout: 5s
       retries: 50
+  server:
+    image: nginx:stable-alpine
+    container_name: ft_transcendence-nginx
+    depends_on:
+      - web
+      - api
+    restart: always
+    networks:
+      - app
+    volumes:
+      - ./templates:/etc/nginx/templates
+    ports:
+      - 8080:80
+    environment:
+      NGINX_ENTRYPOINT_QUIET_LOGS: 1
 
 networks:
   app:
