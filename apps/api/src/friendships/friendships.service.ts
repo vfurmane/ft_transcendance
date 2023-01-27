@@ -1,7 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { FriendshipRequestStatus, Friendships as friendshipsEntity } from 'types';
+import {
+  FriendshipRequestStatus,
+  Friendships as friendshipsEntity,
+} from 'types';
 import { User } from 'types';
 
 @Injectable()
@@ -35,7 +38,8 @@ export class FriendshipsService {
       },
     });
 
-    if ((targetFriend && targetFriend.accepted) || initiatorFriend) return false;
+    if ((targetFriend && targetFriend.accepted) || initiatorFriend)
+      return false;
     const target = await this.userRepository.findOne({
       where: {
         id: target_id,
@@ -50,9 +54,7 @@ export class FriendshipsService {
     return true;
   }
 
-  async getFriendsList(
-    currentUser: User,
-  ): Promise<FriendshipRequestStatus[]> {
+  async getFriendsList(currentUser: User): Promise<FriendshipRequestStatus[]> {
     const response: { friend: User | null; accept: boolean; ask: boolean }[] =
       [];
 
