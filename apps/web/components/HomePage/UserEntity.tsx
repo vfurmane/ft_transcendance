@@ -37,7 +37,7 @@ export default function UserEntity(props: {
       target_id: UserState.id,
     };
 
-    fetch(`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/friendships/valide`, {
+    fetch(`/api/friendships/validate`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
