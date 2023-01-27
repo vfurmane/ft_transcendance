@@ -11,7 +11,6 @@ export class UsersController {
 
   @Get('/:id')
   async getFriendsList(@Param() { id } : isUUIDDto): Promise<User | null> {
-    console.log(`user_id : ${id}`);
     return this.usersService.getById(id);
   }
 }
