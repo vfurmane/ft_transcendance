@@ -23,6 +23,7 @@ const user: User = {
   tfa_setup: false,
   messages: [],
   conversationRoles: [],
+  jwts: [],
 };
 
 describe('AuthController', () => {
@@ -59,8 +60,8 @@ describe('AuthController', () => {
 
   describe('ftCallback', () => {
     it('should return the access token of the user', async () => {
-      service.login.mockReturnValueOnce({ access_token: accessToken });
-      const response = controller.ftCallback(user);
+      service.login.mockResolvedValueOnce({ access_token: accessToken });
+      const response = await controller.ftCallback(user);
       expect(service.login).toHaveBeenCalledWith(user);
       expect(response).toHaveProperty('access_token', accessToken);
     });

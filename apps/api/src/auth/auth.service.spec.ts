@@ -15,6 +15,8 @@ import { UsersService } from '../users/users.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { State } from 'types';
 import { User as UserEntity } from 'types';
+import { Jwt } from 'types';
+import { Repository } from 'typeorm';
 
 const JWT_SECRET = faker.random.alphaNumeric(20);
 const code = faker.random.alphaNumeric(20);
@@ -34,12 +36,21 @@ const user: User = {
   tfa_setup: false,
   messages: [],
   conversationRoles: [],
+  jwts: [],
 };
+const jwt: Jwt = {
+  id: faker.datatype.uuid(),
+  created_at: faker.date.recent(),
+  updated_at: faker.date.recent(),
+  user,
+};
+user.jwts.push(jwt);
 
 describe('AuthService', () => {
   let service: AuthService;
   let httpService: DeepMocked<HttpService>;
   let jwtService: JwtService;
+  let jwtsRepository: DeepMocked<Repository<Jwt>>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -73,12 +84,17 @@ describe('AuthService', () => {
           provide: UsersService,
           useValue: createMock<UsersService>(),
         },
+        {
+          provide: getRepositoryToken(Jwt),
+          useValue: createMock<Repository<Jwt>>(),
+        },
       ],
     }).compile();
 
     service = module.get<AuthService>(AuthService);
     httpService = module.get(HttpService);
     jwtService = module.get<JwtService>(JwtService);
+    jwtsRepository = module.get(getRepositoryToken(Jwt));
   });
 
   it('should be defined', () => {
@@ -112,8 +128,9 @@ describe('AuthService', () => {
   });
 
   describe('login', () => {
-    it('should return an object containing the access token', () => {
-      const response = service.login(user);
+    it('should return an object containing the access token', async () => {
+      jwtsRepository.save.mockResolvedValueOnce(jwt);
+      const response = await service.login(user);
       const payload = jwtService.decode(response.access_token);
       expect(payload).toHaveProperty('sub', user.id);
       expect(payload).toHaveProperty('name', user.name);

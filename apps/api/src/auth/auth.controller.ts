@@ -44,6 +44,7 @@ import { State } from '../common/decorators/state.decorator';
 import { State as StateEntity } from 'types';
 import { LocalAuthGuard } from './local-auth.guard';
 import { RegisterUserDto } from '../users/register-user.dto';
+import { JwtRefreshAuthGuard } from './jwt-refresh-auth.guard';
 
 @ApiTags()
 @UseInterceptors(ClassSerializerInterceptor)
@@ -71,10 +72,10 @@ export class AuthController {
     description:
       'The authentication failed (`code` or `state` may be invalid).',
   })
-  ftCallback(
+  async ftCallback(
     @User() user: UserEntity,
     @State() state: StateEntity,
-  ): AccessTokenResponse | TfaNeededResponse {
+  ): Promise<AccessTokenResponse | TfaNeededResponse> {
     if (user.tfa_setup) {
       this.logger.log(`${user.name} logged in using OAuth2, but TFA is needed`);
       return { message: 'Authentication factor needed', route: 'tfa' };
@@ -105,12 +106,6 @@ export class AuthController {
     }
     this.logger.log(`${user.name} logged in using username:password`);
     return this.authService.login(user, state);
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @Get('profile')
-  async getProfile(@User() user: UserEntity): Promise<UserEntity> {
-    return user;
   }
 
   @Post('tfa')
@@ -199,5 +194,11 @@ export class AuthController {
     await this.authService.removeState(state);
     this.logger.log(`${state.user.name} validated TFA`);
     return this.authService.login(state.user, state);
+  }
+
+  @Post('refresh')
+  @UseGuards(JwtRefreshAuthGuard)
+  refreshToken(@User() user: UserEntity): Promise<AccessTokenResponse> {
+    return this.authService.login(user);
   }
 }
