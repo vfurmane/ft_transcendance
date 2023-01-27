@@ -7,7 +7,7 @@ import { SpeakeasyGeneratedSecretDto } from '../auth/speakeasy-generated-secret.
 import { AccessTokenResponse } from 'types';
 import * as bcrypt from 'bcrypt';
 import { UpdateUserPasswordDto } from './update-user-password.dto';
-import { Jwt as JwtEntity } from 'types/src/entities';
+import { Jwt as JwtEntity } from 'types';
 import { AuthService } from '../auth/auth.service';
 
 export interface AddUserData {

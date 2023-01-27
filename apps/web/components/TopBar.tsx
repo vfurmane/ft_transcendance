@@ -56,9 +56,7 @@ function TopBar(props: propsTopBar): JSX.Element {
 
   useEffect((): void => {
     if (value.length) {
-      fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/search?letters=${value}`
-      )
+      fetch(`/api/search?letters=${value}`)
         .then(function (response) {
           response.json().then(function (json) {
             const userListTmp: JSX.Element[] = [];
