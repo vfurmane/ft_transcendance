@@ -15,6 +15,7 @@ import playButtonStyles from "styles/playButton.module.scss";
 import textStyles from "styles/text.module.scss";
 import styles from "styles/home.module.scss";
 import { FriendshipRequestStatus } from "types";
+import { io } from 'socket.io-client';
 
 //temporary before the login page
 const user_id = "1edffd5a-863d-442c-a962-a5dbd9b2c686";
@@ -78,6 +79,28 @@ function Home(): JSX.Element {
   /*==========================================================*/
 
   function handleClickPlayButton(): void {
+    console.log("CLICKING THE BUTTON")
+    const socket = io("/pong", {
+      auth: {
+        token: localStorage.getItem('access_token'),
+      }
+    });
+    socket.on('disconnect', function(){
+      console.error("JWT PROBABLY EXPIRED")
+    });
+
+    socket.on("connect_error", (error) => {
+      console.error("COULD NOT CONNECT " + error.message);
+    });
+
+    socket.emit('searchGame', (response:any) => {
+      console.log(response);
+    });
+
+    socket.on("startGame", (config) => {
+      console.log(config)
+    })
+
     setOpenPlayButton(!openPlayButton);
   }
 
