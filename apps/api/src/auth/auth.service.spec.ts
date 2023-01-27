@@ -10,11 +10,11 @@ import { of, throwError } from 'rxjs';
 import { AxiosResponse } from 'axios';
 import { ConfigModule } from '@nestjs/config';
 import ftOauth2Configuration from '../config/ft-oauth2';
-import { User } from '../users/user.entity';
+import { User } from 'types';
 import { UsersService } from '../users/users.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { State } from './state.entity';
-import { User as UserEntity } from '../users/user.entity';
+import { State } from 'types';
+import { User as UserEntity } from 'types';
 
 const JWT_SECRET = faker.random.alphaNumeric(20);
 const code = faker.random.alphaNumeric(20);

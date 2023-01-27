@@ -38,12 +38,14 @@ export class UsersService {
   }
 
   async userExists(user: AddUserData): Promise<boolean> {
-    return (
-      (await this.usersRepository.findOneBy([
-        { name: user.name },
-        { email: user.email },
-      ])) !== null
-    );
+    return await this.usersRepository?.createQueryBuilder().
+      where(
+          "LOWER(name) = :name OR LOWER(email) = :email",
+          {
+            name: user.name.toLowerCase(),
+            email: user.email.toLowerCase()
+          }
+      ).getOne() !== null
   }
 
   async addUser(user: AddUserData): Promise<User> {
