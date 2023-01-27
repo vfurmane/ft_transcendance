@@ -27,7 +27,7 @@ async function login(
   state: string
 ): Promise<AccessTokenResponse | TfaNeededResponse | null> {
   const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/login`,
+    `/api/auth/login`,
     {
       method: "POST",
       headers: {
