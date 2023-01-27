@@ -5,10 +5,10 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { UsersService } from '../users/users.service';
 import { Repository } from 'typeorm';
-import { User } from '../users/user.entity';
+import { User } from 'types';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
-import { State } from './state.entity';
+import { State } from 'types';
 
 const accessToken = faker.random.alphaNumeric(20);
 const user: User = {

@@ -10,7 +10,7 @@ export class CheckTfaTokenStateDto {
   })
   @IsNotEmpty()
   @IsString()
-  @Transform((value) => sanitize(value as any))
+  @Transform(({ value }) => sanitize(value))
   state!: string;
 
   @ApiProperty({
@@ -19,5 +19,6 @@ export class CheckTfaTokenStateDto {
   })
   @IsNotEmpty()
   @IsString()
+  @Transform(({ value }) => sanitize(value))
   token!: string;
 }

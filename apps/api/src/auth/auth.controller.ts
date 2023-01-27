@@ -46,6 +46,7 @@ import { LocalAuthGuard } from './local-auth.guard';
 import { RegisterUserDto } from '../users/register-user.dto';
 
 @ApiTags()
+@UseInterceptors(ClassSerializerInterceptor)
 @Controller('auth')
 export class AuthController {
   constructor(
@@ -82,7 +83,6 @@ export class AuthController {
     return this.authService.login(user, state);
   }
 
-  @UseInterceptors(ClassSerializerInterceptor)
   @Post('register')
   async register(
     @Body() registerUserDto: RegisterUserDto,
@@ -108,7 +108,6 @@ export class AuthController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(ClassSerializerInterceptor)
   @Get('profile')
   async getProfile(@User() user: UserEntity): Promise<UserEntity> {
     return user;

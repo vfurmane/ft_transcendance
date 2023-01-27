@@ -10,6 +10,6 @@ export class SearchController {
 
   @Get()
   async findAll(@Query() query: { letters: string }): Promise<User[]> {
-    return this.searchService.findAll(query.letters);
+    return this.searchService.findAll(query.letters.toLowerCase());
   }
 }
