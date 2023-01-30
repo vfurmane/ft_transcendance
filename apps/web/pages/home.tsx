@@ -3,8 +3,6 @@ import TopBar from "../components/TopBar";
 import PlayButton from "../components/HomePage/PlayButton";
 import List from "../components/HomePage/List";
 import UserEntity from "../components/HomePage/UserEntity";
-import MatchEntity from "../components/HomePage/MatchEntity";
-import LeaderboardEntity from "../components/HomePage/LeaderboardEntity";
 import ArrayDoubleColumn from "../components/HomePage/ArrayDoubleColumn";
 import PlayMenu from "../components/HomePage/PlayMenu";
 import { setUserState } from "../store/UserSlice";
@@ -14,7 +12,7 @@ import ChatBar from "../components/chatBar";
 import playButtonStyles from "styles/playButton.module.scss";
 import textStyles from "styles/text.module.scss";
 import styles from "styles/home.module.scss";
-import { FriendshipRequestStatus } from "types";
+import { Userfront as User } from "types";
 import { initUser } from "../interface/UserInterface";
 
 //temporary before the login page

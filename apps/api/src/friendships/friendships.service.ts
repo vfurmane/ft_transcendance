@@ -56,7 +56,7 @@ export class FriendshipsService {
   }
 
   async getFriendsList(
-    user_id: string,
+    currentUser: User,
   ): Promise<{ friend: Userfront | null; accept: boolean; ask: boolean }[]> {
     let friendsList: (User | null)[] = [];
     const ids: string[] = [];
