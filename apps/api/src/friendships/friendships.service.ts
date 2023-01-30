@@ -71,12 +71,12 @@ export class FriendshipsService {
         },
       ],
     });
-    initiatorArray.forEach(async (e): Promise<void> => {
-      if (e.initiator.id === currentUser.id)
-        response.push({ friend: await this.transformUserService.transform(e.target), accept: e.accepted, ask: true });
+    for (let i = 0; i < initiatorArray.length; i++) {
+      if (initiatorArray[i].initiator.id === currentUser.id)
+        response.push({ friend: await this.transformUserService.transform(initiatorArray[i].target), accept: initiatorArray[i].accepted, ask: true });
       else
-        response.push({ friend: await this.transformUserService.transform(e.initiator), accept: e.accepted, ask: false });
-    });
+        response.push({ friend: await this.transformUserService.transform(initiatorArray[i].initiator), accept: initiatorArray[i].accepted, ask: false });
+    };
     return response;
   }
 
@@ -108,14 +108,14 @@ export class FriendshipsService {
     return false;
   }
 
-  async update(currentUser: User, target_id: string): Promise<boolean> {
+  async update(currentUser: User, initiator_id: string): Promise<boolean> {
     const friendContract = await this.friendshipsRepository.findOne({
       where: {
         initiator: {
-          id: currentUser.id,
+          id: initiator_id,
         },
         target: {
-          id: target_id,
+          id: currentUser.id,
         },
       },
     });

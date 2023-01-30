@@ -13,6 +13,9 @@ import { FriendshipRequestStatus, User } from 'types';
 import { User as CurrentUser } from '../common/decorators/user.decorator';
 import { isUUIDDto } from '../conversations/dtos/IsUUID.dto';
 
+//let userTest = new User();
+//userTest.id = "2d0f1e9e-f273-42b6-b897-1eecf18b85b2";
+
 @UseGuards(JwtAuthGuard)
 @Controller('friendships')
 export class FriendshipsController {
@@ -28,7 +31,7 @@ export class FriendshipsController {
 
   @Get()
   getFriendsList(
-    @CurrentUser() currentUser: User,
+    @CurrentUser() currentUser: User
   ): Promise<FriendshipRequestStatus[]> {
     return this.fiendshipsService.getFriendsList(currentUser);
   }
