@@ -6,7 +6,7 @@ import { Repository } from 'typeorm';
 import { Match, User, Userfront } from 'types';
 import { UsersService } from '../users/users.service';
 
-export interface MatcFront {
+export interface MatchFront {
   id: string;
   score_winner: number;
   score_looser: number;
@@ -62,12 +62,12 @@ export class MatchService{
     return 1;
   }
 
-  async getMatch(user_id: string): Promise<MatcFront[]> {
+  async getMatch(user_id: string): Promise<MatchFront[]> {
     const user = await this.userRepository.findOne({
       relations: {
-        win: { looser_id: true },
+        win: { looser_id: true , winner_id: true},
 
-        defeat: { winner_id: true },
+        defeat: { winner_id: true, looser_id: true },
       },
       where: {
         id: user_id,
@@ -75,9 +75,9 @@ export class MatchService{
     });
     if (!user) throw new BadRequestException('user not found');
 
-    const winArray: MatcFront[] = [];
+    const winArray: MatchFront[] = [];
 
-    const looseArray: MatcFront[] = [];
+    const looseArray: MatchFront[] = [];
 
     for (let i = 0; i < user.win.length; i++) {
       winArray.push({
@@ -91,7 +91,10 @@ export class MatchService{
       });
     }
 
+    console.log(winArray);
+
     for (let i = 0; i < user.defeat.length; i++) {
+      console.log(user.defeat);
       looseArray.push({
         id: user.defeat[i].id,
         score_winner: user.defeat[i].score_winner,

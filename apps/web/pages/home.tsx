@@ -15,9 +15,10 @@ import playButtonStyles from "styles/playButton.module.scss";
 import textStyles from "styles/text.module.scss";
 import styles from "styles/home.module.scss";
 import { FriendshipRequestStatus } from "types";
+import { initUser } from "../interface/UserInterface";
 
 //temporary before the login page
-const user_id = "bc5ab5fb-842f-47ab-a2df-1eec056346bb";
+const user_id = "2d0f1e9e-f273-42b6-b897-1eecf18b85b2";
 
 function Home(): JSX.Element {
   const friendListRef = useRef([<></>]);
@@ -27,18 +28,20 @@ function Home(): JSX.Element {
   const [openUserMenu, setOpenUserMenu] = useState(false);
   const [indexOfUser, setIndexOfUser] = useState(0);
   const [friendList, setFriendList] = useState([<></>]);
+  const [user, setUser] = useState(initUser);
 
   const prevIndexOfUserRef = useRef(0);
   const prevSetterUsermenuRef = useRef(setterInit);
 
   const dispatch = useDispatch();
   useEffect(() => {
-    fetch(`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/user?user_id=${user_id}`)
+    fetch(`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/user/${user_id}`)
       .then(function (response) {
         return response.json();
       })
       .then((data) => {
         dispatch(setUserState(data));
+        setUser(data);
       })
       .catch(function (error) {
         console.log(`probleme with fetch: ${error.message}`);
@@ -103,16 +106,9 @@ function Home(): JSX.Element {
   }
 
   function delFriendClick(e: { idToDelete: string; index: number }): void {
-    const data = {
-      user_id: user_id,
-      userToDelete_id: e.idToDelete,
-    };
-    fetch(`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/friendships`, {
+    fetch(`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/friendships/${e.idToDelete}`, 
+    {
       method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
     }).catch(function (error) {
       console.log(
         "Il y a eu un problème avec l'opération fetch : " + error.message
@@ -128,7 +124,7 @@ function Home(): JSX.Element {
   //get the friend list of the user
   useEffect(() => {
     fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/friendships?user_id=${user_id}`
+      `${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/friendships`
     )
       .then(function (response) {
         if (response.ok) {

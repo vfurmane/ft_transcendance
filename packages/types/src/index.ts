@@ -1,9 +1,6 @@
-<<<<<<< HEAD
-=======
 import { User } from "./entities";
 import { Conversation } from "./entities/conversation.entity";
 
->>>>>>> 1efb144 (Couple changes)
 export interface FtUser {
   login: string;
   email: string;

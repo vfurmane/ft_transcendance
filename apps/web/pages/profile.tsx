@@ -69,15 +69,15 @@ export default function Profil(): JSX.Element {
   }
   /*==========================================================*/
 
+
   useEffect((): void => {
     if (typeof router.query.user === "string") {
       setUser(JSON.parse(router.query.user));
       if (JSON.parse(router.query.user).id === UserState.id)
         setUserProfil(true);
       else setUserProfil(false);
-
       fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/match?user_id${
+        `${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/match?user_id=${
           JSON.parse(router.query.user).id
         }`
       )
@@ -97,7 +97,30 @@ export default function Profil(): JSX.Element {
       tmp.push(<MatchEntity match={matchHistory[i]} user={user} key={i} />);
     }
     setListOfMatch([...tmp]);
+
+    const level = document.getElementById("level");
+    if (level)
+    {
+      level.innerText = '0';
+      const incrementLevel = () => {
+        let c = +level.innerText;
+        if ( c + 10 <= user.level)
+        {
+          level.innerText = `${c + 10}`;
+          setTimeout(incrementLevel, 100)
+        }
+        else
+        {
+          level.innerText = `${user.level}`;
+        }
+      }
+      incrementLevel();
+    }
+
   }, [matchHistory, user]);
+
+
+ 
 
   function achivementListClick(): void {
     setOpenAchivementList(true);
@@ -135,12 +158,9 @@ export default function Profil(): JSX.Element {
       target_id: user.id,
     };
 
-    fetch(`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/friendships`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
+    fetch(`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/friendships/${user.id}`, 
+    {
+      method: "PUT",
     })
       .then(function (response) {
         response.json().then((res) => {
@@ -156,7 +176,6 @@ export default function Profil(): JSX.Element {
   }
 
   //temporary before get the real data
-  //const listOfMatch = [];
   const achivementList: JSX.Element[] = [];
   for (let i = 0; i < 22; i++) {
     achivementList.push(
@@ -171,15 +190,6 @@ export default function Profil(): JSX.Element {
         handleClick={achivementClick}
       />
     );
-    /*listOfMatch.push(
-      <MatchEntity
-        url1={`/avatar/avatar-${Math.floor(Math.random() * 19) + 1}.png`}
-        url2={`/avatar/avatar-${Math.floor(Math.random() * 19) + 1}.png`}
-        name={"name" + (i + 1).toString()}
-        score={5}
-        key={i}
-      />
-    );*/
   }
 
   return (
@@ -214,16 +224,20 @@ export default function Profil(): JSX.Element {
             className={`col-10 offset-1  col-md-6 offset-lg-0  ${styles.profilMenuContainer}`}
           >
             <div>
-              <h2
-                className={textStyles.pixel}
-                style={{
-                  color: "white",
-                  fontSize: "40px",
-                  marginBottom: "10px",
-                }}
-              >
-                {user.name}
-              </h2>
+              <div className={styles.flex_between}>
+                <h2
+                  className={textStyles.pixel}
+                  style={{
+                    color: "white",
+                    fontSize: "40px",
+                    marginBottom: "10px",
+                  }}
+                >
+                  {user.name}
+                </h2>
+                <p style={{color: "white", marginBottom: '10px', fontSize: '20px'}} className={textStyles.saira + styles.flex_between} >level : <span id="level" className={textStyles.saira} style={{fontSize: '40px', color: 'white'}}></span></p>
+                
+              </div>
               <div className={styles.buttonAndBarContainer}>
                 <div style={{ width: "80%" }}>
                   <div className={styles.flex_between}>

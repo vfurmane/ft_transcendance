@@ -11,6 +11,7 @@ export default function MatchEntity(props: {
   key: number;
 }): JSX.Element {
   if (!props || !props.match) return <></>;
+
   return (
     <div className={styles.shadowContainer}>
       <div
@@ -42,7 +43,7 @@ export default function MatchEntity(props: {
         <div className={`${styles.entityContainer} ${styles.end}`}>
           <div className={styles.entityText}>
             <h3 className={textStyle.laquer}>
-              {props.match.looser ? props.match.looser.name : props.user.name}
+              {props.match.looser !== null ? props.match.looser.name : props.user.name}
             </h3>
             <p className={textStyle.saira} style={{ textAlign: "center" }}>
               {props.match.score_looser}
