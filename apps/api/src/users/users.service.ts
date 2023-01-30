@@ -46,7 +46,7 @@ export class UsersService {
   }
 
   async userExists(user: AddUserData): Promise<boolean> {
-    return await this.usersRepository?.createQueryBuilder().
+    return await this.usersRepository.createQueryBuilder().
       where(
           "LOWER(name) = :name OR LOWER(email) = :email",
           {
