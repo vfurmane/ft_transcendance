@@ -4,7 +4,7 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { Userfront } from 'types';
 import { isUUIDDto } from '../conversations/dtos/IsUUID.dto';
 
-//@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard)
 @Controller('user')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
