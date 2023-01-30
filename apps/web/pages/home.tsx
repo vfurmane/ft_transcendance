@@ -16,6 +16,7 @@ import textStyles from "styles/text.module.scss";
 import styles from "styles/home.module.scss";
 import { FriendshipRequestStatus } from "types";
 import { io } from 'socket.io-client';
+import { useRouter } from "next/router";
 
 //temporary before the login page
 const user_id = "1edffd5a-863d-442c-a962-a5dbd9b2c686";
@@ -26,6 +27,8 @@ function Home(): JSX.Element {
   const friendListRef = useRef([<></>]);
   const setterInit: React.Dispatch<React.SetStateAction<boolean>> = () => false;
 
+  const router = useRouter();
+  
   const [openPlayButton, setOpenPlayButton] = useState(false);
   const [openUserMenu, setOpenUserMenu] = useState(false);
   const [indexOfUser, setIndexOfUser] = useState(0);
@@ -79,6 +82,7 @@ function Home(): JSX.Element {
   /*==========================================================*/
 
   function handleClickPlayButton(): void {
+    
     console.log("CLICKING THE BUTTON")
     const socket = io("/pong", {
       auth: {
@@ -98,7 +102,16 @@ function Home(): JSX.Element {
     });
 
     socket.on("startGame", (config) => {
-      console.log(config)
+      console.log("RECEIVED START GAME")
+ 
+      router.replace({
+        pathname: '/pong', query: {
+          number_player : config.number_player,
+          position : config.position,
+        }}, '/pong');
+      console.log("number of player :" + config.number_player);
+      console.log("position :", config.position);
+      //socket.disconnect();
     })
 
     setOpenPlayButton(!openPlayButton);
@@ -304,7 +317,7 @@ function Home(): JSX.Element {
           <div className="col-8 offset-2">
             <h3 className={`${styles.text} ${textStyles.laquer}`}>
               These guy are the best pong player of the world ... we are so
-              pround of them !!
+              proud of them !!
             </h3>
           </div>
         </div>

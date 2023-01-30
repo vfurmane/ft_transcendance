@@ -15,9 +15,12 @@ import { Interval } from "@nestjs/schedule";
  export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect  {
 	@WebSocketServer() server !: Server;
 	room_id !: string[];
-	games !: Map<string, Game>; 
+
+	games !: Map<string, [Game, Array<string>]>; 
 
 	constructor(private readonly authService : AuthService) {
+		this.room_id = [];
+		this.games = new Map();
 	}
 
 	async handleConnection(client: Socket)
@@ -32,31 +35,42 @@ import { Interval } from "@nestjs/schedule";
 			return ;
 		}
 		client.data = { id: currentUser.sub, name: currentUser.name, room: undefined, position: -1 };
-		// const checkSockets = await this.server.in(`user_${currentUser.sub}`).fetchSockets();
-		// if (checkSockets.length != 0) {
-		// 	client.disconnect();
-		// 	console.log("THERE IS ALREADY A SOCKET OPEN FOR YOU");
-		// 	return ;
-		// }
 		client.join(`user_${currentUser.sub}`);
 		console.log("NEW CONNECTION!");
-		console.log("YOU ARE " + currentUser.name);
+		console.log("YOU ARE " + currentUser.name + " OF ID " + client.data.id);
+		if (this.games) {
+			this.games.forEach((value, key) => {
+				value[1].forEach(id => {
+					if (id === client.data.id) {
+						client.data.room = key;
+						console.log("Reconnected to the game !")
+						return 'Connection restored'
+					}
+				});
+			})
+		}
 		return 'Connection established';
 	}
 
 	async handleDisconnect(client: Socket) {
-		if (client.data.room) {
-			client.leave(client.data.room)
-			console.log(client.data.name + " LEFT WAITING ROOM")
-			const socketWaiting = await this.server.in(client.data.room).fetchSockets();
-			if (socketWaiting.length === 0) {
-				this.room_id.splice(this.room_id.indexOf(client.data.room), 1);
-				console.log("REMOVED THE ROOM")
-				console.log(this.room_id);
-			} else {
-				let i = 0;
-				socketWaiting.forEach((socket) => socket.data.position = i++);
-			}
+		if (!client.data.room) {
+			console.log(client.data.name + " WAS NOT IN A ROOM")
+			return ;
+		}
+		if (!this.room_id.includes(client.data.room)) {
+			console.log(client.data.name + " IS CURRENTLY GAMING")
+			return ;
+		}
+		client.leave(client.data.room)
+		console.log(client.data.name + " LEFT WAITING ROOM")
+		const socketWaiting = await this.server.in(client.data.room).fetchSockets();
+		if (socketWaiting.length === 0) {
+			this.room_id.splice(this.room_id.indexOf(client.data.room), 1);
+			console.log("REMOVED THE ROOM")
+			console.log(this.room_id);
+		} else {
+			let i = 0;
+			socketWaiting.forEach((socket) => socket.data.position = i++);
 		}
 		console.log(client.data.name + " DISCONNECTED")
 	}
@@ -66,17 +80,11 @@ import { Interval } from "@nestjs/schedule";
 		if (!this.games || this.games === undefined) {
 			return ;
 		}
-		if (!this.room_id || this.room_id === undefined) {
-			return ;
-		}
-		for (let room of this.room_id) {
-			let game = this.games.get(room);
-			if (!game) {
-				return ;
-			}
+		this.games.forEach((key, room) => {
+			let game = key[0];
 			game.updateGame();
 			this.server.in(room).emit('refresh', { GameState : game.getState() });
-		}
+		});
 	}
 
 	@SubscribeMessage('move')
@@ -92,7 +100,7 @@ import { Interval } from "@nestjs/schedule";
 		if (client.data.position === -1) {
 			return 'You are not a player !'
 		}
-		const game = this.games.get(room);
+		const game = (this.games.get(room))![0];
 		if (!game) {
 			return 'Fatal error : No game !'
 		}
@@ -113,10 +121,12 @@ import { Interval } from "@nestjs/schedule";
 		}
 		if (client.data.position === 0) {
 			let numberPlayer = (await this.server.in(room).fetchSockets()).length;
+			let list:Array<string> = [];
 			(await this.server.in(room).fetchSockets()).forEach(element => {
+				list.push(element.data.id);
 				this.server.in(`user_${element.data.id}`).emit('startGame', { number_player: numberPlayer, position : element.data.position});
 			});
-			this.games.set(room, new Game(numberPlayer))
+			this.games.set(room, [new Game(numberPlayer), list])
 			return 'Launching the game for room ' + room;
 		}
 		return 'You are not player 1 !'
@@ -132,15 +142,19 @@ import { Interval } from "@nestjs/schedule";
 		if (this.room_id?.length) {
 			for (let id of this.room_id) {
 				let count = (await this.server.in(id).fetchSockets()).length 
-				if (count < 5) {
+				if (count < 6) {
 					client.join(id);
 					client.data.room = id;
 					client.data.position = count;
-					if (count == 4) {
+					console.log(count)
+					if (count === 1) { // CHANGE BACK TO 5 PLEASE
+						let list:Array<string> = [];
 						(await this.server.in(id).fetchSockets()).forEach(element => {
-							this.server.in(`user_${element.data.id}`).emit('startGame', { number_player: 5, position : element.data.position});
+							list.push(element.data.id);
+							this.server.in(`user_${element.data.id}`).emit('startGame', { number_player: count + 1, position : element.data.position});
 						});
-						this.games.set(id, new Game(5))
+						this.games.set(id, [new Game(5), list])
+						this.room_id.splice(this.room_id.indexOf(id), 1);
 						return 'Launched game for room ' + id;
 					}
 					return 'Joined room of id ' + id + ' at position ' + count;

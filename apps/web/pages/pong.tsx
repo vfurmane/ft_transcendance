@@ -1,4 +1,5 @@
 import { GameState, PlayerInterface } from 'types'
+import { io } from 'socket.io-client'
 
 import React, {
   useRef,
@@ -6,6 +7,7 @@ import React, {
   useState,
   ReactComponentElement,
 } from "react";
+import { useRouter } from 'next/router';
 
 enum Axe {
   X = 1,
@@ -49,8 +51,18 @@ class Game {
   public start = Date.now();
   public wall: Wall[] = [];
   public color: string[] = ["blue", "red", "orange", "white", "pink", "black"];
+  public static position : number;
+  public static socket : any;
 
-  constructor() {}
+  constructor(number_player:number, position:number) {
+    Game.socket = io("/pong", {
+      auth: {
+        token: localStorage.getItem('access_token'),
+      }
+    });
+    this.boardType = number_player;
+    Game.position = position;
+  }
 
   createRegularPolygon(point: Point, side: number, n: number) {
     let points: Point[] = [];
@@ -211,11 +223,15 @@ class Game {
     this.boardCanvas!.width = window.innerWidth * 0.9;
     this.boardCanvas!.height = window.innerHeight * 0.9;
 
+    if (!this.boardType) {
+      return ;
+    }
+
     for (let p of this.player) {
       if (p.hp == 0) {
         if (this.boardType == Form.REC) {
-          this.boardType = Form.HEX;
-          this.player = [];
+          this.boardType = 0;
+          return ;  
         } else {
           this.player.splice(p.index, 1);
           for (let i = 0; i < this.player.length; i++) {
@@ -745,7 +761,7 @@ class Racket extends Entity {
   }
 
   update(ball: Ball, walls: Wall[]) {
-    if (this.index == 0) {
+    if (this.index == Game.position) {
       if (Game.keyPressed.up && Game.keyPressed.down) {
       } else if (Game.keyPressed.up) {
         this.speed = new Vector(
@@ -762,34 +778,34 @@ class Racket extends Entity {
         this.moveTo(this.speed);
         //socket.emit('down');
       }
-    } else {
-      if (
-        this.center().vectorTo(ball.point[0]).norm() >
-        new Point(
-          this.center().x + this.dir.x * this.defaultSpeed,
-          this.center().y + this.dir.y * this.defaultSpeed
-        )
-          .vectorTo(ball.point[0])
-          .norm()
-      ) {
-        this.speed = new Vector(
-          this.dir.x * this.defaultSpeed,
-          this.dir.y * this.defaultSpeed
-        );
-        this.moveTo(this.speed);
-      } else {
-        this.speed = new Vector(
-          -this.dir.x * this.defaultSpeed,
-          -this.dir.y * this.defaultSpeed
-        );
-        this.moveTo(this.speed);
-      }
-    }
-    for (let wall of walls) {
-      if (this.sat(wall)) {
-        this.moveTo(new Vector(-this.speed.x, -this.speed.y));
-      }
-    }
+   } //else {
+    //   if (
+    //     this.center().vectorTo(ball.point[0]).norm() >
+    //     new Point(
+    //       this.center().x + this.dir.x * this.defaultSpeed,
+    //       this.center().y + this.dir.y * this.defaultSpeed
+    //     )
+    //       .vectorTo(ball.point[0])
+    //       .norm()
+    //   ) {
+    //     this.speed = new Vector(
+    //       this.dir.x * this.defaultSpeed,
+    //       this.dir.y * this.defaultSpeed
+    //     );
+    //     this.moveTo(this.speed);
+    //   } else {
+    //     this.speed = new Vector(
+    //       -this.dir.x * this.defaultSpeed,
+    //       -this.dir.y * this.defaultSpeed
+    //     );
+    //     this.moveTo(this.speed);
+    //   }
+    // }
+    // for (let wall of walls) {
+    //   if (this.sat(wall)) {
+    //     this.moveTo(new Vector(-this.speed.x, -this.speed.y));
+    //   }
+    // }
   }
 }
 
@@ -798,9 +814,14 @@ function handleResize(game: Game) {
 }
 
 const Canvas = ({ ref }: any) => {
+  let router = useRouter();
   const canvasRef = useRef(ref);
   if (canvasRef) {
-    let game = new Game();
+    console.error(router.query);
+    let game = new Game(Number(router.query.number_player), Number(router.query.position));
+    console.log("?")
+    console.log(router.query.position);
+    console.log(router.query.number_player);
 
     useEffect(() => {
       game.init(canvasRef);
@@ -808,7 +829,7 @@ const Canvas = ({ ref }: any) => {
     }, []);
   }
 
-  return <canvas width="1500" height="1500" ref={canvasRef} />;
+  return <canvas width="1500" height="1500" ref={canvasRef}/>;
 };
 
 // type Props = {
