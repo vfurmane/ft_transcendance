@@ -1,18 +1,7 @@
-import { User } from 'types';
+import { User, Userfront } from 'types';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { Repository } from 'typeorm';
-
-export interface Userfront {
-  id: string;
-  name: string;
-  avatar_num: number;
-  status: string;
-  victory: number;
-  defeat: number;
-  rank: number;
-  level: number;
-}
 
 @Injectable()
 export class TransformUserService {

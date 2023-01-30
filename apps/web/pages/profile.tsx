@@ -12,7 +12,7 @@ import ChangePswrd from "../components/ProfilePage/ChangePswrd";
 import ChatBar from "../components/chatBar";
 import styles from "styles/profil.module.scss";
 import textStyles from "styles/text.module.scss";
-import { initMatch } from "../../interface/Match.interface";
+import { initMatch } from "../interface/Match.interface";
 
 export default function Profil(): JSX.Element {
   const UserState = useSelector(selectUserState);

@@ -1,0 +1,76 @@
+@import "variables";
+
+.PlayButtonContainer {
+  padding-bottom: 200px;
+  display: flex;
+  justify-content: center;
+}
+
+.playButton {
+  background: url("../public/texture.png"),
+    linear-gradient(
+      160deg,
+      rgba(234, 196, 53, 1) 45%,
+      rgb(233, 110, 9) 70%,
+      rgb(218, 74, 8) 100%
+    );
+  background-repeat: repeat, no-repeat;
+  background-size: 50px 50px, 100% 100%;
+  border-radius: 20px;
+  border: solid 1px white;
+  font-family: "Press Start 2P", cursive;
+  font-size: 60px;
+  color: #1e1e1e;
+  transition: transform 0.3s ease;
+  transform: translateX(0px);
+  margin-top: 60px;
+  z-index: 2;
+  position: absolute;
+  width: 300px;
+  height: 100px;
+  text-align: center;
+  box-shadow: 0px 0px 8px 1px rgba(234, 196, 53, 1);
+}
+
+.playButton:hover {
+  transform: translateY(-8px) scale(1.08, 1);
+}
+
+.playButtonShadow {
+  border: 0px;
+  width: 300px;
+  height: 80px;
+  border-radius: 20px;
+  position: absolute;
+  background-color: rgba(255, 255, 255, 0);
+  margin-top: 60px;
+  z-index: -1;
+}
+
+.playMenuContainer {
+  background: url("../public/texture.png"), rgba(255, 255, 255, 0.1);
+  background-size: 50px 50px;
+  color: white;
+  text-align: start;
+  border-radius: 8px;
+  font-family: "Saira", sans-serif;
+  width: 100%;
+}
+
+.playMenuContainer.marge_top {
+  margin-top: 50px;
+}
+
+.playMenuEntity {
+  width: 100%;
+  padding: 10px;
+}
+
+.playMenuEntity:hover {
+  background: url("../public/texture.png"), rgba(255, 255, 255, 0.1);
+  background-size: 50px 50px;
+}
+
+.playMenuEntity.bar {
+  border-bottom: 1px solid white;
+}

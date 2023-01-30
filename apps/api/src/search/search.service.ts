@@ -1,11 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User as UserEntity } from 'types';
-import {
-  TransformUserService,
-  Userfront,
-} from 'src/TransformUser/TransformUser.service';
+import { User as UserEntity, Userfront } from 'types';
+import { TransformUserService } from 'src/TransformUser/TransformUser.service';
 
 @Injectable()
 export class SearchService {

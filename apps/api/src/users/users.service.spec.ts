@@ -23,6 +23,8 @@ const userEntity: UserEntity = {
   states: [],
   tfa_secret: null,
   tfa_setup: false,
+  messages: [],
+  conversationRoles: [],
 };
 
 describe('UsersService', () => {

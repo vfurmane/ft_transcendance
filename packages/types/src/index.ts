@@ -48,8 +48,19 @@ export interface ConversationWithUnread {
   lastMessage: Date;
 }
 
+export interface Userfront {
+  id: string;
+  name: string;
+  avatar_num: number;
+  status: string;
+  victory: number;
+  defeat: number;
+  rank: number;
+  level: number;
+}
+
 export interface FriendshipRequestStatus {
-  friend : User | null,
+  friend : Userfront | null,
   accept: boolean,
   ask: boolean
 }

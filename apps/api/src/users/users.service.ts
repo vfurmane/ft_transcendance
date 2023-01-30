@@ -1,13 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { Repository, UpdateResult } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User } from 'types';
+import { User, Userfront } from 'types';
 import * as speakeasy from 'speakeasy';
 import { SpeakeasyGeneratedSecretDto } from 'src/auth/speakeasy-generated-secret.dto';
-import {
-  TransformUserService,
-  Userfront,
-} from 'src/TransformUser/TransformUser.service';
+import { TransformUserService } from '../TransformUser/TransformUser.service';
 
 export interface AddUserData {
   name: string;
@@ -39,6 +36,15 @@ export class UsersService {
     return this.usersRepository.findOneBy({
       email,
     });
+  }
+
+  async userExists(user: AddUserData): Promise<boolean> {
+    return (
+      (await this.usersRepository.findOneBy([
+        { name: user.name },
+        { email: user.email },
+      ])) !== null
+    );
   }
 
   async addUser(user: AddUserData): Promise<User> {

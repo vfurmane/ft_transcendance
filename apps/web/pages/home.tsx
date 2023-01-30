@@ -7,12 +7,12 @@ import ArrayDoubleColumn from "../components/HomePage/ArrayDoubleColumn";
 import PlayMenu from "../components/HomePage/PlayMenu";
 import { setUserState } from "../store/UserSlice";
 import { useDispatch } from "react-redux";
+import { Userfront as User } from "types";
 import Link from "next/link";
 import ChatBar from "../components/chatBar";
 import playButtonStyles from "styles/playButton.module.scss";
 import textStyles from "styles/text.module.scss";
 import styles from "styles/home.module.scss";
-import { Userfront as User } from "types";
 import { initUser } from "../interface/UserInterface";
 
 //temporary before the login page

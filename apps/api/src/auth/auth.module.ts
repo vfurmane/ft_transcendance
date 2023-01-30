@@ -10,7 +10,7 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { FtOauth2Strategy } from './ft-oauth2.strategy';
 import { JwtStrategy } from './jwt.strategy';
-import { State } from './state.entity';
+import { State } from 'types';
 import ftOauth2Configuration from '../config/ft-oauth2';
 import { LocalStrategy } from './local.strategy';
 import { TransformUserService } from 'src/TransformUser/TransformUser.service';

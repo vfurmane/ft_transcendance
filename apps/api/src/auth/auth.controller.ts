@@ -36,16 +36,16 @@ import { FtOauth2AuthGuard } from './ft-oauth2-auth.guard';
 import { FtOauth2Dto } from './ft-oauth2.dto';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { SpeakeasyGeneratedSecretDto } from './speakeasy-generated-secret.dto';
-import { User as UserEntity } from '../users/user.entity';
+import { User as UserEntity } from 'types';
 import { User } from '../common/decorators/user.decorator';
 import { StateGetGuard } from './state-get.guard';
 import { StatePostGuard } from './state-post.guard';
 import { State } from '../common/decorators/state.decorator';
-import { State as StateEntity } from './state.entity';
+import { State as StateEntity } from 'types';
 import { LocalAuthGuard } from './local-auth.guard';
 import { RegisterUserDto } from '../users/register-user.dto';
 
-@ApiTags('auth')
+@ApiTags()
 @Controller('auth')
 export class AuthController {
   constructor(
@@ -55,7 +55,7 @@ export class AuthController {
   ) {}
 
   @Get('/login/oauth2/42')
-  @UseGuards(StateGetGuard, FtOauth2AuthGuard)
+  @UseGuards(FtOauth2AuthGuard, StateGetGuard)
   @ApiOperation({
     summary:
       'Authenticate the user against the 42 Authorization Server (managed by Passport).',
@@ -72,13 +72,14 @@ export class AuthController {
   })
   ftCallback(
     @User() user: UserEntity,
+    @State() state: StateEntity,
   ): AccessTokenResponse | TfaNeededResponse {
     if (user.tfa_setup) {
       this.logger.log(`${user.name} logged in using OAuth2, but TFA is needed`);
       return { message: 'Authentication factor needed', route: 'tfa' };
     }
     this.logger.log(`${user.name} logged in using OAuth2`);
-    return this.authService.login(user);
+    return this.authService.login(user, state);
   }
 
   @UseInterceptors(ClassSerializerInterceptor)
@@ -94,6 +95,7 @@ export class AuthController {
   @Post('login')
   async login(
     @User() user: UserEntity,
+    @State() state: StateEntity,
   ): Promise<AccessTokenResponse | TfaNeededResponse> {
     if (user.tfa_setup) {
       this.logger.log(
@@ -102,7 +104,7 @@ export class AuthController {
       return { message: 'Authentication factor needed', route: 'tfa' };
     }
     this.logger.log(`${user.name} logged in using username:password`);
-    return this.authService.login(user);
+    return this.authService.login(user, state);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -197,6 +199,6 @@ export class AuthController {
     await this.authService.checkTfa(state.user, body.token);
     await this.authService.removeState(state);
     this.logger.log(`${state.user.name} validated TFA`);
-    return this.authService.login(state.user);
+    return this.authService.login(state.user, state);
   }
 }

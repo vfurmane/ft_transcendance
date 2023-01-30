@@ -6,10 +6,10 @@ import { AccessTokenResponse, FtUser, JwtPayload } from 'types';
 import * as speakeasy from 'speakeasy';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { User } from '../users/user.entity';
+import { User } from 'types';
 import { UsersService } from '../users/users.service';
 import { InjectRepository } from '@nestjs/typeorm';
-import { State } from './state.entity';
+import { State } from 'types';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { RegisterUserDto } from 'src/users/register-user.dto';
@@ -63,9 +63,11 @@ export class AuthService {
   }
 
   async createUser(user: RegisterUserDto): Promise<User> {
+    if (await this.usersService.userExists({ ...user, name: user.username }))
+      throw new BadRequestException('`username` or `email` is already in use');
     const salt = await bcrypt.genSalt();
     user.password = await bcrypt.hash(user.password, salt);
-    return this.usersService.addUser(user);
+    return this.usersService.addUser({ ...user, name: user.username });
   }
 
   async validateUser(username: string, pass: string): Promise<User | null> {
@@ -80,11 +82,14 @@ export class AuthService {
     return null;
   }
 
-  login(user: User): AccessTokenResponse {
+  login(user: User, state?: State): AccessTokenResponse {
     const payload: JwtPayload = {
       sub: user.id,
       name: user.name,
     };
+    if (state) {
+      this.statesRepository.delete({ token: state.token });
+    }
     return {
       access_token: this.jwtService.sign(payload),
     };
@@ -100,12 +105,12 @@ export class AuthService {
     if (state === null) {
       state = new State();
       state.token = stateToken;
-      if (user)
-        state.user = await this.usersRepository.findOneBy({
-          id: user.id,
-        });
-      await this.statesRepository.save(state);
     }
+    if (user && (!state.user || user.id !== state.user.id))
+      state.user = await this.usersRepository.findOneBy({
+        id: user.id,
+      });
+    await this.statesRepository.save(state);
     return state;
   }
 

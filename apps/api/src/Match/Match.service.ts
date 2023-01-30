@@ -1,4 +1,3 @@
-
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { TransformUserService } from 'src/TransformUser/TransformUser.service';
@@ -15,15 +14,15 @@ export interface MatchFront {
 }
 
 @Injectable()
-export class MatchService{
-    constructor(
-        @InjectRepository(Match)
-        private readonly matchRepository : Repository<Match>,
-        @InjectRepository(User)
-        private readonly userRepository : Repository<User>,
-        private readonly userService : UsersService,
-        private readonly transformUserService : TransformUserService,
-    ){}
+export class MatchService {
+  constructor(
+    @InjectRepository(Match)
+    private readonly matchRepository: Repository<Match>,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
+    private readonly userService: UsersService,
+    private readonly transformUserService: TransformUserService,
+  ) {}
 
   #getXp(
     winner: User,
@@ -105,7 +104,7 @@ export class MatchService{
         looser: null,
       });
     }
+
     return [...winArray, ...looseArray];
   }
 }
-

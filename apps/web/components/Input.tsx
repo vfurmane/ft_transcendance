@@ -3,6 +3,7 @@ import { FieldError } from "react-hook-form";
 import styles from "styles/Input.module.scss";
 
 export interface InputProps {
+  autofocus?: boolean;
   disabled?: boolean;
   fullWidth?: boolean;
   name?: string;
@@ -22,6 +23,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
       <div className={styles.container}>
         <input
           autoComplete="off"
+          autoFocus={props.autofocus}
           className={`${styles.input} ${
             props.fullWidth ? styles.fullWidth : ""
           } ${props.primary ? styles.primary : ""} ${

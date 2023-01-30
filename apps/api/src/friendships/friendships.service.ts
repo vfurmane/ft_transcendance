@@ -1,11 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import {
-  TransformUserService,
-  Userfront,
-} from 'src/TransformUser/TransformUser.service';
+import { TransformUserService } from '../TransformUser/TransformUser.service';
 import { Repository } from 'typeorm';
-import { FriendshipRequestStatus, Friendships as friendshipsEntity } from 'types';
+import { FriendshipRequestStatus, Friendships as friendshipsEntity, Userfront } from 'types';
 import { User } from 'types';
 
 @Injectable()
@@ -57,15 +54,9 @@ export class FriendshipsService {
 
   async getFriendsList(
     currentUser: User,
-  ): Promise<{ friend: Userfront | null; accept: boolean; ask: boolean }[]> {
-    let friendsList: (User | null)[] = [];
-    const ids: string[] = [];
-    const response: {
-      friend: Userfront | null;
-      accept: boolean;
-      ask: boolean;
-    }[] = [];
-    
+  ): Promise<FriendshipRequestStatus[]> {
+    const response: FriendshipRequestStatus[] = [];
+
     const initiatorArray = await this.friendshipsRepository.find({
       where: [
         {
@@ -134,7 +125,6 @@ export class FriendshipsService {
       this.friendshipsRepository.save(friendContract);
       return true;
     }
-
     return false;
   }
 }
