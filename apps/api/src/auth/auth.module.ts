@@ -13,12 +13,9 @@ import { JwtStrategy } from './jwt.strategy';
 import { State } from 'types';
 import ftOauth2Configuration from '../config/ft-oauth2';
 import { LocalStrategy } from './local.strategy';
-<<<<<<< HEAD
 import { TransformUserService } from 'src/TransformUser/TransformUser.service';
-=======
 import { Jwt } from 'types';
 import { JwtRefreshStrategy } from './jwt-refresh.strategy';
->>>>>>> origin
 
 @Module({
   imports: [

@@ -52,7 +52,7 @@ export class MatchService {
     );
   }
 
-  async getMatch(currentUser : User): Promise<MatchFront[]> {
+  async getMatch(currentUser: User): Promise<MatchFront[]> {
     const user = await this.userRepository.findOne({
       relations: {
         win: { looser_id: true },

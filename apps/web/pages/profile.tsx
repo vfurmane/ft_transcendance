@@ -75,9 +75,7 @@ export default function Profil(): JSX.Element {
       if (JSON.parse(router.query.user).id === UserState.id)
         setUserProfil(true);
       else setUserProfil(false);
-      fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/match`
-      )
+      fetch(`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/match`)
         .then((res) => res.json())
         .then((data) => {
           setMatchHistory(data);

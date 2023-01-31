@@ -38,9 +38,13 @@ export class TransformUserService {
   }
 
   async #getRank(user_id: string): Promise<number> {
-    const user = await this.userRepository.findOneBy({id : user_id});
+    const user = await this.userRepository.findOneBy({ id: user_id });
     if (!user) throw new BadRequestException('users not found');
-    return await this.userRepository.count({ where: { level: MoreThan(user.level) } }) + 1;
+    return (
+      (await this.userRepository.count({
+        where: { level: MoreThan(user.level) },
+      })) + 1
+    );
   }
 
   async transform(userBack: User | null): Promise<Userfront> {

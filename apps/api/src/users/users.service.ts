@@ -1,4 +1,9 @@
-import { forwardRef, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  forwardRef,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { In, Repository, UpdateResult } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User, Userfront } from 'types';
@@ -48,14 +53,15 @@ export class UsersService {
   }
 
   async userExists(user: AddUserData): Promise<boolean> {
-    return await this.usersRepository.createQueryBuilder().
-      where(
-          "LOWER(name) = :name OR LOWER(email) = :email",
-          {
-            name: user.name.toLowerCase(),
-            email: user.email.toLowerCase()
-          }
-      ).getOne() !== null
+    return (
+      (await this.usersRepository
+        .createQueryBuilder()
+        .where('LOWER(name) = :name OR LOWER(email) = :email', {
+          name: user.name.toLowerCase(),
+          email: user.email.toLowerCase(),
+        })
+        .getOne()) !== null
+    );
   }
 
   async addUser(user: AddUserData): Promise<User> {
@@ -87,20 +93,17 @@ export class UsersService {
     return this.usersRepository.update({ id: userId }, { tfa_setup: false });
   }
 
-  async getUser(user_id: string): Promise<Userfront | null> {
-    const user = await this.getById(user_id);
-    return await this.transformUserService.transform(user);
+  async getUser(currentUser: User): Promise<Userfront | null> {
+    return await this.transformUserService.transform(currentUser);
   }
 
   async updateLevel(user_id: string, xp: number): Promise<number> {
     const user = await this.usersRepository.findOneBy({ id: user_id });
     const level = user?.level;
-    if (!user)
-      throw new NotFoundException('Unknown user');
-    user.level = (user.level ? user.level : 0) + xp
-    this.usersRepository.save(user)
+    if (!user) throw new NotFoundException('Unknown user');
+    user.level = (user.level ? user.level : 0) + xp;
+    this.usersRepository.save(user);
     return (level ? level : 0) + xp;
-
   }
 
   async updateUserPassword(

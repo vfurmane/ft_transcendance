@@ -3,10 +3,8 @@ import { MatchService } from './Match.service';
 import { MatchFront } from 'types';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { User as CurrentUser } from '../common/decorators/user.decorator';
-import { isUUIDDto } from '../conversations/dtos/IsUUID.dto';
 import { User } from 'types';
 import { matchAddDto } from './dtos/match.add.dto';
-
 
 @UseGuards(JwtAuthGuard)
 @Controller('match')
@@ -16,7 +14,7 @@ export class MatchController {
   @Post()
   addMatch(
     @Body()
-    body: matchAddDto
+    body: matchAddDto,
   ): Promise<void> {
     return this.matchService.addMatch(
       body.winner_id,
@@ -27,7 +25,7 @@ export class MatchController {
   }
 
   @Get()
-  getMatch (@CurrentUser() currentUser: User): Promise<MatchFront[]> {
+  getMatch(@CurrentUser() currentUser: User): Promise<MatchFront[]> {
     return this.matchService.getMatch(currentUser);
   }
 }

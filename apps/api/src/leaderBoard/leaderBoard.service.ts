@@ -13,7 +13,7 @@ export class LeaderBoardService {
   ) {}
 
   async getLeaderBoard(): Promise<Userfront[]> {
-    const users = await this.userRepository.find({ order: { level: "DESC" }, });
+    const users = await this.userRepository.find({ order: { level: 'DESC' } });
     if (!users) throw new BadRequestException('users not found');
     const res: Userfront[] = [];
     for (let i = 0; i < users.length; i++)

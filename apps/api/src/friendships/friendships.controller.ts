@@ -13,7 +13,6 @@ import { FriendshipRequestStatus, User } from 'types';
 import { User as CurrentUser } from '../common/decorators/user.decorator';
 import { isUUIDDto } from '../conversations/dtos/IsUUID.dto';
 
-
 @UseGuards(JwtAuthGuard)
 @Controller('friendships')
 export class FriendshipsController {

@@ -58,9 +58,9 @@ function TopBar(props: propsTopBar): JSX.Element {
     if (value.length) {
       fetch(`/api/search?letters=${value}`)
         .then(function (response) {
-          response.json().then(function (json) {
+          response.json().then(function (data) {
             const userListTmp: JSX.Element[] = [];
-            json.map((e: User, i: number) => {
+            data.map((e: User, i: number) => {
               const user = e;
               const userEntity = (
                 <UserEntity

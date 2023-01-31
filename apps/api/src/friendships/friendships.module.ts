@@ -7,7 +7,11 @@ import { UsersModule } from '../users/users.module';
 import { TransformUserModule } from 'src/TransformUser/TransformUser.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([FriendshipsEntity]), UsersModule, TransformUserModule],
+  imports: [
+    TypeOrmModule.forFeature([FriendshipsEntity]),
+    UsersModule,
+    TransformUserModule,
+  ],
   controllers: [FriendshipsController],
   providers: [FriendshipsService],
   exports: [FriendshipsService],

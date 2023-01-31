@@ -14,9 +14,6 @@ import playButtonStyles from "styles/playButton.module.scss";
 import textStyles from "styles/text.module.scss";
 import styles from "styles/home.module.scss";
 
-//temporary before the login page
-const user_id = "efe50ae9-9311-413d-8227-87ef928eb044";
-
 function Home(): JSX.Element {
   const friendListRef = useRef([<></>]);
   const setterInit: React.Dispatch<React.SetStateAction<boolean>> = () => false;
@@ -31,7 +28,7 @@ function Home(): JSX.Element {
 
   const dispatch = useDispatch();
   useEffect(() => {
-    fetch(`/api/user/${user_id}`)
+    fetch(`/api/user`)
       .then(function (response) {
         return response.json();
       })
@@ -77,7 +74,7 @@ function Home(): JSX.Element {
         prevSetterUsermenuRef.current !== setterInit &&
         prevSetterUsermenuRef.current !== e.setOpenMenu
       )
-      prevSetterUsermenuRef.current(false);
+        prevSetterUsermenuRef.current(false);
       prevSetterUsermenuRef.current = e.setOpenMenu;
       setIndexOfUser(e.index);
       prevIndexOfUserRef.current = e.index;
@@ -101,12 +98,9 @@ function Home(): JSX.Element {
   }
 
   function delFriendClick(e: { idToDelete: string; index: number }): void {
-    fetch(
-      `/api/friendships/${e.idToDelete}`,
-      {
-        method: "DELETE",
-      }
-    ).catch(function (error) {
+    fetch(`/api/friendships/${e.idToDelete}`, {
+      method: "DELETE",
+    }).catch(function (error) {
       console.log(
         "Il y a eu un problème avec l'opération fetch : " + error.message
       );

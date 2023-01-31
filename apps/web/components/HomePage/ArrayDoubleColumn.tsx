@@ -21,7 +21,7 @@ export default function ArrayDoubleColumn(props: {
 
   useEffect(() => {
     const tmp: JSX.Element[] = [];
-    fetch(`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/leaderBoard`)
+    fetch(`/api/leaderBoard`)
       .then((res) => res.json())
       .then((data) => {
         data.map((e: User, i: number) =>
