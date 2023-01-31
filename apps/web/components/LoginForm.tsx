@@ -12,7 +12,7 @@ interface LoginFormData {
 
 async function login(data: LoginFormData): Promise<string | null> {
   const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/login`,
+    `/api/auth/login`,
     {
       method: "POST",
       headers: {

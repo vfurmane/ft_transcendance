@@ -48,6 +48,7 @@ export class ConversationsGateway implements OnGatewayConnection {
   ) {}
 
   async handleConnection(client: Socket): Promise<string | void> {
+    console.error("Someone is trying to connect")
     if (!client.handshake.headers?.authorization) {
       client.disconnect();
       return;
