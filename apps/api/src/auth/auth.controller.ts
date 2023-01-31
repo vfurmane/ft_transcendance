@@ -47,6 +47,7 @@ import { RegisterUserDto } from '../users/register-user.dto';
 import { JwtRefreshAuthGuard } from './jwt-refresh-auth.guard';
 
 @ApiTags()
+@UseInterceptors(ClassSerializerInterceptor)
 @Controller('auth')
 export class AuthController {
   constructor(
@@ -83,7 +84,6 @@ export class AuthController {
     return this.authService.login(user, state);
   }
 
-  @UseInterceptors(ClassSerializerInterceptor)
   @Post('register')
   async register(
     @Body() registerUserDto: RegisterUserDto,

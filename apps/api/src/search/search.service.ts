@@ -11,14 +11,22 @@ export class SearchService {
   ) {}
 
   async findAll(letters: string): Promise<UserEntity[]> {
-    const queryBuilder = this.usersRepository?.createQueryBuilder().select('*');
-
-    queryBuilder.where(
-      `LOWER(SUBSTRING(name, 1, ${letters.length})) IN (:letters)`,
+    return (await this.usersRepository?.createQueryBuilder().
+    where(
+      "LOWER(name) LIKE :letters",
       {
-        letters,
+        letters: `%${ letters }%`
       },
-    );
-    return await queryBuilder.getRawMany();
+    ).orderBy("name", "ASC").getMany()).sort((user1, user2) => {
+      const user1sub = user1.name.toLowerCase().slice(0, letters.length)
+      const user2sub = user2.name.toLowerCase().slice(0, letters.length)
+      if (user1sub === letters && user2sub !== letters)
+        return (-1);
+      if (user1sub !== letters && user2sub === letters)
+        return (1);
+      if (user1.name.toLowerCase() < user2.name.toLowerCase())
+        return (-1);
+      return (1);
+    });
   }
 }

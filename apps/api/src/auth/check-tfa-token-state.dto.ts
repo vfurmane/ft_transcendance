@@ -1,5 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Transform, Type } from 'class-transformer';
 import { IsNotEmpty, IsString } from 'class-validator';
+import sanitize from 'sanitize-html';
 
 export class CheckTfaTokenStateDto {
   @ApiProperty({
@@ -8,6 +10,7 @@ export class CheckTfaTokenStateDto {
   })
   @IsNotEmpty()
   @IsString()
+  @Transform(({ value }) => sanitize(value))
   state!: string;
 
   @ApiProperty({
@@ -16,5 +19,6 @@ export class CheckTfaTokenStateDto {
   })
   @IsNotEmpty()
   @IsString()
+  @Transform(({ value }) => sanitize(value))
   token!: string;
 }

@@ -10,12 +10,12 @@ import { of, throwError } from 'rxjs';
 import { AxiosResponse } from 'axios';
 import { ConfigModule } from '@nestjs/config';
 import ftOauth2Configuration from '../config/ft-oauth2';
-import { User } from '../users/user.entity';
+import { User } from 'types';
 import { UsersService } from '../users/users.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { State } from './state.entity';
-import { User as UserEntity } from '../users/user.entity';
-import { Jwt } from './jwt.entity';
+import { State } from 'types';
+import { User as UserEntity } from 'types';
+import { Jwt } from 'types';
 import { Repository } from 'typeorm';
 
 const JWT_SECRET = faker.random.alphaNumeric(20);
