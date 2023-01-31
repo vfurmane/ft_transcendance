@@ -1,3 +1,4 @@
+import { Transform } from 'class-transformer';
 import {
   ArrayNotEmpty,
   IsArray,
@@ -7,10 +8,12 @@ import {
   IsString,
   IsUUID,
 } from 'class-validator';
+import sanitize from 'sanitize-html';
 
 export class createConversationDto {
   @IsOptional()
   @IsString()
+  @Transform(({ value }) => sanitize(value))
   name!: string;
 
   @IsNotEmpty()

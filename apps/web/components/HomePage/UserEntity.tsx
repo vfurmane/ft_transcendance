@@ -29,12 +29,27 @@ export default function UserEntity(props: {
   if (typeof props.user === "undefined" || !props.option) return <></>;
 
   function valideClick(): void {
+<<<<<<< HEAD
     fetch(
       `${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/friendships/validate/${props.user.id}`,
       {
         method: "PATCH",
       }
     )
+=======
+    const data = {
+      initiator_id: props.user.id,
+      target_id: UserState.id,
+    };
+
+    fetch(`/api/friendships/validate`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    })
+>>>>>>> origin
       .then(function (response) {
         response.json().then((res) => {
           if (res === 1) {

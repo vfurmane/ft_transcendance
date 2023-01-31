@@ -13,7 +13,12 @@ import { JwtStrategy } from './jwt.strategy';
 import { State } from 'types';
 import ftOauth2Configuration from '../config/ft-oauth2';
 import { LocalStrategy } from './local.strategy';
+<<<<<<< HEAD
 import { TransformUserService } from 'src/TransformUser/TransformUser.service';
+=======
+import { Jwt } from 'types';
+import { JwtRefreshStrategy } from './jwt-refresh.strategy';
+>>>>>>> origin
 
 @Module({
   imports: [
@@ -32,12 +37,14 @@ import { TransformUserService } from 'src/TransformUser/TransformUser.service';
       }),
     }),
     PassportModule,
-    TypeOrmModule.forFeature([State]),
+    TypeOrmModule.forFeature([State, Jwt]),
+    forwardRef(() => UsersModule),
   ],
   providers: [
     AuthService,
     FtOauth2Strategy,
     JwtStrategy,
+    JwtRefreshStrategy,
     LocalStrategy,
     Logger,
     UsersService,

@@ -142,12 +142,17 @@ export default function Profil(): JSX.Element {
   }
 
   function addFriend(): void {
-    fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/friendships/${user.id}`,
-      {
-        method: "PUT",
-      }
-    )
+    const data = {
+      id: user.id,
+    };
+
+    fetch(`/api/friendships`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    })
       .then(function (response) {
         response.json().then((res) => {
           if (res === 1) console.log("friend add");

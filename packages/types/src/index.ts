@@ -8,6 +8,7 @@ export interface FtUser {
 
 export interface AccessTokenResponse {
   access_token: string;
+  refresh_token: string;
 }
 
 export interface TfaNeededResponse {
@@ -18,11 +19,7 @@ export interface TfaNeededResponse {
 export interface JwtPayload {
   sub: string;
   name: string;
-}
-
-export interface JwtPayload {
-  sub: string;
-  name: string;
+  jti: string;
 }
 
 export interface unreadMessagesResponse

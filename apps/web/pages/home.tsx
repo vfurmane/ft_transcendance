@@ -31,7 +31,7 @@ function Home(): JSX.Element {
 
   const dispatch = useDispatch();
   useEffect(() => {
-    fetch(`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/user/${user_id}`)
+    fetch(`/api/user/${user_id}`)
       .then(function (response) {
         return response.json();
       })
@@ -102,7 +102,7 @@ function Home(): JSX.Element {
 
   function delFriendClick(e: { idToDelete: string; index: number }): void {
     fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/friendships/${e.idToDelete}`,
+      `/api/friendships/${e.idToDelete}`,
       {
         method: "DELETE",
       }
@@ -120,7 +120,7 @@ function Home(): JSX.Element {
 
   //get the friend list of the user
   useEffect(() => {
-    fetch(`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/friendships`)
+    fetch(`/api/friendships`)
       .then(function (response) {
         if (response.ok) {
           return response.json().then(function (json) {

@@ -7,7 +7,6 @@ export default function List(props: {
   list: JSX.Element[];
 }): JSX.Element {
   if (!props.list) return <></>;
-
   return (
     <div>
       {typeof props.title === "string" && props.title.length ? (

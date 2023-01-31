@@ -5,7 +5,6 @@ import { Repository } from 'typeorm';
 import {
   FriendshipRequestStatus,
   Friendships as friendshipsEntity,
-  Userfront,
 } from 'types';
 import { User } from 'types';
 
