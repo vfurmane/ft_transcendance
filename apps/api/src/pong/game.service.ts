@@ -39,6 +39,7 @@ export class Game {
 
   constructor(playerNumber:number) {
     this.boardType = playerNumber;
+    this.init();
   }
 
   getState () {
@@ -196,10 +197,12 @@ export class Game {
 
   updateGame() {
     for (let p of this.player) {
+      if (!this.boardType) {
+        return;
+      }
       if (p.hp == 0) {
         if (this.boardType == Form.REC) {
-          this.boardType = Form.HEX;
-          this.player = [];
+          this.boardType = 0;
         } else {
           this.player.splice(p.index, 1);
           for (let i = 0; i < this.player.length; i++) {
@@ -209,7 +212,7 @@ export class Game {
           }
           this.boardType--;
         }
-		this.init();
+		    this.init();
       }
     }
     this.countUpdate++;

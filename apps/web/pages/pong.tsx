@@ -1,4 +1,4 @@
-import { GameState, PlayerInterface } from 'types'
+import { GameState, PlayerInterface, State } from 'types'
 import { io } from 'socket.io-client'
 
 import React, {
@@ -8,6 +8,9 @@ import React, {
   ReactComponentElement,
 } from "react";
 import { useRouter } from 'next/router';
+import { config } from 'process';
+import { STATUS_CODES } from 'http';
+import { stat } from 'fs';
 
 enum Axe {
   X = 1,
@@ -27,12 +30,6 @@ enum Form {
   HEX = 6,
 }
 
-/*
-socket.on('refresh', GameState) {
-  
-}
-*/
-
 class Game {
   public isSolo: boolean = false;
   public boardType = Form.REC;
@@ -49,17 +46,26 @@ class Game {
   public cible!: Target;
   public static keyPressed = { up: false, down: false };
   public start = Date.now();
-  public wall: Wall[] = [];
   public color: string[] = ["blue", "red", "orange", "white", "pink", "black"];
   public static position : number;
   public static socket : any;
 
   constructor(number_player:number, position:number) {
-    Game.socket = io("/pong", {
-      auth: {
-        token: localStorage.getItem('access_token'),
-      }
-    });
+    if (typeof window !== 'undefined') {
+      Game.socket = io("/pong", {
+        auth: {
+          token: localStorage.getItem('access_token'),
+        }
+      });
+      Game.socket.on('refresh', (state:GameState) => {
+        console.log("I GOT REFRESH MESSAGE")
+        if (!this.board) {
+          return ;
+        }
+        console.log(this.board.wall)
+        this.refresh(state);
+      });
+    }
     this.boardType = number_player;
     Game.position = position;
   }
@@ -81,23 +87,27 @@ class Game {
     return points;
   }
 
-  refresh(state: GameState) {
-    this.player = this.updatePlayer(state.players, this.wall);
-    this.ball = new Ball (this.createRegularPolygon(new Point(state.ball.point.x, state.ball.point.y), 30, this.boardType), this.player);
+  refresh(state: any) {
+    console.log("i actually refreshed something")
+    if (this.boardType == Form.REC) {
+      this.player = this.updatePlayer(state.players, [
+        this.board.wall[0],
+        this.board.wall[2]
+      ]);
+    } else {
+      this.player = this.updatePlayer(state.players, this.board.wall);
+    }
+    console.log(this.player)
+    if (this.boardType == Form.REC) {
+      this.ball = new Ball (this.createRegularPolygon(new Point(state.ball.point.x, state.ball.point.y), 10, 4), this.player);
+    } else {
+      this.ball = new Ball (this.createRegularPolygon(new Point(state.ball.point.x, state.ball.point.y), 30, this.boardType), this.player);
+    }
     this.ball.speed = new Vector(state.ball.dir.x, state.ball.dir.y);
   }
 
-/*
-  refresh(player: Racket[], ball: Point, ballVector: Vector) {
-    this.player = this.updatePlayer(player, this.wall);
-    this.ball = new Ball(
-      this.createRegularPolygon(ball, 30, this.boardType),
-      this.player
-    );
-    this.ball.speed = ballVector;
-  }*/
-
   updatePlayer(player: PlayerInterface[], wall: Wall[]) {
+    console.log("number of wall : " + wall.length)
     let racket: Racket[] = [];
     for (let i = 0; i < wall.length; i++) {
       let wallDir = wall[i].point[0].vectorTo(wall[i].point[2]).normalized();
@@ -172,8 +182,8 @@ class Game {
     this.boardCanvas = this.boardCanvasRef.current;
     if (!this.boardCanvas) return;
     this.boardContext = this.boardCanvas.getContext("2d");
-    this.boardCanvas.width = window.innerWidth * 0.9;
-    this.boardCanvas.height = window.innerHeight * 0.9;
+    this.boardCanvas.width = 1920//window.innerWidth * 0.9;
+    this.boardCanvas.height = 1080//window.innerHeight * 0.9;
     this.board = new Board(this.boardType, this.boardCanvas);
     if (this.boardType != Form.REC) {
       this.player = this.createRacket(this.isSolo, this.board.wall);
@@ -220,8 +230,8 @@ class Game {
   }
 
   updateGame() {
-    this.boardCanvas!.width = window.innerWidth * 0.9;
-    this.boardCanvas!.height = window.innerHeight * 0.9;
+    this.boardCanvas!.width = 1920//window.innerWidth * 0.9;
+    this.boardCanvas!.height = 1080//window.innerHeight * 0.9;
 
     if (!this.boardType) {
       return ;

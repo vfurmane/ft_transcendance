@@ -43,6 +43,7 @@ import { Interval } from "@nestjs/schedule";
 				value[1].forEach(id => {
 					if (id === client.data.id) {
 						client.data.room = key;
+						client.join(key);
 						console.log("Reconnected to the game !")
 						return 'Connection restored'
 					}
@@ -75,15 +76,20 @@ import { Interval } from "@nestjs/schedule";
 		console.log(client.data.name + " DISCONNECTED")
 	}
 
-	@Interval(100)
+	@Interval(10)
 	refresh() {
 		if (!this.games || this.games === undefined) {
 			return ;
 		}
-		this.games.forEach((key, room) => {
+		this.games.forEach(async (key, room) => {
 			let game = key[0];
 			game.updateGame();
-			this.server.in(room).emit('refresh', { GameState : game.getState() });
+			let state = game.getState();
+			console.log(game.player)
+			console.log("SENDING REFRESH TO : ")
+			const sockets = await this.server.in(room).fetchSockets();
+			sockets.forEach((socket) => console.log(socket.data.name));
+			this.server.in(room).emit('refresh', state);
 		});
 	}
 
@@ -153,7 +159,7 @@ import { Interval } from "@nestjs/schedule";
 							list.push(element.data.id);
 							this.server.in(`user_${element.data.id}`).emit('startGame', { number_player: count + 1, position : element.data.position});
 						});
-						this.games.set(id, [new Game(5), list])
+						this.games.set(id, [new Game(2), list])
 						this.room_id.splice(this.room_id.indexOf(id), 1);
 						return 'Launched game for room ' + id;
 					}

@@ -111,7 +111,7 @@ function Home(): JSX.Element {
         }}, '/pong');
       console.log("number of player :" + config.number_player);
       console.log("position :", config.position);
-      //socket.disconnect();
+      socket.disconnect();
     })
 
     setOpenPlayButton(!openPlayButton);

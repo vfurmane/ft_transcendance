@@ -9,6 +9,7 @@ import { SearchModule } from './search/search.module';
 import { FriendshipsModule } from './friendships/friendships.module';
 import { ConversationsModule } from './conversations/conversations.module';
 import { PongModule } from './pong/pong.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { PongModule } from './pong/pong.module';
         logging: configService.get('NODE_ENV') === 'development',
       }),
     }),
+    ScheduleModule.forRoot(),
     UsersModule,
     AuthModule,
     SearchModule,
