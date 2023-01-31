@@ -9,8 +9,6 @@ import Link from "next/link";
 import Message from "../../public/message.png";
 import valide from "../../public/valide.png";
 import refuse from "../../public/crossRed.png";
-import { useSelector } from "react-redux";
-import { selectUserState } from "../../store/UserSlice";
 
 export default function UserEntity(props: {
   user: User;
@@ -25,16 +23,18 @@ export default function UserEntity(props: {
   }) => void;
   delFriendClick: (e: { idToDelete: string; index: number }) => void;
 }): JSX.Element {
-  const UserState = useSelector(selectUserState);
   const [openMenu, setOpenMenu] = useState(false);
   const [accept, setAccept] = useState(props.option?.accept);
 
   if (typeof props.user === "undefined" || !props.option) return <></>;
 
   function valideClick(): void {
-    fetch(`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/friendships/validate/${props.user.id}`, {
-      method: "PATCH",
-    })
+    fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/friendships/validate/${props.user.id}`,
+      {
+        method: "PATCH",
+      }
+    )
       .then(function (response) {
         response.json().then((res) => {
           if (res === 1) {

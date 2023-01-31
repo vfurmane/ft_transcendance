@@ -1,6 +1,14 @@
-import { Body, Controller, Get, Post, Query } from '@nestjs/common';
-import { MatchFront, MatchService } from './Match.service';
+import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
+import { MatchService } from './Match.service';
+import { MatchFront } from 'types';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { User as CurrentUser } from '../common/decorators/user.decorator';
+import { isUUIDDto } from '../conversations/dtos/IsUUID.dto';
+import { User } from 'types';
+import { matchAddDto } from './dtos/match.add.dto';
 
+
+@UseGuards(JwtAuthGuard)
 @Controller('match')
 export class MatchController {
   constructor(private readonly matchService: MatchService) {}
@@ -8,13 +16,8 @@ export class MatchController {
   @Post()
   addMatch(
     @Body()
-    body: {
-      winner_id: string;
-      looser_id: string;
-      score_winner: number;
-      score_looser: number;
-    },
-  ): Promise<number> {
+    body: matchAddDto
+  ): Promise<void> {
     return this.matchService.addMatch(
       body.winner_id,
       body.looser_id,
@@ -24,7 +27,7 @@ export class MatchController {
   }
 
   @Get()
-  getMatch(@Query() query: { user_id: string }): Promise<MatchFront[]> {
-    return this.matchService.getMatch(query.user_id);
+  getMatch (@CurrentUser() currentUser: User): Promise<MatchFront[]> {
+    return this.matchService.getMatch(currentUser);
   }
 }

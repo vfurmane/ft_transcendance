@@ -7,8 +7,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { User } from '../../users/user.entity';
-import { Conversation } from './conversation.entity';
+import { User, Conversation } from 'types';
 
 @Expose()
 @Entity()

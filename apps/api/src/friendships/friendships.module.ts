@@ -4,12 +4,12 @@ import { FriendshipsService } from './friendships.service';
 import { Friendships as FriendshipsEntity } from 'types';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersModule } from '../users/users.module';
-import { TransformUserService } from 'src/TransformUser/TransformUser.service';
+import { TransformUserModule } from 'src/TransformUser/TransformUser.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([FriendshipsEntity]), UsersModule],
+  imports: [TypeOrmModule.forFeature([FriendshipsEntity]), UsersModule, TransformUserModule],
   controllers: [FriendshipsController],
-  providers: [FriendshipsService, TransformUserService],
+  providers: [FriendshipsService],
   exports: [FriendshipsService],
 })
 export class FriendshipsModule {}

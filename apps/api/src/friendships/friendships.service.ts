@@ -2,7 +2,11 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { TransformUserService } from '../TransformUser/TransformUser.service';
 import { Repository } from 'typeorm';
-import { FriendshipRequestStatus, Friendships as friendshipsEntity, Userfront } from 'types';
+import {
+  FriendshipRequestStatus,
+  Friendships as friendshipsEntity,
+  Userfront,
+} from 'types';
 import { User } from 'types';
 
 @Injectable()
@@ -37,7 +41,8 @@ export class FriendshipsService {
       },
     });
 
-    if ((targetFriend && targetFriend.accepted) || initiatorFriend) return false;
+    if ((targetFriend && targetFriend.accepted) || initiatorFriend)
+      return false;
     const target = await this.userRepository.findOne({
       where: {
         id: target_id,
@@ -52,9 +57,7 @@ export class FriendshipsService {
     return true;
   }
 
-  async getFriendsList(
-    currentUser: User,
-  ): Promise<FriendshipRequestStatus[]> {
+  async getFriendsList(currentUser: User): Promise<FriendshipRequestStatus[]> {
     const response: FriendshipRequestStatus[] = [];
 
     const initiatorArray = await this.friendshipsRepository.find({
@@ -73,10 +76,22 @@ export class FriendshipsService {
     });
     for (let i = 0; i < initiatorArray.length; i++) {
       if (initiatorArray[i].initiator.id === currentUser.id)
-        response.push({ friend: await this.transformUserService.transform(initiatorArray[i].target), accept: initiatorArray[i].accepted, ask: true });
+        response.push({
+          friend: await this.transformUserService.transform(
+            initiatorArray[i].target,
+          ),
+          accept: initiatorArray[i].accepted,
+          ask: true,
+        });
       else
-        response.push({ friend: await this.transformUserService.transform(initiatorArray[i].initiator), accept: initiatorArray[i].accepted, ask: false });
-    };
+        response.push({
+          friend: await this.transformUserService.transform(
+            initiatorArray[i].initiator,
+          ),
+          accept: initiatorArray[i].accepted,
+          ask: false,
+        });
+    }
     return response;
   }
 

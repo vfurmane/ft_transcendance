@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { Repository, UpdateResult } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User, Userfront } from 'types';
@@ -84,12 +84,10 @@ export class UsersService {
   async updateLevel(user_id: string, xp: number): Promise<number> {
     const user = await this.usersRepository.findOneBy({ id: user_id });
     const level = user?.level;
-    const queryBuilder = this.usersRepository.createQueryBuilder().select('*');
-    queryBuilder
-      .update()
-      .set({ level: (level ? level : 0) + xp })
-      .where('id =  :id', { id: user_id })
-      .execute();
+    if (!user)
+      throw new NotFoundException('Unknown user');
+    user.level = (user.level ? user.level : 0) + xp
+    this.usersRepository.save(user)
     return (level ? level : 0) + xp;
   }
 }

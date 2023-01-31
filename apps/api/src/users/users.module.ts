@@ -7,9 +7,12 @@ import { UsersService } from './users.service';
 import { UsersController } from './user.controller';
 import { TransformUserModule } from '../TransformUser/TransformUser.module';
 
-
 @Module({
-  imports: [TypeOrmModule.forFeature([User]), forwardRef(() => AuthModule), forwardRef(() => TransformUserModule)],
+  imports: [
+    TypeOrmModule.forFeature([User]),
+    forwardRef(() => AuthModule),
+    forwardRef(() => TransformUserModule),
+  ],
   controllers: [UsersController],
   providers: [UsersService, UsersGateway],
   exports: [TypeOrmModule, UsersService],

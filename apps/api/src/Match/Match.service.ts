@@ -2,16 +2,8 @@ import { Injectable, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { TransformUserService } from 'src/TransformUser/TransformUser.service';
 import { Repository } from 'typeorm';
-import { Match, User, Userfront } from 'types';
+import { Match, User, MatchFront } from 'types';
 import { UsersService } from '../users/users.service';
-
-export interface MatchFront {
-  id: string;
-  score_winner: number;
-  score_looser: number;
-  looser: Userfront | null;
-  winner: Userfront | null;
-}
 
 @Injectable()
 export class MatchService {
@@ -40,7 +32,7 @@ export class MatchService {
     looser_id: string,
     score_winner: number,
     score_looser: number,
-  ): Promise<number> {
+  ): Promise<void> {
     const winner = await this.userRepository.findOneBy({ id: winner_id });
     if (!winner) throw new BadRequestException('winner not find');
 
@@ -58,24 +50,22 @@ export class MatchService {
       winner_id,
       this.#getXp(winner, looser, score_winner, score_looser),
     );
-    return 1;
   }
 
-  async getMatch(user_id: string): Promise<MatchFront[]> {
+  async getMatch(currentUser : User): Promise<MatchFront[]> {
     const user = await this.userRepository.findOne({
       relations: {
-        win: { looser_id: true , winner_id: true},
+        win: { looser_id: true },
 
-        defeat: { winner_id: true, looser_id: true },
+        defeat: { winner_id: true },
       },
       where: {
-        id: user_id,
+        id: currentUser.id,
       },
     });
     if (!user) throw new BadRequestException('user not found');
 
     const winArray: MatchFront[] = [];
-
     const looseArray: MatchFront[] = [];
 
     for (let i = 0; i < user.win.length; i++) {
@@ -90,10 +80,7 @@ export class MatchService {
       });
     }
 
-    console.log(winArray);
-
     for (let i = 0; i < user.defeat.length; i++) {
-      console.log(user.defeat);
       looseArray.push({
         id: user.defeat[i].id,
         score_winner: user.defeat[i].score_winner,

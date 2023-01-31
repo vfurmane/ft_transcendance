@@ -69,7 +69,6 @@ export default function Profil(): JSX.Element {
   }
   /*==========================================================*/
 
-
   useEffect((): void => {
     if (typeof router.query.user === "string") {
       setUser(JSON.parse(router.query.user));
@@ -77,9 +76,7 @@ export default function Profil(): JSX.Element {
         setUserProfil(true);
       else setUserProfil(false);
       fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/match?user_id=${
-          JSON.parse(router.query.user).id
-        }`
+        `${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/match`
       )
         .then((res) => res.json())
         .then((data) => {
@@ -99,28 +96,20 @@ export default function Profil(): JSX.Element {
     setListOfMatch([...tmp]);
 
     const level = document.getElementById("level");
-    if (level)
-    {
-      level.innerText = '0';
-      const incrementLevel = () => {
-        let c = +level.innerText;
-        if ( c + 10 <= user.level)
-        {
+    if (level) {
+      level.innerText = "0";
+      const incrementLevel = (): void => {
+        const c = +level.innerText;
+        if (c + 10 <= user.level) {
           level.innerText = `${c + 10}`;
-          setTimeout(incrementLevel, 100)
-        }
-        else
-        {
+          setTimeout(incrementLevel, 100);
+        } else {
           level.innerText = `${user.level}`;
         }
-      }
+      };
       incrementLevel();
     }
-
   }, [matchHistory, user]);
-
-
- 
 
   function achivementListClick(): void {
     setOpenAchivementList(true);
@@ -153,15 +142,12 @@ export default function Profil(): JSX.Element {
   }
 
   function addFriend(): void {
-    const data = {
-      initiator_id: UserState.id,
-      target_id: user.id,
-    };
-
-    fetch(`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/friendships/${user.id}`, 
-    {
-      method: "PUT",
-    })
+    fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/friendships/${user.id}`,
+      {
+        method: "PUT",
+      }
+    )
       .then(function (response) {
         response.json().then((res) => {
           if (res === 1) console.log("friend add");
@@ -235,8 +221,21 @@ export default function Profil(): JSX.Element {
                 >
                   {user.name}
                 </h2>
-                <p style={{color: "white", marginBottom: '10px', fontSize: '20px'}} className={textStyles.saira + styles.flex_between} >level : <span id="level" className={textStyles.saira} style={{fontSize: '40px', color: 'white'}}></span></p>
-                
+                <p
+                  style={{
+                    color: "white",
+                    marginBottom: "10px",
+                    fontSize: "20px",
+                  }}
+                  className={textStyles.saira + styles.flex_between}
+                >
+                  level :{" "}
+                  <span
+                    id="level"
+                    className={textStyles.saira}
+                    style={{ fontSize: "40px", color: "white" }}
+                  ></span>
+                </p>
               </div>
               <div className={styles.buttonAndBarContainer}>
                 <div style={{ width: "80%" }}>

@@ -7,7 +7,11 @@ import { UsersModule } from '../users/users.module';
 import { TransformUserModule } from '../TransformUser/TransformUser.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Match]), UsersModule, TransformUserModule],
+  imports: [
+    TypeOrmModule.forFeature([Match]),
+    UsersModule,
+    TransformUserModule,
+  ],
   controllers: [MatchController],
   providers: [MatchService],
   exports: [TypeOrmModule, MatchService],

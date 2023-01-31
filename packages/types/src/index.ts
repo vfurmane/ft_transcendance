@@ -65,5 +65,13 @@ export interface FriendshipRequestStatus {
   ask: boolean
 }
 
+export interface MatchFront {
+  id: string;
+  score_winner: number;
+  score_looser: number;
+  looser: Userfront | null;
+  winner: Userfront | null;
+}
+
 export * from './enums';
 export * from './entities';

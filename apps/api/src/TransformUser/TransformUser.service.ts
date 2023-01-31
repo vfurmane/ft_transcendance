@@ -1,7 +1,7 @@
 import { User, Userfront } from 'types';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Injectable, BadRequestException } from '@nestjs/common';
-import { Repository } from 'typeorm';
+import { Repository, MoreThan } from 'typeorm';
 
 @Injectable()
 export class TransformUserService {
@@ -20,7 +20,6 @@ export class TransformUserService {
       },
     });
     if (!user) throw new BadRequestException('user not found');
-
     return user.win.length;
   }
 
@@ -39,14 +38,9 @@ export class TransformUserService {
   }
 
   async #getRank(user_id: string): Promise<number> {
-    const users = await this.userRepository.find();
-    if (!users) throw new BadRequestException('users not found');
-
-    return (
-      users
-        .sort((a, b) => b.level - a.level)
-        .findIndex((e) => e.id === user_id) + 1
-    );
+    const user = await this.userRepository.findOneBy({id : user_id});
+    if (!user) throw new BadRequestException('users not found');
+    return await this.userRepository.count({ where: { level: MoreThan(user.level) } }) + 1;
   }
 
   async transform(userBack: User | null): Promise<Userfront> {
