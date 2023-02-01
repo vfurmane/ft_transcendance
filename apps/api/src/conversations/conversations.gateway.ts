@@ -49,12 +49,12 @@ export class ConversationsGateway implements OnGatewayConnection {
 
   async handleConnection(client: Socket): Promise<string | void> {
     console.error("Someone is trying to connect")
-    if (!client.handshake.headers?.authorization) {
+    if (!client.handshake.auth.token) {
       client.disconnect();
       return;
     }
     const currentUser = this.authService.verifyUserFromToken(
-      client.handshake.headers.authorization,
+      client.handshake.auth.token,
     );
     if (!currentUser) {
       client.disconnect();

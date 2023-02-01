@@ -1,36 +1,33 @@
 import { createContext, ReactElement, useContext, useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { identifyUser } from "../helpers/identifyUser";
+import { selectUserState, setUserState } from "../store/UserSlice";
 
 interface AuthProps {
     children: ReactElement
 }
 
-interface AuthUser
-{
-    id: string,
-    name: string,
-}
-
-interface AuthContextInterface
-{
-    currentUser: AuthUser,
-    setCurrentUser: (user : AuthUser) => void
-}
-
-const AuthContext = createContext<AuthContextInterface>({
-    currentUser: {id: "", name: ""},
-    setCurrentUser: () => {}
-});
-
 export default function Auth({ children } : AuthProps )
 {
-    const [currentUser, setCurrentUser] = useState<AuthUser>({name:"", id:""});
+    const userState = useSelector(selectUserState);
+    const dispatch = useDispatch()
 
+    useEffect(() =>
+    {
+        const fetchUser = async () => {
+            const user = await identifyUser();
+            if (user)
+                dispatch(setUserState(user))
+        }
+
+        if (userState === undefined || userState.id === undefined || !userState.id.length)
+        {
+            fetchUser()
+        }
+    }, [])
     return (
-
-        <AuthContext.Provider value={{ currentUser, setCurrentUser }}>
+        <>
             { children }
-        </AuthContext.Provider>
+        </>
     )
 }
-
-export const useAuthContext = () => useContext(AuthContext)
