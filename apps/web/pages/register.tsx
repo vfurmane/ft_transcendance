@@ -1,16 +1,17 @@
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import Home from "./home";
 import { Loading } from "../components/Loading";
+import { RegisterForm } from "../components/RegisterForm";
+import styles from "../styles/register-page.module.scss";
 
-export default function Web(): JSX.Element {
+export default function Login(): JSX.Element {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const access_token = localStorage.getItem("access_token");
-    if (access_token === null) {
-      router.replace("/login");
+    if (access_token !== null) {
+      router.replace("/");
     } else {
       setLoading(false);
     }
@@ -19,8 +20,8 @@ export default function Web(): JSX.Element {
   if (loading) return <Loading></Loading>;
 
   return (
-    <div>
-      <Home />
+    <div className={styles.container}>
+      <RegisterForm />
     </div>
   );
 }
