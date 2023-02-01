@@ -10,6 +10,12 @@ services:
     depends_on:
       - api
     restart: always
+    ports:
+      - 8080:8080
+    environment:
+      NEXT_PUBLIC_BASE_URL: ${FRONTEND_BASE_URL}
+      NEXT_PUBLIC_API_BASE_URL: ${BACKEND_BASE_URL}
+      NEXT_PUBLIC_FT_OAUTH2_CLIENT_ID: ${FT_OAUTH2_CLIENT_ID}
     networks:
       - app
   api:

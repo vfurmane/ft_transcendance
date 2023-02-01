@@ -1,39 +1,34 @@
-import { ReactElement, useEffect, useState } from "react";
+import { ReactElement, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Input } from "../components/Input";
-import { TextDivider } from "../components/TextDivider";
-import styles from "styles/LoginForm.module.scss";
-import crypto from "crypto";
-import { FtOAuth2Button } from "./FtOAuth2Button";
+import styles from "styles/RegisterForm.module.scss";
 import { useRouter } from "next/router";
-import { AccessTokenResponse, TfaNeededResponse } from "types";
 import Link from "next/link";
 
-interface LoginFormData {
+interface RegisterFormData {
   username: string;
+  email: string;
   password: string;
 }
 
-function obtainState(): string {
-  let state = localStorage.getItem("state");
-  if (state !== null) return state;
-  state = crypto.randomBytes(32).toString("hex");
-  localStorage.setItem("state", state);
-  return state;
+interface RegisterUserResponse {
+  id: string;
+  email: string;
+  name: string;
+  tfa_setup: boolean;
 }
 
-async function login(
-  data: LoginFormData,
-  state: string
-): Promise<AccessTokenResponse | TfaNeededResponse | null> {
+async function registerUser(
+  data: RegisterFormData
+): Promise<RegisterUserResponse | null> {
   const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/login`,
+    `${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/register`,
     {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ ...data, state }),
+      body: JSON.stringify({ ...data }),
     }
   ).then(async (response) => {
     if (!response.ok) {
@@ -48,9 +43,8 @@ async function login(
   return response;
 }
 
-export function LoginForm(): ReactElement {
+export function RegisterForm(): ReactElement {
   const router = useRouter();
-  const [state, setState] = useState("");
   const [formError, setFormError] = useState("");
   const [formSuccess, setFormSuccess] = useState("");
   const [loading, setLoading] = useState(false);
@@ -58,29 +52,22 @@ export function LoginForm(): ReactElement {
     formState: { errors },
     handleSubmit,
     register,
-  } = useForm<LoginFormData>();
+  } = useForm<RegisterFormData>();
 
-  const onSubmit = async (data: LoginFormData): Promise<void> => {
+  const onSubmit = async (data: RegisterFormData): Promise<void> => {
     setFormError("");
     setFormSuccess("");
     setLoading(true);
 
-    await login(data, state)
+    await registerUser(data)
       .then((response) => {
+        console.log(response);
         if (response === null) {
           throw new Error("An unexpected error occured...");
         } else {
-          if ("access_token" in response && response.access_token) {
-            setFormSuccess("Success! Redirecting...");
-            localStorage.setItem("access_token", response.access_token);
-            localStorage.removeItem("state");
-            router.replace("/");
-          } else if (
-            "message" in response &&
-            response.message === "Authentication factor needed"
-          ) {
-            router.replace(`/auth/${response.route}`);
-          }
+          setFormSuccess("Success! Redirecting...");
+          localStorage.removeItem("state");
+          router.replace("/login");
         }
       })
       .catch((error) => {
@@ -89,20 +76,23 @@ export function LoginForm(): ReactElement {
       });
   };
 
-  useEffect(() => {
-    setState(obtainState());
-  }, []);
-
   return (
     <div className={styles.container}>
       <form className={styles.form} onSubmit={handleSubmit(onSubmit)}>
-        <h1>Login</h1>
+        <h1>Register</h1>
         <Input
           {...register("username", { required: "'username' is required" })}
-          autofocus
           disabled={loading}
           error={errors.username}
           placeholder="username"
+          fullWidth
+        />
+        <Input
+          {...register("email", { required: "'email' is required" })}
+          disabled={loading}
+          error={errors.email}
+          placeholder="email"
+          type="email"
           fullWidth
         />
         <Input
@@ -118,10 +108,8 @@ export function LoginForm(): ReactElement {
         <Input disabled={loading} type="submit" fullWidth primary />
       </form>
       <p>
-        <Link href="/register">Create an account</Link>
+        Or <Link href="/login">login</Link>
       </p>
-      <TextDivider>or</TextDivider>
-      <FtOAuth2Button disabled={loading} state={state} fullWidth />
     </div>
   );
 }
