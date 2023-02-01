@@ -3,7 +3,7 @@ import styles from "styles/leaderBoard.module.scss";
 import textStyle from "styles/text.module.scss";
 import entityStyles from "styles/entity.module.scss";
 import LeaderboardEntity from "./LeaderboardEntity";
-import User from "../../interface/UserInterface";
+import { Userfront as User } from "types";
 
 export default function ArrayDoubleColumn(props: {
   title: string;
@@ -21,7 +21,12 @@ export default function ArrayDoubleColumn(props: {
 
   useEffect(() => {
     const tmp: JSX.Element[] = [];
-    fetch(`/api/leaderBoard`)
+    fetch(`/api/leaderBoard`, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + localStorage.getItem('access_token'),
+      }
+    })
       .then((res) => res.json())
       .then((data) => {
         data.map((e: User, i: number) =>

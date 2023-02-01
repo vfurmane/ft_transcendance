@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import Connect from "../../public/statusConnect.png";
-// import RemoveFriend from "../../public/RemoveFriend.png";
-import User from "../../interface/UserInterface";
+import { Userfront as User } from "types";
 import styles from "styles/entity.module.scss";
 import textStyles from "styles/text.module.scss";
 import Link from "next/link";
@@ -31,6 +30,10 @@ export default function UserEntity(props: {
   function valideClick(): void {
     fetch(`/api/friendships/validate/${props.user.id}`, {
       method: "PATCH",
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + localStorage.getItem('access_token'),
+      }
     })
       .then(function (response) {
         response.json().then((res) => {

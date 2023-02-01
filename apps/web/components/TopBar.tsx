@@ -56,7 +56,12 @@ function TopBar(props: propsTopBar): JSX.Element {
 
   useEffect((): void => {
     if (value.length) {
-      fetch(`/api/search?letters=${value}`)
+      fetch(`/api/search?letters=${value}`, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + localStorage.getItem('access_token'),
+        }
+      })
         .then(function (response) {
           response.json().then(function (data) {
             const userListTmp: JSX.Element[] = [];

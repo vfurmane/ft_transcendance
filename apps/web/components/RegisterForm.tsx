@@ -22,7 +22,7 @@ async function registerUser(
   data: RegisterFormData
 ): Promise<RegisterUserResponse | null> {
   const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/register`,
+    `/api/auth/register`,
     {
       method: "POST",
       headers: {

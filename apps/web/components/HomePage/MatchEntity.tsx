@@ -2,8 +2,8 @@ import React from "react";
 import Image from "next/image";
 import textStyle from "styles/text.module.scss";
 import styles from "styles/entity.module.scss";
-import { Match } from "../../interface/Match.interface";
-import User from "../../interface/UserInterface";
+import { Match } from "../../initType/MatchInit";
+import User from "../../initType/UserInit";
 
 export default function MatchEntity(props: {
   match: Match;

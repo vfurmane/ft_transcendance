@@ -1,5 +1,5 @@
 import React from "react";
-import User from "../../interface/UserInterface";
+import User from "../../initType/UserInit";
 import leaderBoardStyles from "styles/leaderBoard.module.scss";
 import UserEntity from "./UserEntity";
 

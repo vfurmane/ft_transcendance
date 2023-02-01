@@ -1,9 +1,6 @@
 const fetch = require("node-fetch");
 
-var max_id = '';
-
-//not fonctional, you must add the id of max to the currentUser.id in frendship route and in home page
-
+var access_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJlZDFlOGExMi00ODMxLTQwNGUtYTBhZi1lYTMxYTRhZDNmMTgiLCJuYW1lIjoibWF4IiwianRpIjoiYTlkYzE4NzgtMzljOC00OTNlLWIxOGMtZDA2OGMyMDRmYzcyIiwiaWF0IjoxNjc1MjU1NzU4LCJleHAiOjE2NzUyNTYwNTh9.LrGjxjVC_1-7DfsZ--Bgzs-DjTuJO61-BnQyRFk5wKY"
 
 async function createMatch(ids)
 {
@@ -22,32 +19,34 @@ async function createMatch(ids)
                     score_winner: Math.max(num1, num2),
                     score_looser: Math.min(num1, num2),
                 }
-                await fetch(`http://localhost:3000/match`, {
+                await fetch(`http://localhost:8080/api/match`, {
                     method: 'POST',
                     headers: {
-                        "content-type" : "application/json"
+                        "content-type" : "application/json",
+                        'Authorization': 'Bearer ' + access_token,
                     },
                     body: JSON.stringify(data)
                 })
-                .then(res => res.json())
-                .then(data => console.log(`createMatch ${data}`))
+                .then(() => console.log(`createMatch ok`))
                 .catch(error => {console.log("Il y a eu un problème avec l'opération fetch : " + error.message);});
             }
         }
     }
 }
 
-
-async function addFriends(max_id, ids)
+async function addFriends(ids)
 {
-    for (let i = 1; i < ids.length; i++)
+    for (let i = 0; i < ids.length; i++)
     {
-        await fetch(`http://localhost:3000/friendships/${ids[i]}`, {
+        await fetch(`http://localhost:8080/api/friendships/${ids[i]}`, {
         method: "PUT",
+        headers: {
+            'Authorization': 'Bearer ' + access_token,
+        }
         })
         .then((res)=> res.json())
         .then((data => {
-            console.log(`addFriend ${data}`);
+            console.log(`addFriend ${JSON.stringify(data)}`);
         }))
         .catch(function (error) {
         console.log(
@@ -64,10 +63,10 @@ async function createUser (){
     {
         const data = {
         email: `name${i}@gmail.com`,
-        username: (i === 0? 'max': `name ${i}`),
+        username: `name ${i}`,
         password: '123'
         }
-        await fetch(`http://localhost:3000/auth/register`, {
+        await fetch(`http://localhost:8080/api/auth/register`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -77,8 +76,6 @@ async function createUser (){
         .then((res)=> res.json())
         .then((data => {
             console.log(data);
-            if (i === 0)
-                max_id  = data.id;
             ids.push(data.id);
         }))
         .catch(function (error) {
@@ -87,10 +84,7 @@ async function createUser (){
         );
         });
     }
-
-    await new Promise(r => setTimeout(r, 30000));
-
-    addFriends(max_id, ids);
+    addFriends(ids);
     createMatch(ids);
 }
 

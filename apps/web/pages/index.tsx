@@ -6,6 +6,7 @@ import { Loading } from "../components/Loading";
 export default function Web(): JSX.Element {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
+  const [accessToken, setAccessToken] = useState("");
 
   useEffect(() => {
     const access_token = localStorage.getItem("access_token");
@@ -13,6 +14,7 @@ export default function Web(): JSX.Element {
       router.replace("/login");
     } else {
       setLoading(false);
+      setAccessToken(accessToken);
     }
   }, [router]);
 
@@ -20,7 +22,7 @@ export default function Web(): JSX.Element {
 
   return (
     <div>
-      <Home />
+      <Home/>
     </div>
   );
 }

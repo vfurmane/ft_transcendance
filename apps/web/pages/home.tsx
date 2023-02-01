@@ -28,7 +28,12 @@ function Home(): JSX.Element {
 
   const dispatch = useDispatch();
   useEffect(() => {
-    fetch(`/api/user`)
+    fetch(`/api/user`, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + localStorage.getItem('access_token'),
+      }
+    })
       .then(function (response) {
         return response.json();
       })
@@ -100,6 +105,10 @@ function Home(): JSX.Element {
   function delFriendClick(e: { idToDelete: string; index: number }): void {
     fetch(`/api/friendships/${e.idToDelete}`, {
       method: "DELETE",
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + localStorage.getItem('access_token'),
+      }
     }).catch(function (error) {
       console.log(
         "Il y a eu un problème avec l'opération fetch : " + error.message
@@ -114,7 +123,12 @@ function Home(): JSX.Element {
 
   //get the friend list of the user
   useEffect(() => {
-    fetch(`/api/friendships`)
+    fetch(`/api/friendships`, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + localStorage.getItem('access_token'),
+      }
+    })
       .then(function (response) {
         if (response.ok) {
           return response.json().then(function (json) {

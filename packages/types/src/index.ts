@@ -70,5 +70,11 @@ export interface MatchFront {
   winner: Userfront | null;
 }
 
+export interface Achivement {
+  name: string;
+  status: string;
+  description: string;
+}
+
 export * from './enums';
 export * from './entities';

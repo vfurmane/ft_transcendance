@@ -5,14 +5,15 @@ import Image from "next/image";
 import MatchEntity from "../components/HomePage/MatchEntity";
 import { selectUserState } from "../store/UserSlice";
 import { useSelector } from "react-redux";
-import { initUser } from "../interface/UserInterface";
+import { initUser } from "../initType/UserInit";
 import AchivementEntity from "../components/ProfilePage/achivementEntity";
-import Achivement, { initAchivement } from "../interface/AchivementInterface";
+import { initAchivement } from "../initType/AchivementInit";
+import { Achivement } from 'types';
 import ChangePswrd from "../components/ProfilePage/ChangePswrd";
 import ChatBar from "../components/chatBar";
 import styles from "styles/profil.module.scss";
 import textStyles from "styles/text.module.scss";
-import { initMatch } from "../interface/Match.interface";
+import { initMatch } from "../initType/MatchInit";
 
 export default function Profil(): JSX.Element {
   const UserState = useSelector(selectUserState);
@@ -75,7 +76,12 @@ export default function Profil(): JSX.Element {
       if (JSON.parse(router.query.user).id === UserState.id)
         setUserProfil(true);
       else setUserProfil(false);
-      fetch(`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/match`)
+      fetch(`/api/match`, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + localStorage.getItem('access_token'),
+        }
+      })
         .then((res) => res.json())
         .then((data) => {
           setMatchHistory(data);
@@ -148,6 +154,7 @@ export default function Profil(): JSX.Element {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
+        'Authorization': 'Bearer ' + localStorage.getItem('access_token'),
       },
       body: JSON.stringify(data),
     })

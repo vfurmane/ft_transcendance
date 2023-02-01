@@ -1,6 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { AppState } from "./store";
-import User, { initUser } from "../interface/UserInterface";
+import { Userfront as User } from "types";
+import { initUser } from "../initType/UserInit";
 
 // Initial state
 const initialState: User = initUser;
