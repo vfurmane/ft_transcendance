@@ -56,6 +56,33 @@ export interface Userfront {
   level: number;
 }
 
+export interface Point {
+  x: number;
+  y: number;
+}
+
+export interface Vector {
+  x: number;
+  y: number;
+}
+
+export interface Ball {
+  point : Point;
+  dir : Vector;
+}
+
+export interface PlayerInterface {
+  point : Point;
+  dir : Vector;
+  hp : number;
+}
+
+export interface GameState {
+  numberPlayer : number;
+  players : PlayerInterface[]
+  ball : Ball;
+}
+
 export interface FriendshipRequestStatus {
   friend : Userfront | null,
   accept: boolean,

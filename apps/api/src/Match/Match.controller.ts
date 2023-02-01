@@ -1,10 +1,9 @@
-import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
 import { MatchService } from './Match.service';
 import { MatchFront } from 'types';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
-import { User as CurrentUser } from '../common/decorators/user.decorator';
-import { User } from 'types';
 import { matchAddDto } from './dtos/match.add.dto';
+import { isUUIDDto } from '../conversations/dtos/IsUUID.dto';
 
 @UseGuards(JwtAuthGuard)
 @Controller('match')
@@ -24,8 +23,8 @@ export class MatchController {
     );
   }
 
-  @Get()
-  getMatch(@CurrentUser() currentUser: User): Promise<MatchFront[]> {
-    return this.matchService.getMatch(currentUser);
+  @Get('/:id')
+  getMatch(@Param() { id }: isUUIDDto,): Promise<MatchFront[]> {
+    return this.matchService.getMatch(id);
   }
 }

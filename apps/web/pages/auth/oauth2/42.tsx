@@ -8,9 +8,13 @@ async function exchangeCodeForToken(
   state?: string
 ): Promise<AccessTokenResponse | TfaNeededResponse | null> {
   const response = await fetch(
+<<<<<<< HEAD
     `${
       process.env.NEXT_PUBLIC_API_BASE_URL
     }/auth/login/oauth2/42?${new URLSearchParams({
+=======
+    `/api/auth/login/oauth2/42?${new URLSearchParams({
+>>>>>>> origin/pong-back
       code,
       state: `${state}`,
     })}`

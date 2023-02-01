@@ -11,6 +11,8 @@ import { ConversationsModule } from './conversations/conversations.module';
 import { MatchModule } from './Match/Match.module';
 import { LeaderBoardModule } from './leaderBoard/leaderBoard.module';
 import { TransformUserModule } from './TransformUser/TransformUser.module';
+import { PongModule } from './pong/pong.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -34,6 +36,7 @@ import { TransformUserModule } from './TransformUser/TransformUser.module';
         logging: configService.get('NODE_ENV') === 'development',
       }),
     }),
+    ScheduleModule.forRoot(),
     UsersModule,
     AuthModule,
     SearchModule,
@@ -43,6 +46,7 @@ import { TransformUserModule } from './TransformUser/TransformUser.module';
     MatchModule,
     LeaderBoardModule,
     TransformUserModule,
+    PongModule
   ],
   controllers: [AppController],
   providers: [AppService],

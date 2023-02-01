@@ -30,7 +30,7 @@ import { JwtRefreshStrategy } from './jwt-refresh.strategy';
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
         secret: configService.get('JWT_SECRET'),
-        signOptions: { expiresIn: '5m' },
+        signOptions: { expiresIn: '1h' },
       }),
     }),
     PassportModule,

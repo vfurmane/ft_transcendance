@@ -9,15 +9,15 @@ export class LeaderBoardService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-    private readonly transfornService: TransformUserService,
+    private readonly transformService: TransformUserService,
   ) {}
 
   async getLeaderBoard(): Promise<Userfront[]> {
     const users = await this.userRepository.find({ order: { level: 'DESC' } });
     if (!users) throw new BadRequestException('users not found');
-    const res: Userfront[] = [];
-    for (let i = 0; i < users.length; i++)
-      res.push(await this.transfornService.transform(users[i]));
-    return res;
+    
+    
+    const res = users.map(async (el) => await this.transformService.transform(el));
+    return Promise.all(res);
   }
 }

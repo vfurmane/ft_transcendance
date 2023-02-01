@@ -76,7 +76,7 @@ export default function Profil(): JSX.Element {
       if (JSON.parse(router.query.user).id === UserState.id)
         setUserProfil(true);
       else setUserProfil(false);
-      fetch(`/api/match`, {
+      fetch(`/api/match/${JSON.parse(router.query.user).id}`, {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer ' + localStorage.getItem('access_token'),

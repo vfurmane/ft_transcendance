@@ -1,6 +1,6 @@
 import React from "react";
 import Image from "next/image";
-import Achivement from "../../initType/AchivementInit";
+import { Achivement } from "types";
 import styles from "styles/entity.module.scss";
 import textStyles from "styles/text.module.scss";
 
