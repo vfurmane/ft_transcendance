@@ -1,16 +1,31 @@
 import { useDispatch, useSelector } from "react-redux";
-import { User } from "types";
+import { Userfront } from "types";
 import { selectUserState, setUserState } from "../store/UserSlice";
+import { refreshToken } from "./refreshTokens";
 
-export async function identifyUser() {
-    const response = await fetch('/api/users/profile',
+async function fetchUser() : Promise<Response | null>
+{
+    return await fetch('/api/user',
     {
         headers:
         {
             "Authorization": `Bearer ${localStorage.getItem("access_token")}`
         }
-    })
-    if (!response.ok)
-        return null
-    return response.json() as Promise<User>
+    }).catch((error) => null)
+}
+
+export async function identifyUser() : Promise<null | Userfront > {
+    let response = await fetchUser()
+    if (!response || !response.ok)
+    {
+        if (await refreshToken())
+        {
+            response = await fetchUser()
+            if (!response || !response.ok)
+                return null
+        }
+        else
+            return null
+    }
+    return response.json() as Promise<Userfront>
 }

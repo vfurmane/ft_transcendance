@@ -72,9 +72,10 @@ export function LoginForm(): ReactElement {
         if (response === null) {
           throw new Error("An unexpected error occured...");
         } else {
-          if ("access_token" in response && response.access_token) {
+          if ("access_token" in response && response.access_token && response.refresh_token) {
             setFormSuccess("Success! Redirecting...");
             localStorage.setItem("access_token", response.access_token);
+            localStorage.setItem("refresh_token", response.refresh_token);
             localStorage.removeItem("state");
             const user = await identifyUser()
             if (user)

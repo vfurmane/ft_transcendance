@@ -5,8 +5,8 @@ import List from "../components/HomePage/List";
 import UserEntity from "../components/HomePage/UserEntity";
 import ArrayDoubleColumn from "../components/HomePage/ArrayDoubleColumn";
 import PlayMenu from "../components/HomePage/PlayMenu";
-import { setUserState } from "../store/UserSlice";
-import { useDispatch } from "react-redux";
+import { selectUserState, setUserState } from "../store/UserSlice";
+import { useDispatch, useSelector } from "react-redux";
 import { Userfront as User } from "types";
 import Link from "next/link";
 import ChatBar from "../components/chatBar";
@@ -16,6 +16,7 @@ import styles from "styles/home.module.scss";
 import { useRouter } from "next/router";
 
 function Home(): JSX.Element {
+  const userState = useSelector(selectUserState);
   const friendListRef = useRef([<></>]);
   const setterInit: React.Dispatch<React.SetStateAction<boolean>> = () => false;
 
@@ -29,25 +30,14 @@ function Home(): JSX.Element {
   const prevIndexOfUserRef = useRef(-1);
   const prevSetterUsermenuRef = useRef(setterInit);
 
-  const dispatch = useDispatch();
   useEffect(() => {
-    fetch(`/api/user`, {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + localStorage.getItem("access_token"),
-      },
-    })
-      .then(function (response) {
-        return response.json();
-      })
-      .then((data) => {
-        dispatch(setUserState(data));
-      })
-      .catch(function (error) {
-        console.log(`probleme with fetch: ${error.message}`);
-      });
-    //console.log(localStorage.getItem('access_token'));
-  }, [dispatch]);
+    console.error("triggered")
+    if (!userState || userState === undefined || userState.id === undefined
+      || !userState.id.length)
+      {
+        router.replace('/login')
+      }
+  }, [userState]);
 
   /*======for close topBar component when click on screen====*/
   const [openToggle, setOpenToggle] = useState(false);

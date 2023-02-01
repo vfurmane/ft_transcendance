@@ -19,7 +19,8 @@ export default function Websocket({ children } : WebsocketProps )
     // console.error(children)
 
     useEffect(() => {
-        if (userState !== undefined && userState.id !== undefined
+        console.error("user state in websocket: ", userState)
+        if (userState && userState !== undefined && userState.id !== undefined
             && userState.id.length && typeof window !== 'undefined')
         {
             console.error("connecting")

@@ -5,6 +5,7 @@ import { AppProps } from "next/app";
 import { wrapper } from "../store/store";
 import Websocket from "../components/Websocket";
 import Auth from "../components/Auth";
+import Routes from "../components/Routes";
 
 function App({ Component, pageProps }: AppProps): JSX.Element {
   return (
@@ -23,7 +24,9 @@ function App({ Component, pageProps }: AppProps): JSX.Element {
       </Head>
       <Auth>
         <Websocket>
-          <Component {...pageProps} />
+          <Routes>
+            <Component {...pageProps} />
+          </Routes>
         </Websocket>
       </Auth>
       <Script
