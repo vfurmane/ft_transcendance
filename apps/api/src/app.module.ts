@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { CacheModule, Logger, Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -12,6 +12,7 @@ import { MatchModule } from './Match/Match.module';
 import { LeaderBoardModule } from './leaderBoard/leaderBoard.module';
 import { TransformUserModule } from './TransformUser/TransformUser.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { AppGateway } from './app.gateway';
 
 @Module({
   imports: [
@@ -45,8 +46,9 @@ import { ScheduleModule } from '@nestjs/schedule';
     MatchModule,
     LeaderBoardModule,
     TransformUserModule,
+    CacheModule.register(),
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, AppGateway, Logger],
 })
 export class AppModule {}
