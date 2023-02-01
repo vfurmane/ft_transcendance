@@ -46,7 +46,9 @@
     "sanitize-html": "^2.8.1",
     "socket.io": "^4.5.4",
     "speakeasy": "^2.0.0",
-    "typeorm": "^0.3.11"
+    "typeorm": "^0.3.11",
+    "libphonenumber-js": "^1.10.18",
+    "validator": "^13.7.0"
   },
   "devDependencies": {
     "@faker-js/faker": "^7.6.0",

@@ -73,25 +73,30 @@ export class FriendshipsService {
         },
       ],
     });
-    for (let i = 0; i < initiatorArray.length; i++) {
-      if (initiatorArray[i].initiator.id === currentUser.id)
-        response.push({
+
+    const res = initiatorArray.map(async (el): Promise<FriendshipRequestStatus> => {
+      if (el.initiator.id === currentUser.id)
+      {
+        return {
           friend: await this.transformUserService.transform(
-            initiatorArray[i].target,
+            el.target,
           ),
-          accept: initiatorArray[i].accepted,
+          accept: el.accepted,
           ask: true,
-        });
+        }
+      }
       else
-        response.push({
+      {
+        return {
           friend: await this.transformUserService.transform(
-            initiatorArray[i].initiator,
+            el.initiator,
           ),
-          accept: initiatorArray[i].accepted,
+          accept: el.accepted,
           ask: false,
-        });
-    }
-    return response;
+        }
+      }
+    });
+    return Promise.all(res);
   }
 
   async delete(currentUser: User, userToDelete_id: string): Promise<boolean> {

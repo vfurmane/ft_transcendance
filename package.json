@@ -20,12 +20,8 @@
   "engines": {
     "node": ">=14.0.0"
   },
+  "packageManager": "npm@8.19.2",
   "dependencies": {
-    "libphonenumber-js": "^1.10.18",
-    "node-fetch": "^2.6.1",
-    "passport-jwt": "^4.0.1",
-    "sass": "^1.57.1",
-    "validator": "^13.7.0"
-  },
-  "packageManager": "npm@8.19.2"
+    "node-localstorage": "^2.2.1"
+  }
 }

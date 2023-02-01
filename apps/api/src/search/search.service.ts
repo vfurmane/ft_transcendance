@@ -30,9 +30,7 @@ export class SearchService {
       return 1;
     });
 
-    const res: Userfront[] = [];
-    for (let i = 0; i < array.length; i++)
-      res.push(await this.transformUserService.transform(array[i]));
-    return res;
+    const res = array.map(async (el) => await this.transformUserService.transform(el))
+    return Promise.all(res);
   }
 }

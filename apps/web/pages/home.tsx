@@ -43,6 +43,7 @@ function Home(): JSX.Element {
       .catch(function (error) {
         console.log(`probleme with fetch: ${error.message}`);
       });
+      //console.log(localStorage.getItem('access_token'));
   }, [dispatch]);
 
   /*======for close topBar component when click on screen====*/
