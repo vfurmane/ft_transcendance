@@ -30,7 +30,9 @@ export class SearchService {
       return 1;
     });
 
-    const res = array.map(async (el) => await this.transformUserService.transform(el))
+    const res = array.map(
+      async (el) => await this.transformUserService.transform(el),
+    );
     return Promise.all(res);
   }
 }

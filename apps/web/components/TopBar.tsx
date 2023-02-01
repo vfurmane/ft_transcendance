@@ -58,9 +58,9 @@ function TopBar(props: propsTopBar): JSX.Element {
     if (value.length) {
       fetch(`/api/search?letters=${value}`, {
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + localStorage.getItem('access_token'),
-        }
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + localStorage.getItem("access_token"),
+        },
       })
         .then(function (response) {
           response.json().then(function (data) {
