@@ -21,16 +21,13 @@ interface RegisterUserResponse {
 async function registerUser(
   data: RegisterFormData
 ): Promise<RegisterUserResponse | null> {
-  const response = await fetch(
-    `/api/auth/register`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ ...data }),
-    }
-  ).then(async (response) => {
+  const response = await fetch(`/api/auth/register`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ ...data }),
+  }).then(async (response) => {
     if (!response.ok) {
       return response.json().then((error) => {
         throw new Error(error.message || "An unexpected error occured...");

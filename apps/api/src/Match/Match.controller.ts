@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { MatchService } from './Match.service';
 import { MatchFront } from 'types';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
@@ -24,7 +32,7 @@ export class MatchController {
   }
 
   @Get('/:id')
-  getMatch(@Param() { id }: isUUIDDto,): Promise<MatchFront[]> {
+  getMatch(@Param() { id }: isUUIDDto): Promise<MatchFront[]> {
     return this.matchService.getMatch(id);
   }
 }

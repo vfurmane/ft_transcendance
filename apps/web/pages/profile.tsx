@@ -8,7 +8,7 @@ import { useSelector } from "react-redux";
 import { initUser } from "../initType/UserInit";
 import AchivementEntity from "../components/ProfilePage/achivementEntity";
 import { initAchivement } from "../initType/AchivementInit";
-import { Achivement } from 'types';
+import { Achivement } from "types";
 import ChangePswrd from "../components/ProfilePage/ChangePswrd";
 import ChatBar from "../components/chatBar";
 import styles from "styles/profil.module.scss";
@@ -78,9 +78,9 @@ export default function Profil(): JSX.Element {
       else setUserProfil(false);
       fetch(`/api/match/${JSON.parse(router.query.user).id}`, {
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + localStorage.getItem('access_token'),
-        }
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + localStorage.getItem("access_token"),
+        },
       })
         .then((res) => res.json())
         .then((data) => {
@@ -154,7 +154,7 @@ export default function Profil(): JSX.Element {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
-        'Authorization': 'Bearer ' + localStorage.getItem('access_token'),
+        Authorization: "Bearer " + localStorage.getItem("access_token"),
       },
       body: JSON.stringify(data),
     })

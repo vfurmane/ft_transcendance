@@ -31,9 +31,9 @@ export default function UserEntity(props: {
     fetch(`/api/friendships/validate/${props.user.id}`, {
       method: "PATCH",
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + localStorage.getItem('access_token'),
-      }
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + localStorage.getItem("access_token"),
+      },
     })
       .then(function (response) {
         response.json().then((res) => {

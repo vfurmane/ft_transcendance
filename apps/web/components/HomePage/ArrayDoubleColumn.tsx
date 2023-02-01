@@ -23,9 +23,9 @@ export default function ArrayDoubleColumn(props: {
     const tmp: JSX.Element[] = [];
     fetch(`/api/leaderBoard`, {
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + localStorage.getItem('access_token'),
-      }
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + localStorage.getItem("access_token"),
+      },
     })
       .then((res) => res.json())
       .then((data) => {

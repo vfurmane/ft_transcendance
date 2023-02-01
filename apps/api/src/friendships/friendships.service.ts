@@ -74,28 +74,23 @@ export class FriendshipsService {
       ],
     });
 
-    const res = initiatorArray.map(async (el): Promise<FriendshipRequestStatus> => {
-      if (el.initiator.id === currentUser.id)
-      {
-        return {
-          friend: await this.transformUserService.transform(
-            el.target,
-          ),
-          accept: el.accepted,
-          ask: true,
+    const res = initiatorArray.map(
+      async (el): Promise<FriendshipRequestStatus> => {
+        if (el.initiator.id === currentUser.id) {
+          return {
+            friend: await this.transformUserService.transform(el.target),
+            accept: el.accepted,
+            ask: true,
+          };
+        } else {
+          return {
+            friend: await this.transformUserService.transform(el.initiator),
+            accept: el.accepted,
+            ask: false,
+          };
         }
-      }
-      else
-      {
-        return {
-          friend: await this.transformUserService.transform(
-            el.initiator,
-          ),
-          accept: el.accepted,
-          ask: false,
-        }
-      }
-    });
+      },
+    );
     return Promise.all(res);
   }
 

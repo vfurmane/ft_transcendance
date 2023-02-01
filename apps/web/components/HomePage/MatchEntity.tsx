@@ -2,7 +2,7 @@ import React from "react";
 import Image from "next/image";
 import textStyle from "styles/text.module.scss";
 import styles from "styles/entity.module.scss";
-import { Userfront as User , MatchFront as Match } from "types";
+import { Userfront as User, MatchFront as Match } from "types";
 
 export default function MatchEntity(props: {
   match: Match;

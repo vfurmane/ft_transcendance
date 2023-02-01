@@ -13,8 +13,6 @@ import ChatBar from "../components/chatBar";
 import playButtonStyles from "styles/playButton.module.scss";
 import textStyles from "styles/text.module.scss";
 import styles from "styles/home.module.scss";
-import { FriendshipRequestStatus } from "types";
-import { io } from 'socket.io-client';
 import { useRouter } from "next/router";
 
 function Home(): JSX.Element {
@@ -35,9 +33,9 @@ function Home(): JSX.Element {
   useEffect(() => {
     fetch(`/api/user`, {
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + localStorage.getItem('access_token'),
-      }
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + localStorage.getItem("access_token"),
+      },
     })
       .then(function (response) {
         return response.json();
@@ -48,7 +46,7 @@ function Home(): JSX.Element {
       .catch(function (error) {
         console.log(`probleme with fetch: ${error.message}`);
       });
-      //console.log(localStorage.getItem('access_token'));
+    //console.log(localStorage.getItem('access_token'));
   }, [dispatch]);
 
   /*======for close topBar component when click on screen====*/
@@ -70,38 +68,6 @@ function Home(): JSX.Element {
   /*==========================================================*/
 
   function handleClickPlayButton(): void {
-    
-    console.log("CLICKING THE BUTTON")
-    const socket = io("/pong", {
-      auth: {
-        token: localStorage.getItem('access_token'),
-      }
-    });
-    socket.on('disconnect', function(){
-      console.error("JWT PROBABLY EXPIRED")
-    });
-
-    socket.on("connect_error", (error) => {
-      console.error("COULD NOT CONNECT " + error.message);
-    });
-
-    socket.emit('searchGame', (response:any) => {
-      console.log(response);
-    });
-
-    socket.on("startGame", (config) => {
-      console.log("RECEIVED START GAME")
- 
-      router.replace({
-        pathname: '/pong', query: {
-          number_player : config.number_player,
-          position : config.position,
-        }}, '/pong');
-      console.log("number of player :" + config.number_player);
-      console.log("position :", config.position);
-      socket.disconnect();
-    })
-
     setOpenPlayButton(!openPlayButton);
   }
 
@@ -144,9 +110,9 @@ function Home(): JSX.Element {
     fetch(`/api/friendships/${e.idToDelete}`, {
       method: "DELETE",
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + localStorage.getItem('access_token'),
-      }
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + localStorage.getItem("access_token"),
+      },
     }).catch(function (error) {
       console.log(
         "Il y a eu un problème avec l'opération fetch : " + error.message
@@ -163,9 +129,9 @@ function Home(): JSX.Element {
   useEffect(() => {
     fetch(`/api/friendships`, {
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + localStorage.getItem('access_token'),
-      }
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + localStorage.getItem("access_token"),
+      },
     })
       .then(function (response) {
         if (response.ok) {

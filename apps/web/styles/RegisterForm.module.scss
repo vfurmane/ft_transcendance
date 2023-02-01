@@ -1,4 +1,4 @@
-@import 'variables';
+@import "variables";
 
 .container {
   border-radius: 12px;
@@ -10,9 +10,9 @@
   flex-direction: column;
   align-items: center;
 
-  background: $dark-background-lighter-rgba-overlay, url('/noise.png');
+  background: $dark-background-lighter-rgba-overlay, url("/noise.png");
   background-repeat: repeat;
-  color: #E8E8E8;
+  color: #e8e8e8;
   text-align: center;
 
   * {
