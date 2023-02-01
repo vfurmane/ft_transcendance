@@ -90,7 +90,7 @@ function Home(): JSX.Element {
       }
     });
     socket.on('disconnect', function(){
-      console.error("JWT PROBABLY EXPIRED")
+      console.error("DEHORS")
     });
 
     socket.on("connect_error", (error) => {

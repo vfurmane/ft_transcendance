@@ -24,7 +24,7 @@ export class Game {
 	  width : 1920,
   }
   public isSolo: boolean = false;
-  public boardType = Form.REC;
+  public boardType : number = Form.REC;
   public board!: Board;
   public countUpdate: number = 0;
   public static point: number = 0;
@@ -59,7 +59,7 @@ export class Game {
 
   movePlayer (playerPosition : number, dir : boolean) {
     let player = this.player[playerPosition];
-    player.move(dir);
+    player.move(dir, this.board.wall);
   }
 
   createRegularPolygon(point: Point, side: number, n: number) {
@@ -196,13 +196,16 @@ export class Game {
   }
 
   updateGame() {
+    if (!this.boardType) {
+      return;
+    }
     for (let p of this.player) {
-      if (!this.boardType) {
-        return;
-      }
       if (p.hp == 0) {
-        if (this.boardType == Form.REC) {
+        console.log("TYPE OF BOARD :" + this.boardType);
+        if (this.boardType === Form.REC) {
           this.boardType = 0;
+          console.log("updated type of board : " + this.boardType)
+          return ;
         } else {
           this.player.splice(p.index, 1);
           for (let i = 0; i < this.player.length; i++) {
@@ -211,8 +214,8 @@ export class Game {
             }
           }
           this.boardType--;
+		      this.init();
         }
-		    this.init();
       }
     }
     this.countUpdate++;
@@ -514,7 +517,6 @@ export class Target extends Entity {
 }
 
 export class Ball extends Entity {
-  public wait: number = 120;
   public defaultSpeed: number = 3;
 
   constructor(points: Point[], player: Racket[]) {
@@ -548,10 +550,6 @@ export class Ball extends Entity {
   }
 
   update(rackets: Racket[], walls: Wall[], board: Board) {
-    if (this.wait) {
-      this.wait--;
-      return;
-    }
     if (!this.sat(board.board)) {
       this.replaceTo(board.board.center());
     }
@@ -613,21 +611,20 @@ export class Ball extends Entity {
         let index = walls.indexOf(wall);
         if (rackets.length === 2) {
           if (index === 2) {
+            console.log("GOAL for player 0")
             rackets[1].hp--;
             this.replaceTo(board.board.center());
             this.goToRandomPlayer(rackets);
-            this.wait = 120;
           } else if (index === 0) {
+            console.log("GOAL for player 1")
             rackets[0].hp--;
             this.replaceTo(board.board.center());
             this.goToRandomPlayer(rackets);
-            this.wait = 120;
           }
         } else {
           rackets[index].hp--;
           this.replaceTo(board.board.center());
           this.goToRandomPlayer(rackets);
-          this.wait = 120;
         }
         return;
       }
@@ -638,7 +635,7 @@ export class Ball extends Entity {
 
 export class Racket extends Entity {
   public defaultSpeed: number = 1.5;
-  public hp = 3;
+  public hp = 1;
   public dir!: Vector;
 
   constructor(public index: number, points: Point[], public color: string) {
@@ -650,7 +647,7 @@ export class Racket extends Entity {
     );
   }
 
-  move(dir : boolean) {
+  move(dir : boolean, walls : Wall[]) {
     if (dir) {
       this.speed = new Vector(
         this.dir.x * this.defaultSpeed,
@@ -663,6 +660,11 @@ export class Racket extends Entity {
       );
     }
     this.moveTo(this.speed);
+    for (let wall of walls) {
+      if (this.sat(wall)) {
+        this.moveTo(new Vector(-this.speed.x, -this.speed.y));
+      }
+    }
   }
 
   update(ball: Ball, walls: Wall[]) {
@@ -683,29 +685,29 @@ export class Racket extends Entity {
         this.moveTo(this.speed);
         //socket.emit('down');
       }
-    } else {
-      if (
-        this.center().vectorTo(ball.point[0]).norm() >
-        new Point(
-          this.center().x + this.dir.x * this.defaultSpeed,
-          this.center().y + this.dir.y * this.defaultSpeed
-        )
-          .vectorTo(ball.point[0])
-          .norm()
-      ) {
-        this.speed = new Vector(
-          this.dir.x * this.defaultSpeed,
-          this.dir.y * this.defaultSpeed
-        );
-        this.moveTo(this.speed);
-      } else {
-        this.speed = new Vector(
-          -this.dir.x * this.defaultSpeed,
-          -this.dir.y * this.defaultSpeed
-        );
-        this.moveTo(this.speed);
-      }
-    }
+    }// else {
+    //   if (
+    //     this.center().vectorTo(ball.point[0]).norm() >
+    //     new Point(
+    //       this.center().x + this.dir.x * this.defaultSpeed,
+    //       this.center().y + this.dir.y * this.defaultSpeed
+    //     )
+    //       .vectorTo(ball.point[0])
+    //       .norm()
+    //   ) {
+    //     this.speed = new Vector(
+    //       this.dir.x * this.defaultSpeed,
+    //       this.dir.y * this.defaultSpeed
+    //     );
+    //     this.moveTo(this.speed);
+    //   } else {
+    //     this.speed = new Vector(
+    //       -this.dir.x * this.defaultSpeed,
+    //       -this.dir.y * this.defaultSpeed
+    //     );
+    //     this.moveTo(this.speed);
+    //   }
+    // }
     for (let wall of walls) {
       if (this.sat(wall)) {
         this.moveTo(new Vector(-this.speed.x, -this.speed.y));

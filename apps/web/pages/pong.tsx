@@ -1,17 +1,11 @@
-import { GameState, PlayerInterface, State } from 'types'
+import { GameState, PlayerInterface } from 'types'
 import { io } from 'socket.io-client'
 
 import React, {
   useRef,
   useEffect,
-  useState,
-  ReactComponentElement,
 } from "react";
-import { useRouter } from 'next/router';
-import { config } from 'process';
-import { STATUS_CODES } from 'http';
-import { stat } from 'fs';
-
+import Router, { NextRouter, useRouter } from 'next/router';
 enum Axe {
   X = 1,
   Y = 2,
@@ -50,19 +44,22 @@ class Game {
   public static position : number;
   public static socket : any;
 
-  constructor(number_player:number, position:number) {
+  constructor(number_player:number, position:number, private router:NextRouter) {
     if (typeof window !== 'undefined') {
       Game.socket = io("/pong", {
         auth: {
           token: localStorage.getItem('access_token'),
         }
       });
+      Game.socket.on('disconnect', () => {
+        console.error('Fin de partie')
+        this.router.replace('/')
+      })
       Game.socket.on('refresh', (state:GameState) => {
-        console.log("I GOT REFRESH MESSAGE")
         if (!this.board) {
           return ;
         }
-        console.log(this.board.wall)
+        console.log("=-=-=-=-=-=REFRESHING=-=-=-=-=-=")
         this.refresh(state);
       });
     }
@@ -88,7 +85,9 @@ class Game {
   }
 
   refresh(state: any) {
-    console.log("i actually refreshed something")
+    if (!this.boardType) {
+      return ;
+    }
     if (this.boardType == Form.REC) {
       this.player = this.updatePlayer(state.players, [
         this.board.wall[0],
@@ -97,7 +96,6 @@ class Game {
     } else {
       this.player = this.updatePlayer(state.players, this.board.wall);
     }
-    console.log(this.player)
     if (this.boardType == Form.REC) {
       this.ball = new Ball (this.createRegularPolygon(new Point(state.ball.point.x, state.ball.point.y), 10, 4), this.player);
     } else {
@@ -107,7 +105,6 @@ class Game {
   }
 
   updatePlayer(player: PlayerInterface[], wall: Wall[]) {
-    console.log("number of wall : " + wall.length)
     let racket: Racket[] = [];
     for (let i = 0; i < wall.length; i++) {
       let wallDir = wall[i].point[0].vectorTo(wall[i].point[2]).normalized();
@@ -126,6 +123,7 @@ class Game {
       if (this.player === undefined)
         racket.push(new Racket(i, [p0, p1, p2, p3], this.color[i]));
       else racket.push(new Racket(i, [p0, p1, p2, p3], this.player[i].color));
+      racket[i].hp = player[i].hp;
     }
     return racket;
   }
@@ -236,7 +234,6 @@ class Game {
     if (!this.boardType) {
       return ;
     }
-
     for (let p of this.player) {
       if (p.hp == 0) {
         if (this.boardType == Form.REC) {
@@ -272,12 +269,12 @@ class Game {
     this.boardContext!.font = "50px sherif";
     this.boardContext!.fillText(
       Game.point.toString(),
-      this.boardCanvas!.width / 2,
+      this.boardCanvas!.width / 3,
       50
     );
     this.boardContext!.fillText(
       Math.round((Date.now() - this.start) / 1000).toString(),
-      this.boardCanvas!.width / 2,
+      this.boardCanvas!.width / 3,
       110
     );
     this.boardContext!.font = "20px sherif";
@@ -302,7 +299,7 @@ class Game {
       p.printPoint(this.boardContext, 3, "green");
       this.boardContext!.fillText(
         p.hp.toString(),
-        this.boardCanvas!.width / 1.2,
+        this.boardCanvas!.width / 2,
         50 + 20 * p.index
       );
     }
@@ -312,6 +309,7 @@ class Game {
       Game.live = 3;
       this.start = Date.now();
     }
+    console.log(this.ball.point[0].x + " " + this.ball.point[0].y + "|" + this.ball.speed.x + " " + this.ball.speed.y + "|" + Date.now())
   }
 }
 
@@ -634,7 +632,6 @@ class Target extends Entity {
 }
 
 class Ball extends Entity {
-  public wait: number = 120;
   public defaultSpeed: number = 3;
 
   constructor(points: Point[], player: Racket[]) {
@@ -668,10 +665,6 @@ class Ball extends Entity {
   }
 
   update(rackets: Racket[], walls: Wall[], board: Board) {
-    if (this.wait) {
-      this.wait--;
-      return;
-    }
     if (!this.sat(board.board)) {
       this.replaceTo(board.board.center());
     }
@@ -679,8 +672,9 @@ class Ball extends Entity {
       if (this.sat(racket)) {
         let angle = 0;
         let face;
-        if (rackets.length != 2) face = this.getFace(rackets.indexOf(racket));
-        else {
+        if (rackets.length != 2) {
+          face = this.getFace(rackets.indexOf(racket));
+        } else {
           let index = rackets.indexOf(racket);
           if (index == 1) face = this.getFace(2);
           else face = this.getFace(0);
@@ -736,18 +730,15 @@ class Ball extends Entity {
             rackets[1].hp--;
             this.replaceTo(board.board.center());
             this.goToRandomPlayer(rackets);
-            this.wait = 120;
           } else if (index === 0) {
             rackets[0].hp--;
             this.replaceTo(board.board.center());
             this.goToRandomPlayer(rackets);
-            this.wait = 120;
           }
         } else {
           rackets[index].hp--;
           this.replaceTo(board.board.center());
           this.goToRandomPlayer(rackets);
-          this.wait = 120;
         }
         return;
       }
@@ -779,14 +770,14 @@ class Racket extends Entity {
           this.dir.y * this.defaultSpeed
         );
         this.moveTo(this.speed);
-        //socket.emit('up', this.index);
+        Game.socket.emit('up');
       } else if (Game.keyPressed.down) {
         this.speed = new Vector(
           -this.dir.x * this.defaultSpeed,
           -this.dir.y * this.defaultSpeed
         );
         this.moveTo(this.speed);
-        //socket.emit('down');
+        Game.socket.emit('down');
       }
    } //else {
     //   if (
@@ -827,15 +818,11 @@ const Canvas = ({ ref }: any) => {
   let router = useRouter();
   const canvasRef = useRef(ref);
   if (canvasRef) {
-    console.error(router.query);
-    let game = new Game(Number(router.query.number_player), Number(router.query.position));
-    console.log("?")
-    console.log(router.query.position);
-    console.log(router.query.number_player);
+    let game = new Game(Number(router.query.number_player), Number(router.query.position), router);
 
     useEffect(() => {
       game.init(canvasRef);
-      setInterval(handleResize, 8, game);
+      setInterval(handleResize, 17, game);
     }, []);
   }
 
