@@ -1,7 +1,9 @@
 import { NextComponentType, NextPageContext } from "next";
 import { createContext, ReactElement, useContext, useEffect, useMemo, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { io, Socket, SocketOptions } from "socket.io-client";
 import { DefaultEventsMap } from "socket.io/dist/typed-events";
+import { selectUserState } from "../store/UserSlice";
 import { useAuthContext } from "./Auth";
 
 const WebsocketContext = createContext<Socket<DefaultEventsMap, DefaultEventsMap> | null>(null);
@@ -14,13 +16,17 @@ export default function Websocket({ children } : WebsocketProps )
 {
     const [socketInstances, setSocketInstances] = useState<Socket<DefaultEventsMap, DefaultEventsMap> | null>(null);
     const { currentUser } = useAuthContext()
+    const userState = useSelector(selectUserState);
+    const dispatch = useDispatch();
     // console.error("check")
     // console.error(children)
 
     useEffect(() => {
-        console.error("In websocket component")
-        console.error("type of window: ", typeof window)
-        if (typeof window !== 'undefined' && currentUser.id.length)
+        if (!userState.id.length)
+        {
+            
+        }
+        if (typeof window !== 'undefined')
         {
             console.error("connecting")
             const socket = io("/conversations");
