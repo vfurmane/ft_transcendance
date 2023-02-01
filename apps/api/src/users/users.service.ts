@@ -1,7 +1,12 @@
-import { forwardRef, Inject, Injectable } from '@nestjs/common';
+import {
+  forwardRef,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { In, Repository, UpdateResult } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User } from 'types';
+import { User, Userfront } from 'types';
 import * as speakeasy from 'speakeasy';
 import { SpeakeasyGeneratedSecretDto } from '../auth/speakeasy-generated-secret.dto';
 import { AccessTokenResponse } from 'types';
@@ -9,6 +14,7 @@ import * as bcrypt from 'bcrypt';
 import { UpdateUserPasswordDto } from './update-user-password.dto';
 import { Jwt as JwtEntity } from 'types';
 import { AuthService } from '../auth/auth.service';
+import { TransformUserService } from 'src/TransformUser/TransformUser.service';
 
 export interface AddUserData {
   name: string;
@@ -21,6 +27,7 @@ export class UsersService {
   constructor(
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
+    private readonly transformUserService: TransformUserService,
     @Inject(forwardRef(() => AuthService))
     private readonly authService: AuthService,
     @InjectRepository(JwtEntity)
@@ -46,14 +53,15 @@ export class UsersService {
   }
 
   async userExists(user: AddUserData): Promise<boolean> {
-    return await this.usersRepository.createQueryBuilder().
-      where(
-          "LOWER(name) = :name OR LOWER(email) = :email",
-          {
-            name: user.name.toLowerCase(),
-            email: user.email.toLowerCase()
-          }
-      ).getOne() !== null
+    return (
+      (await this.usersRepository
+        .createQueryBuilder()
+        .where('LOWER(name) = :name OR LOWER(email) = :email', {
+          name: user.name.toLowerCase(),
+          email: user.email.toLowerCase(),
+        })
+        .getOne()) !== null
+    );
   }
 
   async addUser(user: AddUserData): Promise<User> {
@@ -83,6 +91,19 @@ export class UsersService {
 
   async removeTfa(userId: string): Promise<UpdateResult> {
     return this.usersRepository.update({ id: userId }, { tfa_setup: false });
+  }
+
+  async getUser(currentUser: User): Promise<Userfront | null> {
+    return await this.transformUserService.transform(currentUser);
+  }
+
+  async updateLevel(user_id: string, xp: number): Promise<number> {
+    const user = await this.usersRepository.findOneBy({ id: user_id });
+    const level = user?.level;
+    if (!user) throw new NotFoundException('Unknown user');
+    user.level = (user.level ? user.level : 0) + xp;
+    this.usersRepository.save(user);
+    return (level ? level : 0) + xp;
   }
 
   async updateUserPassword(

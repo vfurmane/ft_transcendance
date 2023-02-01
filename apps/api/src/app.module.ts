@@ -8,6 +8,11 @@ import { AuthModule } from './auth/auth.module';
 import { SearchModule } from './search/search.module';
 import { FriendshipsModule } from './friendships/friendships.module';
 import { ConversationsModule } from './conversations/conversations.module';
+import { MatchModule } from './Match/Match.module';
+import { LeaderBoardModule } from './leaderBoard/leaderBoard.module';
+import { TransformUserModule } from './TransformUser/TransformUser.module';
+import { PongModule } from './pong/pong.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -31,12 +36,17 @@ import { ConversationsModule } from './conversations/conversations.module';
         logging: configService.get('NODE_ENV') === 'development',
       }),
     }),
+    ScheduleModule.forRoot(),
     UsersModule,
     AuthModule,
     SearchModule,
     FriendshipsModule,
     UsersModule,
     ConversationsModule,
+    MatchModule,
+    LeaderBoardModule,
+    TransformUserModule,
+    PongModule
   ],
   controllers: [AppController],
   providers: [AppService],

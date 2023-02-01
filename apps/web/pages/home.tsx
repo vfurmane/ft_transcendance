@@ -3,60 +3,52 @@ import TopBar from "../components/TopBar";
 import PlayButton from "../components/HomePage/PlayButton";
 import List from "../components/HomePage/List";
 import UserEntity from "../components/HomePage/UserEntity";
-import MatchEntity from "../components/HomePage/MatchEntity";
-import LeaderboardEntity from "../components/HomePage/LeaderboardEntity";
 import ArrayDoubleColumn from "../components/HomePage/ArrayDoubleColumn";
 import PlayMenu from "../components/HomePage/PlayMenu";
 import { setUserState } from "../store/UserSlice";
 import { useDispatch } from "react-redux";
+import { Userfront as User } from "types";
 import Link from "next/link";
 import ChatBar from "../components/chatBar";
 import playButtonStyles from "styles/playButton.module.scss";
 import textStyles from "styles/text.module.scss";
 import styles from "styles/home.module.scss";
 import { FriendshipRequestStatus } from "types";
-
-//temporary before the login page
-const user_id = "1edffd5a-863d-442c-a962-a5dbd9b2c686";
+import { io } from 'socket.io-client';
+import { useRouter } from "next/router";
 
 function Home(): JSX.Element {
-  const matchList: JSX.Element[] = [];
-  const leaderboard: JSX.Element[] = [];
   const friendListRef = useRef([<></>]);
   const setterInit: React.Dispatch<React.SetStateAction<boolean>> = () => false;
 
+  const router = useRouter();
+
   const [openPlayButton, setOpenPlayButton] = useState(false);
   const [openUserMenu, setOpenUserMenu] = useState(false);
-  const [indexOfUser, setIndexOfUser] = useState(0);
+  const [indexOfUser, setIndexOfUser] = useState(-1);
   const [friendList, setFriendList] = useState([<></>]);
 
-  const prevIndexOfUserRef = useRef(0);
+  const prevIndexOfUserRef = useRef(-1);
   const prevSetterUsermenuRef = useRef(setterInit);
 
-  //get user info end dispatch them in the redux store
   const dispatch = useDispatch();
   useEffect(() => {
-    fetch(`/api/user/${user_id}`)
+    fetch(`/api/user`, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + localStorage.getItem('access_token'),
+      }
+    })
       .then(function (response) {
         return response.json();
       })
       .then((data) => {
-        dispatch(
-          setUserState({
-            id: data.id,
-            name: data.name,
-            avatar_num: 6,
-            status: "Store Ok",
-            victory: 1000,
-            defeat: 70,
-            rank: 10,
-            level: 489,
-          })
-        );
+        dispatch(setUserState(data));
       })
       .catch(function (error) {
         console.log(`probleme with fetch: ${error.message}`);
       });
+      //console.log(localStorage.getItem('access_token'));
   }, [dispatch]);
 
   /*======for close topBar component when click on screen====*/
@@ -78,6 +70,38 @@ function Home(): JSX.Element {
   /*==========================================================*/
 
   function handleClickPlayButton(): void {
+    
+    console.log("CLICKING THE BUTTON")
+    const socket = io("/pong", {
+      auth: {
+        token: localStorage.getItem('access_token'),
+      }
+    });
+    socket.on('disconnect', function(){
+      console.error("JWT PROBABLY EXPIRED")
+    });
+
+    socket.on("connect_error", (error) => {
+      console.error("COULD NOT CONNECT " + error.message);
+    });
+
+    socket.emit('searchGame', (response:any) => {
+      console.log(response);
+    });
+
+    socket.on("startGame", (config) => {
+      console.log("RECEIVED START GAME")
+ 
+      router.replace({
+        pathname: '/pong', query: {
+          number_player : config.number_player,
+          position : config.position,
+        }}, '/pong');
+      console.log("number of player :" + config.number_player);
+      console.log("position :", config.position);
+      socket.disconnect();
+    })
+
     setOpenPlayButton(!openPlayButton);
   }
 
@@ -117,16 +141,12 @@ function Home(): JSX.Element {
   }
 
   function delFriendClick(e: { idToDelete: string; index: number }): void {
-    const data = {
-      user_id: user_id,
-      userToDelete_id: e.idToDelete,
-    };
-    fetch(`/api/friendships`, {
+    fetch(`/api/friendships/${e.idToDelete}`, {
       method: "DELETE",
       headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + localStorage.getItem('access_token'),
+      }
     }).catch(function (error) {
       console.log(
         "Il y a eu un problème avec l'opération fetch : " + error.message
@@ -141,36 +161,37 @@ function Home(): JSX.Element {
 
   //get the friend list of the user
   useEffect(() => {
-    fetch(`/api/friendships`)
+    fetch(`/api/friendships`, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + localStorage.getItem('access_token'),
+      }
+    })
       .then(function (response) {
         if (response.ok) {
           return response.json().then(function (json) {
             const friendListTmp: JSX.Element[] = [];
-            json.map((e: FriendshipRequestStatus, i: number) => {
-              const key = i;
-              const user = {
-                id: `${e.friend?.id}`,
-                avatar_num: i + 1,
-                status: i % 2 === 0 ? "online" : "offline",
-                name: `${e.friend?.name}`,
-                victory: Math.floor(Math.random() * 1000),
-                defeat: Math.floor(Math.random() * 1000),
-                rank: Math.floor(Math.random() * 1000),
-                level: Math.floor(Math.random() * 1000),
-              };
-              const userEntity = (
-                <UserEntity
-                  small={false}
-                  option={{ del: true, accept: e.accept, ask: e.ask }}
-                  user={user}
-                  key={key}
-                  index={i}
-                  handleClick={handleClickUserMenu}
-                  delFriendClick={delFriendClick}
-                />
-              );
-              friendListTmp.push(userEntity);
-            });
+            json.map(
+              (
+                e: { friend: User; accept: boolean; ask: boolean },
+                i: number
+              ) => {
+                const key = i;
+                const user = e.friend;
+                const userEntity = (
+                  <UserEntity
+                    small={false}
+                    option={{ del: true, accept: e.accept, ask: e.ask }}
+                    user={user}
+                    key={key}
+                    index={i}
+                    handleClick={handleClickUserMenu}
+                    delFriendClick={delFriendClick}
+                  />
+                );
+                friendListTmp.push(userEntity);
+              }
+            );
             setFriendList([...friendListTmp]);
             friendListRef.current = friendListTmp;
           });
@@ -183,36 +204,6 @@ function Home(): JSX.Element {
         );
       });
   }, [handleClickUserMenu]);
-
-  for (let i = 0; i < 19; i++) {
-    matchList.push(
-      <MatchEntity
-        url1={`/avatar/avatar-${i + 2}.png`}
-        url2={`/avatar/avatar-${i + 1}.png`}
-        name={"name" + (i + 1).toString()}
-        score={5}
-        key={i}
-      />
-    );
-    const user = {
-      id: `${i + 1}`,
-      avatar_num: i + 1,
-      status: i % 2 === 0 ? "online" : "offline",
-      name: "name " + (i + 1).toString(),
-      victory: Math.floor(Math.random() * 1000),
-      defeat: Math.floor(Math.random() * 1000),
-      rank: i + 1,
-      level: Math.floor(Math.random() * 1000),
-    };
-    leaderboard.push(
-      <LeaderboardEntity
-        user={user}
-        key={i}
-        index={i}
-        handleClick={handleClickUserMenu}
-      />
-    );
-  }
 
   return (
     <div onClick={(): void => close()} id={"top"}>
@@ -273,7 +264,7 @@ function Home(): JSX.Element {
           </div>
           <div className="col-10 offset-1  offset-lg-0 col-lg-6">
             <div className="card">
-              <List title="featuring" list={matchList} />
+              <List title="featuring" list={[<></>]} />
             </div>
           </div>
         </div>
@@ -281,13 +272,16 @@ function Home(): JSX.Element {
           <div className="col-8 offset-2">
             <h3 className={`${styles.text} ${textStyles.laquer}`}>
               These guy are the best pong player of the world ... we are so
-              pround of them !!
+              proud of them !!
             </h3>
           </div>
         </div>
         <div className="row">
           <div className="col-10 offset-1" id="leaderBoard">
-            <ArrayDoubleColumn title="leaderboard" list={leaderboard} />
+            <ArrayDoubleColumn
+              title="leaderboard"
+              handleClick={handleClickUserMenu}
+            />
           </div>
         </div>
         <div className="row">

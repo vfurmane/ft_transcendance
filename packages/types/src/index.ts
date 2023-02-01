@@ -45,10 +45,62 @@ export interface ConversationWithUnread {
   lastMessage: Date;
 }
 
+export interface Userfront {
+  id: string;
+  name: string;
+  avatar_num: number;
+  status: string;
+  victory: number;
+  defeat: number;
+  rank: number;
+  level: number;
+}
+
+export interface Point {
+  x: number;
+  y: number;
+}
+
+export interface Vector {
+  x: number;
+  y: number;
+}
+
+export interface Ball {
+  point : Point;
+  dir : Vector;
+}
+
+export interface PlayerInterface {
+  point : Point;
+  dir : Vector;
+  hp : number;
+}
+
+export interface GameState {
+  numberPlayer : number;
+  players : PlayerInterface[]
+  ball : Ball;
+}
+
 export interface FriendshipRequestStatus {
-  friend : User | null,
+  friend : Userfront | null,
   accept: boolean,
   ask: boolean
+}
+
+export interface MatchFront {
+  id: string;
+  score_winner: number;
+  score_looser: number;
+  looser: Userfront | null;
+  winner: Userfront | null;
+}
+
+export interface Achivement {
+  name: string;
+  status: string;
+  description: string;
 }
 
 export * from './enums';

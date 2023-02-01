@@ -1,9 +1,9 @@
 import React from "react";
-import User from "../../interface/UserInterface";
+import { Userfront as User } from "types";
 import leaderBoardStyles from "styles/leaderBoard.module.scss";
 import UserEntity from "./UserEntity";
 
-export default function leaderboardEntity(props: {
+export default function LeaderboardEntity(props: {
   user: User;
   index: number;
   key: number;

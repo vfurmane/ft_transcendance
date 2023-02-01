@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { TransformUserService } from '../TransformUser/TransformUser.service';
 import { Repository } from 'typeorm';
 import {
   FriendshipRequestStatus,
@@ -14,6 +15,7 @@ export class FriendshipsService {
     private readonly userRepository: Repository<User>,
     @InjectRepository(friendshipsEntity)
     private readonly friendshipsRepository: Repository<friendshipsEntity>,
+    private readonly transformUserService: TransformUserService,
   ) {}
 
   async add(currentUser: User, target_id: string): Promise<boolean> {
@@ -55,8 +57,7 @@ export class FriendshipsService {
   }
 
   async getFriendsList(currentUser: User): Promise<FriendshipRequestStatus[]> {
-    const response: { friend: User | null; accept: boolean; ask: boolean }[] =
-      [];
+    const response: FriendshipRequestStatus[] = [];
 
     const initiatorArray = await this.friendshipsRepository.find({
       where: [
@@ -72,13 +73,30 @@ export class FriendshipsService {
         },
       ],
     });
-    initiatorArray.forEach((e): void => {
-      if (e.initiator.id === currentUser.id)
-        response.push({ friend: e.target, accept: e.accepted, ask: true });
+
+    const res = initiatorArray.map(async (el): Promise<FriendshipRequestStatus> => {
+      if (el.initiator.id === currentUser.id)
+      {
+        return {
+          friend: await this.transformUserService.transform(
+            el.target,
+          ),
+          accept: el.accepted,
+          ask: true,
+        }
+      }
       else
-        response.push({ friend: e.initiator, accept: e.accepted, ask: false });
+      {
+        return {
+          friend: await this.transformUserService.transform(
+            el.initiator,
+          ),
+          accept: el.accepted,
+          ask: false,
+        }
+      }
     });
-    return response;
+    return Promise.all(res);
   }
 
   async delete(currentUser: User, userToDelete_id: string): Promise<boolean> {
@@ -109,14 +127,14 @@ export class FriendshipsService {
     return false;
   }
 
-  async update(currentUser: User, target_id: string): Promise<boolean> {
+  async update(currentUser: User, initiator_id: string): Promise<boolean> {
     const friendContract = await this.friendshipsRepository.findOne({
       where: {
         initiator: {
-          id: currentUser.id,
+          id: initiator_id,
         },
         target: {
-          id: target_id,
+          id: currentUser.id,
         },
       },
     });
@@ -126,7 +144,6 @@ export class FriendshipsService {
       this.friendshipsRepository.save(friendContract);
       return true;
     }
-
     return false;
   }
 }

@@ -1,9 +1,3 @@
-export default interface Achivement {
-  name: string;
-  status: string;
-  description: string;
-}
-
 export const initAchivement = {
   name: "achivement",
   status: "done",

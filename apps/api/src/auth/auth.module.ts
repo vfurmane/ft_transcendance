@@ -13,6 +13,7 @@ import { JwtStrategy } from './jwt.strategy';
 import { State } from 'types';
 import ftOauth2Configuration from '../config/ft-oauth2';
 import { LocalStrategy } from './local.strategy';
+import { TransformUserService } from 'src/TransformUser/TransformUser.service';
 import { Jwt } from 'types';
 import { JwtRefreshStrategy } from './jwt-refresh.strategy';
 
@@ -29,7 +30,7 @@ import { JwtRefreshStrategy } from './jwt-refresh.strategy';
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
         secret: configService.get('JWT_SECRET'),
-        signOptions: { expiresIn: '5m' },
+        signOptions: { expiresIn: '1h' },
       }),
     }),
     PassportModule,
@@ -44,6 +45,7 @@ import { JwtRefreshStrategy } from './jwt-refresh.strategy';
     LocalStrategy,
     Logger,
     UsersService,
+    TransformUserService,
   ],
   controllers: [AuthController],
   exports: [AuthService],

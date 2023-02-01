@@ -1,16 +1,13 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import Connect from "../../public/statusConnect.png";
-// import RemoveFriend from "../../public/RemoveFriend.png";
-import User from "../../interface/UserInterface";
+import { Userfront as User } from "types";
 import styles from "styles/entity.module.scss";
 import textStyles from "styles/text.module.scss";
 import Link from "next/link";
 import Message from "../../public/message.png";
 import valide from "../../public/valide.png";
 import refuse from "../../public/crossRed.png";
-import { useSelector } from "react-redux";
-import { selectUserState } from "../../store/UserSlice";
 
 export default function UserEntity(props: {
   user: User;
@@ -25,24 +22,18 @@ export default function UserEntity(props: {
   }) => void;
   delFriendClick: (e: { idToDelete: string; index: number }) => void;
 }): JSX.Element {
-  const UserState = useSelector(selectUserState);
   const [openMenu, setOpenMenu] = useState(false);
   const [accept, setAccept] = useState(props.option?.accept);
 
   if (typeof props.user === "undefined" || !props.option) return <></>;
 
   function valideClick(): void {
-    const data = {
-      initiator_id: props.user.id,
-      target_id: UserState.id,
-    };
-
-    fetch(`/api/friendships/validate`, {
-      method: "POST",
+    fetch(`/api/friendships/validate/${props.user.id}`, {
+      method: "PATCH",
       headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + localStorage.getItem('access_token'),
+      }
     })
       .then(function (response) {
         response.json().then((res) => {
