@@ -208,7 +208,7 @@ export class AuthController {
   async changePassword(
     @Body() changePasswordDto: ChangePasswordDto,
     @User() user: UserEntity,
-  ): Promise<void> {
+  ): Promise<{ message: string }> {
     if (
       changePasswordDto.new_password !== changePasswordDto.confirm_new_password
     )
@@ -223,6 +223,7 @@ export class AuthController {
       throw new UnauthorizedException('Old password is incorrect');
 
     this.authService.changePassword(user.id, changePasswordDto.new_password);
+    return { message: 'Successfully changed password' };
   }
 
   @Post('logout')
