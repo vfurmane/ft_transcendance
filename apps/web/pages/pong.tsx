@@ -1,4 +1,4 @@
-import { GameState, PlayerInterface, State } from 'types'
+import { GameState, PlayerInterface, State} from 'types'
 import { io } from 'socket.io-client'
 
 import React, {
@@ -424,7 +424,7 @@ class Point {
   }
 
   midSegment(other: Point) {
-    return new Point((this.x + other.x) / 2, (this.y + other.y) / 2);
+    return new Point((this.x + other?.x) / 2, (this.y + other?.y) / 2);
   }
 
   intersect(to1: Point, from2: Point, to2: Point) {
