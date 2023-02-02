@@ -157,7 +157,7 @@ export class AuthService {
       '5d',
     );
     if (state) {
-      this.statesRepository.delete({ token: state.token });
+      this.removeState(state);
     }
     return {
       access_token: await accessTokenPayload,
@@ -205,7 +205,7 @@ export class AuthService {
   }
 
   async removeState(state: State): Promise<void> {
-    state;
+    this.statesRepository.delete({ token: state.token });
     return;
   }
 }
