@@ -221,16 +221,14 @@ function Home(): JSX.Element {
         handleClickUserMenu={handleClickUserMenu}
       />
       <div className={`${styles.illustration} d-none d-lg-block`}></div>
-      <div className="container ">
-        <div className="row">
-          <div className="col-12  d-none d-lg-block">
-            <h3 className={styles.title}>Ft_Transcendence</h3>
-          </div>
-          <div className="col-12 d-block d-lg-none">
-            <h3 className={`${styles.title} ${styles.small} d-block d-lg-none`}>
-              Ft_Transcendence
-            </h3>
-          </div>
+      <div className="container" style={{overflow: 'hidden', height: '2000px'}}>
+        <div className={`containerScrollVertical`}>
+            <span className={`textScroll ${textStyles.pixel}`}>-Ft_Transcendence-Ft_Transcendence-Ft_Transcendence&nbsp;</span>
+            <span className={`textScroll ${textStyles.pixel}`}>-Ft_Transcendence-Ft_Transcendence-Ft_Transcendence&nbsp;</span>
+        </div>
+        <div className={`containerScrollVertical inv`}>
+            <span className={`textScroll inv ${textStyles.laquer}`}>-Ft_Transcendence-Ft_Transcendence-Ft_Transcendence&nbsp;</span>
+            <span className={`textScroll inv ${textStyles.laquer}`}>-Ft_Transcendence-Ft_Transcendence-Ft_Transcendence&nbsp;</span>
         </div>
         <div className="row">
           <div

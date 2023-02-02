@@ -6,11 +6,9 @@ import { useSelector } from "react-redux";
 import { selectUserState } from "../store/UserSlice";
 import styles from 'styles/profil.module.scss';
 import Image from "next/image";
+import MiniProfil from "../components/miniProfil";
 
 export default function PingPong () : JSX.Element {
-
-    const user = useSelector(selectUserState);
-    console.log(user);
 
     /*======for close topBar component when click on screen====*/
     const [openToggle, setOpenToggle] = useState(false);
@@ -75,83 +73,15 @@ export default function PingPong () : JSX.Element {
                 handleClickUserMenu={handleClickUserMenu}
             />
 
-            <div style={{position: 'absolute', top: "20%", left: '20%', border: 'solid 1px white', width: '30%'}}>
-                <div style={{display: 'flex'}}>
-                    <div className="fill small">
-                        <Image
-                            alt="avatar"
-                            src={`/avatar/avatar-${user.avatar_num}.png`}
-                            width={42}
-                            height={42}
-                        />
-                    </div>
-                    
-                    <h2
-                    className={textStyles.pixel}
-                    style={{
-                        color: "white",
-                        fontSize: "30px",
-                        marginRight: "20px",
-                        marginTop: "5px"
-                    }}
-                    >
-                    {user.name}
-                    </h2>
+            <MiniProfil left={true}/>
+            <MiniProfil left={false}/>
 
-                    <p
-                    style={{
-                        color: "white",
-                        fontSize: "20px",
-                    }}
-                    className={textStyles.saira}
-                    >
-                    level :{user.level}
-                    <span
-                        id="level"
-                        className={textStyles.saira}
-                        style={{ fontSize: "30px", color: "white"}}
-                    ></span>
-                    </p>
-                    
-                    
-                </div>
-                <div>
-                    <div style={{ width: "100%" }}>
-                        <div className={styles.flex_between}>
-                            <p className={textStyles.saira} style={{ color: "white" }}>
-                            {user.victory} victory
-                            </p>
-                            <p className={textStyles.saira} style={{ color: "white" }}>
-                            {user.defeat} defeat
-                            </p>
-                        </div>
-                        <div className={`${styles.flex_between} ${styles.statBar}`}>
-                            <div
-                            style={{
-                                height: "30px",
-                                backgroundColor: "#03cea4",
-                                width: `${Math.floor(
-                                (user.victory / (user.defeat + user.victory)) * 100
-                                )}%`,
-                            }}
-                            ></div>
-                            <div
-                            style={{
-                                height: "30px",
-                                backgroundColor: "#e22d44",
-                                width: `${Math.floor(
-                                (user.defeat / (user.defeat + user.victory)) * 100
-                                )}%`,
-                            }}
-                            ></div>
-                        </div>
-                    </div>
-                </div>
+            <div className={`containerScrollHorizon `}>
+                <span className={`textScroll ${textStyles.pixel}`}>- Pong - pOnG - poNg - PONG - pOng&nbsp;</span>
+                <span className={`textScroll ${textStyles.pixel}`}>- Pong - pOnG - poNg - PONG - pOng&nbsp;</span>
             </div>
 
-
-            <div  style={{display: 'flex', alignItems: 'center', marginTop: '100px', flexDirection: 'column'}}>
-                <h1 className={textStyles.laquer} style={{color: 'white', fontSize: '100px', marginBottom: '150px'}}>Pong</h1>
+            <div  style={{display: 'flex', alignItems: 'center', marginTop: '400px', flexDirection: 'column'}}>
                 <Canvas/>
             </div>
        </div>

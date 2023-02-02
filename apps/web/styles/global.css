@@ -95,3 +95,55 @@ body::-webkit-scrollbar {
   left: 38px;
   bottom: 10px;
 }
+
+
+.containerScrollHorizon
+{
+  display: flex;
+  overflow: hidden;
+  width: 100%;
+  position: absolute;
+  top: 100px;
+  transform: translateX(0%);
+}
+
+.containerScrollVertical
+{
+  display: flex;
+  width: 0px;
+  height: 60px;
+  position: relative;
+  left: 30%;
+  transform: rotate(-90deg) translate(-2000px);
+  z-index: -1;
+}
+
+.containerScrollVertical.inv
+{
+  transform: rotate(90deg) translate(-50px);
+}
+
+
+.textScroll
+{
+  color: rgba(255, 255, 255, 0.1);
+  font-size: 200px;
+  white-space: nowrap;
+  animation: scrollTxt 180s linear infinite;
+}
+
+.textScroll.inv
+{
+  color: transparent;
+  -webkit-text-stroke: 2px #fff;
+  animation: scrollTxt 200s linear infinite;
+}
+
+@keyframes scrollTxt {
+  0%{
+    transform: translate(0, 0)
+  }
+  100%{
+    transform: translate(-100%, 0);
+  }
+}
