@@ -222,7 +222,11 @@ export class AuthController {
     )
       throw new UnauthorizedException('Old password is incorrect');
 
-    this.authService.changePassword(user.id, changePasswordDto.new_password);
+    await this.authService.changePassword(
+      user.id,
+      changePasswordDto.new_password,
+    );
+    await this.authService.revokeAllToken(user);
     return { message: 'Successfully changed password' };
   }
 
