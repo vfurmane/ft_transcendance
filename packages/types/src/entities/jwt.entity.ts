@@ -33,6 +33,6 @@ export class Jwt {
   @Column('boolean', { default: false })
   consumed!: boolean;
 
-  @ManyToOne(() => Jwt, (jwt) => jwt.id, { eager: true, nullable: true })
+  @ManyToOne(() => Jwt, (jwt) => jwt.id, { eager: false, nullable: true })
   originToken!: Jwt | null;
 }
