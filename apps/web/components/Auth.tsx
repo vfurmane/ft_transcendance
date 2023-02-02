@@ -15,17 +15,14 @@ export default function Auth({ children } : AuthProps )
 
     useEffect(() =>
     {
-        if (typeof window !== 'undefined')
-        {
-            const fetchUser = async () => {
-                const user = await identifyUser();
-                console.error("user received: ", user)
-                if (user)
-                    dispatch(setUserState(user))
-            }
-            fetchUser()
+        const fetchUser = async () => {
+            const user = await identifyUser();
+            console.error("user received: ", user)
+            if (user)
+                dispatch(setUserState(user))
             setLoading(false)
         }
+        fetchUser()
     }, [])
     if (loading) return <Loading></Loading>
     return (
