@@ -58,7 +58,8 @@ export default function ChangePswrd(): JSX.Element {
           throw new Error("An unexpected error occured...");
         } else {
           setFormSuccess(response.message);
-          router.push("/");
+          localStorage.removeItem("access_token");
+          router.push("/login");
         }
       })
       .catch((error) => {
