@@ -14,6 +14,7 @@ import List from "./HomePage/List";
 import { Userfront as User } from "types";
 import { initUser } from "../initType/UserInit";
 import { clearTokens } from "../helpers/clearTokens";
+import { useRouter } from "next/router";
 
 interface propsTopBar {
   openToggle: boolean;
@@ -29,7 +30,27 @@ interface propsTopBar {
   }): void;
 }
 
+async function logout(): Promise<null> {
+  const response = await fetch(`/api/auth/logout`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+    },
+  }).then(async (response) => {
+    if (!response.ok) {
+      return response.json().then((error) => {
+        throw new Error(error.message || "An unexpected error occured...");
+      });
+    } else {
+      return response.json();
+    }
+  });
+  if (!response) return null;
+  return response;
+}
+
 function TopBar(props: propsTopBar): JSX.Element {
+  const router = useRouter();
   const [value, setValue] = useState("");
   const [userList, setUserList] = useState([<></>]);
 
@@ -55,6 +76,16 @@ function TopBar(props: propsTopBar): JSX.Element {
     setValue(val);
     if (!val.length) props.writeSearchTopBar(false);
     else props.writeSearchTopBar(true);
+  }
+
+  function logoutHandler(): void {
+    logout()
+      .then(() => {
+        clearTokens();
+        dispatch(setUserState(initUser));
+        router.push("/login");
+      })
+      .catch((error) => console.error(error));
   }
 
   useEffect((): void => {
@@ -214,13 +245,7 @@ function TopBar(props: propsTopBar): JSX.Element {
               </div>
             </Link>
             <div className={styles.contextMenuEntity}>
-              <h3
-                className={textStyles.laquer}
-                onClick={(): void => {
-                  clearTokens();
-                  dispatch(setUserState(initUser));
-                }}
-              >
+              <h3 className={textStyles.laquer} onClick={logoutHandler}>
                 logout
               </h3>
             </div>
