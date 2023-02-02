@@ -74,14 +74,14 @@ function Home(): JSX.Element {
 
   function handleClickPlayButton(): void {
     
-    console.log("CLICKING THE BUTTON")
+    /*console.log("CLICKING THE BUTTON")
     const socket = io("/pong", {
       auth: {
         token: localStorage.getItem('access_token'),
       }
     });
     socket.on('disconnect', function(){
-      console.error("JWT PROBABLY EXPIRED")
+      console.error("DEHORS")
     });
 
     socket.on("connect_error", (error) => {
@@ -103,7 +103,8 @@ function Home(): JSX.Element {
       console.log("number of player :" + config.number_player);
       console.log("position :", config.position);
       socket.disconnect();
-    })
+    })*/
+    router.replace('/pingPong');
 
     setOpenPlayButton(!openPlayButton);
   }

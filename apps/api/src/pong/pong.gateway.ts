@@ -43,6 +43,7 @@ import { Interval } from "@nestjs/schedule";
 				value[1].forEach(id => {
 					if (id === client.data.id) {
 						client.data.room = key;
+						client.data.position = value[1].indexOf(id);
 						client.join(key);
 						console.log("Reconnected to the game !")
 						return 'Connection restored'
@@ -67,7 +68,7 @@ import { Interval } from "@nestjs/schedule";
 		const socketWaiting = await this.server.in(client.data.room).fetchSockets();
 		if (socketWaiting.length === 0) {
 			this.room_id.splice(this.room_id.indexOf(client.data.room), 1);
-			console.log("REMOVED THE ROOM")
+			console.log("REMOVED THE ROOM"  )
 			console.log(this.room_id);
 		} else {
 			let i = 0;
@@ -76,43 +77,85 @@ import { Interval } from "@nestjs/schedule";
 		console.log(client.data.name + " DISCONNECTED")
 	}
 
-	@Interval(10)
+	@Interval(17)
+	update() {
+		if (!this.games || this.games === undefined) {
+			return ;
+		}
+		this.games.forEach(async (key, room) => {
+			let game = key[0];
+			if (game.boardType !== 0) {
+				game.updateGame();
+				console.log(game.ball.point[0].x + " " + game.ball.point[0].y + "|" + game.ball.speed.x + game.ball.speed.y + "|" + Date.now());
+			} else {
+				// console.log("GA ME IS FINISHED - DISCONNECTING ALL CLIENT")
+				const sockets = await this.server.in(room).fetchSockets();
+				sockets.forEach((socket) => {
+					// console.log("DISCONNECTING :" + socket.data.name)
+					socket.leave(room);
+					socket.disconnect();
+				})
+				this.games.delete(room);
+			}
+		})
+	}
+
+	@Interval(1000)
 	refresh() {
 		if (!this.games || this.games === undefined) {
 			return ;
 		}
 		this.games.forEach(async (key, room) => {
 			let game = key[0];
-			game.updateGame();
-			let state = game.getState();
-			console.log(game.player)
-			console.log("SENDING REFRESH TO : ")
-			const sockets = await this.server.in(room).fetchSockets();
-			sockets.forEach((socket) => console.log(socket.data.name));
-			this.server.in(room).emit('refresh', state);
+			if (game.boardType !== 0) {
+				let state = game.getState();
+				console.log("=-=-=-=-=-=REFRESHING=-=-=-=-=-=")
+				this.server.in(room).emit('refresh', state);
+			}
 		});
 	}
 
-	@SubscribeMessage('move')
-	async	registerMove(@ConnectedSocket() client : Socket, dir : boolean) {
-		const clientSockets = await this.server.in(`user_${client.data.id}`).fetchSockets();
-		const room = client.data.room;
-		if (room === undefined)
-			return 'You are not in a room'
-		if (this.room_id.indexOf(room) === -1) {
-			client.data.room = undefined
-			return 'Your room doesnt exist !'
+	checkUser (client : Socket, room : any) {
+		if (room === undefined) { // not in any room
+			console.log("no room")
+			return false;
+		} else if (client.data.position === -1) { // is not a player (spectate)
+			console.log("no position : " + client.data.position)
+			return false;
 		}
-		if (client.data.position === -1) {
-			return 'You are not a player !'
+		return true;
+	}
+
+	@SubscribeMessage('up')
+	async	registerUp(@ConnectedSocket() client : Socket) {
+		const room = client.data.room;
+		if (!this.checkUser(client, room)) {
+			return 'You are not allowed to send this kind of message !'
 		}
 		const game = (this.games.get(room))![0];
 		if (!game) {
-			return 'Fatal error : No game !'
+			return 'Game not launched'
 		}
-		game.movePlayer(client.data.position, dir)
-		this.server.in(room).emit('refresh', { GameState : game.getState()});
-		return 'You moved ' + (dir ? 'up' : 'down')
+		game.movePlayer(client.data.position, true)
+		this.server.in(room).emit('refresh', game.getState());
+		return 'You moved up'
+	}
+
+	@SubscribeMessage('down')
+	async	registerDown(@ConnectedSocket() client : Socket) {
+		const room = client.data.room;
+		if (!this.checkUser(client, room)) {
+			return 'You are not allowed to send this kind of message !'
+		}
+		const game = (this.games.get(room))![0];
+		if (!game) {
+			return 'Game not launched'
+		}
+		console.log(`Moving player from ${game.player[client.data.position].getx()} ${game.player[client.data.position].gety()}`)
+		game.movePlayer(client.data.position, false)
+		console.log(`to ${game.player[client.data.position].getx()} ${game.player[client.data.position].gety()}`)
+		this.server.in(room).emit('refresh', game.getState());
+		return 'You moved down'
 	}
 
 	@SubscribeMessage('startGame')

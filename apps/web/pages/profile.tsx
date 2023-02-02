@@ -17,11 +17,9 @@ import { initMatch } from "../initType/MatchInit";
 
 export default function Profil(): JSX.Element {
   const UserState = useSelector(selectUserState);
-  const setterInit: React.Dispatch<React.SetStateAction<boolean>> = () => {
-    console.error("setterInit");
-  };
+  console.log(UserState.name);
 
-  const prevSetterUsermenuRef = useRef(setterInit);
+  
   const prevAchivementRef = useRef({ name: "", status: "", description: "" });
   const router = useRouter();
   const [user, setUser] = useState(initUser);
@@ -40,6 +38,11 @@ export default function Profil(): JSX.Element {
   const [openUserList, setOpenUserList] = useState(false);
   const [indexOfUser, setIndexOfUser] = useState(-1);
   const prevIndexOfUserRef = useRef(-1);
+
+  const setterInit: React.Dispatch<React.SetStateAction<boolean>> = () => {
+    console.error("setterInit");
+  };
+  const prevSetterUsermenuRef = useRef(setterInit);
 
   function clickTopBarToggle(): void {
     setOpenToggle(!openToggle);

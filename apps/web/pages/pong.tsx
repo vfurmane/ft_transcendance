@@ -1,17 +1,11 @@
-import { GameState, PlayerInterface, State} from 'types'
+import { GameState, PlayerInterface } from 'types'
 import { io } from 'socket.io-client'
 
 import React, {
   useRef,
   useEffect,
-  useState,
-  ReactComponentElement,
 } from "react";
-import { useRouter } from 'next/router';
-import { config } from 'process';
-import { STATUS_CODES } from 'http';
-import { stat } from 'fs';
-
+import Router, { NextRouter, useRouter } from 'next/router';
 enum Axe {
   X = 1,
   Y = 2,
@@ -50,23 +44,26 @@ class Game {
   public static position : number;
   public static socket : any;
 
-  constructor(number_player:number, position:number) {
-    if (typeof window !== 'undefined') {
+  constructor(number_player:number, position:number, private router:NextRouter) {
+    /*if (typeof window !== 'undefined') {
       Game.socket = io("/pong", {
         auth: {
           token: localStorage.getItem('access_token'),
         }
       });
+      Game.socket.on('disconnect', () => {
+        console.error('Fin de partie')
+        //this.router.replace('/')
+      })
       Game.socket.on('refresh', (state:GameState) => {
-        console.log("I GOT REFRESH MESSAGE")
         if (!this.board) {
           return ;
         }
-        console.log(this.board.wall)
+        console.log("=-=-=-=-=-=REFRESHING=-=-=-=-=-=")
         this.refresh(state);
       });
-    }
-    this.boardType = number_player;
+    }*/
+    this.boardType = 2;
     Game.position = position;
   }
 
@@ -88,7 +85,9 @@ class Game {
   }
 
   refresh(state: any) {
-    console.log("i actually refreshed something")
+    if (!this.boardType) {
+      return ;
+    }
     if (this.boardType == Form.REC) {
       this.player = this.updatePlayer(state.players, [
         this.board.wall[0],
@@ -97,7 +96,6 @@ class Game {
     } else {
       this.player = this.updatePlayer(state.players, this.board.wall);
     }
-    console.log(this.player)
     if (this.boardType == Form.REC) {
       this.ball = new Ball (this.createRegularPolygon(new Point(state.ball.point.x, state.ball.point.y), 10, 4), this.player);
     } else {
@@ -107,7 +105,6 @@ class Game {
   }
 
   updatePlayer(player: PlayerInterface[], wall: Wall[]) {
-    console.log("number of wall : " + wall.length)
     let racket: Racket[] = [];
     for (let i = 0; i < wall.length; i++) {
       let wallDir = wall[i].point[0].vectorTo(wall[i].point[2]).normalized();
@@ -126,6 +123,7 @@ class Game {
       if (this.player === undefined)
         racket.push(new Racket(i, [p0, p1, p2, p3], this.color[i]));
       else racket.push(new Racket(i, [p0, p1, p2, p3], this.player[i].color));
+      racket[i].hp = player[i].hp;
     }
     return racket;
   }
@@ -182,8 +180,8 @@ class Game {
     this.boardCanvas = this.boardCanvasRef.current;
     if (!this.boardCanvas) return;
     this.boardContext = this.boardCanvas.getContext("2d");
-    this.boardCanvas.width = 1920//window.innerWidth * 0.9;
-    this.boardCanvas.height = 1080//window.innerHeight * 0.9;
+    this.boardCanvas.width = window.innerWidth * 0.6;
+    this.boardCanvas.height = window.innerHeight * 0.6;
     this.board = new Board(this.boardType, this.boardCanvas);
     if (this.boardType != Form.REC) {
       this.player = this.createRacket(this.isSolo, this.board.wall);
@@ -230,18 +228,17 @@ class Game {
   }
 
   updateGame() {
-    this.boardCanvas!.width = 1920//window.innerWidth * 0.9;
-    this.boardCanvas!.height = 1080//window.innerHeight * 0.9;
+    this.boardCanvas!.width = window.innerWidth * 0.6;
+    this.boardCanvas!.height = window.innerHeight * 0.6;
 
     if (!this.boardType) {
       return ;
     }
-
-    for (let p of this.player) {
+    /*for (let p of this.player) {
       if (p.hp == 0) {
         if (this.boardType == Form.REC) {
-          this.boardType = 0;
-          return ;  
+          this.boardType = Form.HEX;
+          //return ;  
         } else {
           this.player.splice(p.index, 1);
           for (let i = 0; i < this.player.length; i++) {
@@ -253,12 +250,12 @@ class Game {
         }
         this.init(this.boardCanvasRef);
       }
-    }
+    }*/
     this.boardContext!.fillStyle = "#666666";
-    this.board.board.draw(this.boardContext, "gray");
+    this.board.board.draw(this.boardContext, "#1e1e1e");
     this.boardContext!.font = "14px sherif";
-    this.boardContext!.fillStyle = "#000000";
-    this.boardContext!.fillText(
+    this.boardContext!.fillStyle = "#fff";
+    /*this.boardContext!.fillText(
       Math.round(
         this.countUpdate / Math.round((Date.now() - this.start) / 1000)
       ) +
@@ -268,26 +265,46 @@ class Game {
         this.boardCanvas!.height,
       0,
       10
-    );
+    );*/
     this.boardContext!.font = "50px sherif";
     this.boardContext!.fillText(
       Game.point.toString(),
-      this.boardCanvas!.width / 2,
-      50
+      this.boardCanvas!.width * 0.3,
+      this.boardCanvas!.height * 0.1
     );
     this.boardContext!.fillText(
-      Math.round((Date.now() - this.start) / 1000).toString(),
-      this.boardCanvas!.width / 2,
-      110
+      Game.point.toString(),
+      this.boardCanvas!.width * 0.7,
+      this.boardCanvas!.height * 0.1
     );
     this.boardContext!.font = "20px sherif";
     for (let i: number = 0; i < Game.live; i++) {
       this.boardContext!.fillText(
         "❤️",
-        this.boardCanvas!.width / 2 + 25 * i,
-        160
+        this.boardCanvas!.width * 0.1 + 25 * i,
+        this.boardCanvas!.height * 0.1
       );
     }
+    for (let i: number = 0; i < Game.live; i++) {
+      this.boardContext!.fillText(
+        "❤️",
+        this.boardCanvas!.width * 0.9 - 25 * i,
+        this.boardCanvas!.height * 0.1
+      );
+    }
+
+    // Draw the net (Line in the middle)
+		this.boardContext!.beginPath();
+		this.boardContext!.setLineDash([30, 15]);
+		this.boardContext!.moveTo((this.boardCanvas!.width / 2), this.boardCanvas!.height - 50);
+		this.boardContext!.lineTo((this.boardCanvas!.width / 2), 120);
+		this.boardContext!.lineWidth = 2;
+		this.boardContext!.strokeStyle = '#ffffff';
+		this.boardContext!.stroke();
+    this.boardContext!.setLineDash([0, 0]);
+    this.boardContext!.lineWidth = 1;
+
+
     this.countUpdate++;
     this.ball.update(this.player, this.board.wall, this.board);
     for (let p of this.player) p.update(this.ball, this.board.wall);
@@ -300,11 +317,11 @@ class Game {
       p.draw(this.boardContext, p.color);
       p.printPoint(this.boardContext, 0, "red");
       p.printPoint(this.boardContext, 3, "green");
-      this.boardContext!.fillText(
+      /*this.boardContext!.fillText(
         p.hp.toString(),
-        this.boardCanvas!.width / 1.2,
+        this.boardCanvas!.width / 2,
         50 + 20 * p.index
-      );
+      );*/
     }
     if (this.isSolo) this.cible.draw(this.boardContext);
     if (Game.live == 0) {
@@ -312,6 +329,7 @@ class Game {
       Game.live = 3;
       this.start = Date.now();
     }
+    //console.log(this.ball.point[0].x + " " + this.ball.point[0].y + "|" + this.ball.speed.x + " " + this.ball.speed.y + "|" + Date.now())
   }
 }
 
@@ -339,8 +357,8 @@ class Board {
         this.createRect(
           0,
           0,
-          (canvas!.height / 4) * 4,
-          (canvas!.height / 4) * 3
+          (canvas!.width),
+          (canvas!.height)
         )
       );
     this.wall = this.createWall(this.board);
@@ -634,7 +652,6 @@ class Target extends Entity {
 }
 
 class Ball extends Entity {
-  public wait: number = 120;
   public defaultSpeed: number = 3;
 
   constructor(points: Point[], player: Racket[]) {
@@ -668,10 +685,6 @@ class Ball extends Entity {
   }
 
   update(rackets: Racket[], walls: Wall[], board: Board) {
-    if (this.wait) {
-      this.wait--;
-      return;
-    }
     if (!this.sat(board.board)) {
       this.replaceTo(board.board.center());
     }
@@ -679,8 +692,9 @@ class Ball extends Entity {
       if (this.sat(racket)) {
         let angle = 0;
         let face;
-        if (rackets.length != 2) face = this.getFace(rackets.indexOf(racket));
-        else {
+        if (rackets.length != 2) {
+          face = this.getFace(rackets.indexOf(racket));
+        } else {
           let index = rackets.indexOf(racket);
           if (index == 1) face = this.getFace(2);
           else face = this.getFace(0);
@@ -736,18 +750,15 @@ class Ball extends Entity {
             rackets[1].hp--;
             this.replaceTo(board.board.center());
             this.goToRandomPlayer(rackets);
-            this.wait = 120;
           } else if (index === 0) {
             rackets[0].hp--;
             this.replaceTo(board.board.center());
             this.goToRandomPlayer(rackets);
-            this.wait = 120;
           }
         } else {
           rackets[index].hp--;
           this.replaceTo(board.board.center());
           this.goToRandomPlayer(rackets);
-          this.wait = 120;
         }
         return;
       }
@@ -779,14 +790,14 @@ class Racket extends Entity {
           this.dir.y * this.defaultSpeed
         );
         this.moveTo(this.speed);
-        //socket.emit('up', this.index);
+        Game.socket.emit('up');
       } else if (Game.keyPressed.down) {
         this.speed = new Vector(
           -this.dir.x * this.defaultSpeed,
           -this.dir.y * this.defaultSpeed
         );
         this.moveTo(this.speed);
-        //socket.emit('down');
+        Game.socket.emit('down');
       }
    } //else {
     //   if (
@@ -827,19 +838,19 @@ const Canvas = ({ ref }: any) => {
   let router = useRouter();
   const canvasRef = useRef(ref);
   if (canvasRef) {
-    console.error(router.query);
-    let game = new Game(Number(router.query.number_player), Number(router.query.position));
-    console.log("?")
-    console.log(router.query.position);
-    console.log(router.query.number_player);
+    let game = new Game(Number(router.query.number_player), Number(router.query.position), router);
 
     useEffect(() => {
       game.init(canvasRef);
-      setInterval(handleResize, 8, game);
+      setInterval(handleResize, 17, game);
     }, []);
   }
 
-  return <canvas width="1500" height="1500" ref={canvasRef}/>;
+  return (
+      <div style={{width: '60vw', height: '60vh', overflow: 'hidden', border: 'solid 2px white',borderRadius: '10px', boxShadow: '0px 0px 60px 5px  #875E5E', backgroundColor: '#1e1e1e', display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
+         <canvas ref={canvasRef}></canvas>
+      </div>
+  );
 };
 
 // type Props = {
