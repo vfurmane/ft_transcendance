@@ -230,6 +230,7 @@ export class AuthService {
   }
 
   async logout(jti: string): Promise<void> {
+    this.jwtsRepository.delete({ originToken: { id: jti } });
     this.jwtsRepository.delete({ id: jti });
   }
 }
