@@ -109,7 +109,7 @@ import { Interval } from "@nestjs/schedule";
 			let game = key[0];
 			if (game.boardType !== 0) {
 				let state = game.getState();
-				console.log("=-=-=-=-=-=REFRESHING=-=-=-=-=-=")
+				console.log("=-=-=-=-=-=REFRESHING=-=-=-=-=-=|" + Date.now())
 				this.server.in(room).emit('refresh', state);
 			}
 		});

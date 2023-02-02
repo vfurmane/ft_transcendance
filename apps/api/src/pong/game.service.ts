@@ -83,7 +83,8 @@ export class Game {
     this.player = this.updatePlayer(player, this.wall);
     this.ball = new Ball(
       this.createRegularPolygon(ball, 30, this.boardType),
-      this.player
+      this.player,
+      this.board.wall
     );
     this.ball.speed = ballVector;
   }
@@ -167,7 +168,8 @@ export class Game {
           30,
           this.boardType
         ),
-        this.player
+        this.player,
+        this.board.wall
       );
     } else {
       this.player = this.createRacket(this.isSolo, [
@@ -181,7 +183,8 @@ export class Game {
           10,
           10
         ),
-        this.player
+        this.player,
+        this.board.wall
       );
     }
     if (this.isSolo)
@@ -422,45 +425,35 @@ export class Entity {
   }
 
   sat(other: Entity) {
-    let lines: Vector[] = this.getPerps().concat(other.getPerps());
-    let amax: number | null;
-    let amin: number | null;
-    let bmax: number | null;
-    let bmin: number | null;
-    let dot: number | null;
+    let lines: Vector[] = [...this.getPerps(), ...other.getPerps()];
+    let amax: number;
+    let amin: number;
+    let bmax: number;
+    let bmin: number;
+    let dot: number;
 
     for (let line of lines) {
-      amax = null;
-      amin = null;
-      bmax = null;
-      bmin = null;
+      amax = line.product(this.point[0]);
+      amin = amax;
+      bmax = line.product(other.point[0]);
+      bmin = bmax;
       for (let point of this.point) {
         dot = line.product(point);
-        if (amax === null || dot > amax) {
+        if (dot > amax) {
           amax = dot;
-        }
-        if (amin === null || dot < amin) {
+        } else if (dot < amin) {
           amin = dot;
         }
       }
       for (let point of other.point) {
         dot = line.product(point);
-        if (bmax === null || dot > bmax) {
+        if (dot > bmax) {
           bmax = dot;
-        }
-        if (bmin === null || dot < bmin) {
+        } else if (dot < bmin) {
           bmin = dot;
         }
       }
-      if (
-        amin != null &&
-        bmax != null &&
-        bmin != null &&
-        amax != null &&
-        ((amin < bmax && amin > bmin) || (bmin < amax && bmin > amin))
-      ) {
-        continue;
-      } else {
+      if (!((amin < bmax && amin > bmin) || (bmin < amax && bmin > amin))) {
         return false;
       }
     }
@@ -518,16 +511,53 @@ export class Target extends Entity {
 
 export class Ball extends Entity {
   public defaultSpeed: number = 3;
+  public nextCollision : { wall: number , racket: number } = { wall: 0, racket: 0 }
 
-  constructor(points: Point[], player: Racket[]) {
+  constructor(points: Point[], player: Racket[], walls: Wall[]) {
     super(points);
     this.goToRandomPlayer(player);
+    this.calcNextCollision(player, walls)
   }
 
-  isParallel(from1: Point, to1: Point, from2: Point, to2: Point) {
-    let v1 = from1.vectorTo(to1);
-    let v2 = from2.vectorTo(to2);
-    return v1.crossProduct(v2);
+  calcNextCollision(rackets: Racket[], walls: Wall[])
+  {
+    let face : Point;
+    let ballTo : Point;
+    let minRatio : number | null = null
+    rackets.forEach((racket, index) =>
+    {
+      if (rackets.length != 2) {
+        face = this.getFace(index);
+      } else {
+        if (index) face = this.getFace(2);
+        else face = this.getFace(0);
+      }
+      ballTo = new Point (this.speed.x + face.x, this.speed.y + face.y)
+      let ratio = face.intersect(ballTo, racket.point[2], racket.point[1])
+      if (ratio > 0)
+      {
+        minRatio ??= ratio
+        if (ratio < minRatio)
+          minRatio = ratio
+      }
+    })
+    if (minRatio)
+      this.nextCollision.racket = minRatio;
+    minRatio = null
+    walls.forEach((wall, index) =>
+    {
+      face = this.getFace(index)
+      ballTo = new Point (this.speed.x + face.x, this.speed.y + face.y)
+      let ratio = face.intersect(ballTo, wall.point[2], wall.point[1])
+      if (ratio > 0)
+      {
+        minRatio ??= ratio
+        if (ratio < minRatio)
+          minRatio = ratio
+      }
+    })
+    if (minRatio)
+      this.nextCollision.wall = minRatio;
   }
 
   getFace(n: number) {
@@ -552,81 +582,94 @@ export class Ball extends Entity {
   update(rackets: Racket[], walls: Wall[], board: Board) {
     if (!this.sat(board.board)) {
       this.replaceTo(board.board.center());
+      this.moveTo(this.speed);
+      this.calcNextCollision(rackets, walls);
+      return ;
     }
-    for (let racket of rackets) {
-      if (this.sat(racket)) {
-        let angle = 0;
-        let face;
-        if (rackets.length != 2) face = this.getFace(rackets.indexOf(racket));
-        else {
-          let index = rackets.indexOf(racket);
-          if (index == 1) face = this.getFace(2);
-          else face = this.getFace(0);
+    this.nextCollision.wall -= 1
+    this.nextCollision.racket -= 1
+    if (this.nextCollision.wall > this.nextCollision.racket && this.nextCollision.racket < 1)
+    {
+      for (let racket of rackets) {
+        if (this.sat(racket)) {
+          let angle = 0;
+          let face;
+          if (rackets.length != 2) face = this.getFace(rackets.indexOf(racket));
+          else {
+            let index = rackets.indexOf(racket);
+            if (index == 1) face = this.getFace(2);
+            else face = this.getFace(0);
+          }
+          let ratio = racket.point[2].intersect(
+            racket.point[1],
+            this.center(),
+            face
+          );
+          if (ratio > 1) ratio = 1;
+          if (ratio < 0) ratio = 0;
+          angle = -(Math.PI / 4 + (Math.PI / 2) * (1 - ratio));
+          let norm = racket.point[2].vectorTo(racket.point[1]).normalized();
+          [norm.x, norm.y] = [
+            norm.x * Math.cos(angle) + norm.y * Math.sin(angle),
+            -(norm.x * Math.sin(angle)) + norm.y * Math.cos(angle),
+          ];
+          this.speed = new Vector(
+            norm.x * this.defaultSpeed,
+            norm.y * this.defaultSpeed
+          );
+          this.moveTo(this.speed);
+          this.calcNextCollision(rackets, walls);
+          return;
         }
-        let ratio = racket.point[2].intersect(
-          racket.point[1],
-          this.center(),
-          face
-        );
-        if (ratio > 1) ratio = 1;
-        if (ratio < 0) ratio = 0;
-        angle = -(Math.PI / 4 + (Math.PI / 2) * (1 - ratio));
-        let norm = racket.point[2].vectorTo(racket.point[1]).normalized();
-        [norm.x, norm.y] = [
-          norm.x * Math.cos(angle) + norm.y * Math.sin(angle),
-          -(norm.x * Math.sin(angle)) + norm.y * Math.cos(angle),
-        ];
-        this.speed = new Vector(
-          norm.x * this.defaultSpeed,
-          norm.y * this.defaultSpeed
-        );
-        this.moveTo(this.speed);
-        return;
       }
     }
-    for (let wall of walls) {
-      if (this.sat(wall)) {
-        let wallVector = wall.point[0].vectorTo(wall.point[2]);
-        let Norm = wallVector.norm() * this.speed.norm();
-        let angle = Math.acos(wallVector.product(this.speed) / Norm);
-        let tmp = new Vector(this.speed.x, this.speed.y);
-        let isAcute = angle <= Math.PI / 2;
-        let outAngle = isAcute ? angle * 2 : (Math.PI - angle) * 2;
-        let cosA = Math.cos(outAngle);
-        let sinA = Math.sin(outAngle);
-        [tmp.x, tmp.y] = [
-          this.speed.x * cosA - this.speed.y * sinA,
-          this.speed.x * sinA + this.speed.y * cosA,
-        ];
-        let angle2 = Math.acos(wallVector.product(tmp) / Norm);
-        if (Math.abs(angle2 - angle) > 0.001) {
+    if (this.nextCollision.wall < 1)
+    {
+      for (let wall of walls) {
+        if (this.sat(wall)) {
+          let wallVector = wall.point[0].vectorTo(wall.point[2]);
+          let Norm = wallVector.norm() * this.speed.norm();
+          let angle = Math.acos(wallVector.product(this.speed) / Norm);
+          let tmp = new Vector(this.speed.x, this.speed.y);
+          let isAcute = angle <= Math.PI / 2;
+          let outAngle = isAcute ? angle * 2 : (Math.PI - angle) * 2;
+          let cosA = Math.cos(outAngle);
+          let sinA = Math.sin(outAngle);
           [tmp.x, tmp.y] = [
-            this.speed.x * cosA - this.speed.y * -sinA,
-            this.speed.x * -sinA + this.speed.y * cosA,
+            this.speed.x * cosA - this.speed.y * sinA,
+            this.speed.x * sinA + this.speed.y * cosA,
           ];
-        }
-        this.speed = tmp;
-        this.moveTo(this.speed);
-        this.moveTo(this.speed);
-        let index = walls.indexOf(wall);
-        if (rackets.length === 2) {
-          if (index === 2) {
-            console.log("GOAL for player 0")
-            rackets[1].hp--;
-            this.replaceTo(board.board.center());
-            this.goToRandomPlayer(rackets);
-          } else if (index === 0) {
-            console.log("GOAL for player 1")
-            rackets[0].hp--;
+          let angle2 = Math.acos(wallVector.product(tmp) / Norm);
+          if (Math.abs(angle2 - angle) > 0.001) {
+            [tmp.x, tmp.y] = [
+              this.speed.x * cosA - this.speed.y * -sinA,
+              this.speed.x * -sinA + this.speed.y * cosA,
+            ];
+          }
+          this.speed = tmp;
+          this.moveTo(this.speed);
+          this.moveTo(this.speed);
+          let index = walls.indexOf(wall);
+          if (rackets.length === 2) {
+            if (index === 2) {
+              console.log("GOAL for player 0")
+              rackets[1].hp--;
+              this.replaceTo(board.board.center());
+              this.goToRandomPlayer(rackets);
+            } else if (index === 0) {
+              console.log("GOAL for player 1")
+              rackets[0].hp--;
+              this.replaceTo(board.board.center());
+              this.goToRandomPlayer(rackets);
+            }
+          } else {
+            rackets[index].hp--;
             this.replaceTo(board.board.center());
             this.goToRandomPlayer(rackets);
           }
-        } else {
-          rackets[index].hp--;
-          this.replaceTo(board.board.center());
-          this.goToRandomPlayer(rackets);
+          this.calcNextCollision(rackets, walls);
+          return;
         }
-        return;
       }
     }
     this.moveTo(this.speed);
