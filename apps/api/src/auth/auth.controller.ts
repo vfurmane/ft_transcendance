@@ -203,7 +203,8 @@ export class AuthController {
 
   @Post('logout')
   @UseGuards(JwtAuthGuard)
-  logout(@User() user: UserEntity): void {
-    this.authService.logout(user.currentJwt.jti);
+  async logout(@User() user: UserEntity): Promise<{ message: string }> {
+    await this.authService.logout(user.currentJwt.jti);
+    return { message: 'Successfully logged out' };
   }
 }
