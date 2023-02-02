@@ -12,6 +12,7 @@ import { Message } from './message.entity';
 import { ConversationRole } from './conversationRole.entity';
 import { Match } from './match.entity';
 import { Jwt } from './jwt.entity';
+import { JwtPayload } from '..';
 
 @Exclude()
 @Entity()
@@ -69,4 +70,6 @@ export class User {
   level!: number;
   @OneToMany(() => Jwt, (jwt) => jwt.user)
   jwts!: Jwt[];
+
+  currentJwt!: JwtPayload;
 }

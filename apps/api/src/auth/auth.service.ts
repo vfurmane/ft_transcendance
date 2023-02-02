@@ -228,4 +228,8 @@ export class AuthService {
     this.statesRepository.delete({ token: state.token });
     return;
   }
+
+  async logout(jti: string): Promise<void> {
+    this.jwtsRepository.delete({ id: jti });
+  }
 }

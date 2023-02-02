@@ -200,4 +200,10 @@ export class AuthController {
   refreshToken(@User() user: UserEntity): Promise<AccessTokenResponse> {
     return this.authService.login(user);
   }
+
+  @Post('logout')
+  @UseGuards(JwtAuthGuard)
+  logout(@User() user: UserEntity): void {
+    this.authService.logout(user.currentJwt.jti);
+  }
 }
