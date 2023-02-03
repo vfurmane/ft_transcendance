@@ -14,7 +14,7 @@ import playButtonStyles from "styles/playButton.module.scss";
 import textStyles from "styles/text.module.scss";
 import styles from "styles/home.module.scss";
 import { FriendshipRequestStatus } from "types";
-import { io } from 'socket.io-client';
+import { io } from "socket.io-client";
 import { useRouter } from "next/router";
 
 function Home(): JSX.Element {
@@ -69,37 +69,41 @@ function Home(): JSX.Element {
   /*==========================================================*/
 
   function handleClickPlayButton(): void {
-    
-    console.log("CLICKING THE BUTTON")
+    console.log("CLICKING THE BUTTON");
     const socket = io("/pong", {
       auth: {
-        token: localStorage.getItem('access_token'),
-      }
+        token: localStorage.getItem("access_token"),
+      },
     });
-    socket.on('disconnect', function(){
-      console.error("DEHORS")
+    socket.on("disconnect", function () {
+      console.error("DEHORS");
     });
 
     socket.on("connect_error", (error) => {
       console.error("COULD NOT CONNECT " + error.message);
     });
 
-    socket.emit('searchGame', (response:any) => {
+    socket.emit("searchGame", (response: any) => {
       console.log(response);
     });
 
     socket.on("startGame", (config) => {
-      console.log("RECEIVED START GAME")
- 
-      router.replace({
-        pathname: '/pong', query: {
-          number_player : config.number_player,
-          position : config.position,
-        }}, '/pong');
+      console.log("RECEIVED START GAME");
+
+      router.replace(
+        {
+          pathname: "/pong",
+          query: {
+            number_player: config.number_player,
+            position: config.position,
+          },
+        },
+        "/pong"
+      );
       console.log("number of player :" + config.number_player);
       console.log("position :", config.position);
       socket.disconnect();
-    })
+    });
 
     setOpenPlayButton(!openPlayButton);
   }
