@@ -5,8 +5,6 @@ import List from "../components/HomePage/List";
 import UserEntity from "../components/HomePage/UserEntity";
 import ArrayDoubleColumn from "../components/HomePage/ArrayDoubleColumn";
 import PlayMenu from "../components/HomePage/PlayMenu";
-import { setUserState } from "../store/UserSlice";
-import { useDispatch } from "react-redux";
 import { Userfront as User } from "types";
 import Link from "next/link";
 import ChatBar from "../components/chatBar";
@@ -16,6 +14,7 @@ import styles from "styles/home.module.scss";
 import { FriendshipRequestStatus } from "types";
 import { io } from "socket.io-client";
 import { useRouter } from "next/router";
+import { useWebsocketContext } from "../components/Websocket";
 
 function Home(): JSX.Element {
   const friendListRef = useRef([<></>]);
@@ -30,25 +29,15 @@ function Home(): JSX.Element {
   const prevIndexOfUserRef = useRef(-1);
   const prevSetterUsermenuRef = useRef(setterInit);
 
-  const dispatch = useDispatch();
+  const websockets = useWebsocketContext();
+
   useEffect(() => {
-    fetch(`/api/user`, {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + localStorage.getItem("access_token"),
-      },
-    })
-      .then(function (response) {
-        return response.json();
-      })
-      .then((data) => {
-        dispatch(setUserState(data));
-      })
-      .catch(function (error) {
-        console.log(`probleme with fetch: ${error.message}`);
-      });
-    //console.log(localStorage.getItem('access_token'));
-  }, [dispatch]);
+    if (websockets.general?.connected) {
+      console.error("General is connected");
+    } else {
+      console.error("Websocket error on general");
+    }
+  }), [websockets.general?.connected];
 
   /*======for close topBar component when click on screen====*/
   const [openToggle, setOpenToggle] = useState(false);
@@ -70,26 +59,19 @@ function Home(): JSX.Element {
 
   function handleClickPlayButton(): void {
     console.log("CLICKING THE BUTTON");
-    const socket = io("/pong", {
-      auth: {
-        token: localStorage.getItem("access_token"),
-      },
-    });
-    socket.on("disconnect", function () {
-      console.error("DEHORS");
-    });
+    if (!websockets.pong?.connected)
+    {
+      console.error("Pong socket error, abort play game")
+      return
+    }
 
-    socket.on("connect_error", (error) => {
-      console.error("COULD NOT CONNECT " + error.message);
-    });
-
-    socket.emit("searchGame", (response: any) => {
+    websockets.pong.emit("searchGame", (response: any) => {
       console.log(response);
     });
 
-    socket.on("startGame", (config) => {
+    websockets.pong.on("startGame", (config) => {
       console.log("RECEIVED START GAME");
-
+      websockets.pong?.off("startGame")
       router.replace(
         {
           pathname: "/pong",
@@ -102,7 +84,6 @@ function Home(): JSX.Element {
       );
       console.log("number of player :" + config.number_player);
       console.log("position :", config.position);
-      socket.disconnect();
     });
 
     setOpenPlayButton(!openPlayButton);
@@ -222,6 +203,7 @@ function Home(): JSX.Element {
       <div className={`${styles.illustration} d-none d-lg-block`}></div>
       <div className="container ">
         <div className="row">
+          Chat
           <div className="col-12  d-none d-lg-block">
             <h3 className={styles.title}>Ft_Transcendence</h3>
           </div>

@@ -1,9 +1,10 @@
 import { GameState, PlayerInterface } from "types";
-import { io } from "socket.io-client";
+import { io, Socket } from "socket.io-client";
 
 import React, { useRef, useEffect } from "react";
 import Router, { NextRouter, useRouter } from "next/router";
 import { time } from "console";
+import { useWebsocketContext } from "../components/Websocket";
 
 enum Axe {
   X = 1,
@@ -51,25 +52,6 @@ class Game {
     position: number,
     private router: NextRouter
   ) {
-    if (typeof window !== "undefined") {
-      Game.socket = io("/pong", {
-        auth: {
-          token: localStorage.getItem("access_token"),
-        },
-      });
-      Game.socket.on("disconnect", () => {
-        console.error("Fin de partie");
-        this.router.replace("/");
-      });
-      Game.socket.on("refresh", (state: GameState) => {
-        Game.count = 0;
-        if (!this.board) {
-          return;
-        }
-        // console.log("=-=-=-=-=-=REFRESHING=-=-=-=-=-=")
-        this.refresh(state);
-      });
-    }
     this.boardType = number_player;
     Game.position = position;
   }
@@ -198,8 +180,22 @@ class Game {
     return point;
   }
 
-  init(ref: React.RefObject<HTMLCanvasElement> | undefined) {
+  init(ref: React.RefObject<HTMLCanvasElement> | undefined, socket : Socket) {
     if (ref === undefined) return;
+    Game.socket.on("refresh", (state: GameState) => {
+      Game.count = 0;
+      if (!this.board) {
+        return;
+      }
+      // console.log("=-=-=-=-=-=REFRESHING=-=-=-=-=-=")
+      this.refresh(state);
+    });
+    Game.socket.on("endGame", () => {
+        console.error("Fin de partie");
+        Game.socket.off("endGame")
+        Game.socket.off("refresh")
+        this.router.replace("/");
+    });
     this.boardCanvasRef = ref;
     this.boardCanvas = this.boardCanvasRef.current;
     if (!this.boardCanvas) return;
@@ -892,6 +888,8 @@ function handleResize(game: Game) {
 const Canvas = () => {
   let router = useRouter();
   const canvasRef = useRef(null);
+  const websockets = useWebsocketContext();
+
   if (canvasRef) {
     let game = new Game(
       Number(router.query.number_player),
@@ -900,13 +898,22 @@ const Canvas = () => {
     );
 
     useEffect(() => {
-      game.init(canvasRef);
-      const intervalId = setInterval(handleResize, 17, game);
-      return () => {
-        console.log("CLEARED INTERVAL");
-        clearInterval(intervalId);
-      };
-    }, []);
+      if (websockets.pong?.connected)
+      {
+        Game.socket = websockets.pong
+        game.init(canvasRef, websockets.pong);
+        const intervalId = setInterval(handleResize, 17, game);
+        return () => {
+          console.log("CLEARED INTERVAL");
+          clearInterval(intervalId);
+        };
+      }
+      else
+      {
+        console.error("Cannot play pong")
+        router.replace("/")
+      }
+    }, [websockets.pong?.connected]);
   }
 
   return <canvas width="1500" height="1500" ref={canvasRef} />;

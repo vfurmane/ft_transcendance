@@ -8,6 +8,9 @@ import { FtOAuth2Button } from "./FtOAuth2Button";
 import { useRouter } from "next/router";
 import { AccessTokenResponse, TfaNeededResponse } from "types";
 import Link from "next/link";
+import { useDispatch } from "react-redux";
+import { setUserState } from "../store/UserSlice";
+import { identifyUser } from "../helpers/identifyUser";
 
 interface LoginFormData {
   username: string;
@@ -56,6 +59,7 @@ export function LoginForm(): ReactElement {
     handleSubmit,
     register,
   } = useForm<LoginFormData>();
+  const dispatch = useDispatch();
 
   const onSubmit = async (data: LoginFormData): Promise<void> => {
     setFormError("");
@@ -63,14 +67,21 @@ export function LoginForm(): ReactElement {
     setLoading(true);
 
     await login(data, state)
-      .then((response) => {
+      .then(async (response) => {
         if (response === null) {
           throw new Error("An unexpected error occured...");
         } else {
-          if ("access_token" in response && response.access_token) {
+          if (
+            "access_token" in response &&
+            response.access_token &&
+            response.refresh_token
+          ) {
             setFormSuccess("Success! Redirecting...");
             localStorage.setItem("access_token", response.access_token);
+            localStorage.setItem("refresh_token", response.refresh_token);
             localStorage.removeItem("state");
+            const user = await identifyUser();
+            if (user) dispatch(setUserState(user));
             router.replace("/");
           } else if (
             "message" in response &&
