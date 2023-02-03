@@ -9,6 +9,9 @@ import { SearchModule } from './search/search.module';
 import { FriendshipsModule } from './friendships/friendships.module';
 import { ConversationsModule } from './conversations/conversations.module';
 import { PongModule } from './pong/pong.module';
+import { MatchModule } from './Match/Match.module';
+import { LeaderBoardModule } from './leaderBoard/leaderBoard.module';
+import { TransformUserModule } from './TransformUser/TransformUser.module';
 import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
@@ -40,7 +43,10 @@ import { ScheduleModule } from '@nestjs/schedule';
     FriendshipsModule,
     UsersModule,
     ConversationsModule,
-    PongModule
+    PongModule,
+    MatchModule,
+    LeaderBoardModule,
+    TransformUserModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -5,13 +5,15 @@ import Image from "next/image";
 import MatchEntity from "../components/HomePage/MatchEntity";
 import { selectUserState } from "../store/UserSlice";
 import { useSelector } from "react-redux";
-import { initUser } from "../interface/UserInterface";
+import { initUser } from "../initType/UserInit";
 import AchivementEntity from "../components/ProfilePage/achivementEntity";
-import Achivement, { initAchivement } from "../interface/AchivementInterface";
+import { initAchivement } from "../initType/AchivementInit";
+import { Achivement } from "types";
 import ChangePswrd from "../components/ProfilePage/ChangePswrd";
 import ChatBar from "../components/chatBar";
 import styles from "styles/profil.module.scss";
 import textStyles from "styles/text.module.scss";
+import { initMatch } from "../initType/MatchInit";
 
 export default function Profil(): JSX.Element {
   const UserState = useSelector(selectUserState);
@@ -29,6 +31,8 @@ export default function Profil(): JSX.Element {
   const [userProfil, setUserProfil] = useState(false);
   const [openConfigProfil, setOpenConfigProfil] = useState(false);
   const [configProfil, setConfigProfil] = useState(<></>);
+  const [matchHistory, setMatchHistory] = useState([initMatch]);
+  const [listOfMatch, setListOfMatch] = useState([<></>]);
 
   /*======for close topBar component when click on screen====*/
   const [openToggle, setOpenToggle] = useState(false);
@@ -72,8 +76,44 @@ export default function Profil(): JSX.Element {
       if (JSON.parse(router.query.user).id === UserState.id)
         setUserProfil(true);
       else setUserProfil(false);
+      fetch(`/api/match/${JSON.parse(router.query.user).id}`, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + localStorage.getItem("access_token"),
+        },
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          setMatchHistory(data);
+        })
+        .catch((error) => {
+          console.log(`problem with fetch : ${error.message}`);
+        });
     }
   }, [router.query, UserState]);
+
+  useEffect(() => {
+    const tmp: JSX.Element[] = [];
+    for (let i = 0; i < matchHistory.length; i++) {
+      tmp.push(<MatchEntity match={matchHistory[i]} user={user} key={i} />);
+    }
+    setListOfMatch([...tmp]);
+
+    const level = document.getElementById("level");
+    if (level) {
+      level.innerText = "0";
+      const incrementLevel = (): void => {
+        const c = +level.innerText;
+        if (c + 10 <= user.level) {
+          level.innerText = `${c + 10}`;
+          setTimeout(incrementLevel, 100);
+        } else {
+          level.innerText = `${user.level}`;
+        }
+      };
+      incrementLevel();
+    }
+  }, [matchHistory, user]);
 
   function achivementListClick(): void {
     setOpenAchivementList(true);
@@ -114,6 +154,7 @@ export default function Profil(): JSX.Element {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
+        Authorization: "Bearer " + localStorage.getItem("access_token"),
       },
       body: JSON.stringify(data),
     })
@@ -131,7 +172,6 @@ export default function Profil(): JSX.Element {
   }
 
   //temporary before get the real data
-  const listOfMatch = [];
   const achivementList: JSX.Element[] = [];
   for (let i = 0; i < 22; i++) {
     achivementList.push(
@@ -144,15 +184,6 @@ export default function Profil(): JSX.Element {
         }}
         key={i}
         handleClick={achivementClick}
-      />
-    );
-    listOfMatch.push(
-      <MatchEntity
-        url1={`/avatar/avatar-${Math.floor(Math.random() * 19) + 1}.png`}
-        url2={`/avatar/avatar-${Math.floor(Math.random() * 19) + 1}.png`}
-        name={"name" + (i + 1).toString()}
-        score={5}
-        key={i}
       />
     );
   }
@@ -189,16 +220,33 @@ export default function Profil(): JSX.Element {
             className={`col-10 offset-1  col-md-6 offset-lg-0  ${styles.profilMenuContainer}`}
           >
             <div>
-              <h2
-                className={textStyles.pixel}
-                style={{
-                  color: "white",
-                  fontSize: "40px",
-                  marginBottom: "10px",
-                }}
-              >
-                {user.name}
-              </h2>
+              <div className={styles.flex_between}>
+                <h2
+                  className={textStyles.pixel}
+                  style={{
+                    color: "white",
+                    fontSize: "40px",
+                    marginBottom: "10px",
+                  }}
+                >
+                  {user.name}
+                </h2>
+                <p
+                  style={{
+                    color: "white",
+                    marginBottom: "10px",
+                    fontSize: "20px",
+                  }}
+                  className={textStyles.saira + styles.flex_between}
+                >
+                  level :{" "}
+                  <span
+                    id="level"
+                    className={textStyles.saira}
+                    style={{ fontSize: "40px", color: "white" }}
+                  ></span>
+                </p>
+              </div>
               <div className={styles.buttonAndBarContainer}>
                 <div style={{ width: "80%" }}>
                   <div className={styles.flex_between}>

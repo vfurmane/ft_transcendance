@@ -8,6 +8,7 @@ export interface FtUser {
 
 export interface AccessTokenResponse {
   access_token: string;
+  refresh_token: string;
 }
 
 export interface TfaNeededResponse {
@@ -18,11 +19,7 @@ export interface TfaNeededResponse {
 export interface JwtPayload {
   sub: string;
   name: string;
-}
-
-export interface JwtPayload {
-  sub: string;
-  name: string;
+  jti: string;
 }
 
 export interface unreadMessagesResponse
@@ -75,10 +72,35 @@ export interface GameState {
   ball : Ball;
 }
 
+export interface Userfront {
+  id: string;
+  name: string;
+  avatar_num: number;
+  status: string;
+  victory: number;
+  defeat: number;
+  rank: number;
+  level: number;
+}
+
 export interface FriendshipRequestStatus {
-  friend : User | null,
+  friend : Userfront | null,
   accept: boolean,
   ask: boolean
+}
+
+export interface MatchFront {
+  id: string;
+  score_winner: number;
+  score_looser: number;
+  looser: Userfront | null;
+  winner: Userfront | null;
+}
+
+export interface Achivement {
+  name: string;
+  status: string;
+  description: string;
 }
 
 export * from './enums';

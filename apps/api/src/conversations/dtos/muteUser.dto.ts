@@ -1,4 +1,6 @@
+import { Transform } from 'class-transformer';
 import { IsNotEmpty, IsString, IsUUID } from 'class-validator';
+import sanitize from 'sanitize-html';
 
 export class muteUserDto {
   @IsNotEmpty()
@@ -7,5 +9,6 @@ export class muteUserDto {
 
   @IsNotEmpty()
   @IsString()
+  @Transform(({ value }) => sanitize(value))
   username!: string;
 }

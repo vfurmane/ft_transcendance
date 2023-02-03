@@ -10,6 +10,8 @@ import {
 import { Exclude, Expose } from 'class-transformer';
 import { Message } from './message.entity';
 import { ConversationRole } from './conversationRole.entity';
+import { Match } from './match.entity';
+import { Jwt } from './jwt.entity';
 
 @Exclude()
 @Entity()
@@ -54,4 +56,17 @@ export class User {
     (conversationRole) => conversationRole.user,
   )
   conversationRoles!: ConversationRole[];
+
+  @Expose()
+  @OneToMany(() => Match, (match) => match.winner_id)
+  win!: Match[];
+
+  @Expose()
+  @OneToMany(() => Match, (match) => match.looser_id)
+  defeat!: Match[];
+
+  @Column('smallint', {default: 0})
+  level!: number;
+  @OneToMany(() => Jwt, (jwt) => jwt.user)
+  jwts!: Jwt[];
 }

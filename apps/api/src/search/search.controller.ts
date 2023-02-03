@@ -1,15 +1,15 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 import { SearchService } from './search.service';
-// import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { User } from 'types';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { Userfront } from 'types';
 
-//@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard)
 @Controller('search')
 export class SearchController {
   constructor(private readonly searchService: SearchService) {}
 
   @Get()
-  async findAll(@Query() query: { letters: string }): Promise<User[]> {
-    return this.searchService.findAll(query.letters);
+  async findAll(@Query() query: { letters: string }): Promise<Userfront[]> {
+    return this.searchService.findAll(query.letters.toLowerCase());
   }
 }

@@ -67,8 +67,6 @@ services:
       - ./templates:/etc/nginx/templates
     ports:
       - 8080:80
-    environment:
-      NGINX_ENTRYPOINT_QUIET_LOGS: 1
 
 networks:
   app:

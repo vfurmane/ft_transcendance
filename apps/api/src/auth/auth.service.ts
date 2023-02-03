@@ -1,4 +1,10 @@
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import {
+  BadRequestException,
+  forwardRef,
+  Inject,
+  Injectable,
+  Logger,
+} from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { AxiosError } from 'axios';
 import { catchError, firstValueFrom, throwError } from 'rxjs';
@@ -12,7 +18,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { State } from 'types';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
-import { RegisterUserDto } from 'src/users/register-user.dto';
+import { RegisterUserDto } from '../users/register-user.dto';
+import { Jwt } from 'types';
+import { TokenTypeEnum } from 'types';
 
 @Injectable()
 export class AuthService {
@@ -22,9 +30,13 @@ export class AuthService {
     private readonly statesRepository: Repository<State>,
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
+    @InjectRepository(Jwt)
+    private readonly jwtsRepository: Repository<Jwt>,
     private readonly httpService: HttpService,
     private readonly jwtService: JwtService,
     private readonly logger: Logger,
+
+    @Inject(forwardRef(() => UsersService))
     private readonly usersService: UsersService,
   ) {}
 
@@ -82,16 +94,94 @@ export class AuthService {
     return null;
   }
 
-  login(user: User, state?: State): AccessTokenResponse {
-    const payload: JwtPayload = {
-      sub: user.id,
-      name: user.name,
-    };
+  async validateJwt(user: User, payload: JwtPayload): Promise<User | null> {
+    //Check if jwt exist in db (in case of revocation)
+    const jwt = await this.jwtsRepository.findOneBy({
+      id: payload.jti,
+      token_type: TokenTypeEnum.ACCESS_TOKEN,
+    });
+    if (!jwt) return null;
+
+    return user;
+  }
+
+  async validateRefreshJwt(payload: JwtPayload): Promise<User | null> {
+    const jwt = await this.jwtsRepository.findOneBy({
+      id: payload.jti,
+      token_type: TokenTypeEnum.REFRESH_TOKEN,
+    });
+    if (!jwt) return null;
+
+    if (jwt.consumed) {
+      this.revokeAllToken(jwt.user);
+      return null;
+    } else {
+      jwt.consumed = true;
+      await this.jwtsRepository.save(jwt);
+    }
+
+    return jwt.user;
+  }
+
+  async createJwtEntity(
+    user: User,
+    token_type: TokenTypeEnum = TokenTypeEnum.ACCESS_TOKEN,
+    originToken: Jwt | null = null,
+  ): Promise<Jwt> {
+    const jwtEntity = new Jwt();
+    jwtEntity.user = user;
+    jwtEntity.token_type = token_type;
+    jwtEntity.originToken = originToken;
+    await this.jwtsRepository.save(jwtEntity).then((jwt) => {
+      jwtEntity.id = jwt.id;
+    });
+    return jwtEntity;
+  }
+
+  async revokeAllToken(user: User): Promise<void> {
+    await this.jwtsRepository.delete({ user: { id: user.id } });
+  }
+
+  async createTokensPair(user: User): Promise<string[]> {
+    const accessTokenEntity = await this.createJwtEntity(user);
+    const refreshTokenEntity = await this.createJwtEntity(
+      user,
+      TokenTypeEnum.REFRESH_TOKEN,
+      accessTokenEntity,
+    );
+
+    return Promise.all([
+      this.jwtService.sign(
+        {
+          sub: user.id,
+          name: user.name,
+          jti: accessTokenEntity.id,
+        },
+        {
+          expiresIn: '5m',
+        },
+      ),
+      this.jwtService.sign(
+        {
+          sub: user.id,
+          name: user.name,
+          jti: refreshTokenEntity.id,
+        },
+        {
+          expiresIn: '5d',
+        },
+      ),
+    ]);
+  }
+
+  async login(user: User, state?: State): Promise<AccessTokenResponse> {
+    const [accessToken, refreshToken] = await this.createTokensPair(user);
     if (state) {
       this.statesRepository.delete({ token: state.token });
     }
     return {
-      access_token: this.jwtService.sign(payload),
+      access_token: accessToken,
+      refresh_token: refreshToken,
     };
   }
 

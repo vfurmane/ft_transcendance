@@ -1,17 +1,16 @@
-import { Controller, Get, Param, Query } from '@nestjs/common';
+import { Controller, Get, UseGuards } from '@nestjs/common';
 import { UsersService } from './users.service';
-// import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { User } from 'types';
-import { isUUIDDto } from '../conversations/dtos/IsUUID.dto';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { Userfront, User } from 'types';
+import { User as CurrentUser } from '../common/decorators/user.decorator';
 
-//@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard)
 @Controller('user')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @Get('/:id')
-  async getFriendsList(@Param() { id } : isUUIDDto): Promise<User | null> {
-    console.log(`user_id : ${id}`);
-    return this.usersService.getById(id);
+  @Get()
+  async getUser(@CurrentUser() currentUser: User): Promise<Userfront | null> {
+    return this.usersService.getUser(currentUser);
   }
 }

@@ -26,16 +26,13 @@ async function login(
   data: LoginFormData,
   state: string
 ): Promise<AccessTokenResponse | TfaNeededResponse | null> {
-  const response = await fetch(
-    `/api/auth/login`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ ...data, state }),
-    }
-  ).then(async (response) => {
+  const response = await fetch(`/api/auth/login`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ ...data, state }),
+  }).then(async (response) => {
     if (!response.ok) {
       return response.json().then((error) => {
         throw new Error(error.message || "An unexpected error occured...");
