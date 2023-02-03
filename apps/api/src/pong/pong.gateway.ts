@@ -74,7 +74,7 @@ import { Interval } from "@nestjs/schedule";
 			let i = 0;
 			socketWaiting.forEach((socket) => socket.data.position = i++);
 		}
-		console.log(client.data.name + " DISCONNECTED")
+		console.log(client.data.name + "  DISCONNECTED")
 	}
 
 	@Interval(17)
@@ -86,12 +86,9 @@ import { Interval } from "@nestjs/schedule";
 			let game = key[0];
 			if (game.boardType !== 0) {
 				game.updateGame();
-				console.log(game.ball.point[0].x + " " + game.ball.point[0].y + "|" + game.ball.speed.x + game.ball.speed.y + "|" + Date.now());
 			} else {
-				// console.log("GA ME IS FINISHED - DISCONNECTING ALL CLIENT")
 				const sockets = await this.server.in(room).fetchSockets();
 				sockets.forEach((socket) => {
-					// console.log("DISCONNECTING :" + socket.data.name)
 					socket.leave(room);
 					socket.disconnect();
 				})
@@ -109,7 +106,7 @@ import { Interval } from "@nestjs/schedule";
 			let game = key[0];
 			if (game.boardType !== 0) {
 				let state = game.getState();
-				console.log("=-=-=-=-=-=REFRESHING=-=-=-=-=-=|" + Date.now())
+				console.log("=-=-=-=-=-=REFRESHING=-=-=-=-=-= |" + Date.now())
 				this.server.in(room).emit('refresh', state);
 			}
 		});

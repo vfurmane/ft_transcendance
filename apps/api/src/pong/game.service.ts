@@ -1,3 +1,4 @@
+import { timer } from 'rxjs';
 import { GameState } from 'types'
 
 enum Axe {
@@ -34,6 +35,7 @@ export class Game {
   public cible!: Target;
   public static keyPressed = { up: false, down: false };
   public start = Date.now();
+  public lastUpdate : number = 0;
   public wall: Wall[] = [];
   public color: string[] = ["blue", "red", "orange", "white", "pink", "black"];
 
@@ -79,15 +81,15 @@ export class Game {
     return points;
   }
 
-  refresh(player: Racket[], ball: Point, ballVector: Vector) {
-    this.player = this.updatePlayer(player, this.wall);
-    this.ball = new Ball(
-      this.createRegularPolygon(ball, 30, this.boardType),
-      this.player,
-      this.board.wall
-    );
-    this.ball.speed = ballVector;
-  }
+  // refresh(player: Racket[], ball: Point, ballVector: Vector) {
+  //   this.player = this.updatePlayer(player, this.wall);
+  //   this.ball = new Ball(
+  //     this.createRegularPolygon(ball, 30, this.boardType),
+  //     this.player,
+  //     this.board.wall
+  //   );
+  //   // this.ball.speed = ballVector;
+  // }
 
   updatePlayer(player: Racket[], wall: Wall[]) {
     let racket: Racket[] = [];
@@ -222,14 +224,16 @@ export class Game {
       }
     }
     this.countUpdate++;
-    this.ball.update(this.player, this.board.wall, this.board);
-    for (let p of this.player) p.update(this.ball, this.board.wall);
+    let timeRatio = ((Date.now() - this.start) - this.lastUpdate) / 17;
+    this.ball.update(this.player, this.board.wall, this.board, timeRatio);
+    for (let p of this.player) p.update(this.ball, this.board.wall, timeRatio);
     if (this.isSolo) this.cible.update(this.ball, this.boardCanvas);
     if (Game.live == 0) {
       Game.point = 0;
       Game.live = 3;
       this.start = Date.now();
     }
+    this.lastUpdate = Date.now() - this.start;
   }
 }
 
@@ -417,10 +421,10 @@ export class Entity {
     }
   }
 
-  moveTo(dir: Vector) {
+  moveTo(dir: Vector, ratio : number) {
     for (let point of this.point) {
-      point.x += dir.x;
-      point.y += dir.y;
+      point.x += (dir.x * ratio);
+      point.y += (dir.y * ratio);
     }
   }
 
@@ -511,15 +515,15 @@ export class Target extends Entity {
 
 export class Ball extends Entity {
   public defaultSpeed: number = 3;
-  public nextCollision : { wall: number , racket: number } = { wall: 0, racket: 0 }
+  public nextCollision : { wall: number, wallIndex: number , racket: number } = { wall: 0, wallIndex: 0, racket: 0 }
 
   constructor(points: Point[], player: Racket[], walls: Wall[]) {
     super(points);
     this.goToRandomPlayer(player);
-    this.calcNextCollision(player, walls)
+    this.calcNextCollision(player, walls, null)
   }
 
-  calcNextCollision(rackets: Racket[], walls: Wall[])
+  calcNextCollision(rackets: Racket[], walls: Wall[], ignore : number|null)
   {
     let face : Point;
     let ballTo : Point;
@@ -546,14 +550,20 @@ export class Ball extends Entity {
     minRatio = null
     walls.forEach((wall, index) =>
     {
-      face = this.getFace(index)
-      ballTo = new Point (this.speed.x + face.x, this.speed.y + face.y)
-      let ratio = face.intersect(ballTo, wall.point[2], wall.point[1])
-      if (ratio > 0)
+      if (ignore === null || index !== ignore)
       {
-        minRatio ??= ratio
-        if (ratio < minRatio)
-          minRatio = ratio
+        face = this.getFace(index)
+        ballTo = new Point (this.speed.x + face.x, this.speed.y + face.y)
+        let ratio = face.intersect(ballTo, wall.point[2], wall.point[1])
+        if (ratio > 0)
+        {
+          minRatio ??= ratio
+          if (ratio <= minRatio)
+          {
+            minRatio = ratio
+            this.nextCollision.wallIndex = index
+          }
+        }
       }
     })
     if (minRatio)
@@ -579,15 +589,18 @@ export class Ball extends Entity {
     );
   }
 
-  update(rackets: Racket[], walls: Wall[], board: Board) {
-    if (!this.sat(board.board)) {
-      this.replaceTo(board.board.center());
-      this.moveTo(this.speed);
-      this.calcNextCollision(rackets, walls);
-      return ;
-    }
-    this.nextCollision.wall -= 1
-    this.nextCollision.racket -= 1
+
+  update(rackets: Racket[], walls: Wall[], board: Board, timeRatio : number) {
+    this.nextCollision.wall -= (1 * timeRatio)
+    this.nextCollision.racket -= (1 * timeRatio)
+  
+    // if (!this.sat(board.board)) {
+    //   this.replaceTo(board.board.center());
+    //   this.moveTo(this.speed, timeRatio);
+    //   this.calcNextCollision(rackets, walls, null);
+    //   return ;
+    // }
+    console.log(this.nextCollision.wall);
     if (this.nextCollision.wall > this.nextCollision.racket && this.nextCollision.racket < 1)
     {
       for (let racket of rackets) {
@@ -617,16 +630,19 @@ export class Ball extends Entity {
             norm.x * this.defaultSpeed,
             norm.y * this.defaultSpeed
           );
-          this.moveTo(this.speed);
-          this.calcNextCollision(rackets, walls);
+          this.moveTo(this.speed, timeRatio);
+          this.calcNextCollision(rackets, walls, null);
           return;
         }
       }
     }
-    if (this.nextCollision.wall < 1)
+    if (this.nextCollision.wall <= 0)
     {
-      for (let wall of walls) {
-        if (this.sat(wall)) {
+      // for (let wall of walls) {
+      //   if (this.sat(wall)) {
+          const newCoords = new Point(this.point[0].x - (this.speed.x * this.nextCollision.wall), this.point[0].y - (this.speed.y * this.nextCollision.wall))
+          this.replaceTo(newCoords)
+          const wall = walls[this.nextCollision.wallIndex]
           let wallVector = wall.point[0].vectorTo(wall.point[2]);
           let Norm = wallVector.norm() * this.speed.norm();
           let angle = Math.acos(wallVector.product(this.speed) / Norm);
@@ -647,9 +663,9 @@ export class Ball extends Entity {
             ];
           }
           this.speed = tmp;
-          this.moveTo(this.speed);
-          this.moveTo(this.speed);
-          let index = walls.indexOf(wall);
+          this.moveTo(this.speed, timeRatio);
+          this.moveTo(this.speed, timeRatio);
+          let index = this.nextCollision.wallIndex;
           if (rackets.length === 2) {
             if (index === 2) {
               console.log("GOAL for player 0")
@@ -662,23 +678,24 @@ export class Ball extends Entity {
               this.replaceTo(board.board.center());
               this.goToRandomPlayer(rackets);
             }
+            console.log("DFAJDFJADSLFJADFAS")
           } else {
             rackets[index].hp--;
             this.replaceTo(board.board.center());
             this.goToRandomPlayer(rackets);
           }
-          this.calcNextCollision(rackets, walls);
+          this.calcNextCollision(rackets, walls, this.nextCollision.wallIndex);
           return;
-        }
-      }
+      //   }
+      // }
     }
-    this.moveTo(this.speed);
+    this.moveTo(this.speed, timeRatio);
   }
 }
 
 export class Racket extends Entity {
   public defaultSpeed: number = 1.5;
-  public hp = 1;
+  public hp = 2;
   public dir!: Vector;
 
   constructor(public index: number, points: Point[], public color: string) {
@@ -702,15 +719,15 @@ export class Racket extends Entity {
         -this.dir.y * this.defaultSpeed
       );
     }
-    this.moveTo(this.speed);
+    this.moveTo(this.speed, 1);
     for (let wall of walls) {
       if (this.sat(wall)) {
-        this.moveTo(new Vector(-this.speed.x, -this.speed.y));
+        this.moveTo(new Vector(-this.speed.x, -this.speed.y), 1);
       }
     }
   }
 
-  update(ball: Ball, walls: Wall[]) {
+  update(ball: Ball, walls: Wall[], timeRatio : number) {
     if (this.index == 0) {
       if (Game.keyPressed.up && Game.keyPressed.down) {
       } else if (Game.keyPressed.up) {
@@ -718,14 +735,14 @@ export class Racket extends Entity {
           this.dir.x * this.defaultSpeed,
           this.dir.y * this.defaultSpeed
         );
-        this.moveTo(this.speed);
+        this.moveTo(this.speed, timeRatio);
         //socket.emit('up', this.index);
       } else if (Game.keyPressed.down) {
         this.speed = new Vector(
           -this.dir.x * this.defaultSpeed,
           -this.dir.y * this.defaultSpeed
         );
-        this.moveTo(this.speed);
+        this.moveTo(this.speed, timeRatio);
         //socket.emit('down');
       }
     }// else {
@@ -753,7 +770,7 @@ export class Racket extends Entity {
     // }
     for (let wall of walls) {
       if (this.sat(wall)) {
-        this.moveTo(new Vector(-this.speed.x, -this.speed.y));
+        this.moveTo(new Vector(-this.speed.x, -this.speed.y), timeRatio);
       }
     }
   }

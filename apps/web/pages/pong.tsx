@@ -6,6 +6,7 @@ import React, {
   useEffect,
 } from "react";
 import Router, { NextRouter, useRouter } from 'next/router';
+import { time } from 'console';
 
 enum Axe {
   X = 1,
@@ -41,6 +42,7 @@ class Game {
   public cible!: Target;
   public static keyPressed = { up: false, down: false };
   public start = Date.now();
+  public lastUpdate : number = 0;
   public color: string[] = ["blue", "red", "orange", "white", "pink", "black"];
   public static position : number;
   public static socket : any;
@@ -63,7 +65,7 @@ class Game {
         if (!this.board) {
           return ;
         }
-        console.log("=-=-=-=-=-=REFRESHING=-=-=-=-=-=")
+        // console.log("=-=-=-=-=-=REFRESHING=-=-=-=-=-=")
         this.refresh(state);
       });
     }
@@ -106,7 +108,7 @@ class Game {
       this.ball = new Ball (this.createRegularPolygon(new Point(state.ball.point.x, state.ball.point.y), 30, this.boardType), this.player, this.board.wall);
     }
     this.ball.speed = new Vector(state.ball.dir.x, state.ball.dir.y);
-    this.ball.calcNextCollision(this.player, this.board.wall)
+    this.ball.calcNextCollision(this.player, this.board.wall, null)
   }
 
   updatePlayer(player: PlayerInterface[], wall: Wall[]) {
@@ -243,23 +245,23 @@ class Game {
     if (!this.boardType) {
       return ;
     }
-    for (let p of this.player) {
-      if (p.hp == 0) {
-        if (this.boardType == Form.REC) {
-          this.boardType = 0;
-          return ;  
-        } else {
-          this.player.splice(p.index, 1);
-          for (let i = 0; i < this.player.length; i++) {
-            if (this.player[i].index > p.index) {
-              this.player[i].index--;
-            }
-          }
-          this.boardType--;
-        }
-        this.init(this.boardCanvasRef);
-      }
-    }
+    // for (let p of this.player) {
+    //   if (p.hp == 0) {
+    //     if (this.boardType == Form.REC) {
+    //       this.boardType = 0;
+    //       return ;  
+    //     } else {
+    //       this.player.splice(p.index, 1);
+    //       for (let i = 0; i < this.player.length; i++) {
+    //         if (this.player[i].index > p.index) {
+    //           this.player[i].index--;
+    //         }
+    //       }
+    //       this.boardType--;
+    //     }
+    //     this.init(this.boardCanvasRef);
+    //   }
+    // }
     this.boardContext!.fillStyle = "#666666";
     this.board.board.draw(this.boardContext, "gray");
     this.boardContext!.font = "14px sherif";
@@ -287,8 +289,9 @@ class Game {
       110
     );
     this.countUpdate++;
-    this.ball.update(this.player, this.board.wall, this.board);
-    this.player.forEach((player) => player.update(this.ball, this.board.wall))
+    let timeRatio = ((Date.now() - this.start) - this.lastUpdate) / 17;
+    this.ball.update(this.player, this.board.wall, this.board, timeRatio);
+    this.player.forEach((player) => player.update(this.ball, this.board.wall, timeRatio))
     if (this.isSolo) this.cible.update(this.ball, this.boardCanvas);
     this.board.wall.forEach((wall) => {
       wall.draw(this.boardContext, undefined);
@@ -310,7 +313,7 @@ class Game {
       Game.live = 3;
       this.start = Date.now();
     }
-   // console.log(this.ball.point[0].x + " " + this.ball.point[0].y + "|" + this.ball.speed.x + " " + this.ball.speed.y + "|" + Date.now() + "|" + Game.count++)
+    this.lastUpdate = Date.now() - this.start;
   }
 }
 
@@ -498,10 +501,10 @@ class Entity {
     }
   }
 
-  moveTo(dir: Vector) {
+  moveTo(dir: Vector, ratio : number) {
     for (let point of this.point) {
-      point.x += dir.x;
-      point.y += dir.y;
+      point.x += (dir.x * ratio);
+      point.y += (dir.y * ratio);
     }
   }
 
@@ -620,15 +623,15 @@ class Target extends Entity {
 
 class Ball extends Entity {
   public defaultSpeed: number = 3;
-  public nextCollision : { wall: number , racket: number } = { wall: 0, racket: 0 }
+  public nextCollision : { wall: number, wallIndex: number , racket: number } = { wall: 0, wallIndex: 0, racket: 0 }
 
   constructor(points: Point[], player: Racket[], walls: Wall[]) {
     super(points);
     this.goToRandomPlayer(player);
-    this.calcNextCollision(player, walls)
+    this.calcNextCollision(player, walls, null)
   }
 
-  calcNextCollision(rackets: Racket[], walls: Wall[])
+  calcNextCollision(rackets: Racket[], walls: Wall[], ignore : number|null)
   {
     let face : Point;
     let ballTo : Point;
@@ -655,14 +658,20 @@ class Ball extends Entity {
     minRatio = null
     walls.forEach((wall, index) =>
     {
-      face = this.getFace(index)
-      ballTo = new Point (this.speed.x + face.x, this.speed.y + face.y)
-      let ratio = face.intersect(ballTo, wall.point[2], wall.point[1])
-      if (ratio > 0)
+      if (ignore === null || index !== ignore)
       {
-        minRatio ??= ratio
-        if (ratio < minRatio)
-          minRatio = ratio
+        face = this.getFace(index)
+        ballTo = new Point (this.speed.x + face.x, this.speed.y + face.y)
+        let ratio = face.intersect(ballTo, wall.point[2], wall.point[1])
+        if (ratio > 0)
+        {
+          minRatio ??= ratio
+          if (ratio <= minRatio)
+          {
+            minRatio = ratio
+            this.nextCollision.wallIndex = index
+          }
+        }
       }
     })
     if (minRatio)
@@ -694,28 +703,28 @@ class Ball extends Entity {
     );
   }
 
-  update(rackets: Racket[], walls: Wall[], board: Board) {
-    if (!this.sat(board.board)) {
-      this.replaceTo(board.board.center());
-      this.moveTo(this.speed);
-      this.calcNextCollision(rackets, walls);
-      return ;
-    }
-    this.nextCollision.wall -= 1
-    this.nextCollision.racket -= 1
-    // console.log("next collision: ", this.nextCollision)
+  update(rackets: Racket[], walls: Wall[], board: Board, timeRatio : number) {
+    this.nextCollision.wall -= (1 * timeRatio)
+    this.nextCollision.racket -= (1 * timeRatio)
+
+    // if (!this.sat(board.board)) {
+    //   this.replaceTo(board.board.center());
+    //   this.moveTo(this.speed, timeRatio);
+    //   this.calcNextCollision(rackets, walls, null);
+    //   return ;
+    // }
+    console.log(this.nextCollision.wall);
     if (this.nextCollision.wall > this.nextCollision.racket && this.nextCollision.racket < 1)
     {
       for (let racket of rackets) {
         if (this.sat(racket)) {
           let angle = 0;
           let face;
+          const index = rackets.indexOf(racket);
           if (rackets.length != 2) {
-            face = this.getFace(rackets.indexOf(racket));
+            face = this.getFace(index);
           } else {
-            let index = rackets.indexOf(racket);
-            if (index == 1) face = this.getFace(2);
-            else face = this.getFace(0);
+            face = index === 1 ? this.getFace(2) : this.getFace(0);
           }
           let ratio = racket.point[2].intersect(
             racket.point[1],
@@ -734,16 +743,19 @@ class Ball extends Entity {
             norm.x * this.defaultSpeed,
             norm.y * this.defaultSpeed
           );
-          this.moveTo(this.speed);
-          this.calcNextCollision(rackets, walls);
+          this.moveTo(this.speed, timeRatio);
+          this.calcNextCollision(rackets, walls, null);
           return;
         }
       }
     }
-    if (this.nextCollision.wall < 1)
+    if (this.nextCollision.wall <= 0)
     {
-      for (let wall of walls) {
-        if (this.sat(wall)) {
+      // for (let wall of walls) {
+        // if (this.sat(wall)) {
+          const newCoords = new Point(this.point[0].x - (this.speed.x * this.nextCollision.wall), this.point[0].y - (this.speed.y * this.nextCollision.wall))
+          this.replaceTo(newCoords)
+          const wall = walls[this.nextCollision.wallIndex]
           let wallVector = wall.point[0].vectorTo(wall.point[2]);
           let Norm = wallVector.norm() * this.speed.norm();
           let angle = Math.acos(wallVector.product(this.speed) / Norm);
@@ -764,9 +776,9 @@ class Ball extends Entity {
             ];
           }
           this.speed = tmp;
-          this.moveTo(this.speed);
-          this.moveTo(this.speed);
-          let index = walls.indexOf(wall);
+          this.moveTo(this.speed, timeRatio);
+          this.moveTo(this.speed, timeRatio);
+          let index = this.nextCollision.wallIndex;
           if (rackets.length === 2) {
             if (index === 2) {
               rackets[1].hp--;
@@ -782,12 +794,12 @@ class Ball extends Entity {
             this.replaceTo(board.board.center());
             this.goToRandomPlayer(rackets);
           }
-          this.calcNextCollision(rackets, walls);
+          this.calcNextCollision(rackets, walls, this.nextCollision.wallIndex);
           return;
-        }
-      }
+        // }
+      // }
     }
-    this.moveTo(this.speed);
+    this.moveTo(this.speed, timeRatio);
   }
 }
 
@@ -805,7 +817,7 @@ class Racket extends Entity {
     );
   }
 
-  update(ball: Ball, walls: Wall[]) {
+  update(ball: Ball, walls: Wall[], timeRatio : number) {
     if (this.index == Game.position) {
       if (Game.keyPressed.up && Game.keyPressed.down) {
       } else if (Game.keyPressed.up) {
@@ -813,14 +825,14 @@ class Racket extends Entity {
           this.dir.x * this.defaultSpeed,
           this.dir.y * this.defaultSpeed
         );
-        this.moveTo(this.speed);
+        this.moveTo(this.speed, timeRatio);
         Game.socket.emit('up');
       } else if (Game.keyPressed.down) {
         this.speed = new Vector(
           -this.dir.x * this.defaultSpeed,
           -this.dir.y * this.defaultSpeed
         );
-        this.moveTo(this.speed);
+        this.moveTo(this.speed, timeRatio);
         Game.socket.emit('down');
       }
    } //else {
@@ -858,9 +870,9 @@ function handleResize(game: Game) {
   game.updateGame();
 }
 
-const Canvas = ({ ref }: any) => {
+const Canvas = () => {
   let router = useRouter();
-  const canvasRef = useRef(ref);
+  const canvasRef = useRef(null);
   if (canvasRef) {
     let game = new Game(Number(router.query.number_player), Number(router.query.position), router);
 
