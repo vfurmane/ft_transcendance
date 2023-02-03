@@ -34,7 +34,7 @@ class Game {
   public board!: Board;
   public countUpdate: number = 0;
   public static point: number = 0;
-  public static live: number = 3;
+  public static live: number = 10;
   public ball!: Ball;
   public player: Racket[] = [];
   public cible!: Target;
@@ -43,8 +43,10 @@ class Game {
   public color: string[] = ["blue", "red", "orange", "white", "pink", "black"];
   public static position : number;
   public static socket : any;
+  public static scoreMax : number = 10;
+  public static changeLife :  (index : number) => void;
 
-  constructor(number_player:number, position:number, private router:NextRouter) {
+  constructor(number_player:number, position:number, private router:NextRouter, changeLife : (index : number) => void) {
     /*if (typeof window !== 'undefined') {
       Game.socket = io("/pong", {
         auth: {
@@ -63,8 +65,9 @@ class Game {
         this.refresh(state);
       });
     }*/
-    this.boardType = 2;
+    this.boardType = 3;
     Game.position = position;
+    Game.changeLife = changeLife;
   }
 
   createRegularPolygon(point: Point, side: number, n: number) {
@@ -266,43 +269,63 @@ class Game {
       0,
       10
     );*/
-    this.boardContext!.font = "50px sherif";
-    this.boardContext!.fillText(
-      Game.point.toString(),
-      this.boardCanvas!.width * 0.3,
-      this.boardCanvas!.height * 0.1
-    );
-    this.boardContext!.fillText(
-      Game.point.toString(),
-      this.boardCanvas!.width * 0.7,
-      this.boardCanvas!.height * 0.1
-    );
-    this.boardContext!.font = "20px sherif";
-    for (let i: number = 0; i < Game.live; i++) {
-      this.boardContext!.fillText(
-        "❤️",
-        this.boardCanvas!.width * 0.1 + 25 * i,
-        this.boardCanvas!.height * 0.1
-      );
-    }
-    for (let i: number = 0; i < Game.live; i++) {
-      this.boardContext!.fillText(
-        "❤️",
-        this.boardCanvas!.width * 0.9 - 25 * i,
-        this.boardCanvas!.height * 0.1
-      );
+   
+
+    
+    /*switch (this.player.length) 
+    {
+      case 1 : 
+      {
+        Game.scoreWidth = [0.5];
+        Game.scoreHeight = [0.1];
+        Game.lifeWidth = [0.1];
+        Game.lifeHeight = [0.1];
+        break;
+      }
+      case 2 :
+      {
+        Game.scoreWidth = [0.7, 0.3];
+        Game.scoreHeight = [0.1, 0.1];
+        Game.lifeWidth = [0.1, 0.8];
+        Game.lifeHeight = [0.1, 0.1];
+        break;
+      }
+
     }
 
+    for (let p of this.player)
+    {
+      this.boardContext!.font = "50px sherif";
+      this.boardContext!.fillText(
+        (3 - p.hp).toString(),
+        this.boardCanvas!.width * Game.scoreWidth[p.index],
+        this.boardCanvas!.height * Game.scoreHeight[p.index]
+      );
+      this.boardContext!.font = "20px sherif";
+      for (let i: number = 0; i < Game.live; i++) {
+        this.boardContext!.fillText(
+          "❤️",
+          this.boardCanvas!.width * Game.lifeWidth[p.index] + 25 * i,
+          this.boardCanvas!.height * Game.lifeHeight[p.index]
+        );
+      }
+    }*/
+
+
+
     // Draw the net (Line in the middle)
-		this.boardContext!.beginPath();
-		this.boardContext!.setLineDash([30, 15]);
-		this.boardContext!.moveTo((this.boardCanvas!.width / 2), this.boardCanvas!.height - 50);
-		this.boardContext!.lineTo((this.boardCanvas!.width / 2), 120);
-		this.boardContext!.lineWidth = 2;
-		this.boardContext!.strokeStyle = '#ffffff';
-		this.boardContext!.stroke();
-    this.boardContext!.setLineDash([0, 0]);
-    this.boardContext!.lineWidth = 1;
+    if (this.player.length === 2)
+    {
+      this.boardContext!.beginPath();
+      this.boardContext!.setLineDash([30, 15]);
+      this.boardContext!.moveTo((this.boardCanvas!.width / 2), this.boardCanvas!.height - 50);
+      this.boardContext!.lineTo((this.boardCanvas!.width / 2), 120);
+      this.boardContext!.lineWidth = 2;
+      this.boardContext!.strokeStyle = '#ffffff';
+      this.boardContext!.stroke();
+      this.boardContext!.setLineDash([0, 0]);
+      this.boardContext!.lineWidth = 1;
+    }
 
 
     this.countUpdate++;
@@ -324,7 +347,7 @@ class Game {
       );*/
     }
     if (this.isSolo) this.cible.draw(this.boardContext);
-    if (Game.live == 0) {
+    if (Game.live === 0) {
       Game.point = 0;
       Game.live = 3;
       this.start = Date.now();
@@ -750,15 +773,18 @@ class Ball extends Entity {
             rackets[1].hp--;
             this.replaceTo(board.board.center());
             this.goToRandomPlayer(rackets);
+            Game.changeLife(1);
           } else if (index === 0) {
             rackets[0].hp--;
             this.replaceTo(board.board.center());
             this.goToRandomPlayer(rackets);
+            Game.changeLife(0);
           }
         } else {
           rackets[index].hp--;
           this.replaceTo(board.board.center());
           this.goToRandomPlayer(rackets);
+          Game.changeLife(index);
         }
         return;
       }
@@ -830,31 +856,4 @@ class Racket extends Entity {
   }
 }
 
-function handleResize(game: Game) {
-  game.updateGame();
-}
-
-const Canvas = ({ ref }: any) => {
-  let router = useRouter();
-  const canvasRef = useRef(ref);
-  if (canvasRef) {
-    let game = new Game(Number(router.query.number_player), Number(router.query.position), router);
-
-    useEffect(() => {
-      game.init(canvasRef);
-      setInterval(handleResize, 17, game);
-    }, []);
-  }
-
-  return (
-      <div style={{width: '60vw', height: '60vh', overflow: 'hidden', border: 'solid 2px white',borderRadius: '10px', boxShadow: '0px 0px 60px 5px  #875E5E', backgroundColor: '#1e1e1e', display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
-         <canvas ref={canvasRef}></canvas>
-      </div>
-  );
-};
-
-// type Props = {
-// 	ref: React.RefObject<HTMLCanvasElement> | undefined
-//   }
-
-export default Canvas;
+export default Game
