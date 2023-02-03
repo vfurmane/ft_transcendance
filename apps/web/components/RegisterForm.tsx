@@ -58,7 +58,6 @@ export function RegisterForm(): ReactElement {
 
     await registerUser(data)
       .then((response) => {
-        console.log(response);
         if (response === null) {
           throw new Error("An unexpected error occured...");
         } else {

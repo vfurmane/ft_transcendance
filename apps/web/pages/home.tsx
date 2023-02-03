@@ -5,8 +5,6 @@ import List from "../components/HomePage/List";
 import UserEntity from "../components/HomePage/UserEntity";
 import ArrayDoubleColumn from "../components/HomePage/ArrayDoubleColumn";
 import PlayMenu from "../components/HomePage/PlayMenu";
-import { selectUserState, setUserState } from "../store/UserSlice";
-import { useDispatch, useSelector } from "react-redux";
 import { Userfront as User } from "types";
 import Link from "next/link";
 import ChatBar from "../components/chatBar";
@@ -14,9 +12,9 @@ import playButtonStyles from "styles/playButton.module.scss";
 import textStyles from "styles/text.module.scss";
 import styles from "styles/home.module.scss";
 import { useRouter } from "next/router";
+import { useWebsocketContext } from "../components/Websocket";
 
 function Home(): JSX.Element {
-  const userState = useSelector(selectUserState);
   const friendListRef = useRef([<></>]);
   const setterInit: React.Dispatch<React.SetStateAction<boolean>> = () => false;
 
@@ -30,14 +28,15 @@ function Home(): JSX.Element {
   const prevIndexOfUserRef = useRef(-1);
   const prevSetterUsermenuRef = useRef(setterInit);
 
+  const websockets = useWebsocketContext();
+
   useEffect(() => {
-    console.error("triggered")
-    if (!userState || userState === undefined || userState.id === undefined
-      || !userState.id.length)
-      {
-        router.replace('/login')
-      }
-  }, [userState]);
+    if (websockets?.general?.connected) {
+      console.error("General is connected");
+    } else {
+      console.error("Websocket error on general");
+    }
+  });
 
   /*======for close topBar component when click on screen====*/
   const [openToggle, setOpenToggle] = useState(false);
@@ -175,6 +174,7 @@ function Home(): JSX.Element {
       <div className={`${styles.illustration} d-none d-lg-block`}></div>
       <div className="container ">
         <div className="row">
+          Chat
           <div className="col-12  d-none d-lg-block">
             <h3 className={styles.title}>Ft_Transcendence</h3>
           </div>

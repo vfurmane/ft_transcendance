@@ -5,13 +5,15 @@ import Search from "../public/Search.png";
 import ToggleBar from "../public/toggleBar.png";
 import ToggleCross from "../public/toggleCross.png";
 import Link from "next/link";
-import { selectUserState } from "../store/UserSlice";
-import { useSelector } from "react-redux";
+import { selectUserState, setUserState } from "../store/UserSlice";
+import { useDispatch, useSelector } from "react-redux";
 import UserEntity from "./HomePage/UserEntity";
 import styles from "styles/topBar.module.scss";
 import textStyles from "styles/text.module.scss";
 import List from "./HomePage/List";
 import { Userfront as User } from "types";
+import { initUser } from "../initType/UserInit";
+import { clearTokens } from "../helpers/clearTokens";
 
 interface propsTopBar {
   openToggle: boolean;
@@ -32,6 +34,7 @@ function TopBar(props: propsTopBar): JSX.Element {
   const [userList, setUserList] = useState([<></>]);
 
   const UserState = useSelector(selectUserState);
+  const dispatch = useDispatch();
 
   function clickToggle(): void {
     props.clickTopBarToggle();
@@ -76,7 +79,7 @@ function TopBar(props: propsTopBar): JSX.Element {
                   index={i}
                   handleClick={props.handleClickUserMenu}
                   delFriendClick={(): void => {
-                    console.error("Deleting friend");
+                    null;
                   }}
                 />
               );
@@ -101,7 +104,7 @@ function TopBar(props: propsTopBar): JSX.Element {
             <Image alt="logo" src={Logo} width={200} height={30} />
           </Link>
           <Link className={styles.leaderBoardLink} href="/home#leaderBoard">
-            Learderbord
+            Leaderboard
           </Link>
         </div>
       </div>
@@ -211,7 +214,15 @@ function TopBar(props: propsTopBar): JSX.Element {
               </div>
             </Link>
             <div className={styles.contextMenuEntity}>
-              <h3 className={textStyles.laquer}>logout</h3>
+              <h3
+                className={textStyles.laquer}
+                onClick={(): void => {
+                  clearTokens();
+                  dispatch(setUserState(initUser));
+                }}
+              >
+                logout
+              </h3>
             </div>
           </div>
         </div>
