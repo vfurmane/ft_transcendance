@@ -31,7 +31,7 @@ function Home(): JSX.Element {
   const websockets = useWebsocketContext();
 
   useEffect(() => {
-    if (websockets?.general?.connected) {
+    if (websockets.general?.connected) {
       console.error("General is connected");
     } else {
       console.error("Websocket error on general");

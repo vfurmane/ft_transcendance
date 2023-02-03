@@ -20,7 +20,11 @@ interface OpenedSockets {
   pong: Socket<DefaultEventsMap, DefaultEventsMap> | null;
 }
 
-const WebsocketContext = createContext<OpenedSockets | null>(null);
+const WebsocketContext = createContext<OpenedSockets>({
+  general: null,
+  conversations: null,
+  pong: null,
+});
 
 const deregisterSocket = (
   socket: Socket<DefaultEventsMap, DefaultEventsMap>
@@ -92,6 +96,6 @@ export default function Websocket({ children }: WebsocketProps): JSX.Element {
   );
 }
 
-export const useWebsocketContext: () => OpenedSockets | null = () => {
+export const useWebsocketContext: () => OpenedSockets = () => {
   return useContext(WebsocketContext);
 };
