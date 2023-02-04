@@ -108,7 +108,7 @@ import { Interval } from "@nestjs/schedule";
 			if (game.boardType !== 0) {
 				let state = game.getState();
 				console.log("=-=-=-=-=-= REFRESHING =-=-=-=-=-= |" + Date.now())
-				this.server.in(room).emit('refresh', state);
+				this.server.in(room).emit('refresh', state, Date.now());
 			}
 		});
 	}
@@ -135,7 +135,7 @@ import { Interval } from "@nestjs/schedule";
 			return 'Game not launched'
 		}
 		game.movePlayer(client.data.position, true)
-		this.server.in(room).emit('refresh', game.getState());
+		this.server.in(room).emit('refresh', game.getState(), Date.now());
 		return 'You moved up'
 	}
 
@@ -149,10 +149,8 @@ import { Interval } from "@nestjs/schedule";
 		if (!game) {
 			return 'Game not launched'
 		}
-		console.log(`Moving player from ${game.player[client.data.position].getx()} ${game.player[client.data.position].gety()}`)
 		game.movePlayer(client.data.position, false)
-		console.log(`to ${game.player[client.data.position].getx()} ${game.player[client.data.position].gety()}`)
-		this.server.in(room).emit('refresh', game.getState());
+		this.server.in(room).emit('refresh', game.getState(), Date.now());
 		return 'You moved down'
 	}
 
@@ -187,24 +185,24 @@ import { Interval } from "@nestjs/schedule";
 		let connectedSockets = clientSockets.filter((socket) => socket.data.room !== undefined)
 		if (connectedSockets.length) return 'You are already in a room !'
 		if (this.room_id?.length) {
-			for (let id of this.room_id) {
-				let count = (await this.server.in(id).fetchSockets()).length 
+			for (let room of this.room_id) {
+				let count = (await this.server.in(room).fetchSockets()).length 
 				if (count < 6) {
-					client.join(id);
-					client.data.room = id;
+					client.join(room);
+					client.data.room = room;
 					client.data.position = count;
 					console.log(count)
 					if (count === 1) { // CHANGE BACK TO 5 PLEASE
 						let list:Array<string> = [];
-						(await this.server.in(id).fetchSockets()).forEach(element => {
+						(await this.server.in(room).fetchSockets()).forEach(element => {
 							list.push(element.data.id);
 							this.server.in(`user_${element.data.id}`).emit('startGame', { number_player: count + 1, position : element.data.position});
 						});
-						this.games.set(id, [new Game(2), list])
-						this.room_id.splice(this.room_id.indexOf(id), 1);
-						return 'Launched game for room ' + id;
+						this.games.set(room, [new Game(2), list])
+						this.room_id.splice(this.room_id.indexOf(room), 1);
+						return 'Launched game for room ' + room;
 					}
-					return 'Joined room of id ' + id + ' at position ' + count;
+					return 'Joined room of id ' + room + ' at position ' + count;
 				}
 			}
 			let num = (Number(this.room_id.at(-1)) + 1).toString();

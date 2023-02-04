@@ -182,12 +182,12 @@ class Game {
 
   init(ref: React.RefObject<HTMLCanvasElement> | undefined, socket : Socket) {
     if (ref === undefined) return;
-    Game.socket.on("refresh", (state: GameState) => {
+    Game.socket.on("refresh", (state: GameState, time: number) => {
       Game.count = 0;
       if (!this.board) {
         return;
       }
-      console.log("=-=-=-=-=-=REFRESHING=-=-=-=-=-=" + (Date.now() - this.start))
+      console.log("=-=-=-=-=-=REFRESHING=-=-=-=-=-=   " + (time - this.start) + "     " + this.lastUpdate)
       this.refresh(state);
     });
     Game.socket.on("endGame", () => {

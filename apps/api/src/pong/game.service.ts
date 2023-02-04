@@ -1,4 +1,3 @@
-import { timer } from 'rxjs';
 import { GameState } from 'types'
 
 enum Axe {
