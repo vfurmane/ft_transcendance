@@ -187,7 +187,7 @@ class Game {
       if (!this.board) {
         return;
       }
-      // console.log("=-=-=-=-=-=REFRESHING=-=-=-=-=-=")
+      console.log("=-=-=-=-=-=REFRESHING=-=-=-=-=-=" + (Date.now() - this.start))
       this.refresh(state);
     });
     Game.socket.on("endGame", () => {
@@ -724,7 +724,6 @@ class Ball extends Entity {
     //   this.calcNextCollision(rackets, walls, null);
     //   return ;
     // }
-    console.log(this.nextCollision.wall);
     if (
       this.nextCollision.wall > this.nextCollision.racket &&
       this.nextCollision.racket < 1
@@ -763,8 +762,6 @@ class Ball extends Entity {
       }
     }
     if (this.nextCollision.wall <= 0) {
-      // for (let wall of walls) {
-      // if (this.sat(wall)) {
       const newCoords = new Point(
         this.point[0].x - this.speed.x * this.nextCollision.wall,
         this.point[0].y - this.speed.y * this.nextCollision.wall
@@ -799,20 +796,22 @@ class Ball extends Entity {
           rackets[1].hp--;
           this.replaceTo(board.board.center());
           this.goToRandomPlayer(rackets);
+          this.calcNextCollision(rackets, walls, null);
         } else if (index === 0) {
           rackets[0].hp--;
           this.replaceTo(board.board.center());
           this.goToRandomPlayer(rackets);
+          this.calcNextCollision(rackets, walls, null);
+        } else {
+          this.calcNextCollision(rackets, walls, this.nextCollision.wallIndex);
         }
       } else {
         rackets[index].hp--;
         this.replaceTo(board.board.center());
         this.goToRandomPlayer(rackets);
+        this.calcNextCollision(rackets, walls, null);
       }
-      this.calcNextCollision(rackets, walls, this.nextCollision.wallIndex);
       return;
-      // }
-      // }
     }
     this.moveTo(this.speed, timeRatio);
   }
@@ -902,7 +901,7 @@ const Canvas = () => {
       {
         Game.socket = websockets.pong
         game.init(canvasRef, websockets.pong);
-        const intervalId = setInterval(handleResize, 17, game);
+        const intervalId = setInterval(handleResize, 4, game);
         return () => {
           console.log("CLEARED INTERVAL");
           clearInterval(intervalId);

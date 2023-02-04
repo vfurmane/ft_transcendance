@@ -600,7 +600,6 @@ export class Ball extends Entity {
     //   this.calcNextCollision(rackets, walls, null);
     //   return ;
     // }
-    console.log(this.nextCollision.wall);
     if (this.nextCollision.wall > this.nextCollision.racket && this.nextCollision.racket < 1)
     {
       for (let racket of rackets) {
@@ -638,9 +637,10 @@ export class Ball extends Entity {
     }
     if (this.nextCollision.wall <= 0)
     {
-      // for (let wall of walls) {
-      //   if (this.sat(wall)) {
-          const newCoords = new Point(this.point[0].x - (this.speed.x * this.nextCollision.wall), this.point[0].y - (this.speed.y * this.nextCollision.wall))
+          const newCoords = new Point(
+            this.point[0].x - (this.speed.x * this.nextCollision.wall),
+            this.point[0].y - (this.speed.y * this.nextCollision.wall)
+          );
           this.replaceTo(newCoords)
           const wall = walls[this.nextCollision.wallIndex]
           let wallVector = wall.point[0].vectorTo(wall.point[2]);
@@ -678,16 +678,13 @@ export class Ball extends Entity {
               this.replaceTo(board.board.center());
               this.goToRandomPlayer(rackets);
             }
-            console.log("DFAJDFJADSLFJADFAS")
           } else {
             rackets[index].hp--;
             this.replaceTo(board.board.center());
             this.goToRandomPlayer(rackets);
           }
-          this.calcNextCollision(rackets, walls, this.nextCollision.wallIndex);
+          this.calcNextCollision(rackets, walls, null);
           return;
-      //   }
-      // }
     }
     this.moveTo(this.speed, timeRatio);
   }
