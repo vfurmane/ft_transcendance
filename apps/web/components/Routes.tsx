@@ -14,7 +14,7 @@ export default function Routes({ children }: RoutesProps): JSX.Element {
   const [loading, setLoading] = useState(true);
 
   useEffect((): void => {
-    const isProtected = !/^\/auth\//.test(router.pathname)
+    const isProtected = !/^\/auth\//.test(router.pathname);
     if (!userState.id.length && isProtected) router.replace("/auth/login");
     else if (userState.id.length && !isProtected) router.replace("/");
     else setLoading(false);
