@@ -5,8 +5,6 @@ import List from "../components/HomePage/List";
 import UserEntity from "../components/HomePage/UserEntity";
 import ArrayDoubleColumn from "../components/HomePage/ArrayDoubleColumn";
 import PlayMenu from "../components/HomePage/PlayMenu";
-import { setUserState } from "../store/UserSlice";
-import { useDispatch } from "react-redux";
 import { Userfront as User } from "types";
 import Link from "next/link";
 import ChatBar from "../components/chatBar";
@@ -14,6 +12,7 @@ import playButtonStyles from "styles/playButton.module.scss";
 import textStyles from "styles/text.module.scss";
 import styles from "styles/home.module.scss";
 import { useRouter } from "next/router";
+import { useWebsocketContext } from "../components/Websocket";
 
 function Home(): JSX.Element {
   const friendListRef = useRef([<></>]);
@@ -29,25 +28,15 @@ function Home(): JSX.Element {
   const prevIndexOfUserRef = useRef(-1);
   const prevSetterUsermenuRef = useRef(setterInit);
 
-  const dispatch = useDispatch();
+  const websockets = useWebsocketContext();
+
   useEffect(() => {
-    fetch(`/api/user`, {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + localStorage.getItem("access_token"),
-      },
-    })
-      .then(function (response) {
-        return response.json();
-      })
-      .then((data) => {
-        dispatch(setUserState(data));
-      })
-      .catch(function (error) {
-        console.log(`probleme with fetch: ${error.message}`);
-      });
-    //console.log(localStorage.getItem('access_token'));
-  }, [dispatch]);
+    if (websockets.general?.connected) {
+      console.error("General is connected");
+    } else {
+      console.error("Websocket error on general");
+    }
+  });
 
   /*======for close topBar component when click on screen====*/
   const [openToggle, setOpenToggle] = useState(false);
@@ -185,6 +174,7 @@ function Home(): JSX.Element {
       <div className={`${styles.illustration} d-none d-lg-block`}></div>
       <div className="container ">
         <div className="row">
+          Chat
           <div className="col-12  d-none d-lg-block">
             <h3 className={styles.title}>Ft_Transcendence</h3>
           </div>

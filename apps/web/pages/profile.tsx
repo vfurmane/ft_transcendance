@@ -18,7 +18,7 @@ import { initMatch } from "../initType/MatchInit";
 export default function Profil(): JSX.Element {
   const UserState = useSelector(selectUserState);
   const setterInit: React.Dispatch<React.SetStateAction<boolean>> = () => {
-    console.error("setterInit");
+    null;
   };
 
   const prevSetterUsermenuRef = useRef(setterInit);
