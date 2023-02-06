@@ -177,7 +177,7 @@ export class AuthService {
   async login(user: User, state?: State): Promise<AccessTokenResponse> {
     const [accessToken, refreshToken] = await this.createTokensPair(user);
     if (state) {
-      this.statesRepository.delete({ token: state.token });
+      this.removeState(state);
     }
     return {
       access_token: accessToken,
@@ -225,7 +225,7 @@ export class AuthService {
   }
 
   async removeState(state: State): Promise<void> {
-    state;
+    this.statesRepository.delete({ token: state.token });
     return;
   }
 }

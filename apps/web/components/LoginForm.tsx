@@ -126,7 +126,7 @@ export function LoginForm(): ReactElement {
         <Input disabled={loading} type="submit" fullWidth primary />
       </form>
       <p>
-        <Link href="/register">Create an account</Link>
+        <Link href="/auth/register">Create an account</Link>
       </p>
       <TextDivider>or</TextDivider>
       <FtOAuth2Button disabled={loading} state={state} fullWidth />

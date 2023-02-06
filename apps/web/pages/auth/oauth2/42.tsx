@@ -1,7 +1,10 @@
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
 import { AccessTokenResponse, TfaNeededResponse } from "types";
 import { Loading } from "../../../components/Loading";
+import { identifyUser } from "../../../helpers/identifyUser";
+import { setUserState } from "../../../store/UserSlice";
 
 async function exchangeCodeForToken(
   code: string,
@@ -28,6 +31,8 @@ async function exchangeCodeForToken(
 export default function FtOauth2(): JSX.Element {
   const router = useRouter();
   const [message, setMessage] = useState("Loading...");
+  const dispatch = useDispatch();
+
   useEffect((): void => {
     if (!router.isReady) return;
 
@@ -36,18 +41,21 @@ export default function FtOauth2(): JSX.Element {
     if (
       !(code && typeof code == "string" && state && typeof state == "string")
     ) {
-      router.replace("/login");
+      router.replace("/auth/login");
       return;
     }
     exchangeCodeForToken(code, state)
-      .then((response) => {
+      .then(async (response) => {
         if (response === null) {
           throw new Error("An unexpected error occured...");
         } else {
           if ("access_token" in response && response.access_token) {
             setMessage("Success! Redirecting...");
             localStorage.setItem("access_token", response.access_token);
+            localStorage.setItem("refresh_token", response.refresh_token);
             localStorage.removeItem("state");
+            const user = await identifyUser();
+            if (user) dispatch(setUserState(user));
             router.replace("/");
           } else if (
             "message" in response &&
@@ -59,7 +67,7 @@ export default function FtOauth2(): JSX.Element {
       })
       .catch((error) => {
         setMessage(error?.message || "An unexpected error occured...");
-        router.replace("/login");
+        router.replace("/auth/login");
       });
   }, [router]);
   return <Loading>{message}</Loading>;
