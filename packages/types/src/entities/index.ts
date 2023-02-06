@@ -7,6 +7,3 @@ export * from './user.entity';
 export * from './frienships.entity';
 export * from './match.entity';
 export * from './jwt.entity'
-
-
-

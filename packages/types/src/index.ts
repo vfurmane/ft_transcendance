@@ -1,5 +1,6 @@
-import { User } from "./entities";
 import { Conversation } from "./entities/conversation.entity";
+import { Vector } from "./class/vector.class";
+import { Point } from "./class/point.class";
 
 export interface FtUser {
   login: string;
@@ -43,16 +44,6 @@ export interface ConversationWithUnread {
   conversation: Conversation;
   numberOfUnreadMessages: number;
   lastMessage: Date;
-}
-
-export interface Point {
-  x: number;
-  y: number;
-}
-
-export interface Vector {
-  x: number;
-  y: number;
 }
 
 export interface Ball {
@@ -106,3 +97,4 @@ export interface Achivement {
 
 export * from './enums';
 export * from './entities';
+export * from './class';
