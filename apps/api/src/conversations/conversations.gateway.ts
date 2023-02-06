@@ -66,14 +66,13 @@ export class ConversationsGateway implements OnGatewayConnection {
       currentUser.sub,
     );
     conversations.forEach((el) => client.join(`conversation_${el}`));
+    console.error(`new socket id: ${client.id}`)
     return 'Connection established';
   }
 
-  // handleDisconnect(client : any) {
-  // this.clients.get(client.data.id)?.delete(client.id)
-  // if (this.clients.get(client.data.id)?.size === 0) this.clients.delete(client.data.id)
-  // console.error("Removed socket", this.clients);
-  // }
+  handleDisconnect(client : any) {
+    console.error(`Closed socket: ${client.id}`);
+  }
 
   @SubscribeMessage('getConversations')
   getConversations(

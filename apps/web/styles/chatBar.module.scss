@@ -10,4 +10,31 @@
   text-align: center;
   background: $dark-neutral-black;
   border-radius: 10px;
+  aside {
+    position: absolute;
+    top: 0;
+    right: 40px;
+  }
+  .unreadMessages {
+    color: $dark-primary-yellow;
+  }
 }
+
+.containerChat {
+  position: fixed;
+  z-index: 99;
+  bottom: -10px;
+  right: 10px;
+  width: 350px;
+  height: 75vh;
+  text-align: center;
+  background: $dark-neutral-black;
+  border-radius: 10px;
+  aside {
+    position: absolute;
+    top: 0;
+    right: 10px;
+    font-size: 2rem;
+  }
+}
+

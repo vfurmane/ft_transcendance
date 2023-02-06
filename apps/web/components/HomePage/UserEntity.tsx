@@ -1,13 +1,16 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import Connect from "../../public/statusConnect.png";
-import { Userfront as User } from "types";
+import { Conversation, Userfront as User } from "types";
 import styles from "styles/entity.module.scss";
 import textStyles from "styles/text.module.scss";
 import Link from "next/link";
 import Message from "../../public/message.png";
 import valide from "../../public/valide.png";
 import refuse from "../../public/crossRed.png";
+import { useWebsocketContext } from "../Websocket";
+import { useDispatch } from "react-redux";
+import { OpenConversation } from "../../store/ConversationSlice";
 
 export default function UserEntity(props: {
   user: User;
@@ -24,6 +27,8 @@ export default function UserEntity(props: {
 }): JSX.Element {
   const [openMenu, setOpenMenu] = useState(false);
   const [accept, setAccept] = useState(props.option?.accept);
+  const websockets = useWebsocketContext()
+  const dispatch = useDispatch()
 
   if (typeof props.user === "undefined" || !props.option) return <></>;
 
@@ -67,9 +72,19 @@ export default function UserEntity(props: {
           >
             <h3 className={textStyles.laquer}>profil</h3>
           </Link>
-          <Link href={""} className={styles.buttonEntity}>
+          <article className={styles.buttonEntity} onClick={
+            () => {
+              console.error("Clicked new conversation button")
+              websockets.conversations?.emit("createConversation", {groupConversation : false, participants: [props.user.id] }, (answer : any) =>
+              {
+                console.error(`Conversation received: ${answer}`)
+                if (answer.id)
+                  dispatch(OpenConversation(answer.id))
+              })
+            }
+          }>
             <Image alt="message" src={Message} width={30} height={30} />
-          </Link>
+          </article>
           <Link href={""} className={styles.buttonEntity}>
             <h3 className={textStyles.laquer}>Play</h3>
           </Link>

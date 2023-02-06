@@ -32,7 +32,7 @@ import { ScheduleModule } from '@nestjs/schedule';
         // From NestJS docs:
         // Setting `synchronize: true` shouldn't be used in production - otherwise you can lose production data.
         synchronize: configService.get('NODE_ENV') === 'development',
-        logging: configService.get('NODE_ENV') === 'development',
+        // logging: configService.get('NODE_ENV') === 'development',
       }),
     }),
     ScheduleModule.forRoot(),

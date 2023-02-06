@@ -22,22 +22,21 @@ export default function Auth({ children }: AuthProps): JSX.Element {
 
   useEffect((): (() => void) => {
     const fetchUser = async (): Promise<void> => {
-      const user = await identifyUser();
       if (refreshInterval) {
         clearInterval(refreshInterval);
         setRefreshInterval(null);
       }
+      const user = await identifyUser();
       if (user) {
         dispatch(setUserState(user));
-        const interval = setInterval(async () => {
-          if (!(await refreshToken())) {
-            clearInterval(interval);
+        setRefreshInterval(setInterval(async () => {
+          if (!(await refreshToken()) && refreshInterval) {
+            clearInterval(refreshInterval);
             setRefreshInterval(null);
             dispatch(setUserState(initUser));
             router.push("/auth/login");
           }
-        }, 1000 * 60 * 4);
-        setRefreshInterval(interval);
+        }, 1000 * 60 * 4));
       } else {
         dispatch(setUserState(initUser));
       }
