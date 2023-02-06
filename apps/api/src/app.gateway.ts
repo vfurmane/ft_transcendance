@@ -39,10 +39,17 @@ export class AppGateway {
   }
 
   async handleDisconnect(client: Socket): Promise<void> {
-    this.cacheManager.del(`user:${client.data.id}`);
-    this.server
-      .to(`user_${client.data.id}`)
-      .emit(JSON.stringify({ event_type: 'disconnected' }));
-    this.logger.log(`${client.data.id} disconnected`);
+    await this.server
+      .in(`user_${client.data.id}`)
+      .fetchSockets()
+      .then((sockets) => {
+        if (sockets.length === 0) {
+          this.cacheManager.del(`user:${client.data.id}`);
+          this.server
+            .to(`user_${client.data.id}`)
+            .emit(JSON.stringify({ event_type: 'disconnected' }));
+          this.logger.log(`${client.data.id} disconnected`);
+        }
+      });
   }
 }
