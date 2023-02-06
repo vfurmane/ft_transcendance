@@ -63,7 +63,7 @@ export function RegisterForm(): ReactElement {
         } else {
           setFormSuccess("Success! Redirecting...");
           localStorage.removeItem("state");
-          router.replace("/login");
+          router.replace("/auth/login");
         }
       })
       .catch((error) => {
@@ -104,7 +104,7 @@ export function RegisterForm(): ReactElement {
         <Input disabled={loading} type="submit" fullWidth primary />
       </form>
       <p>
-        Or <Link href="/login">login</Link>
+        Or <Link href="/auth/login">login</Link>
       </p>
     </div>
   );

@@ -1,8 +1,8 @@
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import { Loading } from "../components/Loading";
-import { RegisterForm } from "../components/RegisterForm";
-import styles from "../styles/register-page.module.scss";
+import { Loading } from "../../components/Loading";
+import { RegisterForm } from "../../components/RegisterForm";
+import styles from "../../styles/register-page.module.scss";
 
 export default function Login(): JSX.Element {
   const router = useRouter();
