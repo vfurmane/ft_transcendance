@@ -3,6 +3,7 @@ import styles from "styles/Button.module.scss";
 
 export interface ButtonProps {
   children: string;
+  danger?: boolean;
   disabled?: boolean;
   fullWidth?: boolean;
   href?: string;
@@ -15,7 +16,9 @@ export function Button(props: ButtonProps): ReactElement {
       <a
         className={`${styles.container} ${
           props.fullWidth ? styles.fullWidth : ""
-        } ${props.primary ? styles.primary : ""}`}
+        } ${props.danger ? styles.danger : ""} ${
+          props.primary ? styles.primary : ""
+        }`}
         href={props.href}
       >
         {props.children}
@@ -25,7 +28,9 @@ export function Button(props: ButtonProps): ReactElement {
     <button
       className={`${styles.container} ${
         props.fullWidth ? styles.fullWidth : ""
-      } ${props.primary ? styles.primary : ""}`}
+      } ${props.danger ? styles.danger : ""} ${
+        props.primary ? styles.primary : ""
+      }`}
       disabled={props.disabled}
     >
       {props.children}
