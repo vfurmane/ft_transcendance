@@ -1,20 +1,7 @@
 import { GameState, PlayerInterface } from "types";
-import { io, Socket } from "socket.io-client";
-
 import React, { useRef, useEffect } from "react";
-import Router, { NextRouter, useRouter } from "next/router";
-import { time } from "console";
+import { NextRouter, useRouter } from "next/router";
 import { useWebsocketContext } from "../components/Websocket";
-
-enum Axe {
-  X = 1,
-  Y = 2,
-}
-
-enum Key {
-  UP = 38,
-  DOWN = 40,
-}
 
 enum Form {
   REC = 2,
@@ -25,7 +12,7 @@ enum Form {
 }
 
 class Game {
-  public isSolo: boolean = false;
+  public static isSolo: boolean = false;
   public boardType = Form.REC;
   public boardCanvasRef!: React.RefObject<HTMLCanvasElement>;
   public boardCanvas!: HTMLCanvasElement | null;
@@ -48,12 +35,21 @@ class Game {
   public static count: number;
 
   constructor(
-    number_player: number,
-    position: number,
+    number_player: number|undefined,
+    position: number|undefined,
     private router: NextRouter
   ) {
-    this.boardType = number_player;
-    Game.position = position;
+    if (number_player) {
+      this.boardType = number_player;
+    } else {
+      this.boardType = Form.REC;
+      Game.isSolo = true;
+    }
+    if (position) {
+      Game.position = position;
+    } else {
+      Game.position = 0;
+    }
   }
 
   createRegularPolygon(point: Point, side: number, n: number) {
@@ -134,12 +130,12 @@ class Game {
     return racket;
   }
 
-  createRacket(isSolo: boolean, wall: Wall[]) {
-    if (isSolo) {
+  createRacket(wall: Wall[]) {
+    if (Game.isSolo) {
       return [
         new Racket(
           0,
-          this.createRect(10, this.boardCanvas!.height / 2, 10, 40),
+          this.createRect(10, this.boardCanvas!.height / 2, 10, 80),
           this.color[0]
         ),
       ];
@@ -180,31 +176,31 @@ class Game {
     return point;
   }
 
-  init(ref: React.RefObject<HTMLCanvasElement> | undefined, socket : Socket) {
+  init(ref: React.RefObject<HTMLCanvasElement> | undefined) {
     if (ref === undefined) return;
-    Game.socket.on("refresh", (state: GameState, time: number) => {
-      Game.count = 0;
-      if (!this.board) {
-        return;
-      }
-      console.log("=-=-=-=-=-=REFRESHING=-=-=-=-=-=   " + (time - this.start) + "     " + this.lastUpdate)
-      this.refresh(state);
-    });
-    Game.socket.on("endGame", () => {
-        console.error("Fin de partie");
-        Game.socket.off("endGame")
-        Game.socket.off("refresh")
-        this.router.replace("/");
-    });
+    if (!Game.isSolo) {
+      Game.socket.on("refresh", (state: GameState, time: number) => {
+        Game.count = 0;
+        if (!this.board) {
+          return;
+        }
+        this.refresh(state);
+      });
+      Game.socket.on("endGame", () => {
+          Game.socket.off("endGame")
+          Game.socket.off("refresh")
+          this.router.replace("/");
+      });
+    }
     this.boardCanvasRef = ref;
     this.boardCanvas = this.boardCanvasRef.current;
     if (!this.boardCanvas) return;
     this.boardContext = this.boardCanvas.getContext("2d");
-    this.boardCanvas.width = 1920; //window.innerWidth * 0.9;
-    this.boardCanvas.height = 1080; //window.innerHeight * 0.9;
+    this.boardCanvas.width = 640; //window.innerWidth * 0.9;
+    this.boardCanvas.height = 480; //window.innerHeight * 0.9;
     this.board = new Board(this.boardType, this.boardCanvas);
     if (this.boardType != Form.REC) {
-      this.player = this.createRacket(this.isSolo, this.board.wall);
+      this.player = this.createRacket(this.board.wall);
       this.ball = new Ball(
         this.createRegularPolygon(
           this.board.board.center(),
@@ -215,7 +211,7 @@ class Game {
         this.board.wall
       );
     } else {
-      this.player = this.createRacket(this.isSolo, [
+      this.player = this.createRacket([
         this.board.wall[0],
         this.board.wall[2],
       ]);
@@ -230,7 +226,7 @@ class Game {
         this.board.wall
       );
     }
-    if (this.isSolo)
+    if (Game.isSolo)
       this.cible = new Target(
         this.createRect(
           this.boardCanvas.width * (2 / 3),
@@ -250,31 +246,19 @@ class Game {
   }
 
   updateGame() {
-    // console.log("START AT :" + Date.now())
-    this.boardCanvas!.width = 1920; //window.innerWidth * 0.9;
-    this.boardCanvas!.height = 1080; //window.innerHeight * 0.9;
+    this.boardCanvas!.width = 640; //window.innerWidth * 0.9;
+    this.boardCanvas!.height = 480; //window.innerHeight * 0.9;
     const time = Math.round(Date.now() - this.start);
 
     if (!this.boardType) {
       return;
     }
-    // for (let p of this.player) {
-    //   if (p.hp == 0) {
-    //     if (this.boardType == Form.REC) {
-    //       this.boardType = 0;
-    //       return ;
-    //     } else {
-    //       this.player.splice(p.index, 1);
-    //       for (let i = 0; i < this.player.length; i++) {
-    //         if (this.player[i].index > p.index) {
-    //           this.player[i].index--;
-    //         }
-    //       }
-    //       this.boardType--;
-    //     }
-    //     this.init(this.boardCanvasRef);
-    //   }
-    // }
+    if (Game.isSolo) {
+      if (!this.player[0].hp) {
+        this.boardType = 0;
+        return ;
+      }
+    }
     this.boardContext!.fillStyle = "#666666";
     this.board.board.draw(this.boardContext, "gray");
     this.boardContext!.font = "14px sherif";
@@ -305,7 +289,7 @@ class Game {
     this.player.forEach((player) =>
       player.update(this.ball, this.board.wall, timeRatio)
     );
-    if (this.isSolo) this.cible.update(this.ball, this.boardCanvas);
+    if (Game.isSolo) this.cible.update(this.ball, this.boardCanvas);
     this.board.wall.forEach((wall) => {
       wall.draw(this.boardContext, undefined);
     });
@@ -320,7 +304,7 @@ class Game {
         50 + 20 * p.index
       );
     }
-    if (this.isSolo) this.cible.draw(this.boardContext);
+    if (Game.isSolo) this.cible.draw(this.boardContext);
     if (Game.live == 0) {
       Game.point = 0;
       Game.live = 3;
@@ -354,8 +338,8 @@ class Board {
         this.createRect(
           0,
           0,
-          (canvas!.height / 4) * 4,
-          (canvas!.height / 4) * 3
+          canvas!.width,
+          canvas!.height
         )
       );
     this.wall = this.createWall(this.board);
@@ -725,12 +709,6 @@ class Ball extends Entity {
     this.nextCollision.wall -= 1 * timeRatio;
     this.nextCollision.racket -= 1 * timeRatio;
 
-    // if (!this.sat(board.board)) {
-    //   this.replaceTo(board.board.center());
-    //   this.moveTo(this.speed, timeRatio);
-    //   this.calcNextCollision(rackets, walls, null);
-    //   return ;
-    // }
     if (
       this.nextCollision.wall > this.nextCollision.racket &&
       this.nextCollision.racket < 1
@@ -812,10 +790,17 @@ class Ball extends Entity {
         } else {
           this.calcNextCollision(rackets, walls, this.nextCollision.wallIndex);
         }
-      } else {
+      } else if (!Game.isSolo) {
         rackets[index].hp--;
         this.replaceTo(board.board.center());
         this.goToRandomPlayer(rackets);
+        this.calcNextCollision(rackets, walls, null);
+      } else {
+        if (index === 0) {
+          rackets[0].hp--;
+          this.replaceTo(board.board.center());
+          this.goToRandomPlayer(rackets);
+        }
         this.calcNextCollision(rackets, walls, null);
       }
       return;
@@ -847,43 +832,20 @@ class Racket extends Entity {
           this.dir.y * this.defaultSpeed
         );
         this.moveTo(this.speed, timeRatio);
-        Game.socket.emit("up");
+        if (!Game.isSolo) {
+          Game.socket.emit("up");
+        }
       } else if (Game.keyPressed.down) {
         this.speed = new Vector(
           -this.dir.x * this.defaultSpeed,
           -this.dir.y * this.defaultSpeed
         );
         this.moveTo(this.speed, timeRatio);
-        Game.socket.emit("down");
+        if (!Game.isSolo) {
+          Game.socket.emit("down");
+        }
       }
-    } //else {
-    //   if (
-    //     this.center().vectorTo(ball.point[0]).norm() >
-    //     new Point(
-    //       this.center().x + this.dir.x * this.defaultSpeed,
-    //       this.center().y + this.dir.y * this.defaultSpeed
-    //     )
-    //       .vectorTo(ball.point[0])
-    //       .norm()
-    //   ) {
-    //     this.speed = new Vector(
-    //       this.dir.x * this.defaultSpeed,
-    //       this.dir.y * this.defaultSpeed
-    //     );
-    //     this.moveTo(this.speed);
-    //   } else {
-    //     this.speed = new Vector(
-    //       -this.dir.x * this.defaultSpeed,
-    //       -this.dir.y * this.defaultSpeed
-    //     );
-    //     this.moveTo(this.speed);
-    //   }
-    // }
-    // for (let wall of walls) {
-    //   if (this.sat(wall)) {
-    //     this.moveTo(new Vector(-this.speed.x, -this.speed.y));
-    //   }
-    // }
+    }
   }
 }
 
@@ -907,17 +869,17 @@ const Canvas = () => {
       if (websockets.pong?.connected)
       {
         Game.socket = websockets.pong
-        game.init(canvasRef, websockets.pong);
+        game.init(canvasRef);
         const intervalId = setInterval(handleResize, 4, game);
         return () => {
-          console.log("CLEARED INTERVAL");
           clearInterval(intervalId);
         };
-      }
-      else
-      {
-        console.error("Cannot play pong")
-        router.replace("/")
+      } else {
+        game.init(canvasRef);
+        const intervalId = setInterval(handleResize, 4, game);
+        return () => {
+          clearInterval(intervalId);  
+        };
       }
     }, [websockets.pong?.connected]);
   }

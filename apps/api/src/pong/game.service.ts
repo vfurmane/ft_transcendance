@@ -21,8 +21,8 @@ enum Form {
 
 export class Game {
   public boardCanvas = {
-	  height : 1080,
-	  width : 1920,
+    width : 640,
+	  height : 480,
   }
   public isSolo: boolean = false;
   public boardType : number = Form.REC;
@@ -252,8 +252,8 @@ export class Board {
         this.createRect(
           0,
           0,
-          (canvas!.height / 4) * 4,
-          (canvas!.height / 4) * 3
+          canvas!.width,
+          canvas!.height
         )
       );
     this.wall = this.createWall(this.board);
