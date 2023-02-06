@@ -10,6 +10,7 @@ import AchivementEntity from "../components/ProfilePage/achivementEntity";
 import { initAchivement } from "../initType/AchivementInit";
 import { Achivement } from "types";
 import ChangePswrd from "../components/ProfilePage/ChangePswrd";
+import ChangeUsername from "../components/ProfilePage/ChangeUsername";
 import ChatBar from "../components/chatBar";
 import styles from "styles/profil.module.scss";
 import textStyles from "styles/text.module.scss";
@@ -123,6 +124,12 @@ export default function Profil(): JSX.Element {
     setOpenAchivement(true);
     setAchivementSelect(e.achivement);
     prevAchivementRef.current = achivementSelect;
+  }
+
+  function changeUsername(): void {
+    setOpenConfigProfil(true);
+    setOpenAchivementList(false);
+    setConfigProfil(<ChangeUsername />);
   }
 
   function changePswrd(): void {
@@ -296,6 +303,17 @@ export default function Profil(): JSX.Element {
               </div>
               {userProfil ? (
                 <div className={styles.buttonProfilContainer}>
+                  <button
+                    className={styles.buttonProfil}
+                    onClick={changeUsername}
+                  >
+                    <h3
+                      className={textStyles.laquer}
+                      style={{ fontSize: "18px" }}
+                    >
+                      Change username
+                    </h3>
+                  </button>
                   <button className={styles.buttonProfil} onClick={changePswrd}>
                     <h3
                       className={textStyles.laquer}

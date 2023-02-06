@@ -132,4 +132,8 @@ export class UsersService {
     );
     return this.authService.login(user);
   }
+
+  async updateName(user: User, new_username: string): Promise<UpdateResult> {
+    return this.usersRepository.update({ id: user.id }, { name: new_username });
+  }
 }
