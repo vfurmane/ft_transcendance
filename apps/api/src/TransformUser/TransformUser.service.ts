@@ -58,6 +58,7 @@ export class TransformUserService {
         defeat: 0,
         rank: 0,
         level: 0,
+        tfaSetup: false,
       };
     return {
       id: userBack.id,
@@ -68,6 +69,7 @@ export class TransformUserService {
       defeat: await this.#getDefeatNumber(userBack.id),
       rank: await this.#getRank(userBack.id),
       level: userBack.level,
+      tfaSetup: userBack.tfa_setup,
     };
   }
 }
