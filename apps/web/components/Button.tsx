@@ -6,6 +6,7 @@ export interface ButtonProps {
   disabled?: boolean;
   fullWidth?: boolean;
   href?: string;
+  onClick?: () => unknown;
   primary?: boolean;
 }
 
@@ -17,6 +18,7 @@ export function Button(props: ButtonProps): ReactElement {
           props.fullWidth ? styles.fullWidth : ""
         } ${props.primary ? styles.primary : ""}`}
         href={props.href}
+        onClick={props.onClick}
       >
         {props.children}
       </a>
@@ -27,6 +29,7 @@ export function Button(props: ButtonProps): ReactElement {
         props.fullWidth ? styles.fullWidth : ""
       } ${props.primary ? styles.primary : ""}`}
       disabled={props.disabled}
+      onClick={props.onClick}
     >
       {props.children}
     </button>
