@@ -6,7 +6,7 @@ import styles from 'styles/profil.module.scss';
 import { Userfront as User } from "types";
 import { relative } from "path";
 
-export default function MiniProfil (props : {left: boolean, user : {user: User, index : number}, life: number, score : number, game : {life: number, score: number, numOfPlayers : number}}) {
+export default function MiniProfil (props : {key: number, left: boolean, user : {user: User, index : number}, life: number, score : number, game : {life: number, score: number, numOfPlayers : number}}) {
     let hearts : string[] = [];
     for (let i = 0; i < props.life; i++)
         hearts.push("❤️");
@@ -39,31 +39,49 @@ export default function MiniProfil (props : {left: boolean, user : {user: User, 
         case 1:
             {
                 positionTop = [15];
-                positionLeft = [50];
+                positionLeft = [40];
                 break;
             }
         case 2:
             {
-                positionTop = [15, 15];
-                positionLeft = [20, 55];
+                positionTop = [13, 13];
+                positionLeft = [20, 60];
                 break;
             }
         case 3:
             {
-                positionTop = [50, 30, 80];
+                positionTop = [50, 20, 80];
                 positionLeft = [5, 50, 50];
                 break;
             }
+        case 4:
+            {
+                positionTop = [50, 13, 50, 85];
+                positionLeft = [5, 35, 75, 35];
+                break;
+            }
+        case 5:
+            {
+                positionTop = [50, 13, 30, 70, 80];
+                positionLeft = [5, 35, 70, 70, 35];
+                break;
+            }
+        case 6:
+            {    
+                positionTop = [50, 13, 13, 50, 80, 80];
+                positionLeft = [5, 25, 60, 80, 65, 25];
+                break;
+            }
+        default:
+            break;
     }
 
     if (!props.user.user)
         return <></>;
-
- 
     
     return (
         <div style={{position: 'absolute', top: `${positionTop[props.user.index]}%`, left: `${positionLeft[props.user.index]}%`, width: '20%'}}>
-            <div style={{display: 'flex', justifyContent: 'space-around'}}>
+            <div style={{display: 'flex', justifyContent: 'space-around', width: '100%'}}>
                 {props.left?
                 <div className="fill small">
                     <Image
@@ -78,9 +96,10 @@ export default function MiniProfil (props : {left: boolean, user : {user: User, 
                  style={{
                      color: "white",
                      fontSize: "18px",
-                     marginTop: '12px'
+                     marginTop: '12px',
+                     width: 'auto'
                  }}
-                 className={textStyles.saira}
+                 className={`${textStyles.saira} d-none d-xl-block`}
                  >
                  level :
                  <span
@@ -90,11 +109,10 @@ export default function MiniProfil (props : {left: boolean, user : {user: User, 
                  >{props.user.user.level}</span>
                  </p> }
                 <h2
-                className={textStyles.pixel}
+                className={`${textStyles.pixel} d-none d-lg-block`}
                 style={{
                     color: "white",
                     fontSize: "30px",
-                    marginRight: "20px",
                     marginTop: "7px"
                 }}
                 >
@@ -106,11 +124,12 @@ export default function MiniProfil (props : {left: boolean, user : {user: User, 
                 style={{
                     color: "white",
                     fontSize: "18px",
-                    marginTop: '12px'
+                    marginTop: '12px',
+                    width: 'auto'
                 }}
-                className={textStyles.saira}
+                className={`${textStyles.saira} d-none d-xl-block`}
                 >
-                level:     
+                level:
                 <span
                     id="level"
                     className={textStyles.saira}
@@ -127,7 +146,7 @@ export default function MiniProfil (props : {left: boolean, user : {user: User, 
                     />
                 </div>}
             </div>
-            <div>
+            <div className="d-none d-lg-block">
                 <div style={{ width: "100%" }}>
                     <div className={styles.flex_between}>
                         <p className={textStyles.saira} style={{ color: "white" }}>
@@ -159,16 +178,19 @@ export default function MiniProfil (props : {left: boolean, user : {user: User, 
                     </div>
                 </div>
             </div>
-            <div style={{marginTop: '30px'}}>
+            <div style={{marginTop: '30px'}} className="d-none d-md-block">
                 {props.left?
                 <div style={{display: 'flex', margin: '10px', justifyContent: 'space-between', alignItems: 'center'}}>
-                     <div style={{width: '75%'}}>{props.game.life > 9? life : hearts}</div>
-                    <p className={textStyles.laquer} style={{color: 'white', fontSize:`${20 * (1 + (((props.score * 100)/ props.game.score) / 100) * 2)}px`, width: '15%', position: 'absolute', right: '0px'}}>{props.score}</p>
+                    <div style={{width: '75%'}}>{props.game.life > 10? life : hearts}</div>
+                    {props.game.numOfPlayers <= 2? <p className={textStyles.laquer} style={{color: 'white', fontSize:`${20 * (1 + (((props.score * 100)/ props.game.score) / 100) * 2)}px`, width: '15%', position: 'absolute', right: '0px'}}>{props.score}</p>:<></>}
                 </div> : 
                 <div style={{display:'flex', margin: '10px', justifyContent: 'space-between', alignItems: 'center'}}>
-                    <p className={textStyles.laquer} style={{color: 'white', fontSize:`${20 * (1 + (((props.score * 100)/ props.game.score) / 100) * 2)}px`, width: '15%', position: 'absolute'}}>{props.score}</p>
-                    <div style={{width: '75%', marginLeft: '25%'}}>{props.game.life > 9? life : hearts}</div>
+                    {props.game.numOfPlayers <= 2? <p className={textStyles.laquer} style={{color: 'white', fontSize:`${20 * (1 + (((props.score * 100)/ props.game.score) / 100) * 2)}px`, width: '15%', position: 'absolute'}}>{props.score}</p> : <></>}
+                    <div style={{width: '75%', marginLeft: '25%'}}>{props.game.life > 10? life : hearts}</div>
                 </div> }
+            </div>
+            <div className="d-md-none" style={{marginTop: '30px'}}>
+                <div style={{width: '75%', marginLeft: '25%'}}>{life}</div>
             </div>
         </div>
     );

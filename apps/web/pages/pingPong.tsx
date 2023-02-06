@@ -3,11 +3,11 @@ import textStyles from "styles/text.module.scss";
 import React, { useState, useRef, useEffect } from "react";
 import MiniProfil from "../components/miniProfil";
 import { useRouter } from "next/router";
-import Game from "./pong";
-import { Userfront } from "types";
+import Game from "../helpers/pong";
+import { User, Userfront } from "types";
 import { initUser } from "../initType/UserInit";
 
-export default function PingPong () : JSX.Element {
+export default function PingPong(): JSX.Element {
     /*======for close topBar component when click on screen====*/
     const [openToggle, setOpenToggle] = useState(false);
     const [openProfil, setOpenProfil] = useState(false);
@@ -20,23 +20,23 @@ export default function PingPong () : JSX.Element {
 
     useEffect(() => {
         fetch(`/api/user`, {
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + localStorage.getItem('access_token'),
-        }
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + localStorage.getItem('access_token'),
+            }
         })
-        .then(function (response) {
-            return response.json();
-        })
-        .then((data) => {
-            setUser(data);
-        })
-        .catch(function (error) {
-            console.log(`probleme with fetch: ${error.message}`);
-        });
+            .then(function (response) {
+                return response.json();
+            })
+            .then((data) => {
+                setUser(data);
+            })
+            .catch(function (error) {
+                console.log(`probleme with fetch: ${error.message}`);
+            });
     }, []);
 
-    
+
     const [MiniProfilArray, setMiniProfilArray] = useState([<></>])
 
     const setterInit: React.Dispatch<React.SetStateAction<boolean>> = () => {
@@ -63,10 +63,10 @@ export default function PingPong () : JSX.Element {
     }): void {
         e.setOpenMenu(true);
         if (
-        prevSetterUsermenuRef.current !== setterInit &&
-        prevSetterUsermenuRef.current !== e.setOpenMenu
+            prevSetterUsermenuRef.current !== setterInit &&
+            prevSetterUsermenuRef.current !== e.setOpenMenu
         )
-        prevSetterUsermenuRef.current(false);
+            prevSetterUsermenuRef.current(false);
         prevSetterUsermenuRef.current = e.setOpenMenu;
         setIndexOfUser(e.index);
         prevIndexOfUserRef.current = e.index;
@@ -76,49 +76,51 @@ export default function PingPong () : JSX.Element {
     function close(): void {
         if (openProfil) setOpenProfil(false);
         if (openUserList && indexOfUser === prevIndexOfUserRef.current) {
-          setOpenUserList(false);
-          prevSetterUsermenuRef.current(false);
-          setIndexOfUser(-1);
-          prevIndexOfUserRef.current = -1;
+            setOpenUserList(false);
+            prevSetterUsermenuRef.current(false);
+            setIndexOfUser(-1);
+            prevIndexOfUserRef.current = -1;
         }
-      }
+    }
 
 
     function handleResize(game: Game) {
         game.updateGame();
-      }
+    }
 
 
-    
+
     useEffect(() => {
-        setUsers([user, user, user]);
-        setMiniProfilArray(users.map((e, i) => <MiniProfil left={i % 2 == 0? true : false} user={{user:e, index: i}} life={Game.live} score={0} game={{life: Game.live, score: Game.scoreMax, numOfPlayers: users.length}}/>));
+        setUsers([user, user]);
+        setMiniProfilArray(users.map((e, i) => <MiniProfil key={i} left={i % 2 == 0 ? true : false} user={{ user: e, index: i }} life={Game.live} score={0} game={{ life: Game.live, score: Game.scoreMax, numOfPlayers: users.length }} />));
     }, [user]);
 
 
-    function changeLife(index : number){
+    function changeLife(index: number) {
         let tmp = [...MiniProfilArray];
-        tmp[index] = <MiniProfil left={index % 2 == 0? true : false} user={{user: users[index], index: index}} life={tmp[index]?.props.life - 1} score={tmp[index]?.props.score} game={{life: Game.live, score: Game.scoreMax, numOfPlayers: users.length}}/>
-        if (users.length === 2)
-        {
-            index = index? 0 : 1;
-            tmp[index] = <MiniProfil left={index % 2 == 0? true : false} user={{user: users[index], index: index}} life={tmp[index]?.props.life} score={tmp[index]?.props.score + 1} game={{life: Game.live, score: Game.scoreMax, numOfPlayers: users.length}}/>
+        tmp[index] = <MiniProfil key={index} left={index % 2 == 0 ? true : false} user={{ user: users[index], index: index }} life={tmp[index]?.props.life - 1} score={tmp[index]?.props.score} game={{ life: Game.live, score: Game.scoreMax, numOfPlayers: users.length }} />
+        if (users.length === 2) {
+            index = index ? 0 : 1;
+            tmp[index] = <MiniProfil key={index} left={index % 2 == 0 ? true : false} user={{ user: users[index], index: index }} life={tmp[index]?.props.life} score={tmp[index]?.props.score + 1} game={{ life: Game.live, score: Game.scoreMax, numOfPlayers: users.length }} />
         }
         setMiniProfilArray(tmp);
     }
-      
-   
+
+
     let router = useRouter();
     const canvasRef = useRef(null);
-    if (canvasRef) {
-        let game = new Game(Number(router.query.number_player), Number(router.query.position), router, changeLife);
-        useEffect(() => {
-        game.init(canvasRef);
-        setInterval(handleResize, 17, game);
+    const [height, setHeight] = useState(0);
+    let game = new Game(Number(router.query.number_player), Number(router.query.position), router, changeLife);
+    useEffect(() => {
+        if (canvasRef) {
+            game.init(canvasRef);
+            setInterval(handleResize, 17, game);
+        }
+        setHeight(window.innerHeight * 0.5);
     }, []);
-    }
-      
-      
+
+
+
     return (
         <div onClick={close} style={{ width: "100vw", height: "100vh" }}>
             <TopBar
@@ -133,15 +135,15 @@ export default function PingPong () : JSX.Element {
 
             {MiniProfilArray}
 
-            <div className={`containerScrollHorizon `}>
+            <div className={`containerScrollHorizon midle`}>
                 <span className={`textScroll ${textStyles.pixel}`}>- Pong - pOnG - poNg - PONG - pOng&nbsp;</span>
                 <span className={`textScroll ${textStyles.pixel}`}>- Pong - pOnG - poNg - PONG - pOng&nbsp;</span>
             </div>
 
-            <div  style={{display: 'flex', alignItems: 'center', marginTop: '400px', flexDirection: 'column'}}>
-                    <canvas ref={canvasRef} style={{marginLeft: users.length > 2? '20%' : ''}} ></canvas>
+            <div style={{ marginTop: '250px', display:'flex', justifyContent:'center'}}>
+                <canvas ref={canvasRef} style={{ marginLeft: users.length > 2 ? '40%' : '',width: '60%', height: height, border: 'solid 0px white'}}></canvas>
             </div>
-       </div>
-        
+        </div>
+
     );
 }

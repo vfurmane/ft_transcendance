@@ -107,6 +107,12 @@ body::-webkit-scrollbar {
   transform: translateX(0%);
 }
 
+.containerScrollHorizon.midle
+{
+  top: 30vh;
+}
+
+
 .containerScrollVertical
 {
   display: flex;

@@ -45,6 +45,9 @@ class Game {
   public static socket : any;
   public static scoreMax : number = 10;
   public static changeLife :  (index : number) => void;
+  public static width : number | undefined = 0;
+  public static height : number | undefined = 0;
+  
 
   constructor(number_player:number, position:number, private router:NextRouter, changeLife : (index : number) => void) {
     /*if (typeof window !== 'undefined') {
@@ -65,7 +68,7 @@ class Game {
         this.refresh(state);
       });
     }*/
-    this.boardType = 3;
+    this.boardType = 2;
     Game.position = position;
     Game.changeLife = changeLife;
   }
@@ -183,8 +186,8 @@ class Game {
     this.boardCanvas = this.boardCanvasRef.current;
     if (!this.boardCanvas) return;
     this.boardContext = this.boardCanvas.getContext("2d");
-    this.boardCanvas.width = window.innerWidth * 0.6;
-    this.boardCanvas.height = window.innerHeight * 0.6;
+    this.boardCanvas.width = window.innerWidth * 0.5;
+    this.boardCanvas.height = window.innerHeight * 0.5;
     this.board = new Board(this.boardType, this.boardCanvas);
     if (this.boardType != Form.REC) {
       this.player = this.createRacket(this.isSolo, this.board.wall);
@@ -231,8 +234,28 @@ class Game {
   }
 
   updateGame() {
-    this.boardCanvas!.width = window.innerWidth * 0.6;
-    this.boardCanvas!.height = window.innerHeight * 0.6;
+    this.boardCanvas!.width = window.innerWidth * 0.5;
+    this.boardCanvas!.height = window.innerHeight * 0.5;
+    this.board = new Board(this.boardType, this.boardCanvas);
+    if (this.boardType != Form.REC) {
+      this.player = this.createRacket(this.isSolo, this.board.wall);
+    
+    } else {
+      this.player = this.createRacket(this.isSolo, [
+        this.board.wall[0],
+        this.board.wall[2],
+      ]);
+    }
+    if (this.isSolo)
+      this.cible = new Target(
+        this.createRect(
+          this.boardCanvas!.width * (2 / 3),
+          this.boardCanvas!.height / 2,
+          20,
+          20
+        )
+      );
+    //this.init(this.boardCanvasRef);
 
     if (!this.boardType) {
       return ;
@@ -254,6 +277,7 @@ class Game {
         this.init(this.boardCanvasRef);
       }
     }*/
+
     this.boardContext!.fillStyle = "#666666";
     this.board.board.draw(this.boardContext, "#1e1e1e");
     this.boardContext!.font = "14px sherif";
@@ -268,48 +292,8 @@ class Game {
         this.boardCanvas!.height,
       0,
       10
-    );*/
-   
-
-    
-    /*switch (this.player.length) 
-    {
-      case 1 : 
-      {
-        Game.scoreWidth = [0.5];
-        Game.scoreHeight = [0.1];
-        Game.lifeWidth = [0.1];
-        Game.lifeHeight = [0.1];
-        break;
-      }
-      case 2 :
-      {
-        Game.scoreWidth = [0.7, 0.3];
-        Game.scoreHeight = [0.1, 0.1];
-        Game.lifeWidth = [0.1, 0.8];
-        Game.lifeHeight = [0.1, 0.1];
-        break;
-      }
-
-    }
-
-    for (let p of this.player)
-    {
-      this.boardContext!.font = "50px sherif";
-      this.boardContext!.fillText(
-        (3 - p.hp).toString(),
-        this.boardCanvas!.width * Game.scoreWidth[p.index],
-        this.boardCanvas!.height * Game.scoreHeight[p.index]
-      );
-      this.boardContext!.font = "20px sherif";
-      for (let i: number = 0; i < Game.live; i++) {
-        this.boardContext!.fillText(
-          "❤️",
-          this.boardCanvas!.width * Game.lifeWidth[p.index] + 25 * i,
-          this.boardCanvas!.height * Game.lifeHeight[p.index]
-        );
-      }
-    }*/
+    );
+        */
 
 
 
@@ -318,8 +302,8 @@ class Game {
     {
       this.boardContext!.beginPath();
       this.boardContext!.setLineDash([30, 15]);
-      this.boardContext!.moveTo((this.boardCanvas!.width / 2), this.boardCanvas!.height - 50);
-      this.boardContext!.lineTo((this.boardCanvas!.width / 2), 120);
+      this.boardContext!.moveTo((this.boardCanvas!.width / 2), this.boardCanvas!.height - 20);
+      this.boardContext!.lineTo((this.boardCanvas!.width / 2), 20);
       this.boardContext!.lineWidth = 2;
       this.boardContext!.strokeStyle = '#ffffff';
       this.boardContext!.stroke();
@@ -338,13 +322,6 @@ class Game {
     this.ball.draw(this.boardContext, undefined);
     for (let p of this.player) {
       p.draw(this.boardContext, p.color);
-      p.printPoint(this.boardContext, 0, "red");
-      p.printPoint(this.boardContext, 3, "green");
-      /*this.boardContext!.fillText(
-        p.hp.toString(),
-        this.boardCanvas!.width / 2,
-        50 + 20 * p.index
-      );*/
     }
     if (this.isSolo) this.cible.draw(this.boardContext);
     if (Game.live === 0) {
@@ -352,7 +329,6 @@ class Game {
       Game.live = 3;
       this.start = Date.now();
     }
-    //console.log(this.ball.point[0].x + " " + this.ball.point[0].y + "|" + this.ball.speed.x + " " + this.ball.speed.y + "|" + Date.now())
   }
 }
 
@@ -371,7 +347,7 @@ class Board {
       this.board = new Entity(
         this.createRegularPolygon(
           new Point(0, height),
-          canvas!.height * size,
+          Math.min(canvas!.width * size, canvas!.height * size),
           boardType
         )
       );
@@ -643,7 +619,7 @@ class Target extends Entity {
   constructor(points: Point[]) {
     super(points);
   }
-
+  
   draw(context: CanvasRenderingContext2D | null) {
     context!.beginPath();
     context!.moveTo(this.getx(), this.gety());
@@ -856,4 +832,5 @@ class Racket extends Entity {
   }
 }
 
-export default Game
+
+export default Game;

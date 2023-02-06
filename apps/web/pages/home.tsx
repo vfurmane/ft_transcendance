@@ -221,7 +221,7 @@ function Home(): JSX.Element {
         handleClickUserMenu={handleClickUserMenu}
       />
       <div className={`${styles.illustration} d-none d-lg-block`}></div>
-      <div className="container" style={{overflow: 'hidden', height: '2000px'}}>
+      <div className="container" style={{overflow: 'hidden', height: '100%'}}>
         <div className={`containerScrollVertical`}>
             <span className={`textScroll ${textStyles.pixel}`}>-Ft_Transcendence-Ft_Transcendence-Ft_Transcendence&nbsp;</span>
             <span className={`textScroll ${textStyles.pixel}`}>-Ft_Transcendence-Ft_Transcendence-Ft_Transcendence&nbsp;</span>
@@ -279,7 +279,7 @@ function Home(): JSX.Element {
           </div>
         </div>
         <div className="row">
-          <div className="col-10 offset-1" id="leaderBoard">
+          <div className="col-10 offset-1" id='leaderboard'>
             <ArrayDoubleColumn
               title="leaderboard"
               handleClick={handleClickUserMenu}
