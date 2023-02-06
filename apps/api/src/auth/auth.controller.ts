@@ -191,7 +191,6 @@ export class AuthController {
     if (!state.user)
       throw new UnauthorizedException('Missing first factor authentication.');
     await this.authService.checkTfa(state.user, body.token);
-    await this.authService.removeState(state);
     this.logger.log(`${state.user.name} validated TFA`);
     return this.authService.login(state.user, state);
   }
