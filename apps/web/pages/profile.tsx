@@ -312,14 +312,6 @@ export default function Profil(): JSX.Element {
                       Configure TFA
                     </h3>
                   </button>
-                  <button className={styles.buttonProfil}>
-                    <h3
-                      className={textStyles.laquer}
-                      style={{ fontSize: "18px" }}
-                    >
-                      Delete account
-                    </h3>
-                  </button>
                 </div>
               ) : (
                 <div className={styles.buttonProfilContainer}>
