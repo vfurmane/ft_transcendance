@@ -648,7 +648,14 @@ class Ball extends Entity {
 
   constructor(points: Point[], player: Racket[], walls: Wall[]) {
     super(points);
-    this.goToRandomPlayer(player);
+    let dir = player[0].point[1]
+      .midSegment(player[0].point[2])
+      .vectorTo(player[0].point[0].midSegment(player[0].point[3]))
+      .normalized();
+    this.speed = new Vector(
+      dir.x * this.defaultSpeed,
+      dir.y * this.defaultSpeed
+    );
     this.calcNextCollision(player, walls, null);
   }
 

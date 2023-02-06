@@ -94,20 +94,20 @@ import { Interval } from "@nestjs/schedule";
 		})
 	}
 
-	@Interval(1000)
-	refresh() {
-		if (!this.games || this.games === undefined) {
-			return ;
-		}
-		this.games.forEach(async (key, room) => {
-			let game = key[0];
-			if (game.boardType !== 0) {
-				let state = game.getState();
-				console.log("=-=-=-=-=-= REFRESHING =-=-=-=-=-= |" + Date.now())
-				this.server.in(room).emit('refresh', state, Date.now());
-			}
-		});
-	}
+	// @Interval(1000)
+	// refresh() {
+	// 	if (!this.games || this.games === undefined) {
+	// 		return ;
+	// 	}
+	// 	this.games.forEach(async (key, room) => {
+	// 		let game = key[0];
+	// 		if (game.boardType !== 0) {
+	// 			let state = game.getState();
+	// 			console.log("=-=-=-=-=-= REFRESHING =-=-=-=-=-= |" + Date.now())
+	// 			this.server.in(room).emit('refresh', state, Date.now());
+	// 		}
+	// 	});
+	// }
 
 	checkUser (client : Socket, room : any) {
 		if (room === undefined) { // not in any room
@@ -167,7 +167,7 @@ import { Interval } from "@nestjs/schedule";
 				list.push(element.data.id);
 				this.server.in(`user_${element.data.id}`).emit('startGame', { number_player: numberPlayer, position : element.data.position});
 			});
-			this.games.set(room, [new Game(numberPlayer, this.server, room), list])
+			this.games.set(room, [new Game(numberPlayer, this.server.in(room)), list])
 			return 'Launching the game for room ' + room;
 		}
 		return 'You are not player 1 !'
@@ -194,7 +194,7 @@ import { Interval } from "@nestjs/schedule";
 							list.push(element.data.id);
 							this.server.in(`user_${element.data.id}`).emit('startGame', { number_player: count + 1, position : element.data.position});
 						});
-						this.games.set(room, [new Game(2, this.server, room), list])
+						this.games.set(room, [new Game(2, this.server.in(room)), list])
 						this.room_id.splice(this.room_id.indexOf(room), 1);
 						return 'Launched game for room ' + room;
 					}

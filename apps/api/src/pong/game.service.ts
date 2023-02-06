@@ -30,8 +30,7 @@ export class Game {
   public countUpdate: number = 0;
   public static point: number = 0;
   public static live: number = 3;
-  public static server: Server;
-  public static room: string;
+  public static broadcaster : any;
   public ball!: Ball;
   public player: Racket[] = [];
   public cible!: Target;
@@ -41,10 +40,9 @@ export class Game {
   public wall: Wall[] = [];
   public color: string[] = ["blue", "red", "orange", "white", "pink", "black"];
 
-  constructor(playerNumber:number, server: Server, room: string) {
+  constructor(playerNumber:number, broadcaster : any) {
     this.boardType = playerNumber;
-    Game.server = server;
-    Game.room = room;
+    Game.broadcaster = broadcaster;
     this.init();
   }
 
@@ -85,16 +83,6 @@ export class Game {
     }
     return points;
   }
-
-  // refresh(player: Racket[], ball: Point, ballVector: Vector) {
-  //   this.player = this.updatePlayer(player, this.wall);
-  //   this.ball = new Ball(
-  //     this.createRegularPolygon(ball, 30, this.boardType),
-  //     this.player,
-  //     this.board.wall
-  //   );
-  //   // this.ball.speed = ballVector;
-  // }
 
   updatePlayer(player: Racket[], wall: Wall[]) {
     let racket: Racket[] = [];
@@ -211,10 +199,8 @@ export class Game {
     }
     for (let p of this.player) {
       if (p.hp == 0) {
-        console.log("TYPE OF BOARD :" + this.boardType);
         if (this.boardType === Form.REC) {
           this.boardType = 0;
-          console.log("updated type of board : " + this.boardType)
           return ;
         } else {
           this.player.splice(p.index, 1);
@@ -230,7 +216,7 @@ export class Game {
     }
     this.countUpdate++;
     let timeRatio = ((Date.now() - this.start) - this.lastUpdate) / 17;
-    this.ball.update(this.player, this.board.wall, this.board, timeRatio);
+    this.ball.update(this.player, this.board.wall, this.board, timeRatio, this);
     for (let p of this.player) p.update(this.ball, this.board.wall, timeRatio);
     if (this.isSolo) this.cible.update(this.ball, this.boardCanvas);
     if (Game.live == 0) {
@@ -524,7 +510,14 @@ export class Ball extends Entity {
 
   constructor(points: Point[], player: Racket[], walls: Wall[]) {
     super(points);
-    this.goToRandomPlayer(player);
+    let dir = player[0].point[1]
+    .midSegment(player[0].point[2])
+    .vectorTo(player[0].point[0].midSegment(player[0].point[3]))
+    .normalized();
+  this.speed = new Vector(
+    dir.x * this.defaultSpeed,
+    dir.y * this.defaultSpeed
+  );
     this.calcNextCollision(player, walls, null)
   }
 
@@ -582,7 +575,7 @@ export class Ball extends Entity {
     return this.point[this.point.length - 1].midSegment(this.point[0]);
   }
 
-  goToRandomPlayer(player: Racket[]) {
+  goToRandomPlayer(player: Racket[], game : Game) {
     let random = Math.floor(Math.random() * 10000) % player.length;
     let dir = player[random].point[1]
       .midSegment(player[random].point[2])
@@ -592,10 +585,11 @@ export class Ball extends Entity {
       dir.x * this.defaultSpeed,
       dir.y * this.defaultSpeed
     );
+    Game.broadcaster.emit('refresh', game.getState(), Date.now());
   }
 
 
-  update(rackets: Racket[], walls: Wall[], board: Board, timeRatio : number) {
+  update(rackets: Racket[], walls: Wall[], board: Board, timeRatio : number, game : Game) {
     this.nextCollision.wall -= (1 * timeRatio)
     this.nextCollision.racket -= (1 * timeRatio)
   
@@ -676,17 +670,17 @@ export class Ball extends Entity {
               console.log("GOAL for player 0")
               rackets[1].hp--;
               this.replaceTo(board.board.center());
-              this.goToRandomPlayer(rackets);
+              this.goToRandomPlayer(rackets, game);
             } else if (index === 0) {
               console.log("GOAL for player 1")
               rackets[0].hp--;
               this.replaceTo(board.board.center());
-              this.goToRandomPlayer(rackets);
+              this.goToRandomPlayer(rackets, game);
             }
           } else {
             rackets[index].hp--;
             this.replaceTo(board.board.center());
-            this.goToRandomPlayer(rackets);
+            this.goToRandomPlayer(rackets, game);
           }
           this.calcNextCollision(rackets, walls, null);
           return;
