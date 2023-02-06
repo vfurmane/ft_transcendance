@@ -11,8 +11,6 @@ import ChatBar from "../components/chatBar";
 import playButtonStyles from "styles/playButton.module.scss";
 import textStyles from "styles/text.module.scss";
 import styles from "styles/home.module.scss";
-import { FriendshipRequestStatus } from "types";
-import { io } from "socket.io-client";
 import { useRouter } from "next/router";
 import { useWebsocketContext } from "../components/Websocket";
 
@@ -37,7 +35,8 @@ function Home(): JSX.Element {
     } else {
       console.error("Websocket error on general");
     }
-  }), [websockets.general?.connected];
+  }),
+    [websockets.general?.connected];
 
   /*======for close topBar component when click on screen====*/
   const [openToggle, setOpenToggle] = useState(false);
@@ -59,19 +58,18 @@ function Home(): JSX.Element {
 
   function handleClickPlayButton(): void {
     console.log("CLICKING THE BUTTON");
-    if (!websockets.pong?.connected)
-    {
-      console.error("Pong socket error, abort play game")
-      return
+    if (!websockets.pong?.connected) {
+      console.error("Pong socket error, abort play game");
+      return;
     }
 
-    websockets.pong.emit("searchGame", (response: any) => {
+    websockets.pong.emit("searchGame", (response: string) => {
       console.log(response);
     });
 
     websockets.pong.on("startGame", (config) => {
       console.log("RECEIVED START GAME");
-      websockets.pong?.off("startGame")
+      websockets.pong?.off("startGame");
       router.replace(
         {
           pathname: "/pong",

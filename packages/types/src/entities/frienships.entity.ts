@@ -1,24 +1,19 @@
-import { Exclude, Expose } from 'class-transformer';
-import {
-  Column,
-  Entity,
-  ManyToOne,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
-import { User } from './user.entity';
+import { Exclude, Expose } from "class-transformer";
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { User } from "./user.entity";
 
 @Expose()
 @Entity()
 export class Friendships {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryGeneratedColumn("uuid")
   id!: string;
 
-  @ManyToOne(() => User, {eager: true})
+  @ManyToOne(() => User, { eager: true })
   initiator!: User;
 
-  @ManyToOne(() => User, {eager: true})
+  @ManyToOne(() => User, { eager: true })
   target!: User;
 
-  @Column('boolean', { default: false })
+  @Column("boolean", { default: false })
   accepted!: boolean;
 }

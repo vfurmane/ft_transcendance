@@ -1,33 +1,44 @@
-import { GameState, PlayerInterface, Form, Vector, Point, Entity, Wall, Board } from "types";
+import {
+  GameState,
+  PlayerInterface,
+  Form,
+  Vector,
+  Point,
+  Entity,
+  Wall,
+  Board,
+} from "types";
 import React, { useRef, useEffect } from "react";
 import { NextRouter, useRouter } from "next/router";
 import { useWebsocketContext } from "../components/Websocket";
+import { Socket } from "socket.io-client";
+import { DefaultEventsMap } from "socket.io/dist/typed-events";
 
 class Game {
-  public static isSolo: boolean = false;
+  public static isSolo = false;
   public boardType = Form.REC;
   public boardCanvasRef!: React.RefObject<HTMLCanvasElement>;
-  public boardCanvas!: HTMLCanvasElement | null;
-  public boardContext!: CanvasRenderingContext2D | null;
+  public boardCanvas!: HTMLCanvasElement;
+  public boardContext!: CanvasRenderingContext2D;
   public board!: Board;
-  public countUpdate: number = 0;
-  public static point: number = 0;
-  public static live: number = 3;
+  public countUpdate = 0;
+  public static point = 0;
+  public static live = 3;
   public ball!: Ball;
   public player: Racket[] = [];
   public cible!: Target;
   public static keyPressed = { up: false, down: false };
   public start = Date.now();
-  public lastUpdate: number = 0;
+  public lastUpdate = 0;
   public color: string[] = ["blue", "red", "orange", "white", "pink", "black"];
   public static position: number;
-  public static socket: any;
+  public static socket: Socket<DefaultEventsMap, DefaultEventsMap>;
   public static count: number;
 
   constructor(
-    number_player: number|undefined,
-    position: number|undefined,
-    private router: NextRouter
+    number_player: number | undefined,
+    position: number | undefined,
+    private readonly router: NextRouter
   ) {
     if (number_player) {
       this.boardType = number_player;
@@ -42,12 +53,12 @@ class Game {
     }
   }
 
-  createRegularPolygon(point: Point, side: number, n: number) {
-    let points: Point[] = [];
-    let angle = -(360 - ((n - 2) * 180) / n) * (Math.PI / 180);
+  createRegularPolygon(point: Point, side: number, n: number): Point[] {
+    const points: Point[] = [];
+    const angle = -(360 - ((n - 2) * 180) / n) * (Math.PI / 180);
     points[0] = new Point(point.x, point.y);
-    let vector = point.vectorTo(new Point(points[0].x, points[0].y - side));
-    for (let i: number = 0; i < n - 1; i++) {
+    const vector = point.vectorTo(new Point(points[0].x, points[0].y - side));
+    for (let i = 0; i < n - 1; i++) {
       points[i + 1] = new Point(points[i].x, points[i].y);
       [vector.x, vector.y] = [
         -(vector.x * Math.cos(angle) + vector.y * Math.sin(angle)),
@@ -59,7 +70,7 @@ class Game {
     return points;
   }
 
-  refresh(state: any) {
+  refresh(state: GameState): void {
     if (!this.boardType) {
       return;
     }
@@ -96,22 +107,22 @@ class Game {
     this.ball.calcNextCollision(this.player, this.board.wall, null);
   }
 
-  updatePlayer(player: PlayerInterface[], wall: Wall[]) {
-    let racket: Racket[] = [];
+  updatePlayer(player: PlayerInterface[], wall: Wall[]): Racket[] {
+    const racket: Racket[] = [];
     for (let i = 0; i < wall.length; i++) {
-      let wallDir = wall[i].point[0].vectorTo(wall[i].point[2]).normalized();
-      let wallPerp = wallDir.perp().normalized();
-      let racketCenter = player[i].point;
-      let p3 = new Point(
+      const wallDir = wall[i].point[0].vectorTo(wall[i].point[2]).normalized();
+      const wallPerp = wallDir.perp().normalized();
+      const racketCenter = player[i].point;
+      const p3 = new Point(
         racketCenter.x - wallDir.x * 40,
         racketCenter.y - wallDir.y * 40
       );
-      let p0 = new Point(
+      const p0 = new Point(
         racketCenter.x + wallDir.x * 40,
         racketCenter.y + wallDir.y * 40
       );
-      let p1 = new Point(p0.x + wallPerp.x * 10, p0.y + wallPerp.y * 10);
-      let p2 = new Point(p3.x + wallPerp.x * 10, p3.y + wallPerp.y * 10);
+      const p1 = new Point(p0.x + wallPerp.x * 10, p0.y + wallPerp.y * 10);
+      const p2 = new Point(p3.x + wallPerp.x * 10, p3.y + wallPerp.y * 10);
       if (this.player === undefined)
         racket.push(new Racket(i, [p0, p1, p2, p3], this.color[i]));
       else racket.push(new Racket(i, [p0, p1, p2, p3], this.player[i].color));
@@ -120,35 +131,37 @@ class Game {
     return racket;
   }
 
-  createRacket(wall: Wall[]) {
+  createRacket(wall: Wall[]): Racket[] {
     if (Game.isSolo) {
       return [
         new Racket(
           0,
-          this.createRect(10, this.boardCanvas!.height / 2, 10, 80),
+          this.createRect(10, this.boardCanvas.height / 2, 10, 80),
           this.color[0]
         ),
       ];
     } else {
-      let racket: Racket[] = [];
+      const racket: Racket[] = [];
       for (let i = 0; i < wall.length; i++) {
-        let wallDir = wall[i].point[0].vectorTo(wall[i].point[2]).normalized();
-        let wallPerp = wallDir.perp().normalized();
-        let wallCenter = wall[i].center();
-        let racketCenter = new Point(
+        const wallDir = wall[i].point[0]
+          .vectorTo(wall[i].point[2])
+          .normalized();
+        const wallPerp = wallDir.perp().normalized();
+        const wallCenter = wall[i].center();
+        const racketCenter = new Point(
           wallCenter.x + wallPerp.x * 5,
           wallCenter.y + wallPerp.y * 5
         );
-        let p3 = new Point(
+        const p3 = new Point(
           racketCenter.x - wallDir.x * 40,
           racketCenter.y - wallDir.y * 40
         );
-        let p0 = new Point(
+        const p0 = new Point(
           racketCenter.x + wallDir.x * 40,
           racketCenter.y + wallDir.y * 40
         );
-        let p1 = new Point(p0.x + wallPerp.x * 10, p0.y + wallPerp.y * 10);
-        let p2 = new Point(p3.x + wallPerp.x * 10, p3.y + wallPerp.y * 10);
+        const p1 = new Point(p0.x + wallPerp.x * 10, p0.y + wallPerp.y * 10);
+        const p2 = new Point(p3.x + wallPerp.x * 10, p3.y + wallPerp.y * 10);
         if (this.player.length === 0)
           racket.push(new Racket(i, [p0, p1, p2, p3], this.color[i]));
         else racket.push(new Racket(i, [p0, p1, p2, p3], this.player[i].color));
@@ -157,8 +170,8 @@ class Game {
     }
   }
 
-  createRect(x: number, y: number, w: number, h: number) {
-    let point: Point[] = [];
+  createRect(x: number, y: number, w: number, h: number): Point[] {
+    const point: Point[] = [];
     point[0] = new Point(x, y);
     point[1] = new Point(x + w, y);
     point[2] = new Point(x + w, y + h);
@@ -166,10 +179,10 @@ class Game {
     return point;
   }
 
-  init(ref: React.RefObject<HTMLCanvasElement> | undefined) {
+  init(ref: React.RefObject<HTMLCanvasElement> | undefined): void {
     if (ref === undefined) return;
     if (!Game.isSolo) {
-      Game.socket.on("refresh", (state: GameState, time: number) => {
+      Game.socket.on("refresh", (state: GameState) => {
         Game.count = 0;
         if (!this.board) {
           return;
@@ -177,15 +190,20 @@ class Game {
         this.refresh(state);
       });
       Game.socket.on("endGame", () => {
-          Game.socket.off("endGame")
-          Game.socket.off("refresh")
-          this.router.replace("/");
+        Game.socket.off("endGame");
+        Game.socket.off("refresh");
+        this.router.replace("/");
       });
     }
     this.boardCanvasRef = ref;
+    if (!this.boardCanvasRef.current) {
+      return;
+    }
     this.boardCanvas = this.boardCanvasRef.current;
     if (!this.boardCanvas) return;
-    this.boardContext = this.boardCanvas.getContext("2d");
+    const context = this.boardCanvas.getContext("2d");
+    if (!context) return;
+    this.boardContext = context;
     this.boardCanvas.width = 640; //window.innerWidth * 0.9;
     this.boardCanvas.height = 480; //window.innerHeight * 0.9;
     this.board = new Board(this.boardType, this.boardCanvas);
@@ -201,10 +219,7 @@ class Game {
         this.board.wall
       );
     } else {
-      this.player = this.createRacket([
-        this.board.wall[0],
-        this.board.wall[2],
-      ]);
+      this.player = this.createRacket([this.board.wall[0], this.board.wall[2]]);
       this.ball = new Ball(
         this.createRect(
           this.board.board.center().x,
@@ -235,9 +250,9 @@ class Game {
     });
   }
 
-  updateGame() {
-    this.boardCanvas!.width = 640; //window.innerWidth * 0.9;
-    this.boardCanvas!.height = 480; //window.innerHeight * 0.9;
+  updateGame(): void {
+    this.boardCanvas.width = 640; //window.innerWidth * 0.9;
+    this.boardCanvas.height = 480; //window.innerHeight * 0.9;
     const time = Math.round(Date.now() - this.start);
 
     if (!this.boardType) {
@@ -246,51 +261,49 @@ class Game {
     if (Game.isSolo) {
       if (!this.player[0].hp) {
         this.boardType = 0;
-        return ;
+        return;
       }
     }
-    this.boardContext!.fillStyle = "#666666";
+    this.boardContext.fillStyle = "#666666";
     this.board.board.draw(this.boardContext, "gray");
-    this.boardContext!.font = "14px sherif";
-    this.boardContext!.fillStyle = "#000000";
-    this.boardContext!.fillText(
+    this.boardContext.font = "14px sherif";
+    this.boardContext.fillStyle = "#000000";
+    this.boardContext.fillText(
       Math.round(this.countUpdate / (time / 1000)) +
         " Print from class Board : " +
-        this.boardCanvas!.width +
+        this.boardCanvas.width +
         " " +
-        this.boardCanvas!.height,
+        this.boardCanvas.height,
       0,
       10
     );
-    this.boardContext!.font = "50px sherif";
-    this.boardContext!.fillText(
+    this.boardContext.font = "50px sherif";
+    this.boardContext.fillText(
       Game.point.toString(),
-      this.boardCanvas!.width * 0.333,
+      this.boardCanvas.width * 0.333,
       50
     );
-    this.boardContext!.fillText(
+    this.boardContext.fillText(
       Math.round(time * 0.001).toString(),
-      this.boardCanvas!.width * 0.333,
+      this.boardCanvas.width * 0.333,
       110
     );
     this.countUpdate++;
-    let timeRatio = (Date.now() - this.start - this.lastUpdate) / 17;
+    const timeRatio = (Date.now() - this.start - this.lastUpdate) / 17;
     this.ball.update(this.player, this.board.wall, this.board, timeRatio);
-    this.player.forEach((player) =>
-      player.update(this.board.wall, timeRatio)
-    );
+    this.player.forEach((player) => player.update(this.board.wall, timeRatio));
     if (Game.isSolo) this.cible.update(this.ball, this.boardCanvas);
     this.board.wall.forEach((wall) => {
       wall.draw(this.boardContext, undefined);
     });
     this.ball.draw(this.boardContext, undefined);
-    for (let p of this.player) {
+    for (const p of this.player) {
       p.draw(this.boardContext, p.color);
       p.printPoint(this.boardContext, 0, "red");
       p.printPoint(this.boardContext, 3, "green");
-      this.boardContext!.fillText(
+      this.boardContext.fillText(
         p.hp.toString(),
-        this.boardCanvas!.width / 2,
+        this.boardCanvas.width / 2,
         50 + 20 * p.index
       );
     }
@@ -309,30 +322,30 @@ class Target extends Entity {
     super(points);
   }
 
-  draw(context: CanvasRenderingContext2D | null) {
-    context!.beginPath();
-    context!.moveTo(this.getx(), this.gety());
-    for (let point of this.point) {
-      context!.lineTo(point.x, point.y);
+  draw(context: CanvasRenderingContext2D): void {
+    context.beginPath();
+    context.moveTo(this.getx(), this.gety());
+    for (const point of this.point) {
+      context.lineTo(point.x, point.y);
     }
-    context!.closePath();
-    context!.strokeStyle = "red";
-    context!.stroke();
-    context!.fillStyle = "red";
-    context!.fill();
+    context.closePath();
+    context.strokeStyle = "red";
+    context.stroke();
+    context.fillStyle = "red";
+    context.fill();
   }
 
-  randomVal(min: number, max: number) {
+  randomVal(min: number, max: number): number {
     return Math.floor(Math.random() * (max - min + 1) + min);
   }
 
-  update(ball: Ball, canvas: HTMLCanvasElement | null) {
+  update(ball: Ball, canvas: HTMLCanvasElement): void {
     if (this.sat(ball)) {
       Game.point++;
       this.replaceTo(
         new Point(
-          this.randomVal(canvas!.width / 2, canvas!.width - 30),
-          this.randomVal(30, canvas!.height - 30)
+          this.randomVal(canvas.width / 2, canvas.width - 30),
+          this.randomVal(30, canvas.height - 30)
         )
       );
     }
@@ -340,12 +353,16 @@ class Target extends Entity {
 }
 
 class Ball extends Entity {
-  public defaultSpeed: number = 3;
-  public nextCollision: { wall: number; wallIndex: number; racket: number } = { wall: 0, wallIndex: 0, racket: 0 };
+  public defaultSpeed = 3;
+  public nextCollision: { wall: number; wallIndex: number; racket: number } = {
+    wall: 0,
+    wallIndex: 0,
+    racket: 0,
+  };
 
   constructor(points: Point[], player: Racket[], walls: Wall[]) {
     super(points);
-    let dir = player[0].point[1]
+    const dir = player[0].point[1]
       .midSegment(player[0].point[2])
       .vectorTo(player[0].point[0].midSegment(player[0].point[3]))
       .normalized();
@@ -356,7 +373,11 @@ class Ball extends Entity {
     this.calcNextCollision(player, walls, null);
   }
 
-  calcNextCollision(rackets: Racket[], walls: Wall[], ignore: number | null) {
+  calcNextCollision(
+    rackets: Racket[],
+    walls: Wall[],
+    ignore: number | null
+  ): void {
     let face: Point;
     let ballTo: Point;
     let minRatio: number | null = null;
@@ -368,7 +389,7 @@ class Ball extends Entity {
         else face = this.getFace(0);
       }
       ballTo = new Point(this.speed.x + face.x, this.speed.y + face.y);
-      let ratio = face.intersect(ballTo, racket.point[2], racket.point[1]);
+      const ratio = face.intersect(ballTo, racket.point[2], racket.point[1]);
       if (ratio > 0) {
         minRatio ??= ratio;
         if (ratio < minRatio) minRatio = ratio;
@@ -380,7 +401,7 @@ class Ball extends Entity {
       if (ignore === null || index !== ignore) {
         face = this.getFace(index);
         ballTo = new Point(this.speed.x + face.x, this.speed.y + face.y);
-        let ratio = face.intersect(ballTo, wall.point[2], wall.point[1]);
+        const ratio = face.intersect(ballTo, wall.point[2], wall.point[1]);
         if (ratio > 0) {
           minRatio ??= ratio;
           if (ratio <= minRatio) {
@@ -393,22 +414,22 @@ class Ball extends Entity {
     if (minRatio) this.nextCollision.wall = minRatio;
   }
 
-  isParallel(from1: Point, to1: Point, from2: Point, to2: Point) {
-    let v1 = from1.vectorTo(to1);
-    let v2 = from2.vectorTo(to2);
+  isParallel(from1: Point, to1: Point, from2: Point, to2: Point): number {
+    const v1 = from1.vectorTo(to1);
+    const v2 = from2.vectorTo(to2);
     return v1.crossProduct(v2);
   }
 
-  getFace(n: number) {
+  getFace(n: number): Point {
     if (n) {
       return this.point[n - 1].midSegment(this.point[n]);
     }
     return this.point[this.point.length - 1].midSegment(this.point[0]);
   }
 
-  goToRandomPlayer(player: Racket[]) {
-    let random = Math.floor(Math.random() * 10000) % player.length;
-    let dir = player[random].point[1]
+  goToRandomPlayer(player: Racket[]): void {
+    const random = Math.floor(Math.random() * 10000) % player.length;
+    const dir = player[random].point[1]
       .midSegment(player[random].point[2])
       .vectorTo(player[random].point[0].midSegment(player[random].point[3]))
       .normalized();
@@ -418,7 +439,12 @@ class Ball extends Entity {
     );
   }
 
-  update(rackets: Racket[], walls: Wall[], board: Board, timeRatio: number) {
+  update(
+    rackets: Racket[],
+    walls: Wall[],
+    board: Board,
+    timeRatio: number
+  ): void {
     this.nextCollision.wall -= 1 * timeRatio;
     this.nextCollision.racket -= 1 * timeRatio;
 
@@ -426,7 +452,7 @@ class Ball extends Entity {
       this.nextCollision.wall > this.nextCollision.racket &&
       this.nextCollision.racket < 1
     ) {
-      for (let racket of rackets) {
+      for (const racket of rackets) {
         if (this.sat(racket)) {
           let angle = 0;
           let face;
@@ -444,7 +470,7 @@ class Ball extends Entity {
           if (ratio > 1) ratio = 1;
           if (ratio < 0) ratio = 0;
           angle = -(Math.PI / 4 + (Math.PI / 2) * (1 - ratio));
-          let norm = racket.point[2].vectorTo(racket.point[1]).normalized();
+          const norm = racket.point[2].vectorTo(racket.point[1]).normalized();
           [norm.x, norm.y] = [
             norm.x * Math.cos(angle) + norm.y * Math.sin(angle),
             -(norm.x * Math.sin(angle)) + norm.y * Math.cos(angle),
@@ -466,19 +492,19 @@ class Ball extends Entity {
       );
       this.replaceTo(newCoords);
       const wall = walls[this.nextCollision.wallIndex];
-      let wallVector = wall.point[0].vectorTo(wall.point[2]);
-      let Norm = wallVector.norm() * this.speed.norm();
-      let angle = Math.acos(wallVector.product(this.speed) / Norm);
-      let tmp = new Vector(this.speed.x, this.speed.y);
-      let isAcute = angle <= Math.PI / 2;
-      let outAngle = isAcute ? angle * 2 : (Math.PI - angle) * 2;
-      let cosA = Math.cos(outAngle);
-      let sinA = Math.sin(outAngle);
+      const wallVector = wall.point[0].vectorTo(wall.point[2]);
+      const Norm = wallVector.norm() * this.speed.norm();
+      const angle = Math.acos(wallVector.product(this.speed) / Norm);
+      const tmp = new Vector(this.speed.x, this.speed.y);
+      const isAcute = angle <= Math.PI / 2;
+      const outAngle = isAcute ? angle * 2 : (Math.PI - angle) * 2;
+      const cosA = Math.cos(outAngle);
+      const sinA = Math.sin(outAngle);
       [tmp.x, tmp.y] = [
         this.speed.x * cosA - this.speed.y * sinA,
         this.speed.x * sinA + this.speed.y * cosA,
       ];
-      let angle2 = Math.acos(wallVector.product(tmp) / Norm);
+      const angle2 = Math.acos(wallVector.product(tmp) / Norm);
       if (Math.abs(angle2 - angle) > 0.001) {
         [tmp.x, tmp.y] = [
           this.speed.x * cosA - this.speed.y * -sinA,
@@ -488,7 +514,7 @@ class Ball extends Entity {
       this.speed = tmp;
       this.moveTo(this.speed, timeRatio);
       this.moveTo(this.speed, timeRatio);
-      let index = this.nextCollision.wallIndex;
+      const index = this.nextCollision.wallIndex;
       if (rackets.length === 2) {
         if (index === 2) {
           rackets[1].hp--;
@@ -523,7 +549,7 @@ class Ball extends Entity {
 }
 
 class Racket extends Entity {
-  public defaultSpeed: number = 1.5;
+  public defaultSpeed = 1.5;
   public hp = 3;
   public dir!: Vector;
 
@@ -536,7 +562,7 @@ class Racket extends Entity {
     );
   }
 
-  update(walls: Wall[], timeRatio: number) {
+  update(walls: Wall[], timeRatio: number): void {
     if (this.index == Game.position) {
       if (Game.keyPressed.up && Game.keyPressed.down) {
       } else if (Game.keyPressed.up) {
@@ -559,7 +585,7 @@ class Racket extends Entity {
         }
       }
     }
-    for (let wall of walls) {
+    for (const wall of walls) {
       if (this.sat(wall)) {
         this.moveTo(new Vector(-this.speed.x, -this.speed.y), timeRatio);
       }
@@ -567,40 +593,42 @@ class Racket extends Entity {
   }
 }
 
-function handleResize(game: Game) {
+function handleResize(game: Game): void {
   game.updateGame();
 }
 
-const Canvas = () => {
-  let router = useRouter();
+const Canvas = (): React.DetailedHTMLProps<
+  React.CanvasHTMLAttributes<HTMLCanvasElement>,
+  HTMLCanvasElement
+> => {
+  const router = useRouter();
   const canvasRef = useRef(null);
   const websockets = useWebsocketContext();
 
-  if (canvasRef) {
-    let game = new Game(
-      Number(router.query.number_player),
-      Number(router.query.position),
-      router
-    );
+  const game = new Game(
+    Number(router.query.number_player),
+    Number(router.query.position),
+    router
+  );
 
-    useEffect(() => {
-      if (websockets.pong?.connected)
-      {
-        Game.socket = websockets.pong
+  useEffect(() => {
+    if (canvasRef) {
+      if (websockets.pong?.connected) {
+        Game.socket = websockets.pong;
         game.init(canvasRef);
         const intervalId = setInterval(handleResize, 4, game);
-        return () => {
+        return (): void => {
           clearInterval(intervalId);
         };
       } else {
         game.init(canvasRef);
         const intervalId = setInterval(handleResize, 4, game);
-        return () => {
-          clearInterval(intervalId);  
+        return (): void => {
+          clearInterval(intervalId);
         };
       }
-    }, [websockets.pong?.connected]);
-  }
+    }
+  }, [websockets.pong?.connected]);
 
   return <canvas width="1500" height="1500" ref={canvasRef} />;
 };

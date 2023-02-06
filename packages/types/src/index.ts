@@ -23,8 +23,7 @@ export interface JwtPayload {
   jti: string;
 }
 
-export interface unreadMessagesResponse
-{
+export interface unreadMessagesResponse {
   totalNumberOfUnreadMessages: number;
   UnreadMessage: unreadMessages[];
 }
@@ -47,20 +46,20 @@ export interface ConversationWithUnread {
 }
 
 export interface Ball {
-  point : Point;
-  dir : Vector;
+  point: Point;
+  dir: Vector;
 }
 
 export interface PlayerInterface {
-  point : Point;
-  dir : Vector;
-  hp : number;
+  point: Point;
+  dir: Vector;
+  hp: number;
 }
 
 export interface GameState {
-  numberPlayer : number;
-  players : PlayerInterface[]
-  ball : Ball;
+  numberPlayer: number;
+  players: PlayerInterface[];
+  ball: Ball;
 }
 
 export interface Userfront {
@@ -76,9 +75,9 @@ export interface Userfront {
 }
 
 export interface FriendshipRequestStatus {
-  friend : Userfront | null,
-  accept: boolean,
-  ask: boolean
+  friend: Userfront | null;
+  accept: boolean;
+  ask: boolean;
 }
 
 export interface MatchFront {
@@ -95,6 +94,6 @@ export interface Achivement {
   description: string;
 }
 
-export * from './enums';
-export * from './entities';
-export * from './class';
+export * from "./enums";
+export * from "./entities";
+export * from "./class";
