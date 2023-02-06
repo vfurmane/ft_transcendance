@@ -1,14 +1,18 @@
-import {
-  WebSocketGateway,
-  WebSocketServer,
-  WsException,
-} from '@nestjs/websockets';
+import { WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { CACHE_MANAGER, Inject, Logger } from '@nestjs/common';
+import {
+  CACHE_MANAGER,
+  Inject,
+  Logger,
+  UnauthorizedException,
+  UseFilters,
+} from '@nestjs/common';
 import { Cache } from 'cache-manager';
 import { AuthService } from './auth/auth.service';
+import { HttpExceptionTransformationFilter } from './common/filters/HttpExceptionFilter.filter';
 
 @WebSocketGateway()
+@UseFilters(HttpExceptionTransformationFilter)
 export class AppGateway {
   @WebSocketServer() server!: Server;
 
@@ -20,11 +24,11 @@ export class AppGateway {
 
   async handleConnection(client: Socket): Promise<void> {
     if (!client.handshake.auth.token)
-      throw new WsException('No Authorization header found');
+      throw new UnauthorizedException('No Authorization header found');
     const currentUser = this.authService.verifyUserFromToken(
       client.handshake.auth.token,
     );
-    if (!currentUser) throw new WsException('Invalid token');
+    if (!currentUser) throw new UnauthorizedException('Invalid token');
     client.data = { id: currentUser.sub, name: currentUser.name };
     client.join(`user_${currentUser.sub}`);
     this.server
