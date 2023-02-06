@@ -36,7 +36,7 @@ export default function Auth({ children }: AuthProps): JSX.Element {
             dispatch(setUserState(initUser));
             router.push("/login");
           }
-        }, 1000 * 270);
+        }, 1000 * 60 * 4);
         setRefreshInterval(interval);
       } else {
         dispatch(setUserState(initUser));
