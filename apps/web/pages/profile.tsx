@@ -14,6 +14,7 @@ import ChatBar from "../components/chatBar";
 import styles from "styles/profil.module.scss";
 import textStyles from "styles/text.module.scss";
 import { initMatch } from "../initType/MatchInit";
+import ConfigTfa from "../components/ProfilePage/ConfigTfa";
 
 export default function Profil(): JSX.Element {
   const UserState = useSelector(selectUserState);
@@ -135,6 +136,12 @@ export default function Profil(): JSX.Element {
     setOpenConfigProfil(true);
     setOpenAchivementList(false);
     setConfigProfil(<ChangePswrd />);
+  }
+
+  function configTfa(): void {
+    setOpenConfigProfil(true);
+    setOpenAchivementList(false);
+    setConfigProfil(<ConfigTfa />);
   }
 
   function close(): void {
@@ -303,7 +310,7 @@ export default function Profil(): JSX.Element {
                       Change password
                     </h3>
                   </button>
-                  <button className={styles.buttonProfil}>
+                  <button className={styles.buttonProfil} onClick={configTfa}>
                     <h3
                       className={textStyles.laquer}
                       style={{ fontSize: "18px" }}
