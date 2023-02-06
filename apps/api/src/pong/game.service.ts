@@ -1,4 +1,5 @@
 import { GameState } from 'types'
+import { Server, Socket } from "socket.io"
 
 enum Axe {
   X = 1,
@@ -29,6 +30,8 @@ export class Game {
   public countUpdate: number = 0;
   public static point: number = 0;
   public static live: number = 3;
+  public static server: Server;
+  public static room: string;
   public ball!: Ball;
   public player: Racket[] = [];
   public cible!: Target;
@@ -38,8 +41,10 @@ export class Game {
   public wall: Wall[] = [];
   public color: string[] = ["blue", "red", "orange", "white", "pink", "black"];
 
-  constructor(playerNumber:number) {
+  constructor(playerNumber:number, server: Server, room: string) {
     this.boardType = playerNumber;
+    Game.server = server;
+    Game.room = room;
     this.init();
   }
 
@@ -59,8 +64,9 @@ export class Game {
   }
 
   movePlayer (playerPosition : number, dir : boolean) {
+    let timeRatio = ((Date.now() - this.start) - this.lastUpdate) / 17;
     let player = this.player[playerPosition];
-    player.move(dir, this.board.wall);
+    player.move(dir, this.board.wall, timeRatio);
   }
 
   createRegularPolygon(point: Point, side: number, n: number) {
@@ -703,7 +709,7 @@ export class Racket extends Entity {
     );
   }
 
-  move(dir : boolean, walls : Wall[]) {
+  move(dir : boolean, walls : Wall[], timeRatio : number) {
     if (dir) {
       this.speed = new Vector(
         this.dir.x * this.defaultSpeed,
@@ -715,10 +721,10 @@ export class Racket extends Entity {
         -this.dir.y * this.defaultSpeed
       );
     }
-    this.moveTo(this.speed, 1);
+    this.moveTo(this.speed, timeRatio);
     for (let wall of walls) {
       if (this.sat(wall)) {
-        this.moveTo(new Vector(-this.speed.x, -this.speed.y), 1);
+        this.moveTo(new Vector(-this.speed.x, -this.speed.y), timeRatio);
       }
     }
   }

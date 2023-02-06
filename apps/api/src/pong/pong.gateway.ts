@@ -1,11 +1,7 @@
 import { Server, Socket } from "socket.io"
-import { MessageBody, OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WsResponse, ConnectedSocket, WebSocketServer } from "@nestjs/websockets";
-//import { Game, Player } from "../../../web/pages/pong.tsx"
-import { GameDto, RacketDto } from './pong.dto'
+import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WsResponse, ConnectedSocket, WebSocketServer } from "@nestjs/websockets";
 import { ClassSerializerInterceptor, UseInterceptors, UsePipes, ValidationPipe } from "@nestjs/common";
 import { AuthService } from "src/auth/auth.service";
-import { UUIDVersion } from "class-validator";
-import { arrayBuffer } from "stream/consumers";
 import { Game } from "./game.service"
 import { Interval } from "@nestjs/schedule";
 
@@ -74,7 +70,7 @@ import { Interval } from "@nestjs/schedule";
 			let i = 0;
 			socketWaiting.forEach((socket) => socket.data.position = i++);
 		}
-		console.log(client.data.name + " DISCONNECTED")
+		console.log(client.data.name + "  DISCONNECTED")
 	}
 
 	@Interval(17)
@@ -171,7 +167,7 @@ import { Interval } from "@nestjs/schedule";
 				list.push(element.data.id);
 				this.server.in(`user_${element.data.id}`).emit('startGame', { number_player: numberPlayer, position : element.data.position});
 			});
-			this.games.set(room, [new Game(numberPlayer), list])
+			this.games.set(room, [new Game(numberPlayer, this.server, room), list])
 			return 'Launching the game for room ' + room;
 		}
 		return 'You are not player 1 !'
@@ -198,7 +194,7 @@ import { Interval } from "@nestjs/schedule";
 							list.push(element.data.id);
 							this.server.in(`user_${element.data.id}`).emit('startGame', { number_player: count + 1, position : element.data.position});
 						});
-						this.games.set(room, [new Game(2), list])
+						this.games.set(room, [new Game(2, this.server, room), list])
 						this.room_id.splice(this.room_id.indexOf(room), 1);
 						return 'Launched game for room ' + room;
 					}
