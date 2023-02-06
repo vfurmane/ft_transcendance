@@ -54,6 +54,7 @@ export interface Userfront {
   defeat: number;
   rank: number;
   level: number;
+  tfaSetup: boolean;
 }
 
 export interface FriendshipRequestStatus {
