@@ -7,4 +7,5 @@ export const initUser = {
   defeat: 0,
   rank: 0,
   level: 0,
+  tfaSetup: false,
 };
