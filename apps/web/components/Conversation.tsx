@@ -1,12 +1,12 @@
 import { ConversationWithUnread } from "types"
 
 
-export default function Conversation( props : ConversationWithUnread)
+export default function Conversation( props : { conversation : ConversationWithUnread })
 {
     return (
         <article>
-            <h4>{props.conversation.name}</h4>
-            <aside>{props.numberOfUnreadMessages ? props.numberOfUnreadMessages : ''}</aside>
+            <h4>{props.conversation.conversation.name}</h4>
+            <aside>{props.conversation.numberOfUnreadMessages ? props.conversation.numberOfUnreadMessages : ''}</aside>
         </article>
     )
 }

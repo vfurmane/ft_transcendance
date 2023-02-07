@@ -77,5 +77,10 @@ export interface Achivement {
   description: string;
 }
 
+export interface DMExists {
+  conversationExists: boolean,
+  conversation: Conversation | null
+}
+
 export * from './enums';
 export * from './entities';

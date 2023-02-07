@@ -13,11 +13,11 @@ export default function ChatBar(): JSX.Element {
   const websockets = useWebsocketContext();
   const conversationToOpen = useSelector(selectConversationsState)
   const dispatch = useDispatch()
-  let [conversationIdProp, setConversationIdProp] = useState<string>("")
+  let [conversationIdProp, setConversationIdProp] = useState<{userId: string, userName: string}>({userId: "", userName: ""})
 
   useEffect(() =>
   {
-    if (conversationToOpen.length)
+    if (conversationToOpen.userId.length)
     {
       setVisibility(true)
       setConversationIdProp(conversationToOpen)
@@ -39,17 +39,17 @@ export default function ChatBar(): JSX.Element {
       websockets.conversations?.off("newMessage")
       setUnreadMessages(0)
     }
-    return () =>
+    return (() =>
     {
       websockets.conversations?.off("newMessage")
-    }
+    })
   },[websockets.conversations?.connected, conversationToOpen, visibility])
 
   if (!visibility)
   {
     return (
       <div className={styles.containerChatBar} onClick={ (e) => {
-        setVisibility(true); setConversationIdProp(""); } 
+        setVisibility(true); setConversationIdProp({userId: "", userName: ""}); } 
       }>
         <h3 className={textStyles.laquer}>Chat</h3>
         <aside className={`${textStyles.laquer} ${styles.unreadMessages}`}>{unreadMessages ? unreadMessages : ''}</aside>
@@ -61,9 +61,9 @@ export default function ChatBar(): JSX.Element {
     return (
       <div className={styles.containerChat} >
         <aside className={textStyles.laquer} onClick={ (e) => {
-          setVisibility(false); setConversationIdProp(""); } 
+          setVisibility(false); setConversationIdProp({userId: "", userName: ""}); } 
         }>X</aside>
-        <Chat conversationId={conversationIdProp} />
+        <Chat conversation={conversationIdProp} />
       </div>
     )
   }

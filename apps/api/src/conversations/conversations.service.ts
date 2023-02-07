@@ -6,7 +6,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User } from 'types';
+import { DMExists, User } from 'types';
 import { MoreThan, Not, Repository } from 'typeorm';
 import {
   ConversationsDetails,
@@ -37,7 +37,7 @@ export class ConversationsService {
     private readonly conversationRestrictionRepository: Repository<ConversationRestriction>,
   ) {}
 
-  async getListOfDMs(user: User): Promise<Conversation[]> {
+  async getListOfDMs( { id }: User | { id : string}): Promise<Conversation[]> {
     const listOfDMs: Conversation[] = [];
     const conversationRolesList = await this.conversationRoleRepository.find({
       relations: {
@@ -46,7 +46,7 @@ export class ConversationsService {
       },
       where: {
         user: {
-          id: user.id,
+          id: id,
         },
         conversation: {
           groupConversation: false,
@@ -57,6 +57,17 @@ export class ConversationsService {
       listOfDMs.push(conversationRole.conversation);
     }
     return listOfDMs;
+  }
+
+  async DMExists(currentUser : User, targetUserId : string) : Promise<DMExists>
+  {
+    const creatorDMs = await this.getListOfDMs(currentUser);
+    const recipientDMs = await this.getListOfDMs({ id : targetUserId });
+    for (const creatorDM of creatorDMs) {
+      if (recipientDMs.filter((el) => el.id === creatorDM.id).length)
+        return { conversationExists: true, conversation: creatorDM };
+    }
+    return { conversationExists: false, conversation: null }
   }
 
   async createConversation(

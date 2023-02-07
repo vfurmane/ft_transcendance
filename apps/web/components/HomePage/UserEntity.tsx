@@ -75,12 +75,7 @@ export default function UserEntity(props: {
           <article className={styles.buttonEntity} onClick={
             () => {
               console.error("Clicked new conversation button")
-              websockets.conversations?.emit("createConversation", {groupConversation : false, participants: [props.user.id] }, (answer : any) =>
-              {
-                console.error(`Conversation received: ${answer}`)
-                if (answer.id)
-                  dispatch(OpenConversation(answer.id))
-              })
+              dispatch(OpenConversation({userId : props.user.id, userName: props.user.name}))
             }
           }>
             <Image alt="message" src={Message} width={30} height={30} />

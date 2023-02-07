@@ -46,11 +46,9 @@ export class User {
   @Column('boolean', { default: false })
   tfa_setup!: boolean;
 
-  @Expose()
   @OneToMany(() => Message, (message) => message.sender)
   messages!: Message[];
 
-  @Expose()
   @OneToMany(
     () => ConversationRole,
     (conversationRole) => conversationRole.user,

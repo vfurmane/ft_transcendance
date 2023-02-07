@@ -204,6 +204,12 @@ export class ConversationsGateway implements OnGatewayConnection {
     return newRole;
   }
 
+  @SubscribeMessage("DMExists")
+  async DMExists(@ConnectedSocket() client : Socket, @MessageBody() { id }: isUUIDDto)
+  {
+    return this.conversationsService.DMExists(client.data as User, id)
+  }
+
   @SubscribeMessage('leaveConversation')
   async leaveConversation(
     @ConnectedSocket() client: Socket,

@@ -2,7 +2,7 @@ import { createSlice } from "@reduxjs/toolkit";
 import { AppState } from "./store";
 
 // Initial state
-const initialState: {conversation_id : string} = {conversation_id: ""};
+const initialState: {userId : string, userName: string} = {userId: "", userName: ""};
 
 // Actual Slice
 export const ConversationSlice = createSlice({
@@ -11,17 +11,19 @@ export const ConversationSlice = createSlice({
   reducers: {
     // Action to set the user
     OpenConversation(state, action) {
-      state.conversation_id = action.payload;
+      state.userId = action.payload.userId;
+      state.userName = action. payload.userName;
     },
     ReinitConversations(state)
     {
-        state.conversation_id = ""
+        state.userId = ""
+        state.userName = ""
     }
   },
 });
 
 export const { OpenConversation, ReinitConversations } = ConversationSlice.actions;
 
-export const selectConversationsState: (state: AppState) => string = (state: AppState) => state.conversations.conversation_id;
+export const selectConversationsState: (state: AppState) => {userId : string, userName: string} = (state: AppState) => state.conversations;
 
 export default ConversationSlice.reducer;
