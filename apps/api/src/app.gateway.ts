@@ -43,7 +43,10 @@ export class AppGateway {
       .in(`user_${client.data.id}`)
       .fetchSockets()
       .then((sockets) => {
-        if (sockets.length === 0) {
+        if (
+          sockets.filter((socket) => socket.data.id === client.data.id)
+            .length === 0
+        ) {
           this.cacheManager.del(`user:${client.data.id}`);
           this.server
             .to(`user_${client.data.id}`)
