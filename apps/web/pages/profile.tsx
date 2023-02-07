@@ -107,8 +107,8 @@ export default function Profil(): JSX.Element {
       level.innerText = "0";
       const incrementLevel = (): void => {
         const c = +level.innerText;
-        if (c + 10 <= user.level) {
-          level.innerText = `${c + 10}`;
+        if (c + 1 <= user.level) {
+          level.innerText = `${c + 1}`;
           setTimeout(incrementLevel, 100);
         } else {
           level.innerText = `${user.level}`;
@@ -207,6 +207,7 @@ export default function Profil(): JSX.Element {
           <div
             className={`col-10 offset-1 offset-md-0 offset-lg-1 col-md-2 ${styles.flexCenterColumn}`}
           >
+            
             <div className="fill">
               <Image
                 alt="avatar"
@@ -215,6 +216,7 @@ export default function Profil(): JSX.Element {
                 height={200}
               />
             </div>
+            <div className={styles.rank + ' ' + textStyles.saira}>{user.rank}</div>
             <p className={textStyles.saira} style={{ color: "white" }}>
               {user.status}
             </p>

@@ -6,17 +6,19 @@ import { useRouter } from "next/router";
 import Game from "../helpers/pong";
 import { User, Userfront } from "types";
 import { initUser } from "../initType/UserInit";
+import { Loading } from "../components/Loading";
 
 export default function PingPong(): JSX.Element {
-    /*======for close topBar component when click on screen====*/
-    const [openToggle, setOpenToggle] = useState(false);
-    const [openProfil, setOpenProfil] = useState(false);
-    const [openUserList, setOpenUserList] = useState(false);
-    const [indexOfUser, setIndexOfUser] = useState(-1);
-    const prevIndexOfUserRef = useRef(-1);
-
+    let router = useRouter();
     const [user, setUser] = useState(initUser);
     const [users, setUsers] = useState([initUser]);
+    const usersRef = useRef(users);
+    const canvasRef = useRef(null);
+    const [intervalState, setIntervalState] = useState<NodeJS.Timer | null>(null);
+    const [MiniProfilArray, setMiniProfilArray] = useState([<></>]);
+    const [winner, setWinner] = useState(initUser);
+    const [classement, setClassement] = useState<JSX.Element[]>([]);
+
 
     useEffect(() => {
         fetch(`/api/user`, {
@@ -37,7 +39,12 @@ export default function PingPong(): JSX.Element {
     }, []);
 
 
-    const [MiniProfilArray, setMiniProfilArray] = useState([<></>])
+     /*======for close topBar component when click on screen====*/
+     const [openToggle, setOpenToggle] = useState(false);
+     const [openProfil, setOpenProfil] = useState(false);
+     const [openUserList, setOpenUserList] = useState(false);
+     const [indexOfUser, setIndexOfUser] = useState(-1);
+     const prevIndexOfUserRef = useRef(-1);
 
     const setterInit: React.Dispatch<React.SetStateAction<boolean>> = () => {
         console.error("setterInit");
@@ -88,41 +95,75 @@ export default function PingPong(): JSX.Element {
         game.updateGame();
     }
 
-
-
     useEffect(() => {
-        setUsers([user, user]);
-        setMiniProfilArray(users.map((e, i) => <MiniProfil key={i} left={i % 2 == 0 ? true : false} user={{ user: e, index: i }} life={Game.live} score={0} game={{ life: Game.live, score: Game.scoreMax, numOfPlayers: users.length }} />));
+        const tmp = [user, user];
+        usersRef.current = tmp;
+        setUsers(tmp);
+        setMiniProfilArray(tmp.map((e, i) => <MiniProfil key={i} left={i % 2 == 0 ? true : false} user={{ user: e, index: i }} life={Game.live} score={0} game={{ life: Game.live, score: Game.scoreMax, numOfPlayers: tmp.length }} />));
     }, [user]);
 
 
     function changeLife(index: number) {
         let tmp = [...MiniProfilArray];
-        tmp[index] = <MiniProfil key={index} left={index % 2 == 0 ? true : false} user={{ user: users[index], index: index }} life={tmp[index]?.props.life - 1} score={tmp[index]?.props.score} game={{ life: Game.live, score: Game.scoreMax, numOfPlayers: users.length }} />
-        if (users.length === 2) {
-            index = index ? 0 : 1;
-            tmp[index] = <MiniProfil key={index} left={index % 2 == 0 ? true : false} user={{ user: users[index], index: index }} life={tmp[index]?.props.life} score={tmp[index]?.props.score + 1} game={{ life: Game.live, score: Game.scoreMax, numOfPlayers: users.length }} />
+        if (tmp[index]?.props.life - 1 === 0)
+        {
+            if (intervalState)
+                clearInterval(intervalState);
+            let temp = [...users];
+            let newClassement = [
+                <tr>
+                    <td>{temp[index].name}</td>
+                    <td>{usersRef.current.length - classement.length}</td>
+                </tr>, ...classement];
+            setClassement(newClassement);
+            temp.splice(index, 1);
+            tmp.splice(index, 1);
+            if (temp.length === 1)
+            {
+                setWinner(temp[0]);
+                setClassement([
+                    <tr>
+                        <td>{temp[0].name}</td>
+                        <td>{usersRef.current.length - newClassement.length}</td>
+                    </tr>, ...newClassement]);
+                temp = [initUser];
+                if (intervalState)
+                    clearInterval(intervalState);
+            }
+            const tmpp : JSX.Element[] = [];
+            for (let i = 0; i < tmp.length; i++)
+                tmpp.push(<MiniProfil key={i} left={i % 2 == 0 ? true : false} user={{ user: temp[i], index: i }} life={tmp[i]?.props.life} score={tmp[i]?.props.score} game={{ life: Game.live, score: Game.scoreMax, numOfPlayers: tmp.length }} />);
+            tmp = tmpp;
+            game = new Game(Number(temp.length), Number(router.query.position), router, changeLife);
+            setUsers(temp);
+        }
+        else
+        {
+            tmp[index] = <MiniProfil key={index} left={index % 2 == 0 ? true : false} user={{ user: users[index], index: index }} life={tmp[index]?.props.life - 1} score={tmp[index]?.props.score} game={{ life: Game.live, score: Game.scoreMax, numOfPlayers: tmp.length }} />
+            if (users.length === 2) {
+                index = index ? 0 : 1;
+                tmp[index] = <MiniProfil key={index} left={index % 2 == 0 ? true : false} user={{ user: users[index], index: index }} life={tmp[index]?.props.life} score={tmp[index]?.props.score + 1} game={{ life: Game.live, score: Game.scoreMax, numOfPlayers: tmp.length}} />
+            }
         }
         setMiniProfilArray(tmp);
     }
 
-
-    let router = useRouter();
-    const canvasRef = useRef(null);
-    const [height, setHeight] = useState(0);
-    let game = new Game(Number(router.query.number_player), Number(router.query.position), router, changeLife);
+    let game = new Game(Number(/*router.query.number_player*/users.length), Number(router.query.position), router, changeLife);
     useEffect(() => {
-        if (canvasRef) {
+        if (canvasRef && users[0] !== initUser) {
             game.init(canvasRef);
-            setInterval(handleResize, 17, game);
+            setIntervalState(setInterval(handleResize, 17, game));
         }
-        setHeight(window.innerHeight * 0.5);
-    }, []);
+        return (() : void => {
+            if (intervalState)
+                clearInterval(intervalState);
+        })
+    }, [users]);
 
 
 
     return (
-        <div onClick={close} style={{ width: "100vw", height: "100vh" }}>
+        <div onClick={() => close()} style={{ width: "100vw", height: "100vh" }}>
             <TopBar
                 openProfil={openProfil}
                 openToggle={openToggle}
@@ -132,17 +173,27 @@ export default function PingPong(): JSX.Element {
                 writeSearchTopBar={writeSearchTopBar}
                 handleClickUserMenu={handleClickUserMenu}
             />
+            {users[0] !== initUser?
+            <div>
+                {MiniProfilArray}
 
-            {MiniProfilArray}
-
-            <div className={`containerScrollHorizon midle`}>
-                <span className={`textScroll ${textStyles.pixel}`}>- Pong - pOnG - poNg - PONG - pOng&nbsp;</span>
-                <span className={`textScroll ${textStyles.pixel}`}>- Pong - pOnG - poNg - PONG - pOng&nbsp;</span>
-            </div>
-
-            <div style={{ marginTop: '250px', display:'flex', justifyContent:'center'}}>
-                <canvas ref={canvasRef} style={{ marginLeft: users.length > 2 ? '40%' : '',width: '60%', height: height, border: 'solid 0px white'}}></canvas>
-            </div>
+                <div className={`containerScrollHorizon midle`}>
+                    <span className={`textScroll ${textStyles.pixel}`}>- Pong - pOnG - poNg - PONG - pOng&nbsp;</span>
+                    <span className={`textScroll ${textStyles.pixel}`}>- Pong - pOnG - poNg - PONG - pOng&nbsp;</span>
+                </div>
+                <div style={{ marginTop: users.length > 2? '25vh' : '35vh', display:'flex', justifyContent:'center'}}>
+                    <canvas ref={canvasRef} style={{ marginLeft: users.length > 2 ? '30vw' : '', border: 'solid 0px white'}}></canvas>
+                </div>
+            </div> :
+            <div style={{display: 'flex', justifyContent: 'center', flexDirection:'column'}}>
+                <table style={{color:'white', width:'60%'}}>
+                    <tr>
+                        <td>name</td>
+                        <td>classement</td>
+                    </tr>
+                    {classement}
+                </table>
+            </div>}
         </div>
 
     );

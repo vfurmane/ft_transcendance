@@ -44,7 +44,7 @@ export default function MiniProfil (props : {key: number, left: boolean, user : 
             }
         case 2:
             {
-                positionTop = [13, 13];
+                positionTop = [15, 15];
                 positionLeft = [20, 60];
                 break;
             }
@@ -56,20 +56,20 @@ export default function MiniProfil (props : {key: number, left: boolean, user : 
             }
         case 4:
             {
-                positionTop = [50, 13, 50, 85];
-                positionLeft = [5, 35, 75, 35];
+                positionTop = [50, 10, 50, 85];
+                positionLeft = [5, 40, 75, 40];
                 break;
             }
         case 5:
             {
                 positionTop = [50, 13, 30, 70, 80];
-                positionLeft = [5, 35, 70, 70, 35];
+                positionLeft = [5, 25, 65, 65, 25];
                 break;
             }
         case 6:
             {    
                 positionTop = [50, 13, 13, 50, 80, 80];
-                positionLeft = [5, 25, 60, 80, 65, 25];
+                positionLeft = [5, 15, 60, 70, 65, 15];
                 break;
             }
         default:
@@ -80,7 +80,7 @@ export default function MiniProfil (props : {key: number, left: boolean, user : 
         return <></>;
     
     return (
-        <div style={{position: 'absolute', top: `${positionTop[props.user.index]}%`, left: `${positionLeft[props.user.index]}%`, width: '20%'}}>
+        <div style={{position: 'absolute', top: `${positionTop[props.user.index]}%`, left: `${positionLeft[props.user.index]}vw`, width: '20%'}}>
             <div style={{display: 'flex', justifyContent: 'space-around', width: '100%'}}>
                 {props.left?
                 <div className="fill small">

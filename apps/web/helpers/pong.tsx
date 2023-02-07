@@ -30,11 +30,12 @@ class Game {
   public boardCanvasRef!: React.RefObject<HTMLCanvasElement>;
   public boardCanvas!: HTMLCanvasElement | null;
   public boardContext!: CanvasRenderingContext2D | null;
+  public ballWidth! : number;
 
   public board!: Board;
   public countUpdate: number = 0;
   public static point: number = 0;
-  public static live: number = 10;
+  public static live: number = 3;
   public ball!: Ball;
   public player: Racket[] = [];
   public cible!: Target;
@@ -45,8 +46,8 @@ class Game {
   public static socket : any;
   public static scoreMax : number = 10;
   public static changeLife :  (index : number) => void;
-  public static width : number | undefined = 0;
-  public static height : number | undefined = 0;
+ 
+
   
 
   constructor(number_player:number, position:number, private router:NextRouter, changeLife : (index : number) => void) {
@@ -68,7 +69,7 @@ class Game {
         this.refresh(state);
       });
     }*/
-    this.boardType = 2;
+    this.boardType = number_player;
     Game.position = position;
     Game.changeLife = changeLife;
   }
@@ -90,51 +91,12 @@ class Game {
     return points;
   }
 
-  refresh(state: any) {
-    if (!this.boardType) {
-      return ;
-    }
-    if (this.boardType == Form.REC) {
-      this.player = this.updatePlayer(state.players, [
-        this.board.wall[0],
-        this.board.wall[2]
-      ]);
-    } else {
-      this.player = this.updatePlayer(state.players, this.board.wall);
-    }
-    if (this.boardType == Form.REC) {
-      this.ball = new Ball (this.createRegularPolygon(new Point(state.ball.point.x, state.ball.point.y), 10, 4), this.player);
-    } else {
-      this.ball = new Ball (this.createRegularPolygon(new Point(state.ball.point.x, state.ball.point.y), 30, this.boardType), this.player);
-    }
-    this.ball.speed = new Vector(state.ball.dir.x, state.ball.dir.y);
-  }
 
-  updatePlayer(player: PlayerInterface[], wall: Wall[]) {
-    let racket: Racket[] = [];
-    for (let i = 0; i < wall.length; i++) {
-      let wallDir = wall[i].point[0].vectorTo(wall[i].point[2]).normalized();
-      let wallPerp = wallDir.perp().normalized();
-      let racketCenter = player[i].point;
-      let p3 = new Point(
-        racketCenter.x - wallDir.x * 40,
-        racketCenter.y - wallDir.y * 40
-      );
-      let p0 = new Point(
-        racketCenter.x + wallDir.x * 40,
-        racketCenter.y + wallDir.y * 40
-      );
-      let p1 = new Point(p0.x + wallPerp.x * 10, p0.y + wallPerp.y * 10);
-      let p2 = new Point(p3.x + wallPerp.x * 10, p3.y + wallPerp.y * 10);
-      if (this.player === undefined)
-        racket.push(new Racket(i, [p0, p1, p2, p3], this.color[i]));
-      else racket.push(new Racket(i, [p0, p1, p2, p3], this.player[i].color));
-      racket[i].hp = player[i].hp;
-    }
-    return racket;
-  }
+
+  
 
   createRacket(isSolo: boolean, wall: Wall[]) {
+    this.ballWidth = this.board.wallSize * 0.00625;
     if (isSolo) {
       return [
         new Racket(
@@ -150,19 +112,19 @@ class Game {
         let wallPerp = wallDir.perp().normalized();
         let wallCenter = wall[i].center();
         let racketCenter = new Point(
-          wallCenter.x + wallPerp.x * 5,
-          wallCenter.y + wallPerp.y * 5
+          wallCenter.x + wallPerp.x * 10,
+          wallCenter.y + wallPerp.y * 10
         );
         let p3 = new Point(
-          racketCenter.x - wallDir.x * 40,
-          racketCenter.y - wallDir.y * 40
+          racketCenter.x - wallDir.x * (this.board.wallSize * 0.05 ),
+          racketCenter.y - wallDir.y * (this.board.wallSize * 0.05 )
         );
         let p0 = new Point(
-          racketCenter.x + wallDir.x * 40,
-          racketCenter.y + wallDir.y * 40
+          racketCenter.x + wallDir.x * (this.board.wallSize * 0.05),
+          racketCenter.y + wallDir.y * (this.board.wallSize * 0.05)
         );
-        let p1 = new Point(p0.x + wallPerp.x * 10, p0.y + wallPerp.y * 10);
-        let p2 = new Point(p3.x + wallPerp.x * 10, p3.y + wallPerp.y * 10);
+        let p1 = new Point(p0.x + wallPerp.x * (this.ballWidth), p0.y + wallPerp.y * (this.ballWidth));
+        let p2 = new Point(p3.x + wallPerp.x * (this.ballWidth), p3.y + wallPerp.y * (this.ballWidth ));
         if (this.player.length === 0)
           racket.push(new Racket(i, [p0, p1, p2, p3], this.color[i]));
         else racket.push(new Racket(i, [p0, p1, p2, p3], this.player[i].color));
@@ -186,15 +148,16 @@ class Game {
     this.boardCanvas = this.boardCanvasRef.current;
     if (!this.boardCanvas) return;
     this.boardContext = this.boardCanvas.getContext("2d");
-    this.boardCanvas.width = window.innerWidth * 0.5;
-    this.boardCanvas.height = window.innerHeight * 0.5;
+    this.boardCanvas.width = window.innerWidth * 0.6;
+    this.boardCanvas.height = (window.innerWidth * 0.6) * (1 / 2);
     this.board = new Board(this.boardType, this.boardCanvas);
+    this.ballWidth = this.board.wallSize * 0.00625;
     if (this.boardType != Form.REC) {
       this.player = this.createRacket(this.isSolo, this.board.wall);
       this.ball = new Ball(
         this.createRegularPolygon(
           this.board.board.center(),
-          30,
+          this.ballWidth,
           this.boardType
         ),
         this.player
@@ -208,8 +171,8 @@ class Game {
         this.createRect(
           this.board.board.center().x,
           this.board.board.center().y,
-          10,
-          10
+          this.ballWidth,
+          this.ballWidth
         ),
         this.player
       );
@@ -234,12 +197,15 @@ class Game {
   }
 
   updateGame() {
-    this.boardCanvas!.width = window.innerWidth * 0.5;
-    this.boardCanvas!.height = window.innerHeight * 0.5;
+
+    this.boardCanvas!.width = window.innerWidth * 0.6;
+    this.boardCanvas!.height = (window.innerWidth * 0.6) * (1 / 2);
+  
+    let tmp = this.ballWidth;
     this.board = new Board(this.boardType, this.boardCanvas);
+
     if (this.boardType != Form.REC) {
       this.player = this.createRacket(this.isSolo, this.board.wall);
-    
     } else {
       this.player = this.createRacket(this.isSolo, [
         this.board.wall[0],
@@ -255,45 +221,43 @@ class Game {
           20
         )
       );
-    //this.init(this.boardCanvasRef);
+
+      if (this.ballWidth !== tmp)
+      {
+        if (this.boardType !== Form.REC)
+        {
+          this.ball = new Ball(
+            this.createRegularPolygon(
+              this.ball.center(),
+              this.ballWidth,
+              this.boardType
+            ),
+            this.player
+          );
+        }
+        else
+        {
+          this.ball = new Ball(
+            this.createRect(
+              this.ball.center().x,
+              this.ball.center().y,
+              this.ballWidth,
+              this.ballWidth
+            ),
+            this.player
+          );
+        }
+      }
+
 
     if (!this.boardType) {
       return ;
     }
-    /*for (let p of this.player) {
-      if (p.hp == 0) {
-        if (this.boardType == Form.REC) {
-          this.boardType = Form.HEX;
-          //return ;  
-        } else {
-          this.player.splice(p.index, 1);
-          for (let i = 0; i < this.player.length; i++) {
-            if (this.player[i].index > p.index) {
-              this.player[i].index--;
-            }
-          }
-          this.boardType--;
-        }
-        this.init(this.boardCanvasRef);
-      }
-    }*/
 
     this.boardContext!.fillStyle = "#666666";
     this.board.board.draw(this.boardContext, "#1e1e1e");
     this.boardContext!.font = "14px sherif";
     this.boardContext!.fillStyle = "#fff";
-    /*this.boardContext!.fillText(
-      Math.round(
-        this.countUpdate / Math.round((Date.now() - this.start) / 1000)
-      ) +
-        " Print from class Board : " +
-        this.boardCanvas!.width +
-        " " +
-        this.boardCanvas!.height,
-      0,
-      10
-    );
-        */
 
 
 
@@ -335,6 +299,7 @@ class Game {
 class Board {
   public board!: Entity;
   public wall!: Wall[];
+  public wallSize!: number;
 
   constructor(boardType: number, canvas: HTMLCanvasElement | null) {
     let height = 0;
@@ -343,11 +308,12 @@ class Board {
       height = canvas!.height / 4;
       size = 0.5;
     }
+    this.wallSize = Math.min(canvas!.width * size, canvas!.height * size);
     if (boardType != Form.REC)
       this.board = new Entity(
         this.createRegularPolygon(
           new Point(0, height),
-          Math.min(canvas!.width * size, canvas!.height * size),
+          this.wallSize,
           boardType
         )
       );
