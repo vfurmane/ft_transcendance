@@ -2,13 +2,13 @@ import { GameState, Form, Vector, Point, Entity, Wall, Board } from 'types';
 
 export class Game {
   public boardCanvas = {
-    width: 640,
-    height: 480,
+    width: 1000,
+    height: 500,
   };
   public boardType: number = Form.REC;
   public board!: Board;
   public countUpdate = 0;
-  public static broadcaster: any;
+  public broadcaster: any;
   public ball!: Ball;
   public player: Racket[] = [];
   public start = Date.now();
@@ -17,7 +17,7 @@ export class Game {
 
   constructor(playerNumber: number, broadcaster: any) {
     this.boardType = playerNumber;
-    Game.broadcaster = broadcaster;
+    this.broadcaster = broadcaster;
     this.init();
   }
 
@@ -253,7 +253,7 @@ export class Ball extends Entity {
       dir.x * this.defaultSpeed,
       dir.y * this.defaultSpeed,
     );
-    Game.broadcaster.emit('refresh', game.getState(), Date.now());
+    game.broadcaster.emit('refresh', game.getState(), Date.now());
   }
 
   update(

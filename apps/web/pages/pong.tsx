@@ -204,8 +204,8 @@ class Game {
     const context = this.boardCanvas.getContext("2d");
     if (!context) return;
     this.boardContext = context;
-    this.boardCanvas.width = 640; //window.innerWidth * 0.9;
-    this.boardCanvas.height = 480; //window.innerHeight * 0.9;
+    this.boardCanvas.width = 1000; //window.innerWidth * 0.9;
+    this.boardCanvas.height = 500; //window.innerHeight * 0.9;
     this.board = new Board(this.boardType, this.boardCanvas);
     if (this.boardType != Form.REC) {
       this.player = this.createRacket(this.board.wall);
@@ -251,8 +251,8 @@ class Game {
   }
 
   updateGame(): void {
-    this.boardCanvas.width = 640; //window.innerWidth * 0.9;
-    this.boardCanvas.height = 480; //window.innerHeight * 0.9;
+    this.boardCanvas.width = 1000; //window.innerWidth * 0.9;
+    this.boardCanvas.height = 500; //window.innerHeight * 0.9;
     const time = Math.round(Date.now() - this.start);
 
     if (!this.boardType) {

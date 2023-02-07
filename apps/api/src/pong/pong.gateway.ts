@@ -214,7 +214,7 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
     if (this.room_id?.length) {
       for (const room of this.room_id) {
         const count = (await this.server.in(room).fetchSockets()).length;
-        if (count < 6) {
+        if (count < 2) {
           client.join(room);
           client.data.room = room;
           client.data.position = count;
@@ -230,13 +230,13 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
               });
             });
             this.games.set(room, [new Game(2, this.server.in(room)), list]);
-            this.room_id.splice(this.room_id.indexOf(room), 1);
+            this.room_id.splice(this.room_id.indexOf(room), 1); // pop the room out of the list
             return 'Launched game for room ' + room;
           }
           return 'Joined room of id ' + room + ' at position ' + count;
         }
       }
-      const num = (Number(this.room_id.at(-1)) + 1).toString();
+      const num = (Number(this.room_id.at(-1)) + 1).toString(); // change to a random URI
       this.room_id.push(num);
       client.join(num);
       client.data.room = num;
