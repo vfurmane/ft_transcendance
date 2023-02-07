@@ -11,7 +11,6 @@ import refuse from "../../public/crossRed.png";
 
 export default function UserEntity(props: {
   user: User;
-  key: number;
   index: number;
   option: { del?: boolean; accept?: boolean; ask: boolean };
   small: boolean;

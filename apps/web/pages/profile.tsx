@@ -32,7 +32,7 @@ export default function Profil(): JSX.Element {
   const [openConfigProfil, setOpenConfigProfil] = useState(false);
   const [configProfil, setConfigProfil] = useState(<></>);
   const [matchHistory, setMatchHistory] = useState([initMatch]);
-  const [listOfMatch, setListOfMatch] = useState([<></>]);
+  const [listOfMatch, setListOfMatch] = useState<JSX.Element[]>([]);
 
   /*======for close topBar component when click on screen====*/
   const [openToggle, setOpenToggle] = useState(false);
@@ -95,7 +95,13 @@ export default function Profil(): JSX.Element {
   useEffect(() => {
     const tmp: JSX.Element[] = [];
     for (let i = 0; i < matchHistory.length; i++) {
-      tmp.push(<MatchEntity match={matchHistory[i]} user={user} key={i} />);
+      tmp.push(
+        <MatchEntity
+          match={matchHistory[i]}
+          user={user}
+          key={matchHistory[i].id}
+        />
+      );
     }
     setListOfMatch([...tmp]);
 
