@@ -12,7 +12,6 @@ import playButtonStyles from "styles/playButton.module.scss";
 import textStyles from "styles/text.module.scss";
 import styles from "styles/home.module.scss";
 import { useRouter } from "next/router";
-import { useWebsocketContext } from "../components/Websocket";
 
 function Home(): JSX.Element {
   const friendListRef = useRef([<></>]);
@@ -27,16 +26,6 @@ function Home(): JSX.Element {
 
   const prevIndexOfUserRef = useRef(-1);
   const prevSetterUsermenuRef = useRef(setterInit);
-
-  const websockets = useWebsocketContext();
-
-  useEffect(() => {
-    if (websockets.general?.connected) {
-      console.error("General is connected");
-    } else {
-      console.error("Websocket error on general");
-    }
-  }, [websockets.general?.connected]);
 
   /*======for close topBar component when click on screen====*/
   const [openToggle, setOpenToggle] = useState(false);
@@ -103,7 +92,7 @@ function Home(): JSX.Element {
         Authorization: "Bearer " + localStorage.getItem("access_token"),
       },
     }).catch(function (error) {
-      console.log(
+      console.error(
         "Il y a eu un problème avec l'opération fetch : " + error.message
       );
     });
@@ -153,7 +142,7 @@ function Home(): JSX.Element {
         }
       })
       .catch(function (error) {
-        console.log(
+        console.error(
           "Now that's embarassing... there has been an issue while fetching data : " +
             error.message
         );

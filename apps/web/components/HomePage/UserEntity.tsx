@@ -38,13 +38,12 @@ export default function UserEntity(props: {
       .then(function (response) {
         response.json().then((res) => {
           if (res === 1) {
-            console.log("validation succes");
             setAccept(true);
           }
         });
       })
       .catch(function (error) {
-        console.log(
+        console.error(
           "Il y a eu un problème avec l'opération fetch : " + error.message
         );
       });

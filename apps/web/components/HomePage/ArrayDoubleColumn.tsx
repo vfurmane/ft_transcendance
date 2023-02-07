@@ -41,7 +41,7 @@ export default function ArrayDoubleColumn(props: {
         );
         setLeaderBoardList([...tmp]);
       })
-      .catch((error) => console.log(`error fetch : ${error.message}`));
+      .catch((error) => console.error(`error fetch : ${error.message}`));
   }, [props.handleClick]);
 
   function prevClick(): void {
