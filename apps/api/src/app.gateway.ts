@@ -36,7 +36,9 @@ export class AppGateway {
       userId: client.data.id,
     });
     this.cacheManager.set(`user:${currentUser.sub}`, currentUser, 0);
-    this.logger.log(`${currentUser.sub} connected`);
+    this.logger.log(
+      `'${currentUser.sub}' (${currentUser.name}) connected on socket '${client.id}'`,
+    );
   }
 
   async handleDisconnect(client: Socket): Promise<void> {
@@ -53,7 +55,9 @@ export class AppGateway {
             type: 'offline',
             userId: client.data.id,
           });
-          this.logger.log(`${client.data.id} disconnected`);
+          this.logger.log(
+            `'${client.data.id}' (${client.data.name}) disconnected from socket '${client.id}'`,
+          );
         }
       });
   }
