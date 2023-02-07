@@ -87,7 +87,7 @@ export default function Profil(): JSX.Element {
           setMatchHistory(data);
         })
         .catch((error) => {
-          console.log(`problem with fetch : ${error.message}`);
+          console.error(`problem with fetch : ${error.message}`);
         });
     }
   }, [router.query, UserState]);
@@ -157,18 +157,11 @@ export default function Profil(): JSX.Element {
         Authorization: "Bearer " + localStorage.getItem("access_token"),
       },
       body: JSON.stringify(data),
-    })
-      .then(function (response) {
-        response.json().then((res) => {
-          if (res === 1) console.log("friend add");
-          else console.log("friend allready add");
-        });
-      })
-      .catch(function (error) {
-        console.log(
-          "Il y a eu un problème avec l'opération fetch : " + error.message
-        );
-      });
+    }).catch(function (error) {
+      console.error(
+        "Il y a eu un problème avec l'opération fetch : " + error.message
+      );
+    });
   }
 
   //temporary before get the real data

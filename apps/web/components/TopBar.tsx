@@ -89,7 +89,7 @@ function TopBar(props: propsTopBar): JSX.Element {
           });
         })
         .catch(function (error) {
-          console.log(
+          console.error(
             "Il y a eu un problème avec l'opération fetch : " + error.message
           );
         });
