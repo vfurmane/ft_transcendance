@@ -31,9 +31,10 @@ export class AppGateway {
     if (!currentUser) throw new UnauthorizedException('Invalid token');
     client.data = { id: currentUser.sub, name: currentUser.name };
     client.join(`user_${currentUser.sub}`);
-    this.server
-      .to(`user_${currentUser.sub}`)
-      .emit(JSON.stringify({ event_type: 'connected' }));
+    this.server.to(`user_${currentUser.sub}`).emit('user_status_update', {
+      type: 'online',
+      userId: client.data.id,
+    });
     this.cacheManager.set(`user:${currentUser.sub}`, currentUser, 0);
     this.logger.log(`${currentUser.sub} connected`);
   }
@@ -48,9 +49,10 @@ export class AppGateway {
             .length === 0
         ) {
           this.cacheManager.del(`user:${client.data.id}`);
-          this.server
-            .to(`user_${client.data.id}`)
-            .emit(JSON.stringify({ event_type: 'disconnected' }));
+          this.server.to(`user_${client.data.id}`).emit('user_status_update', {
+            type: 'offline',
+            userId: client.data.id,
+          });
           this.logger.log(`${client.data.id} disconnected`);
         }
       });
