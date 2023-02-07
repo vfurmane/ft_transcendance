@@ -1,4 +1,11 @@
-import { WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
+import {
+  ConnectedSocket,
+  MessageBody,
+  SubscribeMessage,
+  WebSocketGateway,
+  WebSocketServer,
+  WsResponse,
+} from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import {
   CACHE_MANAGER,
@@ -10,6 +17,8 @@ import {
 import { Cache } from 'cache-manager';
 import { AuthService } from './auth/auth.service';
 import { HttpExceptionTransformationFilter } from './common/filters/HttpExceptionFilter.filter';
+import { SpiedUserDto } from './spied-user.dto';
+import { User } from 'types';
 
 @WebSocketGateway()
 @UseFilters(HttpExceptionTransformationFilter)
@@ -60,5 +69,38 @@ export class AppGateway {
           );
         }
       });
+  }
+
+  @SubscribeMessage('subscribe_user')
+  async subscribeUser(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() spiedUserDto: SpiedUserDto,
+  ): Promise<WsResponse<unknown>> {
+    this.logger.log(
+      `'${client.data.id}' (${client.data.name}) is spying on '${spiedUserDto.userId}'`,
+    );
+    client.join(`user_${spiedUserDto.userId}`);
+    const user = await this.cacheManager.get<User>(
+      `user:${spiedUserDto.userId}`,
+    );
+    return {
+      event: 'user_status_update',
+      data: {
+        type: user ? 'online' : 'offline',
+        userId: spiedUserDto.userId,
+        name: user?.name,
+      },
+    };
+  }
+
+  @SubscribeMessage('unsubscribe_user')
+  unsubscribeUser(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() spiedUserDto: SpiedUserDto,
+  ): void {
+    this.logger.log(
+      `'${client.data.id}' (${client.data.name}) is not spying on '${spiedUserDto.userId}' anymore`,
+    );
+    client.leave(`user_${spiedUserDto.userId}`);
   }
 }
