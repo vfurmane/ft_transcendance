@@ -6,7 +6,6 @@ import UserEntity from "./UserEntity";
 export default function LeaderboardEntity(props: {
   user: User;
   index: number;
-  key: number;
   handleClick: (e: {
     index: number;
     openMenu: boolean;
@@ -50,7 +49,6 @@ export default function LeaderboardEntity(props: {
     <div className={leaderBoardStyles.leaderBoardContainer}>
       {div1}
       <UserEntity
-        key={props.user.rank}
         small={true}
         option={{ del: false, accept: true, ask: false }}
         user={props.user}
