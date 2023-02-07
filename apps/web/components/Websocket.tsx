@@ -66,7 +66,8 @@ export default function Websocket({ children }: WebsocketProps): JSX.Element {
     if (userState.id) {
       const general = OpenSocket("/");
       const conversations = OpenSocket("/conversations");
-      const pong = OpenSocket("/pong");
+      // const pong = OpenSocket("/pong");
+      const pong = null;
       setSocketInstances({
         general: general,
         conversations: conversations,
