@@ -83,7 +83,6 @@ function TopBar(props: propsTopBar): JSX.Element {
       .then(() => {
         clearTokens();
         dispatch(setUserState(initUser));
-        router.push("/login");
       })
       .catch((error) => console.error(error));
   }
