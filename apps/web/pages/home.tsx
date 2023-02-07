@@ -22,7 +22,7 @@ function Home(): JSX.Element {
   const [openPlayButton, setOpenPlayButton] = useState(false);
   const [openUserMenu, setOpenUserMenu] = useState(false);
   const [indexOfUser, setIndexOfUser] = useState(-1);
-  const [friendList, setFriendList] = useState([]);
+  const [friendList, setFriendList] = useState<JSX.Element[]>([]);
 
   const prevIndexOfUserRef = useRef(-1);
   const prevSetterUsermenuRef = useRef(setterInit);
