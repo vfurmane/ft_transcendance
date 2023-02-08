@@ -35,7 +35,7 @@ class Game {
   public board!: Board;
   public countUpdate: number = 0;
   public static point: number = 0;
-  public static live: number = 1;
+  public static live: number = 3;
   public ball!: Ball;
   public player: Racket[] = [];
   public cible!: Target;
@@ -51,24 +51,6 @@ class Game {
   
 
   constructor(number_player:number, position:number, private router:NextRouter, changeLife : (index : number) => void) {
-    /*if (typeof window !== 'undefined') {
-      Game.socket = io("/pong", {
-        auth: {
-          token: localStorage.getItem('access_token'),
-        }
-      });
-      Game.socket.on('disconnect', () => {
-        console.error('Fin de partie')
-        //this.router.replace('/')
-      })
-      Game.socket.on('refresh', (state:GameState) => {
-        if (!this.board) {
-          return ;
-        }
-        console.log("=-=-=-=-=-=REFRESHING=-=-=-=-=-=")
-        this.refresh(state);
-      });
-    }*/
     this.boardType = number_player;
     Game.position = position;
     Game.changeLife = changeLife;
@@ -90,10 +72,6 @@ class Game {
     }
     return points;
   }
-
-
-
-  
 
   createRacket(isSolo: boolean, wall: Wall[]) {
     this.ballWidth = this.board.wallSize * 0.00625;
@@ -197,13 +175,10 @@ class Game {
   }
 
   updateGame() {
-
     this.boardCanvas!.width = window.innerWidth * 0.6;
     this.boardCanvas!.height = (window.innerWidth * 0.6) * (1 / 2);
-  
     let tmp = this.ballWidth;
     this.board = new Board(this.boardType, this.boardCanvas);
-
     if (this.boardType != Form.REC) {
       this.player = this.createRacket(this.isSolo, this.board.wall);
     } else {
@@ -221,7 +196,6 @@ class Game {
           20
         )
       );
-
       if (this.ballWidth !== tmp)
       {
         if (this.boardType !== Form.REC)
@@ -248,18 +222,13 @@ class Game {
           );
         }
       }
-
-
     if (!this.boardType) {
       return ;
     }
-
     this.boardContext!.fillStyle = "#666666";
     this.board.board.draw(this.boardContext, "#1e1e1e");
     this.boardContext!.font = "14px sherif";
     this.boardContext!.fillStyle = "#fff";
-
-
 
     // Draw the net (Line in the middle)
     if (this.player.length === 2)
@@ -767,34 +736,7 @@ class Racket extends Entity {
         this.moveTo(this.speed);
         Game.socket.emit('down');
       }
-   } //else {
-    //   if (
-    //     this.center().vectorTo(ball.point[0]).norm() >
-    //     new Point(
-    //       this.center().x + this.dir.x * this.defaultSpeed,
-    //       this.center().y + this.dir.y * this.defaultSpeed
-    //     )
-    //       .vectorTo(ball.point[0])
-    //       .norm()
-    //   ) {
-    //     this.speed = new Vector(
-    //       this.dir.x * this.defaultSpeed,
-    //       this.dir.y * this.defaultSpeed
-    //     );
-    //     this.moveTo(this.speed);
-    //   } else {
-    //     this.speed = new Vector(
-    //       -this.dir.x * this.defaultSpeed,
-    //       -this.dir.y * this.defaultSpeed
-    //     );
-    //     this.moveTo(this.speed);
-    //   }
-    // }
-    // for (let wall of walls) {
-    //   if (this.sat(wall)) {
-    //     this.moveTo(new Vector(-this.speed.x, -this.speed.y));
-    //   }
-    // }
+    }
   }
 }
 

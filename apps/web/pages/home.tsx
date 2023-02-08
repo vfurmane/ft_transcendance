@@ -242,7 +242,7 @@ function Home(): JSX.Element {
               style={{text:'PLAY', small: false, color:true}}
             />
           </div>
-          {openPlayButton ? (
+          {openPlayButton? (
             <div className="col-10 offset-1 offset-xl-0 offset-lg-1 col-lg-3 offset-xl-1 ">
               <div
                 className={`${playButtonStyles.playMenuContainer} d-block d-lg-none`}

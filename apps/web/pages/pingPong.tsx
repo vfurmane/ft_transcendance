@@ -4,59 +4,61 @@ import React, { useState, useRef, useEffect } from "react";
 import MiniProfil from "../components/miniProfil";
 import { useRouter } from "next/router";
 import Game from "../helpers/pong";
-import { User, Userfront } from "types";
+import { Userfront as User } from "types";
 import { initUser } from "../initType/UserInit";
-import { Loading } from "../components/Loading";
-import { Button } from "../components/Button";
 import PlayButton from "../components/HomePage/PlayButton";
 import Link from "next/link";
 import playButtonStyles from 'styles/playButton.module.scss';
 import PlayMenu from "../components/HomePage/PlayMenu";
+import Image from "next/image";
+import styles from 'styles/pingPong.module.scss';
 
 export default function PingPong(): JSX.Element {
     let router = useRouter();
-    const [user, setUser] = useState(initUser);
     const [users, setUsers] = useState([initUser]);
-    const usersRef = useRef(users);
+    const usersRef = useRef<User[]>([]);
     const canvasRef = useRef(null);
     const [intervalState, setIntervalState] = useState<NodeJS.Timer | null>(null);
-    const [MiniProfilArray, setMiniProfilArray] = useState([<></>]);
-    
+    const [MiniProfilArray, setMiniProfilArray] = useState<JSX.Element[]>([]);
     const [classement, setClassement] = useState<JSX.Element[]>([]);
     const [openPlayButton, setOpenPlayButton] = useState(false);
+    const openPlayMenuRef = useRef(openPlayButton);
+    const [openOverlay, setOpenOverlay] = useState(false);
+    const [win, setWin] = useState(false); 
 
+    /*======for close topBar component when click on screen====*/
+    const [openToggle, setOpenToggle] = useState(false);
+    const [openProfil, setOpenProfil] = useState(false);
+    const [openUserList, setOpenUserList] = useState(false);
+    const [indexOfUser, setIndexOfUser] = useState(-1);
+    const prevIndexOfUserRef = useRef(-1);
+    const prevSetterUsermenuRef = useRef< React.Dispatch<React.SetStateAction<boolean>>>(()=>{});
+    /*===========================================================*/
 
     useEffect(() => {
-        fetch(`/api/user`, {
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + localStorage.getItem('access_token'),
-            }
-        })
-            .then(function (response) {
-                return response.json();
-            })
-            .then((data) => {
-                setUser(data);
-            })
-            .catch(function (error) {
-                console.log(`probleme with fetch: ${error.message}`);
-            });
+        if (typeof router.query.users === "string") {
+            const tmp = JSON.parse(router.query.users);
+            setUsers(tmp);
+            usersRef.current = tmp;
+            setMiniProfilArray(tmp.map((e : User, i: number) => <MiniProfil key={i} left={i % 2 == 0 ? true : false} user={{ user: e, index: i }} life={Game.live} score={0} game={{ life: Game.live, score: Game.scoreMax, numOfPlayers: tmp.length }} />));
+        }
     }, []);
 
+    let game = new Game(Number(users.length), Number(router.query.position), router, changeLife);
+    //new map if a user loose
+    useEffect(() => {
+        if (canvasRef && users[0] !== initUser) {
+            game.init(canvasRef);
+            setIntervalState(setInterval(handleResize, 17, game));
+        }
+        return (() : void => {
+            if (intervalState)
+                clearInterval(intervalState);
+        })
+    }, [users]);
 
-     /*======for close topBar component when click on screen====*/
-     const [openToggle, setOpenToggle] = useState(false);
-     const [openProfil, setOpenProfil] = useState(false);
-     const [openUserList, setOpenUserList] = useState(false);
-     const [indexOfUser, setIndexOfUser] = useState(-1);
-     const prevIndexOfUserRef = useRef(-1);
 
-    const setterInit: React.Dispatch<React.SetStateAction<boolean>> = () => {
-        console.error("setterInit");
-    };
-    const prevSetterUsermenuRef = useRef(setterInit);
-
+    /*======for close topBar component when click on screen====*/
     function clickTopBarToggle(): void {
         setOpenToggle(!openToggle);
     }
@@ -76,7 +78,7 @@ export default function PingPong(): JSX.Element {
     }): void {
         e.setOpenMenu(true);
         if (
-            prevSetterUsermenuRef.current !== setterInit &&
+            prevSetterUsermenuRef.current !== (()=>{}) &&
             prevSetterUsermenuRef.current !== e.setOpenMenu
         )
             prevSetterUsermenuRef.current(false);
@@ -85,6 +87,7 @@ export default function PingPong(): JSX.Element {
         prevIndexOfUserRef.current = e.index;
     }
     /*==========================================================*/
+
 
     function close(): void {
         if (openProfil) setOpenProfil(false);
@@ -96,6 +99,9 @@ export default function PingPong(): JSX.Element {
         }
         if (openPlayButton)
             setOpenPlayButton(false);
+        
+        if (openOverlay && openPlayMenuRef.current === openPlayButton)
+            setOpenOverlay(false);
     }
 
 
@@ -103,13 +109,27 @@ export default function PingPong(): JSX.Element {
         game.updateGame();
     }
 
-    useEffect(() => {
-        const tmp = [user, user];
-        usersRef.current = tmp;
-        setUsers(tmp);
-        setMiniProfilArray(tmp.map((e, i) => <MiniProfil key={i} left={i % 2 == 0 ? true : false} user={{ user: e, index: i }} life={Game.live} score={0} game={{ life: Game.live, score: Game.scoreMax, numOfPlayers: tmp.length }} />));
-    }, [user]);
-
+    function createTrClassement(user : User, classement : JSX.Element[])
+    {
+        return (
+            <tr>
+                <td>
+                    <div style={{display:'flex'}}>
+                        <div className="fill small">
+                            <Image
+                            alt="avatar"
+                            src={`/avatar/avatar-${user.avatar_num}.png`}
+                            width={47}
+                            height={47}
+                            />
+                        </div>
+                        {user.name}
+                    </div>
+                </td>
+                <td>{usersRef.current.length - classement.length}</td>
+            </tr>
+        );
+    }
 
     function changeLife(index: number) {
         let tmp = [...MiniProfilArray];
@@ -118,21 +138,17 @@ export default function PingPong(): JSX.Element {
             if (intervalState)
                 clearInterval(intervalState);
             let temp = [...users];
-            let newClassement = [
-                <tr>
-                    <td>{temp[index].name}</td>
-                    <td>{usersRef.current.length - classement.length}</td>
-                </tr>, ...classement];
+            let newClassement = [createTrClassement(temp[index], classement), ...classement];
             setClassement(newClassement);
+            if (users.length > 2 && temp[index] === usersRef.current[0])
+                setOpenOverlay(true);
             temp.splice(index, 1);
             tmp.splice(index, 1);
             if (temp.length === 1)
             {
-                setClassement([
-                    <tr>
-                        <td>{temp[0].name}</td>
-                        <td>{usersRef.current.length - newClassement.length}</td>
-                    </tr>, ...newClassement]);
+                if (temp[0] === usersRef.current[0])
+                    setWin(true);
+                setClassement([createTrClassement(temp[0], newClassement), ...newClassement]);
                 temp = [initUser];
                 if (intervalState)
                     clearInterval(intervalState);
@@ -155,26 +171,50 @@ export default function PingPong(): JSX.Element {
         setMiniProfilArray(tmp);
     }
 
-    let game = new Game(Number(/*router.query.number_player*/users.length), Number(router.query.position), router, changeLife);
-    useEffect(() => {
-        if (canvasRef && users[0] !== initUser) {
-            game.init(canvasRef);
-            setIntervalState(setInterval(handleResize, 17, game));
-        }
-        return (() : void => {
-            if (intervalState)
-                clearInterval(intervalState);
-        })
-    }, [users]);
-
     function handleClickPlayButton(): void {
+        openPlayMenuRef.current = !openPlayButton;
         setOpenPlayButton(!openPlayButton);
       }
 
+    const buttons = (
+        <div className={styles.buttons}>        
+            <Link href={'/home'} className={styles.link}><PlayButton
+                handleClick={() => {}}
+                open={false}
+                style={{text: openPlayButton? '' : 'HOME', small:true, color:false}}
+            /></Link>
+            {openOverlay?
+                <div><PlayButton
+                    handleClick={() => {}}
+                    open={false}
+                    style={{text: openPlayButton? '' : 'continu to WATCH', small:true, color:false}}
+                /></div>: <></>
+            }
+            <Link href={''} className={styles.link}><PlayButton
+                    handleClick={handleClickPlayButton}
+                    open={openPlayButton}
+                    style={{text:openPlayButton? '' : 'PLAY AGAIN', small:true, color:true}}
+            /></Link>
+                    {openPlayButton ? (
+                    <div className="col-10 offset-1 offset-xl-0 offset-lg-1 col-lg-3 offset-xl-1 " style={{width: '80%'}}>
+                        <div className={`${playButtonStyles.playMenuContainer} d-block `}>
+                            <PlayMenu />
+                        </div>
+                    </div>
+                ) : (
+                    <></>
+                )}
+        </div>
+    );
 
 
     return (
         <div onClick={() => close()} style={{ width: "100vw", height: "100vh" }}>
+            {openOverlay? 
+            <div className="overlay">
+                <h1 className={textStyles.saira} style={{color: 'white'}}>You LOose !</h1>
+                {buttons}
+            </div> : <></>}
             <TopBar
                 openProfil={openProfil}
                 openToggle={openToggle}
@@ -193,11 +233,12 @@ export default function PingPong(): JSX.Element {
                     <span className={`textScroll ${textStyles.pixel}`}>- Pong - pOnG - poNg - PONG - pOng&nbsp;</span>
                 </div>
                 <div style={{ marginTop: users.length > 2? '25vh' : '35vh', display:'flex', justifyContent:'center'}}>
-                    <canvas ref={canvasRef} style={{ marginLeft: users.length > 2 ? '30vw' : '', border: 'solid 0px white'}}></canvas>
+                    <canvas ref={canvasRef} style={{ marginLeft: users.length > 2 ? '30vw' : ''}}></canvas>
                 </div>
             </div> :
-            <div style={{display: 'flex', alignItems: 'center', marginTop: '200px', flexDirection: 'column'}}>
-                <div style={{width: '60%', border: '1px solid white', borderRadius: '5px', overflow: 'hidden', boxShadow: '0px 0px 200px 10px rgba(236,125,125,0.2)'}}>
+            <div className={styles.afterGameContainer}>
+                <h1 className={textStyles.saira + ' ' + styles.title}>You {win? 'Win':'LOose'} !</h1>
+                <div className={styles.tableContainer}>
                     <table>
                         <thead>
                             <tr>
@@ -210,33 +251,9 @@ export default function PingPong(): JSX.Element {
                         </tbody>
                     </table>
                 </div>
-                <div style={{display: 'flex', width:'60%', justifyContent: 'center', marginTop: '30px', marginBottom: '20px'}}>
-                    
-                    <Link href={'/home'} style={{textDecoration: 'none', width: '100%'}}><PlayButton
-                        handleClick={() => {}}
-                        open={false}
-                        style={{text: openPlayButton? '' : 'HOME', small:true, color:false}}
-                    /></Link>
-                    
-                    <Link href={''} style={{textDecoration: 'none', width: '100%'}}><PlayButton
-                            handleClick={handleClickPlayButton}
-                            open={openPlayButton}
-                            style={{text:openPlayButton? '' : 'PLAY AGAIN', small:true, color:true}}
-                    /></Link>
-                            {openPlayButton ? (
-                            <div className="col-10 offset-1 offset-xl-0 offset-lg-1 col-lg-3 offset-xl-1 " style={{width: '80%'}}>
-                                <div
-                                    className={`${playButtonStyles.playMenuContainer} d-block `}
-                                >
-                                    <PlayMenu />
-                                </div>
-                            </div>
-                        ) : (
-                            <></>
-                        )}
-                    
-                </div>
+                {buttons}
             </div>}
+            
         </div>
 
     );
