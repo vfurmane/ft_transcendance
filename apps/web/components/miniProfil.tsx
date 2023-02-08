@@ -1,10 +1,8 @@
 import Image from "next/image";
-import { useSelector } from "react-redux";
-import { selectUserState } from "../store/UserSlice";
 import textStyles from 'styles/text.module.scss';
-import styles from 'styles/profil.module.scss';
+import stylesProfil from 'styles/profil.module.scss';
 import { Userfront as User } from "types";
-import { relative } from "path";
+import styles from 'styles/miniProfil.module.scss';
 
 export default function MiniProfil (props : {key: number, left: boolean, user : {user: User, index : number}, life: number, score : number, game : {life: number, score: number, numOfPlayers : number}}) {
     let hearts : string[] = [];
@@ -14,7 +12,7 @@ export default function MiniProfil (props : {key: number, left: boolean, user : 
     let lifepercent = Math.floor((props.life / props.game.life) * 100);
 
     let life = (
-        <div className={`${styles.flex_between} ${styles.statBar}`}>
+        <div className={`${stylesProfil.flex_between} ${stylesProfil.statBar}`}>
             <div
             style={{
                 height: "10px",
@@ -81,7 +79,7 @@ export default function MiniProfil (props : {key: number, left: boolean, user : 
     
     return (
         <div style={{position: 'absolute', top: `${positionTop[props.user.index]}%`, left: `${positionLeft[props.user.index]}vw`, width: '20%'}}>
-            <div style={{display: 'flex', justifyContent: 'space-around', width: '100%'}}>
+            <div className={styles.bandeauSuperior}>
                 {props.left?
                 <div className="fill small">
                     <Image
@@ -92,48 +90,22 @@ export default function MiniProfil (props : {key: number, left: boolean, user : 
                     />
                 </div> 
                 :
-                 <p
-                 style={{
-                     color: "white",
-                     fontSize: "18px",
-                     marginTop: '12px',
-                     width: 'auto'
-                 }}
-                 className={`${textStyles.saira} d-none d-xl-block`}
-                 >
+                <p className={`${textStyles.saira} ${styles.p} d-none d-xl-block`}>
                  level :
-                 <span
-                     id="level"
-                     className={textStyles.saira}
-                     style={{ fontSize: "20px", color: "white"}}
+                 <span id="level" className={textStyles.saira + ' ' + styles.span}
                  >{props.user.user.level}</span>
                  </p> }
                 <h2
-                className={`${textStyles.pixel} d-none d-lg-block`}
-                style={{
-                    color: "white",
-                    fontSize: "30px",
-                    marginTop: "7px"
-                }}
+                className={`${textStyles.pixel} ${styles.h2} d-none d-lg-block`}
                 >
                 {props.user.user.name}
                 </h2>
-
                 {props.left? 
-                <p
-                style={{
-                    color: "white",
-                    fontSize: "18px",
-                    marginTop: '12px',
-                    width: 'auto'
-                }}
-                className={`${textStyles.saira} d-none d-xl-block`}
-                >
+                <p className={`${textStyles.saira} ${styles.p} d-none d-xl-block`}>
                 level:
                 <span
                     id="level"
-                    className={textStyles.saira}
-                    style={{ fontSize: "20px", color: "white"}}
+                    className={textStyles.saira + ' ' + styles.span}
                 >{props.user.user.level}</span>
                 </p>
                 :
@@ -148,7 +120,7 @@ export default function MiniProfil (props : {key: number, left: boolean, user : 
             </div>
             <div className="d-none d-lg-block">
                 <div style={{ width: "100%" }}>
-                    <div className={styles.flex_between}>
+                    <div className={stylesProfil.flex_between}>
                         <p className={textStyles.saira} style={{ color: "white" }}>
                         {props.user.user.victory} victory
                         </p>
@@ -156,7 +128,7 @@ export default function MiniProfil (props : {key: number, left: boolean, user : 
                         {props.user.user.defeat} defeat
                         </p>
                     </div>
-                    <div className={`${styles.flex_between} ${styles.statBar}`}>
+                    <div className={`${stylesProfil.flex_between} ${stylesProfil.statBar}`}>
                         <div
                         style={{
                             height: "3px",
@@ -180,12 +152,12 @@ export default function MiniProfil (props : {key: number, left: boolean, user : 
             </div>
             <div style={{marginTop: '30px'}} className="d-none d-md-block">
                 {props.left?
-                <div style={{display: 'flex', margin: '10px', justifyContent: 'space-between', alignItems: 'center'}}>
+                <div className={styles.scoreNLife}>
                     <div style={{width: '75%'}}>{props.game.life > 10? life : hearts}</div>
-                    {props.game.numOfPlayers <= 2? <p className={textStyles.laquer} style={{color: 'white', fontSize:`${20 * (1 + (((props.score * 100)/ props.game.score) / 100) * 2)}px`, width: '15%', position: 'absolute', right: '0px'}}>{props.score}</p>:<></>}
+                    {props.game.numOfPlayers <= 2? <p className={textStyles.laquer + ' ' + styles.score} style={{fontSize:`${20 * (1 + (((props.score * 100)/ props.game.score) / 100) * 2)}px`}}>{props.score}</p>:<></>}
                 </div> : 
-                <div style={{display:'flex', margin: '10px', justifyContent: 'space-between', alignItems: 'center'}}>
-                    {props.game.numOfPlayers <= 2? <p className={textStyles.laquer} style={{color: 'white', fontSize:`${20 * (1 + (((props.score * 100)/ props.game.score) / 100) * 2)}px`, width: '15%', position: 'absolute'}}>{props.score}</p> : <></>}
+                <div className={styles.scoreNLife}>
+                    {props.game.numOfPlayers <= 2? <p className={textStyles.laquer + ' ' + styles.score} style={{fontSize:`${20 * (1 + (((props.score * 100)/ props.game.score) / 100) * 2)}px`}}>{props.score}</p> : <></>}
                     <div style={{width: '75%', marginLeft: '25%'}}>{props.game.life > 10? life : hearts}</div>
                 </div> }
             </div>

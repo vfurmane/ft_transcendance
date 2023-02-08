@@ -1,0 +1,42 @@
+.bandeauSuperior
+{
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+}
+
+.p
+{
+    color: white;
+    font-size: 18px;
+    margin-top: 12px;
+    width: auto;
+}
+
+.span
+{
+    font-size: 20px;
+    color: white;
+}
+
+.h2
+{
+    color: white;
+    font-size: 20px;
+    margin-top: 7px; 
+}
+
+.scoreNLife
+{
+    display: flex;
+    margin: 10px;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.score
+{
+    color: white;
+    width: 15%;
+    position: absolute;
+}
