@@ -36,7 +36,7 @@ function Home(): JSX.Element {
     } else {
       console.error("Websocket error on general");
     }
-  });
+  }, [websockets.general?.connected]);
 
   /*======for close topBar component when click on screen====*/
   const [openToggle, setOpenToggle] = useState(false);
