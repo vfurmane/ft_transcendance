@@ -78,6 +78,7 @@ export class ConversationsGateway implements OnGatewayConnection {
   getConversations(
     @ConnectedSocket() client: Socket,
   ): Promise<ConversationsDetails> {
+    console.error("Getting conversations")
     return this.conversationsService.getConversations(client.data as User);
   }
 
@@ -86,6 +87,7 @@ export class ConversationsGateway implements OnGatewayConnection {
     @ConnectedSocket() client: Socket,
     @MessageBody() newConversation: createConversationDto,
   ): Promise<Conversation> {
+    console.log("newConversation")
     const { conversation, newConversationMessage } =
       await this.conversationsService.createConversation(
         newConversation,
@@ -119,6 +121,7 @@ export class ConversationsGateway implements OnGatewayConnection {
     @ConnectedSocket() client: Socket,
     @MessageBody() { id }: isUUIDDto,
   ): Promise<Message[]> {
+    console.error("Fetching message")
     return this.conversationsService.getMessages(client.data as User, id);
   }
 

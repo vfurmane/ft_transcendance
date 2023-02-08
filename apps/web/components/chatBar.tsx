@@ -43,7 +43,7 @@ export default function ChatBar(): JSX.Element {
     {
       websockets.conversations?.off("newMessage")
     })
-  },[websockets.conversations?.connected, conversationToOpen, visibility])
+  },[conversationToOpen, visibility])
 
   if (!visibility)
   {
@@ -63,7 +63,9 @@ export default function ChatBar(): JSX.Element {
         <aside className={textStyles.laquer} onClick={ (e) => {
           setVisibility(false); setConversationIdProp({userId: "", userName: ""}); } 
         }>X</aside>
-        <Chat conversation={conversationIdProp} />
+        <section className={styles.conversationListContainer}>
+          <Chat conversation={conversationIdProp} />
+        </section>
       </div>
     )
   }
