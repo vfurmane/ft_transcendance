@@ -7,7 +7,7 @@ import {
   Entity,
   Wall,
   Board,
-  ServerCanvas
+  ServerCanvas,
 } from "types";
 import React, { useRef, useEffect } from "react";
 import { NextRouter, useRouter } from "next/router";
@@ -35,6 +35,7 @@ class Game {
   public static position: number;
   public static socket: Socket<DefaultEventsMap, DefaultEventsMap>;
   public static count: number;
+  public await = true;
 
   constructor(
     number_player: number | undefined,
@@ -52,6 +53,11 @@ class Game {
     } else {
       Game.position = 0;
     }
+  }
+
+  setWebsocket(socket: Socket<DefaultEventsMap, DefaultEventsMap>): void {
+    Game.socket = socket;
+    Game.socket.emit("ready");
   }
 
   createRegularPolygon(point: Point, side: number, n: number): Point[] {
@@ -180,8 +186,9 @@ class Game {
   init(ref: React.RefObject<HTMLCanvasElement> | undefined): void {
     if (ref === undefined) return;
     if (!Game.isSolo) {
-      Game.socket.on("refresh", (state: GameState, time : number) => {
+      Game.socket.on("refresh", (state: GameState, time: number) => {
         console.log(time);
+        this.await = false;
         Game.count = 0;
         if (!this.board) {
           return;
@@ -250,6 +257,7 @@ class Game {
   }
 
   updateGame(): void {
+    if (this.await) return;
     this.boardCanvas.width = 1000; //window.innerWidth * 0.9;
     this.boardCanvas.height = 500; //window.innerHeight * 0.9;
     const time = Math.round(Date.now() - this.start);
@@ -443,7 +451,6 @@ class Ball extends Entity {
     walls: Wall[],
     board: Board,
     timeRatio: number
-
   ): void {
     this.nextCollision.wall -= 1 * timeRatio;
     this.nextCollision.racket -= 1 * timeRatio;
@@ -452,7 +459,6 @@ class Ball extends Entity {
       this.nextCollision.wall > this.nextCollision.racket &&
       this.nextCollision.racket < 1
     ) {
-
       for (const racket of rackets) {
         if (this.sat(racket)) {
           let angle = 0;
@@ -480,16 +486,12 @@ class Ball extends Entity {
             norm.y * this.defaultSpeed
           );
           this.moveTo(this.speed, timeRatio);
-          console.log("racket :", this.speed)
           this.calcNextCollision(rackets, walls, null);
           return;
         }
       }
     }
     if (this.nextCollision.wall <= 0) {
-      console.log(this.point[0].x + "|" + this.point[0].y)
-      console.log("PLAYER:")
-      console.log(rackets[0].point[0].x + "  |  " +  rackets[0].point[0].y)
       const newCoords = new Point(
         this.point[0].x - this.speed.x * this.nextCollision.wall,
         this.point[0].y - this.speed.y * this.nextCollision.wall
@@ -540,7 +542,6 @@ class Ball extends Entity {
           this.goToRandomPlayer(rackets);
         }
       }
-      console.log("wall :", this.speed)
       this.calcNextCollision(rackets, walls, null);
       return;
     }
@@ -614,7 +615,8 @@ const Canvas = (): React.DetailedHTMLProps<
   useEffect(() => {
     if (canvasRef) {
       if (websockets.pong?.connected) {
-        Game.socket = websockets.pong;
+        game.setWebsocket(websockets.pong);
+        console.log("LAUNCHING GAME AT ", Date.now());
         game.init(canvasRef);
         const intervalId = setInterval(handleResize, 4, game);
         return (): void => {

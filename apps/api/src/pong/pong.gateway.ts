@@ -2,10 +2,8 @@ import { Server, Socket } from 'socket.io';
 import {
   OnGatewayConnection,
   OnGatewayDisconnect,
-  OnGatewayInit,
   SubscribeMessage,
   WebSocketGateway,
-  WsResponse,
   ConnectedSocket,
   WebSocketServer,
 } from '@nestjs/websockets';
@@ -26,14 +24,14 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer() server!: Server;
   room_id!: string[];
 
-  games!: Map<string, [Game, Array<string>]>;
+  games!: Map<string, [Game, Array<{ id: string; ready: boolean }>]>;
 
   constructor(private readonly authService: AuthService) {
     this.room_id = [];
     this.games = new Map();
   }
 
-  async handleConnection(client: Socket) {
+  async handleConnection(client: Socket): Promise<void | string> {
     console.log('SOMEBODY IS TRYING TO CONNECT');
     const currentUser = this.authService.verifyUserFromToken(
       client.handshake.auth.token,
@@ -54,10 +52,10 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
     console.log('YOU ARE ' + currentUser.name + ' OF ID ' + client.data.id);
     if (this.games) {
       this.games.forEach((value, key) => {
-        value[1].forEach((id) => {
-          if (id === client.data.id) {
+        value[1].forEach((user) => {
+          if (user.id === client.data.id) {
             client.data.room = key;
-            client.data.position = value[1].indexOf(id);
+            client.data.position = value[1].indexOf(user);
             client.join(key);
             console.log('Reconnected to the game !');
             return 'Connection restored';
@@ -68,7 +66,7 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
     return 'Connection established';
   }
 
-  async handleDisconnect(client: Socket) {
+  async handleDisconnect(client: Socket): Promise<void> {
     if (!client.data.room) {
       console.log(client.data.name + ' WAS NOT IN A ROOM');
       return;
@@ -88,11 +86,11 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
       let i = 0;
       socketWaiting.forEach((socket) => (socket.data.position = i++));
     }
-    console.log(client.data.name + '  DISCONNECTED');
+    console.log(client.data.name + ' DISCONNECTED');
   }
 
   @Interval(17)
-  update() {
+  update(): void {
     if (!this.games || this.games === undefined) {
       return;
     }
@@ -112,6 +110,34 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
     });
   }
 
+  @SubscribeMessage('ready')
+  async clientIsReady(
+    @ConnectedSocket() client: Socket,
+  ): Promise<void | string> {
+    const room = client.data.room;
+    if (!this.checkUser(client, room)) {
+      return 'You are not allowed to send this kind of message !';
+    }
+    const game = this.games.get(room);
+    if (!game || !game[0]) {
+      return 'Game is not launched';
+    }
+    game[1].forEach((user) => {
+      if (client.data.id === user.id) {
+        user.ready = true;
+        for (let i = 0; i < game[1].length; i++) {
+          if (game[1][i].ready === false) {
+            return;
+          }
+        }
+        console.log('LAUNCHING GAME AT ', Date.now());
+        game[0].init();
+        game[0].await = false;
+        this.server.in(room).emit('refresh', game[0].getState(), Date.now());
+      }
+    });
+  }
+
   // @Interval(1000)
   // refresh() {
   // 	if (!this.games || this.games === undefined) {
@@ -127,7 +153,7 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
   // 	});
   // }
 
-  checkUser(client: Socket, room: any) {
+  checkUser(client: Socket, room: undefined | string): boolean {
     if (room === undefined) {
       // not in any room
       console.log('no room');
@@ -141,7 +167,7 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage('up')
-  async registerUp(@ConnectedSocket() client: Socket) {
+  async registerUp(@ConnectedSocket() client: Socket): Promise<void | string> {
     const room = client.data.room;
     if (!this.checkUser(client, room)) {
       return 'You are not allowed to send this kind of message !';
@@ -156,7 +182,9 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage('down')
-  async registerDown(@ConnectedSocket() client: Socket) {
+  async registerDown(
+    @ConnectedSocket() client: Socket,
+  ): Promise<void | string> {
     const room = client.data.room;
     if (!this.checkUser(client, room)) {
       return 'You are not allowed to send this kind of message !';
@@ -171,10 +199,7 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage('startGame')
-  async startGame(@ConnectedSocket() client: Socket) {
-    const clientSockets = await this.server
-      .in(`user_${client.data.id}`)
-      .fetchSockets();
+  async startGame(@ConnectedSocket() client: Socket): Promise<void | string> {
     const room = client.data.room;
     if (room === undefined) return 'You are not in a room';
     if (this.room_id.indexOf(room) === -1) {
@@ -183,9 +208,9 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
     if (client.data.position === 0) {
       const numberPlayer = (await this.server.in(room).fetchSockets()).length;
-      const list: Array<string> = [];
+      const list: Array<{ id: string; ready: boolean }> = [];
       (await this.server.in(room).fetchSockets()).forEach((element) => {
-        list.push(element.data.id);
+        list.push({ id: element.data.id, ready: false });
         this.server.in(`user_${element.data.id}`).emit('startGame', {
           number_player: numberPlayer,
           position: element.data.position,
@@ -201,7 +226,7 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage('searchGame')
-  async searchGame(@ConnectedSocket() client: Socket) {
+  async searchGame(@ConnectedSocket() client: Socket): Promise<void | string> {
     console.log('SOMEBODY IS SEARCHING FOR A GAME');
     const clientSockets = await this.server
       .in(`user_${client.data.id}`)
@@ -221,9 +246,9 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
           console.log(count);
           if (count === 1) {
             // CHANGE BACK TO 5 PLEASE
-            const list: Array<string> = [];
+            const list: Array<{ id: string; ready: boolean }> = [];
             (await this.server.in(room).fetchSockets()).forEach((element) => {
-              list.push(element.data.id);
+              list.push({ id: element.data.id, ready: false });
               this.server.in(`user_${element.data.id}`).emit('startGame', {
                 number_player: count + 1,
                 position: element.data.position,

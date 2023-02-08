@@ -8,5 +8,5 @@ export enum Form {
 
 export enum ServerCanvas {
   width = 1000,
-  height = 500
+  height = 500,
 }
