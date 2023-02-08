@@ -7,6 +7,11 @@ import Game from "../helpers/pong";
 import { User, Userfront } from "types";
 import { initUser } from "../initType/UserInit";
 import { Loading } from "../components/Loading";
+import { Button } from "../components/Button";
+import PlayButton from "../components/HomePage/PlayButton";
+import Link from "next/link";
+import playButtonStyles from 'styles/playButton.module.scss';
+import PlayMenu from "../components/HomePage/PlayMenu";
 
 export default function PingPong(): JSX.Element {
     let router = useRouter();
@@ -16,8 +21,9 @@ export default function PingPong(): JSX.Element {
     const canvasRef = useRef(null);
     const [intervalState, setIntervalState] = useState<NodeJS.Timer | null>(null);
     const [MiniProfilArray, setMiniProfilArray] = useState([<></>]);
-    const [winner, setWinner] = useState(initUser);
+    
     const [classement, setClassement] = useState<JSX.Element[]>([]);
+    const [openPlayButton, setOpenPlayButton] = useState(false);
 
 
     useEffect(() => {
@@ -88,6 +94,8 @@ export default function PingPong(): JSX.Element {
             setIndexOfUser(-1);
             prevIndexOfUserRef.current = -1;
         }
+        if (openPlayButton)
+            setOpenPlayButton(false);
     }
 
 
@@ -120,7 +128,6 @@ export default function PingPong(): JSX.Element {
             tmp.splice(index, 1);
             if (temp.length === 1)
             {
-                setWinner(temp[0]);
                 setClassement([
                     <tr>
                         <td>{temp[0].name}</td>
@@ -160,6 +167,10 @@ export default function PingPong(): JSX.Element {
         })
     }, [users]);
 
+    function handleClickPlayButton(): void {
+        setOpenPlayButton(!openPlayButton);
+      }
+
 
 
     return (
@@ -185,14 +196,46 @@ export default function PingPong(): JSX.Element {
                     <canvas ref={canvasRef} style={{ marginLeft: users.length > 2 ? '30vw' : '', border: 'solid 0px white'}}></canvas>
                 </div>
             </div> :
-            <div style={{display: 'flex', justifyContent: 'center', flexDirection:'column'}}>
-                <table style={{color:'white', width:'60%'}}>
-                    <tr>
-                        <td>name</td>
-                        <td>classement</td>
-                    </tr>
-                    {classement}
-                </table>
+            <div style={{display: 'flex', alignItems: 'center', marginTop: '200px', flexDirection: 'column'}}>
+                <div style={{width: '60%', border: '1px solid white', borderRadius: '5px', overflow: 'hidden', boxShadow: '0px 0px 200px 10px rgba(236,125,125,0.2)'}}>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>name</th>
+                                <th>classement</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {classement}
+                        </tbody>
+                    </table>
+                </div>
+                <div style={{display: 'flex', width:'60%', justifyContent: 'center', marginTop: '30px', marginBottom: '20px'}}>
+                    
+                    <Link href={'/home'} style={{textDecoration: 'none', width: '100%'}}><PlayButton
+                        handleClick={() => {}}
+                        open={false}
+                        style={{text: openPlayButton? '' : 'HOME', small:true, color:false}}
+                    /></Link>
+                    
+                    <Link href={''} style={{textDecoration: 'none', width: '100%'}}><PlayButton
+                            handleClick={handleClickPlayButton}
+                            open={openPlayButton}
+                            style={{text:openPlayButton? '' : 'PLAY AGAIN', small:true, color:true}}
+                    /></Link>
+                            {openPlayButton ? (
+                            <div className="col-10 offset-1 offset-xl-0 offset-lg-1 col-lg-3 offset-xl-1 " style={{width: '80%'}}>
+                                <div
+                                    className={`${playButtonStyles.playMenuContainer} d-block `}
+                                >
+                                    <PlayMenu />
+                                </div>
+                            </div>
+                        ) : (
+                            <></>
+                        )}
+                    
+                </div>
             </div>}
         </div>
 

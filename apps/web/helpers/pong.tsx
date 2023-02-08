@@ -35,7 +35,7 @@ class Game {
   public board!: Board;
   public countUpdate: number = 0;
   public static point: number = 0;
-  public static live: number = 3;
+  public static live: number = 1;
   public ball!: Ball;
   public player: Racket[] = [];
   public cible!: Target;

@@ -1,6 +1,7 @@
 import React from "react";
 import styles from "styles/playButton.module.scss";
 import textStyle from "styles/text.module.scss";
+import Router from "next/router";
 
 export default function PlayMenu(): JSX.Element {
   return (
@@ -11,7 +12,7 @@ export default function PlayMenu(): JSX.Element {
           Play against a wall to practice aiming the ball.
         </p>
       </div>
-      <div className={styles.playMenuEntity}>
+      <div className={styles.playMenuEntity} onClick={() => Router.replace('/pingPong')}>
         <h3 className={textStyle.laquer}>Battle royale</h3>
         <p className={textStyle.saira}>
           Play against 100 other players. Be the last one, be the best one!

@@ -104,7 +104,7 @@ function Home(): JSX.Element {
       console.log("position :", config.position);
       socket.disconnect();
     })*/
-    router.replace('/pingPong');
+    //router.replace('/pingPong');
 
     setOpenPlayButton(!openPlayButton);
   }
@@ -239,12 +239,13 @@ function Home(): JSX.Element {
             <PlayButton
               handleClick={handleClickPlayButton}
               open={openPlayButton}
+              style={{text:'PLAY', small: false, color:true}}
             />
           </div>
           {openPlayButton ? (
             <div className="col-10 offset-1 offset-xl-0 offset-lg-1 col-lg-3 offset-xl-1 ">
               <div
-                className={`{${playButtonStyles.playMenuContainer} d-block d-lg-none`}
+                className={`${playButtonStyles.playMenuContainer} d-block d-lg-none`}
               >
                 <PlayMenu />
               </div>
