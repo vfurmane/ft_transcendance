@@ -41,7 +41,6 @@ import { AppGateway } from './app.gateway';
     AuthModule,
     SearchModule,
     FriendshipsModule,
-    UsersModule,
     ConversationsModule,
     MatchModule,
     LeaderBoardModule,
