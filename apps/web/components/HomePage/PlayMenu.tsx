@@ -25,7 +25,6 @@ export default function PlayMenu(): JSX.Element {
     websockets.pong.on("startGame", (config) => {
       console.log("RECEIVED START GAME");
       websockets.pong?.off("startGame");
-      console.dir(config);
       router.replace(
         {
           pathname: "/pingPong",
@@ -38,6 +37,7 @@ export default function PlayMenu(): JSX.Element {
       );
       console.log("number of player :" + config.number_player);
       console.log("position :", config.position);
+      console.log("list of players : ", config.listOfPlayers);
     });
   }
 
