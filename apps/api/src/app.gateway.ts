@@ -4,7 +4,6 @@ import {
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
-  WsResponse,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import {
@@ -18,7 +17,7 @@ import { Cache } from 'cache-manager';
 import { AuthService } from './auth/auth.service';
 import { HttpExceptionTransformationFilter } from './common/filters/HttpExceptionFilter.filter';
 import { SpiedUserDto } from './spied-user.dto';
-import { User } from 'types';
+import { User, UserStatusUpdatePayload } from 'types';
 
 @WebSocketGateway()
 @UseFilters(HttpExceptionTransformationFilter)
@@ -75,7 +74,7 @@ export class AppGateway {
   async subscribeUser(
     @ConnectedSocket() client: Socket,
     @MessageBody() spiedUserDto: SpiedUserDto,
-  ): Promise<WsResponse<unknown>> {
+  ): Promise<UserStatusUpdatePayload> {
     this.logger.log(
       `'${client.data.id}' (${client.data.name}) is spying on '${spiedUserDto.userId}'`,
     );
@@ -84,12 +83,8 @@ export class AppGateway {
       `user:${spiedUserDto.userId}`,
     );
     return {
-      event: 'user_status_update',
-      data: {
-        type: user ? 'online' : 'offline',
-        userId: spiedUserDto.userId,
-        name: user?.name,
-      },
+      type: user ? 'online' : 'offline',
+      userId: spiedUserDto.userId,
     };
   }
 

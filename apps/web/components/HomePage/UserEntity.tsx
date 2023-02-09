@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
 import Image from "next/image";
 import Connect from "../../public/statusConnect.png";
-import { Userfront as User } from "types";
+import { Userfront as User, UserStatusUpdatePayload } from "types";
 import styles from "styles/entity.module.scss";
 import textStyles from "styles/text.module.scss";
 import Link from "next/link";
@@ -31,15 +31,29 @@ export default function UserEntity(props: {
   const UserState = useSelector(selectUserState);
 
   useEffect(() => {
+    const onUserStatusUpdate = (
+      userId: string,
+      setStatus: Dispatch<SetStateAction<string>>
+    ) => {
+      return (data: UserStatusUpdatePayload): void => {
+        if (data.userId === userId) {
+          setStatus(data.type);
+        }
+      };
+    };
+
     if (props.user.id === UserState.id) {
       setStatus("online");
     } else if (websockets.general?.connected) {
-      websockets.general.on("user_status_update", (data) => {
-        if (data.userId === props.user.id) {
-          setStatus(data.type);
-        }
-      });
-      websockets.general.emit("subscribe_user", { userId: props.user.id });
+      websockets.general.on(
+        "user_status_update",
+        onUserStatusUpdate(props.user.id, setStatus)
+      );
+      websockets.general.emit(
+        "subscribe_user",
+        { userId: props.user.id },
+        onUserStatusUpdate(props.user.id, setStatus)
+      );
     }
 
     return () => {
