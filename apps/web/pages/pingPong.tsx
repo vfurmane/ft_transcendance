@@ -17,7 +17,6 @@ import { selectUserState } from "../store/UserSlice";
 import { useWebsocketContext } from "../components/Websocket";
 
 export default function PingPong(): JSX.Element {
-    const websockets = useWebsocketContext();
     let router = useRouter();
     const [users, setUsers] = useState<User[]>([initUser]);
     const usersRef = useRef<User[]>([]);
@@ -28,7 +27,8 @@ export default function PingPong(): JSX.Element {
     const [openPlayButton, setOpenPlayButton] = useState(false);
     const openPlayMenuRef = useRef(openPlayButton);
     const [openOverlay, setOpenOverlay] = useState(false);
-    const [win, setWin] = useState(false); 
+    const [win, setWin] = useState(false);
+    const [endGame, setEndGame] = useState(false);
 
     /*======for close topBar component when click on screen====*/
     const [openToggle, setOpenToggle] = useState(false);
@@ -40,7 +40,11 @@ export default function PingPong(): JSX.Element {
     /*===========================================================*/
 
     const UserState = useSelector(selectUserState);
+    const websockets = useWebsocketContext();
 
+    websockets.pong?.on('endGame', () => {
+        setEndGame(true);
+    });
    
     function rotate(users : User[]){
         let lastIndex = users.length - 1;
@@ -163,8 +167,6 @@ export default function PingPong(): JSX.Element {
 
     function changeLife(index: number, val: number) {
         let tmp = [...MiniProfilArray];
-        console.log ("hp : ", tmp[index]?.props.life);
-        console.log("val : ", val);
         if (val === 0)
         {
             console.log('a user died');
@@ -173,16 +175,18 @@ export default function PingPong(): JSX.Element {
             let temp = [...users];
             let newClassement = [createTrClassement(temp[index], classement), ...classement];
             setClassement(newClassement);
-            if (users.length > 2 && temp[index] === UserState)
+            if (users.length > 2 && temp[index].id === UserState.id)
                 setOpenOverlay(true);
             temp.splice(index, 1);
             tmp.splice(index, 1);
             if (temp.length === 1)
             {
-                if (temp[0] === UserState)
+                console.log("temp[0]", temp[0]);
+                console.log("UserState", UserState);
+                if (temp[0].id === UserState.id)
                     setWin(true);
                 setClassement([createTrClassement(temp[0], newClassement), ...newClassement]);
-                setUsers(temp);
+                //setUsers(temp);
                 console.log('end game');
                 return ;
             }
@@ -197,6 +201,8 @@ export default function PingPong(): JSX.Element {
         }
         else if (tmp[index]?.props.life !== val)
         {
+            console.log ("hp : ", tmp[index]?.props.life);
+            console.log("val : ", val);
             tmp[index] = <MiniProfil key={index} left={index % 2 == 0 ? true : false} user={{ user: users[index], index: index }} life={val} score={tmp[index]?.props.score} game={{ life: Game.live, score: Game.scoreMax, numOfPlayers: tmp.length }} />
             if (users.length === 2) {
                 index = index ? 0 : 1;
@@ -259,7 +265,7 @@ export default function PingPong(): JSX.Element {
                 writeSearchTopBar={writeSearchTopBar}
                 handleClickUserMenu={handleClickUserMenu}
             />
-            {users.length > 1?
+            {!endGame?
             <div>
                 {MiniProfilArray}
 

@@ -136,8 +136,8 @@ class Game {
       if (this.player === undefined)
         racket.push(new Racket(i, [p0, p1, p2, p3], this.color[i]));
       else racket.push(new Racket(i, [p0, p1, p2, p3], this.player[i].color));
-      //Game.changeLife(1, player[i].hp);
-      //racket[i].hp = player[i].hp;
+      Game.changeLife(1, player[i].hp);
+      racket[i].hp = player[i].hp;
     }
     return racket;
   }
