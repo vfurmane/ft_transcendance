@@ -12,6 +12,8 @@ import playButtonStyles from 'styles/playButton.module.scss';
 import PlayMenu from "../components/HomePage/PlayMenu";
 import Image from "next/image";
 import styles from 'styles/pingPong.module.scss';
+import { useSelector } from "react-redux";
+import { selectUserState } from "../store/UserSlice";
 
 export default function PingPong(): JSX.Element {
     let router = useRouter();
@@ -35,13 +37,47 @@ export default function PingPong(): JSX.Element {
     const prevSetterUsermenuRef = useRef< React.Dispatch<React.SetStateAction<boolean>>>(()=>{});
     /*===========================================================*/
 
-    useEffect(() => {
-        if (typeof router.query.users === "string") {
-            const tmp = JSON.parse(router.query.users);
-            setUsers(tmp);
-            usersRef.current = tmp;
-            setMiniProfilArray(tmp.map((e : User, i: number) => <MiniProfil key={i} left={i % 2 == 0 ? true : false} user={{ user: e, index: i }} life={Game.live} score={0} game={{ life: Game.live, score: Game.scoreMax, numOfPlayers: tmp.length }} />));
+    const UserState = useSelector(selectUserState);
+
+   
+    function rotate(users : User[]){
+        let lastIndex = users.length - 1;
+        let i = 6
+        while (users[0].id !== UserState.id)
+        {
+            let last = users[lastIndex];
+            users.unshift(last);
+            users.pop();
         }
+        return users;
+    }
+
+    useEffect(() => {
+        //==================temporary==================================
+        // i must get the users array with the socket
+        let tmp : User[] = [];
+        for (let i = 0; i < 2; i++)
+        {
+            if (i === 0)
+                tmp.push(UserState);
+            else
+                tmp.push(
+                {
+                    id: i.toString(),
+                    name: 'name ' + i.toString(),
+                    avatar_num: i + 1,
+                    status: "",
+                    victory: (i + 1) * 6,
+                    defeat: (i + 1) * 4,
+                    rank: (i + 1) + 1,
+                    level: (i + 1) * 43,
+                });
+        }
+        //===============================================================
+        tmp = rotate(tmp);
+        setUsers(tmp);
+        usersRef.current = tmp;
+        setMiniProfilArray(tmp.map((e : User, i: number) => <MiniProfil key={i} left={i % 2 == 0 ? true : false} user={{ user: e, index: i }} life={Game.live} score={0} game={{ life: Game.live, score: Game.scoreMax, numOfPlayers: tmp.length }} />));
     }, []);
 
     let game = new Game(Number(users.length), Number(router.query.position), router, changeLife);
