@@ -55,35 +55,17 @@ export default function PingPong(): JSX.Element {
     }
 
     useEffect(() => {
-        //==================temporary==================================
-        // i must get the users array with the socket
-        let tmp : User[] = [];
-        if (typeof router.query.number_player === 'string')
+        console.log(typeof router.query.listOfPlayers);
+        if (typeof router.query.listOfPlayers === 'string')
         {
-            for (let i = 0; i < Number(JSON.parse(router.query.number_player)); i++)
-            {
-                //if (i === 1)
-                //    tmp.push(UserState);
-                //else
-                    tmp.push(
-                    {
-                        id: i.toString(),
-                        name: 'name ' + i.toString(),
-                        avatar_num: i + 1,
-                        status: "",
-                        victory: (i + 1) * 6,
-                        defeat: (i + 1) * 4,
-                        rank: (i + 1) + 1,
-                        level: (i + 1) * 43,
-                        tfaSetup: false,
-                    });
-            }
+            const tmp = JSON.parse(router.query.listOfPlayers);
+            console.dir(tmp);
+            //tmp = rotate(tmp);
+            setUsers(tmp);
+            usersRef.current = tmp;
+            setMiniProfilArray(tmp.map((e : User, i: number) => <MiniProfil key={i} left={i % 2 == 0 ? true : false} user={{ user: e, index: i }} life={Game.live} score={0} game={{ life: Game.live, score: Game.scoreMax, numOfPlayers: tmp.length }} />));
         }
-        //===============================================================
-        //tmp = rotate(tmp);
-        setUsers(tmp);
-        usersRef.current = tmp;
-        setMiniProfilArray(tmp.map((e : User, i: number) => <MiniProfil key={i} left={i % 2 == 0 ? true : false} user={{ user: e, index: i }} life={Game.live} score={0} game={{ life: Game.live, score: Game.scoreMax, numOfPlayers: tmp.length }} />));
+        
     }, []);
 
     let game = new Game(Number(router.query.number_player), Number(router.query.position), router, changeLife);
@@ -181,42 +163,47 @@ export default function PingPong(): JSX.Element {
 
     function changeLife(index: number, val: number) {
         let tmp = [...MiniProfilArray];
-        if (tmp[index]?.props.life - 1 === 0)
+        console.log ("hp : ", tmp[index]?.props.life);
+        console.log("val : ", val);
+        if (val === 0)
         {
+            console.log('a user died');
             if (intervalState)
                 clearInterval(intervalState);
             let temp = [...users];
             let newClassement = [createTrClassement(temp[index], classement), ...classement];
             setClassement(newClassement);
-            if (users.length > 2 && temp[index] === usersRef.current[0])
+            if (users.length > 2 && temp[index] === UserState)
                 setOpenOverlay(true);
             temp.splice(index, 1);
             tmp.splice(index, 1);
             if (temp.length === 1)
             {
-                if (temp[0] === usersRef.current[0])
+                if (temp[0] === UserState)
                     setWin(true);
                 setClassement([createTrClassement(temp[0], newClassement), ...newClassement]);
-                temp = [initUser];
-                if (intervalState)
-                    clearInterval(intervalState);
+                setUsers(temp);
+                console.log('end game');
+                return ;
             }
+            console.log('i destroyed a user');
             const tmpp : JSX.Element[] = [];
             for (let i = 0; i < tmp.length; i++)
                 tmpp.push(<MiniProfil key={i} left={i % 2 == 0 ? true : false} user={{ user: temp[i], index: i }} life={tmp[i]?.props.life} score={tmp[i]?.props.score} game={{ life: Game.live, score: Game.scoreMax, numOfPlayers: tmp.length }} />);
             tmp = tmpp;
             game = new Game(Number(temp.length), Number(router.query.position), router, changeLife);
             setUsers(temp);
+            setMiniProfilArray(tmp);
         }
-        else
+        else if (tmp[index]?.props.life !== val)
         {
             tmp[index] = <MiniProfil key={index} left={index % 2 == 0 ? true : false} user={{ user: users[index], index: index }} life={val} score={tmp[index]?.props.score} game={{ life: Game.live, score: Game.scoreMax, numOfPlayers: tmp.length }} />
             if (users.length === 2) {
                 index = index ? 0 : 1;
                 tmp[index] = <MiniProfil key={index} left={index % 2 == 0 ? true : false} user={{ user: users[index], index: index }} life={tmp[index]?.props.life} score={tmp[index]?.props.score + 1} game={{ life: Game.live, score: Game.scoreMax, numOfPlayers: tmp.length}} />
             }
+            setMiniProfilArray(tmp);
         }
-        setMiniProfilArray(tmp);
     }
 
     function handleClickPlayButton(): void {
@@ -272,7 +259,7 @@ export default function PingPong(): JSX.Element {
                 writeSearchTopBar={writeSearchTopBar}
                 handleClickUserMenu={handleClickUserMenu}
             />
-            {users[0] !== initUser?
+            {users.length > 1?
             <div>
                 {MiniProfilArray}
 
