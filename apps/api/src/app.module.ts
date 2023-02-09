@@ -12,6 +12,7 @@ import { MatchModule } from './Match/Match.module';
 import { LeaderBoardModule } from './leaderBoard/leaderBoard.module';
 import { TransformUserModule } from './TransformUser/TransformUser.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { MatchmakingModule } from './matchmaking/matchmaking.module';
 
 @Module({
   imports: [
@@ -45,6 +46,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     MatchModule,
     LeaderBoardModule,
     TransformUserModule,
+    MatchmakingModule,
   ],
   controllers: [AppController],
   providers: [AppService],
