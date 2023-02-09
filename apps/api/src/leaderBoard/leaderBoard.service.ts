@@ -15,9 +15,10 @@ export class LeaderBoardService {
   async getLeaderBoard(): Promise<Userfront[]> {
     const users = await this.userRepository.find({ order: { level: 'DESC' } });
     if (!users) throw new BadRequestException('users not found');
-    
-    
-    const res = users.map(async (el) => await this.transformService.transform(el));
+
+    const res = users.map(
+      async (el) => await this.transformService.transform(el),
+    );
     return Promise.all(res);
   }
 }

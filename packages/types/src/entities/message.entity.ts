@@ -1,4 +1,4 @@
-import { Expose } from 'class-transformer';
+import { Expose } from "class-transformer";
 import {
   Column,
   CreateDateColumn,
@@ -6,14 +6,14 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
-} from 'typeorm';
-import { User } from './user.entity';
-import { Conversation } from './conversation.entity';
+} from "typeorm";
+import { User } from "./user.entity";
+import { Conversation } from "./conversation.entity";
 
 @Expose()
 @Entity()
 export class Message {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryGeneratedColumn("uuid")
   id!: string;
 
   @ManyToOne(() => User, (user) => user.messages, {
@@ -25,10 +25,10 @@ export class Message {
   @ManyToOne(() => Conversation, (conversation) => conversation.messages)
   conversation!: Conversation;
 
-  @Column('text')
+  @Column("text")
   content!: string;
 
-  @Column('boolean', { default: false })
+  @Column("boolean", { default: false })
   system_generated!: boolean;
 
   @CreateDateColumn()

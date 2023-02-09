@@ -123,45 +123,65 @@ export class AuthService {
     return jwt.user;
   }
 
-  async createJwt(
+  async createJwtEntity(
     user: User,
     token_type: TokenTypeEnum = TokenTypeEnum.ACCESS_TOKEN,
-    expiresIn = '5m',
-  ): Promise<string> {
+    originToken: Jwt | null = null,
+  ): Promise<Jwt> {
     const jwtEntity = new Jwt();
     jwtEntity.user = user;
     jwtEntity.token_type = token_type;
+    jwtEntity.originToken = originToken;
     await this.jwtsRepository.save(jwtEntity).then((jwt) => {
       jwtEntity.id = jwt.id;
     });
-
-    const payload: JwtPayload = {
-      sub: user.id,
-      name: user.name,
-      jti: jwtEntity.id,
-    };
-    return this.jwtService.sign(payload, {
-      expiresIn: expiresIn,
-    });
+    return jwtEntity;
   }
 
   async revokeAllToken(user: User): Promise<void> {
     await this.jwtsRepository.delete({ user: { id: user.id } });
   }
 
-  async login(user: User, state?: State): Promise<AccessTokenResponse> {
-    const accessTokenPayload = this.createJwt(user);
-    const refreshTokenPayload = this.createJwt(
+  async createTokensPair(user: User): Promise<string[]> {
+    const accessTokenEntity = await this.createJwtEntity(user);
+    const refreshTokenEntity = await this.createJwtEntity(
       user,
       TokenTypeEnum.REFRESH_TOKEN,
-      '5d',
+      accessTokenEntity,
     );
+
+    return Promise.all([
+      this.jwtService.sign(
+        {
+          sub: user.id,
+          name: user.name,
+          jti: accessTokenEntity.id,
+        },
+        {
+          expiresIn: '5m',
+        },
+      ),
+      this.jwtService.sign(
+        {
+          sub: user.id,
+          name: user.name,
+          jti: refreshTokenEntity.id,
+        },
+        {
+          expiresIn: '5d',
+        },
+      ),
+    ]);
+  }
+
+  async login(user: User, state?: State): Promise<AccessTokenResponse> {
+    const [accessToken, refreshToken] = await this.createTokensPair(user);
     if (state) {
-      this.statesRepository.delete({ token: state.token });
+      this.removeState(state);
     }
     return {
-      access_token: await accessTokenPayload,
-      refresh_token: await refreshTokenPayload,
+      access_token: accessToken,
+      refresh_token: refreshToken,
     };
   }
 
@@ -205,7 +225,7 @@ export class AuthService {
   }
 
   async removeState(state: State): Promise<void> {
-    state;
+    this.statesRepository.delete({ token: state.token });
     return;
   }
 }

@@ -21,16 +21,13 @@ interface RegisterUserResponse {
 async function registerUser(
   data: RegisterFormData
 ): Promise<RegisterUserResponse | null> {
-  const response = await fetch(
-    `/api/auth/register`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ ...data }),
-    }
-  ).then(async (response) => {
+  const response = await fetch(`/api/auth/register`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ ...data }),
+  }).then(async (response) => {
     if (!response.ok) {
       return response.json().then((error) => {
         throw new Error(error.message || "An unexpected error occured...");
@@ -61,13 +58,12 @@ export function RegisterForm(): ReactElement {
 
     await registerUser(data)
       .then((response) => {
-        console.log(response);
         if (response === null) {
           throw new Error("An unexpected error occured...");
         } else {
           setFormSuccess("Success! Redirecting...");
           localStorage.removeItem("state");
-          router.replace("/login");
+          router.replace("/auth/login");
         }
       })
       .catch((error) => {
@@ -108,7 +104,7 @@ export function RegisterForm(): ReactElement {
         <Input disabled={loading} type="submit" fullWidth primary />
       </form>
       <p>
-        Or <Link href="/login">login</Link>
+        Or <Link href="/auth/login">login</Link>
       </p>
     </div>
   );

@@ -4,8 +4,8 @@ import { PongGateway } from './pong.gateway';
 import { PongService } from './pong.service';
 
 @Module({
-	imports: [AuthModule],
-	controllers: [],
-	providers: [ PongService, PongGateway ],
+  imports: [AuthModule],
+  controllers: [],
+  providers: [PongService, PongGateway],
 })
 export class PongModule {}

@@ -33,7 +33,6 @@ export class UsersGateway implements OnGatewayConnection {
   ) {}
 
   async handleConnection(client: Socket): Promise<string> {
-    console.log('New client trying to connect');
     if (!client.handshake.headers?.authorization)
       throw new WsException('No Authorization header found');
     const currentUser = this.authService.verifyUserFromToken(

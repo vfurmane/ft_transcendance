@@ -55,7 +55,7 @@ export default function LeaderboardEntity(props: {
         index={props.index}
         handleClick={props.handleClick}
         delFriendClick={(): void => {
-          console.error("Deleting friend");
+          null;
         }}
       />
       {div2}

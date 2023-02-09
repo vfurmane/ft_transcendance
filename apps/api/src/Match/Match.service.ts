@@ -52,7 +52,7 @@ export class MatchService {
     );
   }
 
-  async getMatch(Id : string): Promise<MatchFront[]> {
+  async getMatch(Id: string): Promise<MatchFront[]> {
     const user = await this.userRepository.findOne({
       relations: {
         win: { looser_id: true },
@@ -63,7 +63,7 @@ export class MatchService {
         id: Id,
       },
     });
-  
+
     if (!user) throw new BadRequestException('user not found');
 
     const winArray = user.win.map(async (el) => {
@@ -71,11 +71,9 @@ export class MatchService {
         id: el.id,
         score_winner: el.score_winner,
         score_looser: el.score_looser,
-        looser: await this.transformUserService.transform(
-         el.looser_id,
-        ),
+        looser: await this.transformUserService.transform(el.looser_id),
         winner: null,
-      }
+      };
     });
 
     const looseArray = user.defeat.map(async (el) => {
@@ -83,12 +81,10 @@ export class MatchService {
         id: el.id,
         score_winner: el.score_winner,
         score_looser: el.score_looser,
-        winner: await this.transformUserService.transform(
-          el.winner_id,
-        ),
+        winner: await this.transformUserService.transform(el.winner_id),
         looser: null,
-      }
-    })
+      };
+    });
 
     return Promise.all([...winArray, ...looseArray]);
   }

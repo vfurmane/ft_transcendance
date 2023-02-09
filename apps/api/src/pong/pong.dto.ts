@@ -1,9 +1,9 @@
 export class RacketDto {
-	key!: boolean;
+  key!: boolean;
 }
 
 export class GameDto {
-//	player : Player[];
-//	ball : Point;
-//	ballVector : Vector;
+  //	player : Player[];
+  //	ball : Point;
+  //	ballVector : Vector;
 }

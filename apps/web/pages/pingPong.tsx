@@ -17,7 +17,7 @@ import { selectUserState } from "../store/UserSlice";
 
 export default function PingPong(): JSX.Element {
     let router = useRouter();
-    const [users, setUsers] = useState([initUser]);
+    const [users, setUsers] = useState<User[]>([initUser]);
     const usersRef = useRef<User[]>([]);
     const canvasRef = useRef(null);
     const [intervalState, setIntervalState] = useState<NodeJS.Timer | null>(null);

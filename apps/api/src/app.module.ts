@@ -8,10 +8,17 @@ import { AuthModule } from './auth/auth.module';
 import { SearchModule } from './search/search.module';
 import { FriendshipsModule } from './friendships/friendships.module';
 import { ConversationsModule } from './conversations/conversations.module';
+<<<<<<< HEAD
 import { MatchModule } from './Match/Match.module';
 import { LeaderBoardModule } from './leaderBoard/leaderBoard.module';
 import { TransformUserModule } from './TransformUser/TransformUser.module';
 import { PongModule } from './pong/pong.module';
+=======
+import { PongModule } from './pong/pong.module';
+import { MatchModule } from './Match/Match.module';
+import { LeaderBoardModule } from './leaderBoard/leaderBoard.module';
+import { TransformUserModule } from './TransformUser/TransformUser.module';
+>>>>>>> origin/pong-back
 import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
@@ -33,7 +40,7 @@ import { ScheduleModule } from '@nestjs/schedule';
         // From NestJS docs:
         // Setting `synchronize: true` shouldn't be used in production - otherwise you can lose production data.
         synchronize: configService.get('NODE_ENV') === 'development',
-        logging: configService.get('NODE_ENV') === 'development',
+        //logging: configService.get('NODE_ENV') === 'development',
       }),
     }),
     ScheduleModule.forRoot(),
@@ -43,10 +50,17 @@ import { ScheduleModule } from '@nestjs/schedule';
     FriendshipsModule,
     UsersModule,
     ConversationsModule,
+<<<<<<< HEAD
     MatchModule,
     LeaderBoardModule,
     TransformUserModule,
     PongModule
+=======
+    PongModule,
+    MatchModule,
+    LeaderBoardModule,
+    TransformUserModule,
+>>>>>>> origin/pong-back
   ],
   controllers: [AppController],
   providers: [AppService],
