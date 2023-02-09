@@ -40,7 +40,6 @@ import { ScheduleModule } from '@nestjs/schedule';
     AuthModule,
     SearchModule,
     FriendshipsModule,
-    UsersModule,
     ConversationsModule,
     MatchModule,
     LeaderBoardModule,
