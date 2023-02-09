@@ -16,6 +16,10 @@ import {
 import { AuthService } from 'src/auth/auth.service';
 import { Game } from './game.service';
 import { Interval } from '@nestjs/schedule';
+import { InjectRepository } from '@nestjs/typeorm';
+import { User } from 'types';
+import { Repository } from 'typeorm';
+
 
 @UsePipes(new ValidationPipe())
 @UseInterceptors(ClassSerializerInterceptor)
@@ -26,7 +30,12 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   games!: Map<string, [Game, Array<{ id: string; ready: boolean }>]>;
 
-  constructor(private readonly authService: AuthService) {
+  constructor(
+    private readonly authService: AuthService,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
+  ) 
+  {
     this.room_id = [];
     this.games = new Map();
   }
@@ -195,7 +204,7 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
     game.movePlayer(client.data.position, false);
     this.server.in(room).emit('refresh', game.getState(), Date.now());
-    return 'You moved down';
+    return 'You moved down ';
   }
 
   @SubscribeMessage('startGame')
@@ -208,6 +217,12 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
     if (client.data.position === 0) {
       const numberPlayer = (await this.server.in(room).fetchSockets()).length;
+      const ids = (await this.server.in(room).fetchSockets()).map(e => {e.data.id});
+      const users = await this.userRepository
+      ?.createQueryBuilder()
+      .where('id LIKE :ids', {
+        ids: `%${ids}%`,
+      })
       const list: Array<{ id: string; ready: boolean }> = [];
       (await this.server.in(room).fetchSockets()).forEach((element) => {
         list.push({ id: element.data.id, ready: false });

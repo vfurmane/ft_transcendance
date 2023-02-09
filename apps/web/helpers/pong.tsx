@@ -35,7 +35,7 @@ class Game {
   public color: string[] = ["blue", "red", "orange", "white", "pink", "black"];
   public static position : number;
   public static scoreMax : number = 10;
-  public static changeLife :  (index : number) => void;
+  public static changeLife :  (index : number, val: number) => void;
   public static socket: Socket<DefaultEventsMap, DefaultEventsMap>;
   public static count: number;
   public await = true;
@@ -44,7 +44,7 @@ class Game {
     number_player: number | undefined,
     position: number | undefined,
     private readonly router: NextRouter,
-    changeLife : (index : number) => void)
+    changeLife : (index : number, val: number) => void)
   {
     if (number_player) {
       this.boardType = number_player;
@@ -135,6 +135,7 @@ class Game {
       if (this.player === undefined)
         racket.push(new Racket(i, [p0, p1, p2, p3], this.color[i]));
       else racket.push(new Racket(i, [p0, p1, p2, p3], this.player[i].color));
+      Game.changeLife(1, player[i].hp);
       racket[i].hp = player[i].hp;
     }
     return racket;
@@ -203,7 +204,6 @@ class Game {
       Game.socket.on("endGame", () => {
         Game.socket.off("endGame");
         Game.socket.off("refresh");
-        this.router.replace("/");
       });
     }
     this.boardCanvasRef = ref;
@@ -217,8 +217,8 @@ class Game {
     const context = this.boardCanvas.getContext("2d");
     if (!context) return;
     this.boardContext = context;
-    this.boardCanvas.width = window.innerWidth * 0.6;
-    this.boardCanvas.height = (window.innerWidth * 0.6) * (1 / 2);
+    this.boardCanvas.width = 400;//window.innerWidth * 0.6;
+    this.boardCanvas.height = 200;//(window.innerWidth * 0.6) * (1 / 2);
     this.board = new Board(this.boardType, this.boardCanvas);
     this.ballWidth = this.board.wallSize * 0.00625;
     if (this.boardType != Form.REC) {
@@ -267,8 +267,8 @@ class Game {
   updateGame() {
     if (this.await) return;
     const time = Math.round(Date.now() - this.start);
-    this.boardCanvas!.width = window.innerWidth * 0.6;
-    this.boardCanvas!.height = (window.innerWidth * 0.6) * (1 / 2);
+    this.boardCanvas!.width = 400;//window.innerWidth * 0.6;
+    this.boardCanvas!.height = 200;//(window.innerWidth * 0.6) * (1 / 2);
     let tmp = this.ballWidth;
     this.board = new Board(this.boardType, this.boardCanvas);
     if (this.boardType != Form.REC) {
@@ -565,24 +565,24 @@ class Ball extends Entity {
           rackets[1].hp--;
           this.replaceTo(board.board.center());
           this.goToRandomPlayer(rackets);
-          Game.changeLife(1);
+          Game.changeLife(1, rackets[1].hp);
         } else if (index === 0) {
           rackets[0].hp--;
           this.replaceTo(board.board.center());
           this.goToRandomPlayer(rackets);
-          Game.changeLife(0);
+          Game.changeLife(0, rackets[0].hp);
         }
       } else if (!Game.isSolo) {
         rackets[index].hp--;
         this.replaceTo(board.board.center());
         this.goToRandomPlayer(rackets);
-        Game.changeLife(index);
+        Game.changeLife(index, rackets[index].hp);
       } else {
         if (index === 0) {
           rackets[0].hp--;
           this.replaceTo(board.board.center());
           this.goToRandomPlayer(rackets);
-          Game.changeLife(index);
+          Game.changeLife(index, rackets[index].hp);
         }
       }
       this.calcNextCollision(rackets, walls, null);
