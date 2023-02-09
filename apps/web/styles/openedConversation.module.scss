@@ -1,0 +1,21 @@
+.sendMessageField
+{
+    width: 80%;
+    height: 5vh;
+    margin-bottom: 5px;
+}
+
+.openedConversationContainer
+{
+    height: 100%;
+    width: 99.5%;
+    // display: grid;
+    // grid-template-rows: 1fr 5vh;
+    .messages
+    {
+        height: 90%;
+        width: 100%;
+        overflow-y: auto;
+        overflow-wrap: break-word;
+    }
+}

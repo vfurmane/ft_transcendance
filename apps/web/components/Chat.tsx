@@ -10,6 +10,7 @@ export default function Chat( { conversation } : { conversation : {userId: strin
     const [conversationSelected, selectConversation] = useState<ConversationEntity | null>(null)
     const [conversationList, setConversationList] = useState<ConversationWithUnread[]>([])
     const [newConversation, setNewConversation] = useState<{userId: string, userName: string}>(conversation)
+    const [loading, setLoading] = useState(true);
     const websockets = useWebsocketContext()
 
     useEffect(() =>
@@ -18,20 +19,29 @@ export default function Chat( { conversation } : { conversation : {userId: strin
         if (newConversation.userId.length)
         {
             websockets.conversations?.emit("DMExists", {id: newConversation.userId} ,(DM : DMExists) => {
+                console.error("DM exists", DM)
+                console.error("user ID targeted: ", newConversation.userId)
                 if (DM.conversationExists)
                 {
                     selectConversation(DM.conversation)
                     setNewConversation(() => {return ({userId: "", userName: ""})})
+                    setLoading(false)
+                }
+                else
+                {
+                    selectConversation(null)
+                    setLoading(false)
                 }
             })
         }
-        if (!conversationSelected && !newConversation.userId.length)
+        else if (!conversationSelected && !newConversation.userId.length)
         {
             if (websockets.conversations?.connected)
             {
                 websockets.conversations.emit("getConversations", (conversationDetails : ConversationsDetails) =>
                 {
                     setConversationList(()  => conversationDetails.conversations)
+                    setLoading(false)
                 })
                 websockets.conversations.on("newConversation", (conversation: ConversationEntity) =>
                 {
@@ -40,11 +50,18 @@ export default function Chat( { conversation } : { conversation : {userId: strin
                 websockets.conversations.on("newMessage", (message) =>
                 {
                     const conversation = conversationList.filter((e) => e.conversation.id === message.id)
-                    conversation[0].numberOfUnreadMessages += 1
-                    const remainder = conversationList.filter((e) => e.conversation.id !== message.id)
-                    setConversationList(() => [...conversation, ...remainder])
+                    if (conversation)
+                    {
+                        conversation[0].numberOfUnreadMessages += 1
+                        const remainder = conversationList.filter((e) => e.conversation.id !== message.id)
+                        setConversationList(() => [...conversation, ...remainder])
+                    }
                 })
             }
+        }
+        else
+        {
+            setLoading(false)
         }
         return (
             () => {
@@ -54,10 +71,13 @@ export default function Chat( { conversation } : { conversation : {userId: strin
         )
     }, [conversationSelected])
 
+    if (loading)
+        return (<></>)
+
     if (newConversation.userId.length)
     {
         return (
-            <section className="conversationsContainer">
+            <section className={styles.conversationsContainer}>
                 <OpenedConversation newConversation={newConversation} conversation={null} />
             </section>
         )

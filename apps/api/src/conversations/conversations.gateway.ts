@@ -210,6 +210,8 @@ export class ConversationsGateway implements OnGatewayConnection {
   @SubscribeMessage("DMExists")
   async DMExists(@ConnectedSocket() client : Socket, @MessageBody() { id }: isUUIDDto)
   {
+    if (client.data.id === id)
+      return ({conversationExists: false, conversation: null})
     return this.conversationsService.DMExists(client.data as User, id)
   }
 

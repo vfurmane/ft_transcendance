@@ -367,6 +367,13 @@ export class ConversationsService {
           role: Not(ConversationRoleEnum.LEFT),
         },
       },
+      order:
+      {
+        messages:
+        {
+          created_at: 'ASC'
+        }
+      }
     });
     if (!conversation) {
       throw new NotFoundException();

@@ -14,6 +14,7 @@ import { AccessTokenResponse, User as UserEntity } from 'types';
 import { UpdateUserPasswordDto } from './update-user-password.dto';
 import { UsersService } from './users.service';
 
+
 @Controller('users')
 export class UsersController {
   constructor(
