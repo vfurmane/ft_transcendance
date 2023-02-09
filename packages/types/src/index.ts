@@ -77,5 +77,11 @@ export interface Achivement {
   description: string;
 }
 
+export interface UserStatusUpdatePayload {
+  type: string;
+  userId: string;
+
+}
+
 export * from './enums';
 export * from './entities';
