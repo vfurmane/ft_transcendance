@@ -29,6 +29,7 @@ export default function PlayMenu(): JSX.Element {
         {
           pathname: "/pingPong",
           query: {
+            listOfPlayers: JSON.stringify(config.listOfPlayers),
             number_player: config.number_player,
             position: config.position,
           },
