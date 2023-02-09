@@ -1,3 +1,4 @@
+import { of } from 'rxjs';
 import {
   GameState,
   Form,
@@ -167,7 +168,7 @@ export class Game {
 }
 
 export class Ball extends Entity {
-  public defaultSpeed = 1;
+  public defaultSpeed = 3;
   public nextCollision: { wall: number; wallIndex: number; racket: number } = {
     wall: 0,
     wallIndex: 0,
@@ -185,6 +186,14 @@ export class Ball extends Entity {
       dir.y * this.defaultSpeed,
     );
     this.calcNextCollision(player, walls, null);
+  }
+
+  copy() {
+    const lst = [];
+    for (let point of this.point) {
+      lst.push(new Point(point.x, point.y));
+    }
+    return lst;
   }
 
   calcNextCollision(
@@ -262,8 +271,18 @@ export class Ball extends Entity {
       this.nextCollision.wall > this.nextCollision.racket &&
       this.nextCollision.racket < 1
     ) {
+      console.log("COULD HIT PLAYER")
       for (const racket of rackets) {
+        let test = new Ball(this.copy(), rackets, walls);
+        for (let i = 0; i < 100; i++) {
+          test.moveTo(this.speed, 0.01);
+          if (test.sat(racket)) {
+            console.log("SHOULD HIT SOON")
+            break ;
+          }
+        }
         if (this.sat(racket)) {
+          console.log("HIT PLAYER");
           let angle = 0;
           let face;
           const index = rackets.indexOf(racket);

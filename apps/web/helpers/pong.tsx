@@ -400,7 +400,7 @@ class Target extends Entity {
 }
 
 class Ball extends Entity {
-  public defaultSpeed = 1;
+  public defaultSpeed = 3;
   public nextCollision: { wall: number; wallIndex: number; racket: number } = {
     wall: 0,
     wallIndex: 0,
