@@ -200,7 +200,7 @@ export default function PingPong(): JSX.Element {
             tmp[index] = <MiniProfil key={index} left={index % 2 == 0 ? true : false} user={{ user: users[index], index: index }} life={val} score={tmp[index]?.props.score} game={{ life: Game.live, score: Game.scoreMax, numOfPlayers: tmp.length }} />
             if (users.length === 2) {
                 index = index ? 0 : 1;
-                tmp[index] = <MiniProfil key={index} left={index % 2 == 0 ? true : false} user={{ user: users[index], index: index }} life={tmp[index]?.props.life} score={tmp[index]?.props.score + 1} game={{ life: Game.live, score: Game.scoreMax, numOfPlayers: tmp.length}} />
+               // tmp[index] = <MiniProfil key={index} left={index % 2 == 0 ? true : false} user={{ user: users[index], index: index }} life={tmp[index]?.props.life} score={tmp[index]?.props.score + 1} game={{ life: Game.live, score: Game.scoreMax, numOfPlayers: tmp.length}} />
             }
             setMiniProfilArray(tmp);
         }

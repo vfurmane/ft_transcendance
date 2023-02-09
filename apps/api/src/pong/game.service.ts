@@ -13,6 +13,7 @@ export class Game {
   public boardCanvas = ServerCanvas;
   public boardType: number = Form.REC;
   public board!: Board;
+  public ballWidth! : number;
   public countUpdate = 0;
   public broadcaster: any;
   public ball!: Ball;
@@ -70,25 +71,26 @@ export class Game {
   }
 
   createRacket(wall: Wall[]): Racket[] {
+    this.ballWidth = this.board.wallSize * 0.00625;
     const racket: Racket[] = [];
     for (let i = 0; i < wall.length; i++) {
-      const wallDir = wall[i].point[0].vectorTo(wall[i].point[2]).normalized();
-      const wallPerp = wallDir.perp().normalized();
-      const wallCenter = wall[i].center();
-      const racketCenter = new Point(
-        wallCenter.x + wallPerp.x * 5,
-        wallCenter.y + wallPerp.y * 5,
+      let wallDir = wall[i].point[0].vectorTo(wall[i].point[2]).normalized();
+      let wallPerp = wallDir.perp().normalized();
+      let wallCenter = wall[i].center();
+      let racketCenter = new Point(
+        wallCenter.x + wallPerp.x * 10,
+        wallCenter.y + wallPerp.y * 10
       );
-      const p3 = new Point(
-        racketCenter.x - wallDir.x * 40,
-        racketCenter.y - wallDir.y * 40,
+      let p3 = new Point(
+        racketCenter.x - wallDir.x * (this.board.wallSize * 0.05 ),
+        racketCenter.y - wallDir.y * (this.board.wallSize * 0.05 )
       );
-      const p0 = new Point(
-        racketCenter.x + wallDir.x * 40,
-        racketCenter.y + wallDir.y * 40,
+      let p0 = new Point(
+        racketCenter.x + wallDir.x * (this.board.wallSize * 0.05),
+        racketCenter.y + wallDir.y * (this.board.wallSize * 0.05)
       );
-      const p1 = new Point(p0.x + wallPerp.x * 10, p0.y + wallPerp.y * 10);
-      const p2 = new Point(p3.x + wallPerp.x * 10, p3.y + wallPerp.y * 10);
+      let p1 = new Point(p0.x + wallPerp.x * (this.ballWidth), p0.y + wallPerp.y * (this.ballWidth));
+      let p2 = new Point(p3.x + wallPerp.x * (this.ballWidth), p3.y + wallPerp.y * (this.ballWidth ));
       if (this.player.length === 0)
         racket.push(new Racket(i, [p0, p1, p2, p3], this.color[i]));
       else racket.push(new Racket(i, [p0, p1, p2, p3], this.player[i].color));
@@ -112,7 +114,7 @@ export class Game {
       this.ball = new Ball(
         this.createRegularPolygon(
           this.board.board.center(),
-          30,
+          this.ballWidth,
           this.boardType,
         ),
         this.player,
@@ -124,8 +126,8 @@ export class Game {
         this.createRect(
           this.board.board.center().x,
           this.board.board.center().y,
-          10,
-          10,
+          this.ballWidth,
+          this.ballWidth,
         ),
         this.player,
         this.board.wall,
@@ -165,7 +167,7 @@ export class Game {
 }
 
 export class Ball extends Entity {
-  public defaultSpeed = 3;
+  public defaultSpeed = 1;
   public nextCollision: { wall: number; wallIndex: number; racket: number } = {
     wall: 0,
     wallIndex: 0,
@@ -325,10 +327,12 @@ export class Ball extends Entity {
       const index = this.nextCollision.wallIndex;
       if (rackets.length === 2) {
         if (index === 2) {
+          console.log("LEFT PLAYER GOAL")
           rackets[1].hp--;
           this.replaceTo(board.board.center());
           this.goToRandomPlayer(rackets, game);
         } else if (index === 0) {
+          console.log("RIGHT PLAYER GOAL")
           rackets[0].hp--;
           this.replaceTo(board.board.center());
           this.goToRandomPlayer(rackets, game);

@@ -111,6 +111,7 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
       if (game.boardType !== 0) {
         game.updateGame();
       } else {
+        console.log("GAME ENDED")
         const sockets = await this.server.in(room).fetchSockets();
         this.server.in(room).emit('endGame');
         sockets.forEach((socket) => {
@@ -150,20 +151,20 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
     });
   }
 
-  // @Interval(1000)
-  // refresh() {
-  // 	if (!this.games || this.games === undefined) {
-  // 		return ;
-  // 	}
-  // 	this.games.forEach(async (key, room) => {
-  // 		let game = key[0];
-  // 		if (game.boardType !== 0) {
-  // 			let state = game.getState();
-  // 			console.log("=-=-=-=-=-= REFRESHING =-=-=-=-=-= |" + Date.now())
-  // 			this.server.in(room).emit('refresh', state, Date.now());
-  // 		}
-  // 	});
-  // }
+  /*    THIS FUNCTION IS DEBUG ONLY (SHOW SERVER SIDE VISION OF THE GAME)    */
+  @Interval(10)
+  refresh() {
+  	if (!this.games || this.games === undefined) {
+  		return ;
+  	}
+  	this.games.forEach(async (key, room) => {
+  		let game = key[0];
+  		if (!game.await && game.boardType !== 0) {
+  			let state = game.getState();
+  			this.server.in(room).emit('refresh', state, Date.now());
+  		}
+  	});
+  }
 
   checkUser(client: Socket, room: undefined | string): boolean {
     if (room === undefined) {

@@ -92,10 +92,11 @@ class Game {
         this.board.wall[2],
       ]);
       this.ball = new Ball(
-        this.createRegularPolygon(
-          new Point(state.ball.point.x, state.ball.point.y),
-          10,
-          4
+        this.createRect(
+          state.ball.point.x,
+          state.ball.point.y,
+          this.ballWidth,
+          this.ballWidth,
         ),
         this.player,
         this.board.wall
@@ -105,7 +106,7 @@ class Game {
       this.ball = new Ball(
         this.createRegularPolygon(
           new Point(state.ball.point.x, state.ball.point.y),
-          30,
+          this.ballWidth,
           this.boardType
         ),
         this.player,
@@ -123,20 +124,20 @@ class Game {
       const wallPerp = wallDir.perp().normalized();
       const racketCenter = player[i].point;
       const p3 = new Point(
-        racketCenter.x - wallDir.x * 40,
-        racketCenter.y - wallDir.y * 40
+        racketCenter.x - wallDir.x * (this.board.wallSize * 0.05 ),
+        racketCenter.y - wallDir.y * (this.board.wallSize * 0.05 )
       );
       const p0 = new Point(
-        racketCenter.x + wallDir.x * 40,
-        racketCenter.y + wallDir.y * 40
+        racketCenter.x + wallDir.x * (this.board.wallSize * 0.05 ),
+        racketCenter.y + wallDir.y * (this.board.wallSize * 0.05 )
       );
-      const p1 = new Point(p0.x + wallPerp.x * 10, p0.y + wallPerp.y * 10);
-      const p2 = new Point(p3.x + wallPerp.x * 10, p3.y + wallPerp.y * 10);
+      const p1 = new Point(p0.x + wallPerp.x * (this.ballWidth), p0.y + wallPerp.y * (this.ballWidth));
+      const p2 = new Point(p3.x + wallPerp.x * (this.ballWidth), p3.y + wallPerp.y * (this.ballWidth ));
       if (this.player === undefined)
         racket.push(new Racket(i, [p0, p1, p2, p3], this.color[i]));
       else racket.push(new Racket(i, [p0, p1, p2, p3], this.player[i].color));
-      Game.changeLife(1, player[i].hp);
-      racket[i].hp = player[i].hp;
+      //Game.changeLife(1, player[i].hp);
+      //racket[i].hp = player[i].hp;
     }
     return racket;
   }
@@ -193,7 +194,6 @@ class Game {
     if (ref === undefined) return;
     if (!Game.isSolo) {
       Game.socket.on("refresh", (state: GameState, time: number) => {
-        console.log(time);
         this.await = false;
         Game.count = 0;
         if (!this.board) {
@@ -204,6 +204,7 @@ class Game {
       Game.socket.on("endGame", () => {
         Game.socket.off("endGame");
         Game.socket.off("refresh");
+        this.boardType = 0;
       });
     }
     this.boardCanvasRef = ref;
@@ -271,14 +272,14 @@ class Game {
     this.boardCanvas!.height = 200;//(window.innerWidth * 0.6) * (1 / 2);
     let tmp = this.ballWidth;
     this.board = new Board(this.boardType, this.boardCanvas);
-    if (this.boardType != Form.REC) {
+    /*if (this.boardType != Form.REC) {
       this.player = this.createRacket(this.board.wall);
     } else {
       this.player = this.createRacket([
         this.board.wall[0],
         this.board.wall[2],
       ]);
-    }
+    }*/
     if (Game.isSolo)
       this.cible = new Target(
         this.createRect(
@@ -399,7 +400,7 @@ class Target extends Entity {
 }
 
 class Ball extends Entity {
-  public defaultSpeed = 3;
+  public defaultSpeed = 1;
   public nextCollision: { wall: number; wallIndex: number; racket: number } = {
     wall: 0,
     wallIndex: 0,
@@ -565,24 +566,24 @@ class Ball extends Entity {
           rackets[1].hp--;
           this.replaceTo(board.board.center());
           this.goToRandomPlayer(rackets);
-          Game.changeLife(1, rackets[1].hp);
+        //  Game.changeLife(1, rackets[1].hp);
         } else if (index === 0) {
-          rackets[0].hp--;
+        //  rackets[0].hp--;
           this.replaceTo(board.board.center());
           this.goToRandomPlayer(rackets);
-          Game.changeLife(0, rackets[0].hp);
+        //  Game.changeLife(0, rackets[0].hp);
         }
       } else if (!Game.isSolo) {
-        rackets[index].hp--;
+       // rackets[index].hp--;
         this.replaceTo(board.board.center());
         this.goToRandomPlayer(rackets);
-        Game.changeLife(index, rackets[index].hp);
+        //Game.changeLife(index, rackets[index].hp);
       } else {
         if (index === 0) {
-          rackets[0].hp--;
+        //  rackets[0].hp--;
           this.replaceTo(board.board.center());
           this.goToRandomPlayer(rackets);
-          Game.changeLife(index, rackets[index].hp);
+        //  Game.changeLife(index, rackets[index].hp);
         }
       }
       this.calcNextCollision(rackets, walls, null);
@@ -636,6 +637,5 @@ class Racket extends Entity {
     }
   }
 }
-
 
 export default Game;
