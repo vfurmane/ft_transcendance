@@ -17,8 +17,10 @@ import { AuthService } from 'src/auth/auth.service';
 import { Game } from './game.service';
 import { Interval } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User } from 'types';
+import { User, Userfront } from 'types';
 import { Repository } from 'typeorm';
+import { isUUIDDto } from 'src/conversations/dtos/IsUUID.dto';
+import { TransformUserService } from 'src/TransformUser/TransformUser.service';
 
 
 @UsePipes(new ValidationPipe())
@@ -34,6 +36,7 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
     private readonly authService: AuthService,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    private readonly transformUserService: TransformUserService,
   ) 
   {
     this.room_id = [];
@@ -217,16 +220,20 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
     if (client.data.position === 0) {
       const numberPlayer = (await this.server.in(room).fetchSockets()).length;
-      const ids = (await this.server.in(room).fetchSockets()).map(e => {e.data.id});
+      const fetchSockets = (await this.server.in(room).fetchSockets());
+      const ids = fetchSockets.map(e => e.data.id);
       const users = await this.userRepository
       ?.createQueryBuilder()
-      .where('id LIKE :ids', {
-        ids: `%${ids}%`,
-      })
+      .where("id IN (:...ids)", {
+        ids: ids,
+      }).getMany();
+      const ListOfPlayers = await Promise.all(users.map(async (e : User) : Promise<Userfront> => await this.transformUserService.transform(e)));
+      //console.log(ListOfPlayers);
       const list: Array<{ id: string; ready: boolean }> = [];
       (await this.server.in(room).fetchSockets()).forEach((element) => {
         list.push({ id: element.data.id, ready: false });
         this.server.in(`user_${element.data.id}`).emit('startGame', {
+          listOfPlayers: ListOfPlayers,
           number_player: numberPlayer,
           position: element.data.position,
         });
@@ -262,9 +269,20 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
           if (count === 1) {
             // CHANGE BACK TO 5 PLEASE
             const list: Array<{ id: string; ready: boolean }> = [];
+            const fetchSockets = (await this.server.in(room).fetchSockets());
+            const ids = fetchSockets.map(e => e.data.id);
+            const users = await this.userRepository
+            ?.createQueryBuilder()
+            .where("id IN (:...ids)", {
+              ids: ids,
+            }).getMany();
+            const ListOfPlayers = await Promise.all(users.map(async (e : User) : Promise<Userfront> => await this.transformUserService.transform(e)));
+            //console.log(ListOfPlayers);
+
             (await this.server.in(room).fetchSockets()).forEach((element) => {
               list.push({ id: element.data.id, ready: false });
               this.server.in(`user_${element.data.id}`).emit('startGame', {
+                listOfPlayers: ListOfPlayers,
                 number_player: count + 1,
                 position: element.data.position,
               });
