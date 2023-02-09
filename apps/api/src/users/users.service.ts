@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   forwardRef,
   Inject,
   Injectable,
@@ -134,6 +135,8 @@ export class UsersService {
   }
 
   async updateName(user: User, new_username: string): Promise<UpdateResult> {
+    if (await this.userExists(user))
+      throw new BadRequestException('`username` is already in use');
     return this.usersRepository.update({ id: user.id }, { name: new_username });
   }
 }
