@@ -81,10 +81,26 @@ class Game {
     return points;
   }
 
+  convertState(state: GameState): GameState {
+    const newState: GameState = {
+      numberPlayer: state.numberPlayer,
+      players: [],
+      ball: {
+        point: new Point(state.ball.point.x, state.ball.point.y),
+        dir: this.ball.speed,
+      },
+    };
+    for (let player in state.players) {
+
+    }
+    return state;
+  }
+
   refresh(state: GameState): void {
     if (!this.boardType) {
       return;
     }
+    state = this.convertState(state);
     if (this.boardType == Form.REC) {
       this.player = this.updatePlayer(state.players, [
         this.board.wall[0],
