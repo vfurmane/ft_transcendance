@@ -83,5 +83,9 @@ export interface Matchmaking {
   gameMode: GameMode;
 }
 
+export interface GameStartPayload {
+  users: User[];
+}
+
 export * from './enums';
 export * from './entities';

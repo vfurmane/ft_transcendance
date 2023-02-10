@@ -3,15 +3,27 @@ import { GameMode, User } from 'types';
 
 export type QueueList = User[];
 export type QueuesMap = { [key in GameMode]: QueueList };
+export type GameModeDetails = { maxPlayersNumber: number };
 
 @Injectable()
 export class MatchmakingService {
   queues: QueuesMap = {} as QueuesMap;
 
+  static gameModes: { [key in GameMode]: GameModeDetails } = {
+    CLASSIC: { maxPlayersNumber: 2 },
+    BATTLE_ROYALE: { maxPlayersNumber: 6 },
+  };
+
   constructor() {
     for (const mode in GameMode) {
       this.queues[GameMode[mode as keyof typeof GameMode]] = [];
     }
+  }
+
+  static getGameModeDetails(mode: GameMode): GameModeDetails {
+    return MatchmakingService.gameModes[
+      GameMode[mode as string as keyof typeof GameMode]
+    ];
   }
 
   getGameModeQueue(mode: GameMode): QueueList {
@@ -31,9 +43,27 @@ export class MatchmakingService {
     return null;
   }
 
-  join(user: User, mode: GameMode): void {
-    if (this.userIsInQueue(user)) return;
+  queueIsFull(mode: GameMode): boolean {
+    return (
+      this.getGameModeQueue(mode).length >=
+      MatchmakingService.getGameModeDetails(mode).maxPlayersNumber
+    );
+  }
+
+  getFirstGameModeQueue(mode: GameMode): QueueList {
+    const gameQueue: QueueList = [];
+    this.getGameModeQueue(mode).forEach((user, i) => {
+      if (i < MatchmakingService.getGameModeDetails(mode).maxPlayersNumber)
+        gameQueue.push(user);
+    });
+    return gameQueue;
+  }
+
+  join(user: User, mode: GameMode): QueueList | null {
+    if (this.userIsInQueue(user)) return null;
     this.getGameModeQueue(mode).push(user);
+    if (this.queueIsFull(mode)) return this.getFirstGameModeQueue(mode);
+    return null;
   }
 
   setGameModeQueue(new_queue: QueueList, mode: GameMode): void {

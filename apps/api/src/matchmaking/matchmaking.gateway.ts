@@ -3,8 +3,9 @@ import {
   MessageBody,
   SubscribeMessage,
   WebSocketGateway,
+  WebSocketServer,
 } from '@nestjs/websockets';
-import { Socket } from 'socket.io';
+import { Server, Socket } from 'socket.io';
 import {
   ClassSerializerInterceptor,
   Logger,
@@ -19,12 +20,17 @@ import { JoinQueueDto } from './join-queue.dto';
 import { UsersService } from 'src/users/users.service';
 import { HttpExceptionTransformationFilter } from 'src/common/filters/HttpExceptionFilter.filter';
 import { AuthService } from 'src/auth/auth.service';
+import { instanceToPlain } from 'class-transformer';
+import { GameStartPayload } from 'types';
 
 @UseFilters(HttpExceptionTransformationFilter)
 @UsePipes(new ValidationPipe())
 @UseInterceptors(ClassSerializerInterceptor)
 @WebSocketGateway({ namespace: 'matchmaking' })
 export class MatchmakingGateway {
+  @WebSocketServer()
+  server!: Server;
+
   constructor(
     private readonly authService: AuthService,
     private readonly logger: Logger,
@@ -53,10 +59,26 @@ export class MatchmakingGateway {
   ): Promise<void> {
     const user = await this.usersService.getById(client.data.id);
     if (!user) return;
-    this.matchmakingService.join(user, joinQueueDto.game_mode);
+    const gameQueue = this.matchmakingService.join(
+      user,
+      joinQueueDto.game_mode,
+    );
     this.logger.log(
       `'${user.id}' (${user.name}) has joined queue for game mode '${joinQueueDto.game_mode}'`,
     );
+    if (gameQueue !== null) {
+      this.logger.log(`Queue is full, the game will start soon. Players:`);
+      gameQueue.forEach((user_loop) => {
+        this.logger.log(`- ${user_loop.id} (${user_loop.name})`);
+      });
+
+      this.server.emit(
+        'game_start',
+        instanceToPlain<GameStartPayload>({
+          users: gameQueue,
+        }),
+      );
+    }
   }
 
   @SubscribeMessage('leave_queue')
