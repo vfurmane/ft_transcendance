@@ -19,10 +19,14 @@ export class MatchmakingService {
   }
 
   userIsInQueue(user: User, mode?: GameMode): GameMode | null {
-    if (mode) return this.getGameModeQueue(mode).includes(user) ? mode : null;
+    if (mode)
+      return this.getGameModeQueue(mode).find(
+        (queue_user) => queue_user.id === user.id,
+      )
+        ? mode
+        : null;
     for (const mode in GameMode) {
-      if (this.getGameModeQueue(mode as GameMode).includes(user))
-        return mode as GameMode;
+      if (this.userIsInQueue(user, mode as GameMode)) return mode as GameMode;
     }
     return null;
   }
