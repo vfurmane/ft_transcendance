@@ -42,6 +42,10 @@ export class MatchmakingGateway {
     client.data = { id: currentUser.sub, name: currentUser.name };
   }
 
+  async handleDisconnect(client: Socket): Promise<void> {
+    await this.leaveQueue(client);
+  }
+
   @SubscribeMessage('join_queue')
   async joinQueue(
     @ConnectedSocket() client: Socket,
