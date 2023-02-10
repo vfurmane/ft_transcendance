@@ -162,6 +162,7 @@ class Game {
   createRacket(wall: Wall[]): Racket[] {
     this.ballWidth = this.board.wallSize * 0.00625;
     if (Game.isSolo) {
+      console.log("wall: ");
       return [
         new Racket(
           0,
@@ -222,6 +223,8 @@ class Game {
         Game.socket.off("refresh");
         this.boardType = 0;
       });
+    } else {
+      this.await = false;
     }
     this.boardCanvasRef = ref;
     if (!this.boardCanvasRef.current) {
@@ -238,7 +241,7 @@ class Game {
     this.boardCanvas.height = 200;//(window.innerWidth * 0.6) * (1 / 2);
     this.board = new Board(this.boardType, this.boardCanvas);
     this.ballWidth = this.board.wallSize * 0.00625;
-    if (this.boardType != Form.REC) {
+    if (this.boardType !== Form.REC) {
       this.player = this.createRacket(this.board.wall);
       this.ball = new Ball(
         this.createRegularPolygon(
@@ -271,6 +274,7 @@ class Game {
           20
         )
       );
+
     window.addEventListener("keydown", function (e) {
       if (e.key === "ArrowUp") Game.keyPressed.up = true;
       else if (e.key === "ArrowDown") Game.keyPressed.down = true;
@@ -306,7 +310,8 @@ class Game {
         )
       );
     
-    if (this.ballWidth !== tmp)
+
+    /*if (this.ballWidth !== tmp)
     {
       if (this.boardType !== Form.REC)
       {
@@ -333,7 +338,7 @@ class Game {
           this.board.wall
         );
       }
-    }
+    }*/
 
     if (!this.boardType) {
       return;
