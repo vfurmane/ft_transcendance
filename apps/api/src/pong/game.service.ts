@@ -273,14 +273,15 @@ export class Ball extends Entity {
     ) {
       console.log("COULD HIT PLAYER")
       for (const racket of rackets) {
-        let test = new Ball(this.copy(), rackets, walls);
-        for (let i = 0; i < 100; i++) {
-          test.moveTo(this.speed, 0.01);
-          if (test.sat(racket)) {
-            console.log("SHOULD HIT SOON")
-            break ;
-          }
-        }
+        /******************* CHECK IF SPEED VECTOR WILL HIT RACKET VECTOR ******************/
+        // let test = new Ball(this.copy(), rackets, walls);
+        // for (let i = 0; i < 100; i++) {
+        //   test.moveTo(this.speed, 0.01);
+        //   if (test.sat(racket)) {
+        //     console.log("SHOULD HIT SOON")
+        //     break ;
+        //   }
+        // }
         if (this.sat(racket)) {
           console.log("HIT PLAYER");
           let angle = 0;
