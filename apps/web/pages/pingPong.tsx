@@ -44,8 +44,8 @@ export default function PingPong(): JSX.Element {
     const websockets = useWebsocketContext();
 
     websockets.pong?.on('endGame', () => {
-        if (!Game.isSolo)
-            setEndGame(true);
+        //if (!Game.isSolo)
+        setEndGame(true);
     });
    
     function rotate(users : User[]){

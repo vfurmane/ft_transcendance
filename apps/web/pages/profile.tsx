@@ -147,17 +147,12 @@ export default function Profil(): JSX.Element {
   }
 
   function addFriend(): void {
-    //const data = {
-    //  id: user.id,
-    //};
-
     fetch(`/api/friendships/${user.id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
         Authorization: "Bearer " + localStorage.getItem("access_token"),
       },
-      //body: JSON.stringify(data),
     })
       .then(function (response) {
         response.json().then((res) => {
