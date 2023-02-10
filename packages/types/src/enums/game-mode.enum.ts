@@ -1,4 +1,4 @@
 export enum GameMode {
-  CLASSIC = 'classic',
-  BATTLE_ROYALE = 'battle_royale',
+  CLASSIC = 'CLASSIC',
+  BATTLE_ROYALE = 'BATTLE_ROYALE',
 }
