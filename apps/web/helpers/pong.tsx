@@ -19,7 +19,7 @@ class Game {
   public static isSolo = false;
   public boardType = Form.REC;
   public boardCanvasRef!: React.RefObject<HTMLCanvasElement>;
-  public ballWidth! : number;
+  public ballWidth!: number;
   public boardCanvas!: HTMLCanvasElement;
   public boardContext!: CanvasRenderingContext2D;
   public board!: Board;
@@ -33,9 +33,9 @@ class Game {
   public start = Date.now();
   public lastUpdate = 0;
   public color: string[] = ["blue", "red", "orange", "white", "pink", "black"];
-  public static position : number;
-  public static scoreMax : number = 10;
-  public static changeLife :  (index : number, val: number) => void;
+  public static position: number;
+  public static scoreMax: number = 10;
+  public static changeLife: (index: number, val: number) => void;
   public static socket: Socket<DefaultEventsMap, DefaultEventsMap>;
   public static count: number;
   public await = true;
@@ -44,8 +44,7 @@ class Game {
     number_player: number | undefined,
     position: number | undefined,
     private readonly router: NextRouter,
-    changeLife : (index : number, val: number) => void)
-  {
+    changeLife: (index: number, val: number) => void) {
     if (number_player) {
       this.boardType = number_player;
     } else {
@@ -124,15 +123,15 @@ class Game {
       const wallPerp = wallDir.perp().normalized();
       const racketCenter = player[i].point;
       const p3 = new Point(
-        racketCenter.x - wallDir.x * (this.board.wallSize * 0.05 ),
-        racketCenter.y - wallDir.y * (this.board.wallSize * 0.05 )
+        racketCenter.x - wallDir.x * (this.board.wallSize * 0.05),
+        racketCenter.y - wallDir.y * (this.board.wallSize * 0.05)
       );
       const p0 = new Point(
-        racketCenter.x + wallDir.x * (this.board.wallSize * 0.05 ),
-        racketCenter.y + wallDir.y * (this.board.wallSize * 0.05 )
+        racketCenter.x + wallDir.x * (this.board.wallSize * 0.05),
+        racketCenter.y + wallDir.y * (this.board.wallSize * 0.05)
       );
       const p1 = new Point(p0.x + wallPerp.x * (this.ballWidth), p0.y + wallPerp.y * (this.ballWidth));
-      const p2 = new Point(p3.x + wallPerp.x * (this.ballWidth), p3.y + wallPerp.y * (this.ballWidth ));
+      const p2 = new Point(p3.x + wallPerp.x * (this.ballWidth), p3.y + wallPerp.y * (this.ballWidth));
       if (this.player === undefined)
         racket.push(new Racket(i, [p0, p1, p2, p3], this.color[i]));
       else racket.push(new Racket(i, [p0, p1, p2, p3], this.player[i].color));
@@ -165,15 +164,15 @@ class Game {
           wallCenter.y + wallPerp.y * 10
         );
         let p3 = new Point(
-          racketCenter.x - wallDir.x * (this.board.wallSize * 0.05 ),
-          racketCenter.y - wallDir.y * (this.board.wallSize * 0.05 )
+          racketCenter.x - wallDir.x * (this.board.wallSize * 0.05),
+          racketCenter.y - wallDir.y * (this.board.wallSize * 0.05)
         );
         let p0 = new Point(
           racketCenter.x + wallDir.x * (this.board.wallSize * 0.05),
           racketCenter.y + wallDir.y * (this.board.wallSize * 0.05)
         );
         let p1 = new Point(p0.x + wallPerp.x * (this.ballWidth), p0.y + wallPerp.y * (this.ballWidth));
-        let p2 = new Point(p3.x + wallPerp.x * (this.ballWidth), p3.y + wallPerp.y * (this.ballWidth ));
+        let p2 = new Point(p3.x + wallPerp.x * (this.ballWidth), p3.y + wallPerp.y * (this.ballWidth));
         if (this.player.length === 0)
           racket.push(new Racket(i, [p0, p1, p2, p3], this.color[i]));
         else racket.push(new Racket(i, [p0, p1, p2, p3], this.player[i].color));
@@ -216,8 +215,8 @@ class Game {
     }
     this.boardCanvas = this.boardCanvasRef.current;
     if (!this.boardCanvas) return;
- 
-   
+
+
     const context = this.boardCanvas.getContext("2d");
     if (!context) return;
     this.boardContext = context;
@@ -274,8 +273,8 @@ class Game {
     const time = Math.round(Date.now() - this.start);
     this.boardCanvas!.width = 400;//window.innerWidth * 0.6;
     this.boardCanvas!.height = 200;//(window.innerWidth * 0.6) * (1 / 2);
-    let tmp = this.ballWidth;
-    this.board = new Board(this.boardType, this.boardCanvas);
+    let tmp = this.board.wallSize;
+    //this.board = new Board(this.boardType, this.boardCanvas);
     /*if (this.boardType != Form.REC) {
       this.player = this.createRacket(this.board.wall);
     } else {
@@ -285,15 +284,20 @@ class Game {
       ]);
     }*/
     if (Game.isSolo)
-      this.cible = new Target(
-        this.createRect(
-          this.boardCanvas!.width * (2 / 3),
-          this.boardCanvas!.height / 2,
-          20,
-          20
-        )
-      );
-    
+    {
+        this.boardCanvas!.width = window.innerWidth * 0.6;
+        this.boardCanvas!.height = (window.innerWidth * 0.6) * (1 / 2);
+        this.board = new Board(this.boardType, this.boardCanvas);
+        if (this.board.wallSize !== tmp) {
+          console.log('hello');
+          this.player = this.createRacket([
+            this.board.wall[0],
+            this.board.wall[2],
+          ]);
+        }
+    }
+
+
 
     /*if (this.ballWidth !== tmp)
     {
@@ -333,8 +337,7 @@ class Game {
     this.boardContext!.fillStyle = "#fff";
 
     // Draw the net (Line in the middle)
-    if (this.player.length === 2)
-    {
+    if (this.player.length === 2) {
       this.boardContext!.beginPath();
       this.boardContext!.setLineDash([30, 15]);
       this.boardContext!.moveTo((this.boardCanvas!.width / 2), this.boardCanvas!.height - 20);
@@ -571,24 +574,24 @@ class Ball extends Entity {
           rackets[1].hp--;
           this.replaceTo(board.board.center());
           this.goToRandomPlayer(rackets);
-        //  Game.changeLife(1, rackets[1].hp);
+          //  Game.changeLife(1, rackets[1].hp);
         } else if (index === 0) {
-        //  rackets[0].hp--;
+          //  rackets[0].hp--;
           this.replaceTo(board.board.center());
           this.goToRandomPlayer(rackets);
-        //  Game.changeLife(0, rackets[0].hp);
+          //  Game.changeLife(0, rackets[0].hp);
         }
       } else if (!Game.isSolo) {
-       // rackets[index].hp--;
+        // rackets[index].hp--;
         this.replaceTo(board.board.center());
         this.goToRandomPlayer(rackets);
         //Game.changeLife(index, rackets[index].hp);
       } else {
         if (index === 0) {
-        //  rackets[0].hp--;
+          //  rackets[0].hp--;
           this.replaceTo(board.board.center());
           this.goToRandomPlayer(rackets);
-        //  Game.changeLife(index, rackets[index].hp);
+          //  Game.changeLife(index, rackets[index].hp);
         }
       }
       this.calcNextCollision(rackets, walls, null);

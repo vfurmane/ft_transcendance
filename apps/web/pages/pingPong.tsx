@@ -44,7 +44,8 @@ export default function PingPong(): JSX.Element {
     const websockets = useWebsocketContext();
 
     websockets.pong?.on('endGame', () => {
-        setEndGame(true);
+        if (!Game.isSolo)
+            setEndGame(true);
     });
    
     function rotate(users : User[]){
@@ -78,16 +79,14 @@ export default function PingPong(): JSX.Element {
         }, false);
     }, []);
 
+
     let game = new Game(Number(router.query.number_player), Number(router.query.position), router, changeLife);
-    //new map if a user loose
     useEffect(() => {
-        if (canvasRef) {
-            if (websockets.pong?.connected)
-            {
+        if (canvasRef && users.length > 0) {
+            if (websockets.pong?.connected && users.length > 1)
                 game.setWebsocket(websockets.pong);
-                game.init(canvasRef);
-                setIntervalState(setInterval(handleResize, 17, game));
-            }
+            game.init(canvasRef);
+            setIntervalState(setInterval(handleResize, 17, game));
         }
         return (() : void => {
             if (intervalState)
@@ -192,7 +191,7 @@ export default function PingPong(): JSX.Element {
                 if (newClassement.length + 1 <= usersRef.current.length)
                     setClassement([createTrClassement(temp[0], newClassement), ...newClassement]);
                 setPrintButton(true);
-                //setUsers(temp);
+                setUsers(temp);
                 return ;
             }
             const tmpp : JSX.Element[] = [];
@@ -283,7 +282,7 @@ export default function PingPong(): JSX.Element {
                     <span className={`textScroll ${textStyles.pixel}`}>- Pong - pOnG - poNg - PONG - pOng&nbsp;</span>
                     <span className={`textScroll ${textStyles.pixel}`}>- Pong - pOnG - poNg - PONG - pOng&nbsp;</span>
                 </div>
-                <div style={{ marginTop: users.length > 2? '25vh' : '35vh', display:'flex', justifyContent:'center'}}>
+                <div style={{ marginTop: users.length > 2? '25vh' : users.length === 1? '20vh' : '35vh', display:'flex', justifyContent:'center'}}>
                     <canvas ref={canvasRef} style={{ marginLeft: users.length > 2 ? '30vw' : '', border:'1px solid white'}}></canvas>
                 </div>
             </div> :
