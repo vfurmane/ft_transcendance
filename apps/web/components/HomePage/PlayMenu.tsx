@@ -6,7 +6,7 @@ import { useRouter } from "next/router";
 import { useWebsocketContext } from "../Websocket";
 
 
-export default function PlayMenu(): JSX.Element {
+export default function PlayMenu(props : {click? : () => void}): JSX.Element {
   const router = useRouter();
   const websockets = useWebsocketContext();
 
@@ -44,7 +44,7 @@ export default function PlayMenu(): JSX.Element {
 
   return (
     <div>
-      <div className={`${styles.playMenuEntity} ${styles.bar}`}>
+      <div className={`${styles.playMenuEntity} ${styles.bar}`} onClick={() => {if (props.click) props.click(); router.replace('/pingPong');}}>
         <h3 className={textStyle.laquer}>Training</h3>
         <p className={textStyle.saira}>
           Play against a wall to practice aiming the ball.

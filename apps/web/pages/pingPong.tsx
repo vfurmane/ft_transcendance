@@ -5,7 +5,6 @@ import MiniProfil from "../components/miniProfil";
 import { useRouter } from "next/router";
 import Game from "../helpers/pong";
 import { Userfront as User } from "types";
-import { initUser } from "../initType/UserInit";
 import PlayButton from "../components/HomePage/PlayButton";
 import Link from "next/link";
 import playButtonStyles from 'styles/playButton.module.scss';
@@ -15,10 +14,11 @@ import styles from 'styles/pingPong.module.scss';
 import { useSelector } from "react-redux";
 import { selectUserState } from "../store/UserSlice";
 import { useWebsocketContext } from "../components/Websocket";
+import { current } from "@reduxjs/toolkit";
 
 export default function PingPong(): JSX.Element {
     let router = useRouter();
-    const [users, setUsers] = useState<User[]>([initUser]);
+    const [users, setUsers] = useState<User[]>([]);
     const usersRef = useRef<User[]>([]);
     const canvasRef = useRef(null);
     const [intervalState, setIntervalState] = useState<NodeJS.Timer | null>(null);
@@ -29,6 +29,7 @@ export default function PingPong(): JSX.Element {
     const [openOverlay, setOpenOverlay] = useState(false);
     const [win, setWin] = useState(false);
     const [endGame, setEndGame] = useState(false);
+    const [printButton, setPrintButton] = useState(true);
 
     /*======for close topBar component when click on screen====*/
     const [openToggle, setOpenToggle] = useState(false);
@@ -61,13 +62,15 @@ export default function PingPong(): JSX.Element {
     useEffect(() => {
         if (typeof router.query.listOfPlayers === 'string')
         {
+            setPrintButton(false);
             const tmp = JSON.parse(router.query.listOfPlayers);
-            console.dir(tmp);
             //tmp = rotate(tmp);
             setUsers(tmp);
             usersRef.current = tmp;
             setMiniProfilArray(tmp.map((e : User, i: number) => <MiniProfil key={i} left={i % 2 == 0 ? true : false} user={{ user: e, index: i }} life={Game.live} score={0} game={{ life: Game.live, score: Game.scoreMax, numOfPlayers: tmp.length }} />));
         }
+        else
+            setUsers([UserState]);
         window.addEventListener("keydown", function(e) {
             if(["Space","ArrowUp","ArrowDown","ArrowLeft","ArrowRight"].indexOf(e.code) > -1) {
                 e.preventDefault();
@@ -78,7 +81,7 @@ export default function PingPong(): JSX.Element {
     let game = new Game(Number(router.query.number_player), Number(router.query.position), router, changeLife);
     //new map if a user loose
     useEffect(() => {
-        if (canvasRef && users[0] !== initUser) {
+        if (canvasRef) {
             if (websockets.pong?.connected)
             {
                 game.setWebsocket(websockets.pong);
@@ -188,6 +191,7 @@ export default function PingPong(): JSX.Element {
                     setWin(true);
                 if (newClassement.length + 1 <= usersRef.current.length)
                     setClassement([createTrClassement(temp[0], newClassement), ...newClassement]);
+                setPrintButton(true);
                 //setUsers(temp);
                 return ;
             }
@@ -214,6 +218,14 @@ export default function PingPong(): JSX.Element {
         openPlayMenuRef.current = !openPlayButton;
         setOpenPlayButton(!openPlayButton);
       }
+    
+    function newPartie(){
+        console.log('click');
+        setUsers([UserState]);
+        setEndGame(false);
+        setMiniProfilArray([]);
+        setPrintButton(true);
+    }
 
     const buttons = (
         <div className={styles.buttons}>        
@@ -237,7 +249,7 @@ export default function PingPong(): JSX.Element {
                     {openPlayButton ? (
                     <div className="col-10 offset-1 offset-xl-0 offset-lg-1 col-lg-3 offset-xl-1 " style={{width: '80%'}}>
                         <div className={`${playButtonStyles.playMenuContainer} d-block `}>
-                            <PlayMenu />
+                            <PlayMenu click={() => newPartie()}/>
                         </div>
                     </div>
                 ) : (
@@ -272,7 +284,7 @@ export default function PingPong(): JSX.Element {
                     <span className={`textScroll ${textStyles.pixel}`}>- Pong - pOnG - poNg - PONG - pOng&nbsp;</span>
                 </div>
                 <div style={{ marginTop: users.length > 2? '25vh' : '35vh', display:'flex', justifyContent:'center'}}>
-                    <canvas ref={canvasRef} style={{ marginLeft: users.length > 2 ? '30vw' : ''}}></canvas>
+                    <canvas ref={canvasRef} style={{ marginLeft: users.length > 2 ? '30vw' : '', border:'1px solid white'}}></canvas>
                 </div>
             </div> :
             <div className={styles.afterGameContainer}>
@@ -290,9 +302,11 @@ export default function PingPong(): JSX.Element {
                         </tbody>
                     </table>
                 </div>
-                {buttons}
             </div>}
-            
+            {printButton?
+            <div style={{display: 'flex', justifyContent: 'center'}}>
+                {buttons} 
+            </div>: <></>}
         </div>
 
     );
