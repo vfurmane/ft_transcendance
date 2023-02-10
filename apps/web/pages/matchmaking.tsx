@@ -6,10 +6,6 @@ export default function Matchmaking(): ReactElement {
   const websockets = useWebsocketContext();
 
   useEffect(() => {
-    if (websockets.matchmaking) {
-      websockets.matchmaking.emit("join_queue");
-    }
-
     return () => {
       if (websockets.matchmaking) {
         websockets.matchmaking.emit("leave_queue");

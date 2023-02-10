@@ -1,5 +1,6 @@
 import { User } from "./entities";
 import { Conversation } from "./entities/conversation.entity";
+import { GameMode } from "./enums";
 
 export interface FtUser {
   login: string;
@@ -75,6 +76,11 @@ export interface Achivement {
   name: string;
   status: string;
   description: string;
+}
+
+export interface Matchmaking {
+  isInQueue: boolean;
+  gameMode: GameMode;
 }
 
 export * from './enums';
