@@ -25,7 +25,7 @@ class Game {
   public board!: Board;
   public countUpdate = 0;
   public static point = 0;
-  public static live = 3;
+  public static live = 10;
   public ball!: Ball;
   public player: Racket[] = [];
   public cible!: Target;
@@ -136,7 +136,7 @@ class Game {
       if (this.player === undefined)
         racket.push(new Racket(i, [p0, p1, p2, p3], this.color[i]));
       else racket.push(new Racket(i, [p0, p1, p2, p3], this.player[i].color));
-      Game.changeLife(1, player[i].hp);
+      Game.changeLife(i, player[i].hp);
       racket[i].hp = player[i].hp;
     }
     return racket;

@@ -15,9 +15,9 @@ export default function ArrayDoubleColumn(props: {
 }): JSX.Element {
   const [columnNum, setColumnNum] = useState(1);
   const [pageNum, setPageNum] = useState(1);
-  const [leaderBoardList, setLeaderBoardList] = useState([<></>]);
-  const [column1, setColumn1] = useState([<></>]);
-  const [column2, setColumn2] = useState([<></>]);
+  const [leaderBoardList, setLeaderBoardList] = useState<JSX.Element[]>([]);
+  const [column1, setColumn1] = useState<JSX.Element[]>([]);
+  const [column2, setColumn2] = useState<JSX.Element[]>([]);
 
   useEffect(() => {
     const tmp: JSX.Element[] = [];

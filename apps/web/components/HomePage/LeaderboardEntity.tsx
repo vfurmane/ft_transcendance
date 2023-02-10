@@ -6,7 +6,6 @@ import UserEntity from "./UserEntity";
 export default function LeaderboardEntity(props: {
   user: User;
   index: number;
-  key: number;
   handleClick: (e: {
     index: number;
     openMenu: boolean;

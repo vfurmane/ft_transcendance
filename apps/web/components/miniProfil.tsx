@@ -4,7 +4,7 @@ import stylesProfil from 'styles/profil.module.scss';
 import { Userfront as User } from "types";
 import styles from 'styles/miniProfil.module.scss';
 
-export default function MiniProfil (props : {key: number, left: boolean, user : {user: User, index : number}, life: number, score : number, game : {life: number, score: number, numOfPlayers : number}}) {
+export default function MiniProfil (props : {left: boolean, user : {user: User, index : number}, life: number, score : number, game : {life: number, score: number, numOfPlayers : number}}) {
     let hearts : string[] = [];
     for (let i = 0; i < props.life; i++)
         hearts.push("❤️");
