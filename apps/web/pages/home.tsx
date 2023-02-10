@@ -14,14 +14,14 @@ import styles from "styles/home.module.scss";
 
 
 function Home(): JSX.Element {
-  const friendListRef = useRef([<></>]);
+  const friendListRef = useRef<JSX.Element[]>([]);
   const setterInit: React.Dispatch<React.SetStateAction<boolean>> = () => false;
 
   
   const [openPlayButton, setOpenPlayButton] = useState(false);
   const [openUserMenu, setOpenUserMenu] = useState(false);
   const [indexOfUser, setIndexOfUser] = useState(-1);
-  const [friendList, setFriendList] = useState([<></>]);
+  const [friendList, setFriendList] = useState<JSX.Element[]>([]);
 
   const prevIndexOfUserRef = useRef(-1);
   const prevSetterUsermenuRef = useRef(setterInit);
@@ -219,7 +219,7 @@ function Home(): JSX.Element {
           </div>
           <div className="col-10 offset-1  offset-lg-0 col-lg-6">
             <div className="card">
-              <List title="featuring" list={[<></>]} />
+              <List title="featuring" list={[]} />
             </div>
           </div>
         </div>
