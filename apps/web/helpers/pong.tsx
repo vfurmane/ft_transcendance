@@ -82,17 +82,23 @@ class Game {
   }
 
   convertState(state: GameState): GameState {
+    const ratiox = (this.boardCanvas.width / ServerCanvas.width);
+    const ratioy = (this.boardCanvas.height / ServerCanvas.height);
     const newState: GameState = {
       numberPlayer: state.numberPlayer,
       players: [],
       ball: {
-        point: new Point(state.ball.point.x, state.ball.point.y),
+        point: new Point(state.ball.point.x * ratiox, state.ball.point.y * ratioy),
         dir: this.ball.speed,
       },
     };
-    for (let player in state.players) {
-
-    }
+    state.players.forEach((player) => {
+      newState.players.push({
+        point: new Point(player.point.x * ratiox, player.point.y * ratioy),
+        dir : player.dir,
+        hp : player.hp
+      })
+    })
     return state;
   }
 
