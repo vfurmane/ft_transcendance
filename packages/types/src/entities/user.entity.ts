@@ -3,7 +3,9 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -13,6 +15,7 @@ import { ConversationRole } from './conversationRole.entity';
 import { Match } from './match.entity';
 import { Jwt } from './jwt.entity';
 import { JwtPayload } from '..';
+import { Profile } from './profile.entity';
 
 @Exclude()
 @Entity()
@@ -72,4 +75,8 @@ export class User {
   jwts!: Jwt[];
 
   currentJwt!: JwtPayload;
+
+  @OneToOne(() => Profile, (profile) => profile.user)
+  @JoinColumn()
+  profile!: Profile;
 }
