@@ -26,7 +26,7 @@ export default function Matchmaking(): ReactElement {
     if (websockets.matchmaking) {
       websockets.matchmaking.on("game_start", (data: GameStartPayload) => {
         if (data.users.find((user) => user.id == UserState.id)) {
-          router.push("/pong");
+          router.push("/pingPong");
         }
       });
     }

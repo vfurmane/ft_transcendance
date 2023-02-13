@@ -11,13 +11,10 @@ import ChatBar from "../components/chatBar";
 import playButtonStyles from "styles/playButton.module.scss";
 import textStyles from "styles/text.module.scss";
 import styles from "styles/home.module.scss";
-import { useRouter } from "next/router";
 
 function Home(): JSX.Element {
-  const friendListRef = useRef([<></>]);
+  const friendListRef = useRef<JSX.Element[]>([]);
   const setterInit: React.Dispatch<React.SetStateAction<boolean>> = () => false;
-
-  const router = useRouter();
 
   const [openPlayButton, setOpenPlayButton] = useState(false);
   const [openUserMenu, setOpenUserMenu] = useState(false);
@@ -161,17 +158,22 @@ function Home(): JSX.Element {
         handleClickUserMenu={handleClickUserMenu}
       />
       <div className={`${styles.illustration} d-none d-lg-block`}></div>
-      <div className="container ">
-        <div className="row">
-          Chat
-          <div className="col-12  d-none d-lg-block">
-            <h3 className={styles.title}>Ft_Transcendence</h3>
-          </div>
-          <div className="col-12 d-block d-lg-none">
-            <h3 className={`${styles.title} ${styles.small} d-block d-lg-none`}>
-              Ft_Transcendence
-            </h3>
-          </div>
+      <div className="container" style={{ overflow: "hidden", height: "100%" }}>
+        <div className={`containerScrollVertical`}>
+          <span className={`textScroll ${textStyles.pixel}`}>
+            -Ft_Transcendence-Ft_Transcendence-Ft_Transcendence&nbsp;
+          </span>
+          <span className={`textScroll ${textStyles.pixel}`}>
+            -Ft_Transcendence-Ft_Transcendence-Ft_Transcendence&nbsp;
+          </span>
+        </div>
+        <div className={`containerScrollVertical inv`}>
+          <span className={`textScroll inv ${textStyles.laquer}`}>
+            -Ft_Transcendence-Ft_Transcendence-Ft_Transcendence&nbsp;
+          </span>
+          <span className={`textScroll inv ${textStyles.laquer}`}>
+            -Ft_Transcendence-Ft_Transcendence-Ft_Transcendence&nbsp;
+          </span>
         </div>
         <div className="row">
           <div
@@ -182,12 +184,13 @@ function Home(): JSX.Element {
             <PlayButton
               handleClick={handleClickPlayButton}
               open={openPlayButton}
+              style={{ text: "PLAY", small: false, color: true }}
             />
           </div>
           {openPlayButton ? (
             <div className="col-10 offset-1 offset-xl-0 offset-lg-1 col-lg-3 offset-xl-1 ">
               <div
-                className={`{${playButtonStyles.playMenuContainer} d-block d-lg-none`}
+                className={`${playButtonStyles.playMenuContainer} d-block d-lg-none`}
               >
                 <PlayMenu />
               </div>
@@ -222,7 +225,7 @@ function Home(): JSX.Element {
           </div>
         </div>
         <div className="row">
-          <div className="col-10 offset-1" id="leaderBoard">
+          <div className="col-10 offset-1" id="leaderboard">
             <ArrayDoubleColumn
               title="leaderboard"
               handleClick={handleClickUserMenu}

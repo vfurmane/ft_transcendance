@@ -1,6 +1,8 @@
-import { User } from "./entities";
 import { Conversation } from "./entities/conversation.entity";
 import { GameMode } from "./enums";
+import { Vector } from "./class/vector.class";
+import { Point } from "./class/point.class";
+import { User } from "./entities";
 
 export interface FtUser {
   login: string;
@@ -23,8 +25,7 @@ export interface JwtPayload {
   jti: string;
 }
 
-export interface unreadMessagesResponse
-{
+export interface unreadMessagesResponse {
   totalNumberOfUnreadMessages: number;
   UnreadMessage: unreadMessages[];
 }
@@ -46,6 +47,23 @@ export interface ConversationWithUnread {
   lastMessage: Date;
 }
 
+export interface Ball {
+  point: Point;
+  dir: Vector;
+}
+
+export interface PlayerInterface {
+  point: Point;
+  dir: Vector;
+  hp: number;
+}
+
+export interface GameState {
+  numberPlayer: number;
+  players: PlayerInterface[];
+  ball: Ball;
+}
+
 export interface Userfront {
   id: string;
   name: string;
@@ -59,9 +77,9 @@ export interface Userfront {
 }
 
 export interface FriendshipRequestStatus {
-  friend : Userfront | null,
-  accept: boolean,
-  ask: boolean
+  friend: Userfront | null;
+  accept: boolean;
+  ask: boolean;
 }
 
 export interface MatchFront {
@@ -89,3 +107,4 @@ export interface GameStartPayload {
 
 export * from './enums';
 export * from './entities';
+export * from "./class";

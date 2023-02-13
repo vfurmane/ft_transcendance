@@ -8,7 +8,12 @@ export default function Web(): JSX.Element {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setLoading(false);
+    const access_token = localStorage.getItem("access_token");
+    if (access_token === null) {
+      router.replace("/login");
+    } else {
+      setLoading(false);
+    }
   }, [router]);
 
   if (loading) return <Loading></Loading>;

@@ -25,11 +25,7 @@ export default function LeaderboardEntity(props: {
     backgroundColor: color,
   };
 
-  if (
-    props.user.rank &&
-    Number(props.user.rank.toString().slice(-1)) <= 5 &&
-    Number(props.user.rank.toString().slice(-1)) != 0
-  ) {
+  if (Number(props.index.toString().slice(-1)) < 5) {
     div1 = (
       <div className={leaderBoardStyles.rank} style={style}>
         {props.user.rank}

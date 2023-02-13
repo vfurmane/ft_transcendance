@@ -1,7 +1,7 @@
 @import "variables";
 
 .PlayButtonContainer {
-  padding-bottom: 200px;
+  margin-bottom: 20px;
   display: flex;
   justify-content: center;
 }
@@ -25,11 +25,26 @@
   transform: translateX(0px);
   margin-top: 60px;
   z-index: 2;
-  position: absolute;
   width: 300px;
-  height: 100px;
   text-align: center;
   box-shadow: 0px 0px 8px 1px rgba(234, 196, 53, 1);
+}
+
+.playButton.small
+{
+  font-size: 10px;
+  width: 60%;
+  height: 80px;
+  padding: 10px;
+  margin: 10px;
+  overflow: hidden;
+  box-shadow: none;
+}
+
+.playButton.noColor
+{
+  background: transparent;
+  color: white;
 }
 
 .playButton:hover {
