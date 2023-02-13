@@ -387,7 +387,7 @@ class Game {
     this.board.wall.forEach((wall) => {
       wall.draw(this.boardContext, undefined);
     });
-    this.ball.draw(this.boardContext, undefined);
+    this.ball.draw(this.boardContext, 'green');
     for (const p of this.player) {
       p.draw(this.boardContext, p.color);
     }

@@ -101,7 +101,7 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
     console.log(client.data.name + ' DISCONNECTED');
   }
 
-  @Interval(17)
+  @Interval(17) // THIS FUNCTION CALLS UPDATE FOR EVERY CURRENT GAME
   update(): void {
     if (!this.games || this.games === undefined) {
       return;
@@ -113,7 +113,7 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
       } else {
         console.log("GAME ENDED")
         const sockets = await this.server.in(room).fetchSockets();
-        this.server.in(room).emit('endGame');
+        this.server.in(room).emit('endGame'); // TELL CLIENT TO LEAVE AND REMOVE THE ROOM
         sockets.forEach((socket) => {
           socket.leave(room);
           socket.data.room = undefined;
@@ -123,7 +123,7 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
     });
   }
 
-  @SubscribeMessage('ready')
+  @SubscribeMessage('ready') // THIS FUNCTION LISTEN FOR "READY" MESSAGE FROM CLIENT AND SEND THE FIRST REFRESH IF EVERY USER IS READY
   async clientIsReady(
     @ConnectedSocket() client: Socket,
   ): Promise<void | string> {
@@ -233,14 +233,14 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
       const list: Array<{ id: string; ready: boolean }> = [];
       (await this.server.in(room).fetchSockets()).forEach((element) => {
         list.push({ id: element.data.id, ready: false });
-        this.server.in(`user_${element.data.id}`).emit('startGame', {
+        this.server.in(`user_${element.data.id}`).emit('startGame', { // SEND EVERY CLIENT THE NUMBER OF PLAYER AND ITS POSITION
           listOfPlayers: ListOfPlayers,
           number_player: numberPlayer,
           position: element.data.position,
         });
       });
       this.games.set(room, [
-        new Game(numberPlayer, this.server.in(room)),
+        new Game(numberPlayer, this.server.in(room)), // CREATE A GAME SERVER SIDE. IT NEED THE NUMBER OF PLAYER AND THE BROADCASTER FOR THE ROOM
         list,
       ]);
       return 'Launching the game for room ' + room;
@@ -268,7 +268,7 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
           client.data.position = count;
           console.log(count);
           if (count === 1) {
-            // CHANGE BACK TO 5 PLEASE
+            // CHANGE BACK TO 5 FOR BATTLE ROYAL
             const list: Array<{ id: string; ready: boolean }> = [];
             const fetchSockets = (await this.server.in(room).fetchSockets());
             const ids = fetchSockets.map(e => e.data.id);
@@ -282,20 +282,20 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
             (await this.server.in(room).fetchSockets()).forEach((element) => {
               list.push({ id: element.data.id, ready: false });
-              this.server.in(`user_${element.data.id}`).emit('startGame', {
+              this.server.in(`user_${element.data.id}`).emit('startGame', {  // SEND EVERY CLIENT THE NUMBER OF PLAYER AND ITS OWN POSITION
                 listOfPlayers: ListOfPlayers,
                 number_player: count + 1,
                 position: element.data.position,
               });
             });
-            this.games.set(room, [new Game(2, this.server.in(room)), list]);
-            this.room_id.splice(this.room_id.indexOf(room), 1); // pop the room out of the list
+            this.games.set(room, [new Game(2, this.server.in(room)), list]);  // CREATE A GAME SERVER SIDE. IT NEED THE NUMBER OF PLAYER AND THE BROADCASTER FOR THE ROOM
+            this.room_id.splice(this.room_id.indexOf(room), 1); // pop the room out of waiting room list
             return 'Launched game for room ' + room;
           }
           return 'Joined room of id ' + room + ' at position ' + count;
         }
       }
-      const num = (Number(this.room_id.at(-1)) + 1).toString(); // change to a random URI
+      const num = (Number(this.room_id.at(-1)) + 1).toString(); // need to be changed to a random URI
       this.room_id.push(num);
       client.join(num);
       client.data.room = num;
