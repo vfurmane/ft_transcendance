@@ -9,3 +9,5 @@ export * from "./user.entity";
 export * from "./frienships.entity";
 export * from "./match.entity";
 export * from "./jwt.entity";
+export * from './upload.entity'
+export * from './profile.entity'
