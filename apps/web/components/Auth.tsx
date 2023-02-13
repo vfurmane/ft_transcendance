@@ -1,5 +1,5 @@
 import { useRouter } from "next/router";
-import { ReactElement, useEffect, useState } from "react";
+import { ReactElement, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { identifyUser } from "../helpers/identifyUser";
 import { refreshToken } from "../helpers/refreshTokens";
@@ -16,27 +16,26 @@ export default function Auth({ children }: AuthProps): JSX.Element {
   const dispatch = useDispatch();
   const router = useRouter();
   const [loading, setLoading] = useState(true);
-  const [refreshInterval, setRefreshInterval] = useState<NodeJS.Timer | null>(
-    null
-  );
+  const refreshInterval = useRef<NodeJS.Timer | null>(null);
 
   useEffect((): (() => void) => {
     const fetchUser = async (): Promise<void> => {
-      if (refreshInterval) {
-        clearInterval(refreshInterval);
-        setRefreshInterval(null);
+      if (refreshInterval.current) {
+        clearInterval(refreshInterval.current);
+        refreshInterval.current = null;
       }
-      const user = await identifyUser();
+      const user = await identifyUser(loading);
       if (user) {
         dispatch(setUserState(user));
-        setRefreshInterval(setInterval(async () => {
+        refreshInterval.current = setInterval(async () => {
           if (!(await refreshToken()) && refreshInterval) {
-            clearInterval(refreshInterval);
-            setRefreshInterval(null);
+            if (refreshInterval.current)
+              clearInterval(refreshInterval.current);
+            refreshInterval.current = null;
             dispatch(setUserState(initUser));
             router.push("/auth/login");
           }
-        }, 1000 * 60 * 4));
+        }, 1000 * 60 * 4);
       } else {
         dispatch(setUserState(initUser));
       }
@@ -44,8 +43,8 @@ export default function Auth({ children }: AuthProps): JSX.Element {
     };
     fetchUser();
     return (): void => {
-      if (refreshInterval) clearInterval(refreshInterval);
-      setRefreshInterval(null);
+      if (refreshInterval.current) clearInterval(refreshInterval.current);
+      refreshInterval.current  = null;
     };
   }, [userState.id]);
   if (loading) return <Loading></Loading>;

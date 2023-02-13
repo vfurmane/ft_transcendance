@@ -16,16 +16,17 @@ export default function OpenedConversation( props : OpenedConversationProps ) : 
     const [currentConversation, setCurrentConversation] = useState<ConversationEntity | null>(props.conversation)
     const [newConversation, setNewConversation] = useState<{userId: string, userName: string} | null>(props.newConversation)
     const websockets = useWebsocketContext()
-    const lastElement = useRef<HTMLElement | undefined>(undefined)
+    const lastElement = useRef<HTMLElement | null>(null)
     const formRef = useRef<HTMLFormElement | null>(null)
     const [ scroll, setScroll ] = useState<boolean>(true)
+    const socketConnected = useRef<boolean>(false);
 
     const addNewMessage = (message : any) => {
         if (message.id === currentConversation?.id)
         {
             setMessages((m) => [...m, message.message])
             console.error(lastElement.current?.getBoundingClientRect().top)
-            if (lastElement !== null && lastElement !== undefined)
+            if (lastElement !== null)
             {
                 const top = lastElement.current?.getBoundingClientRect().top;
                 console.error(top, window.innerHeight)
@@ -42,6 +43,7 @@ export default function OpenedConversation( props : OpenedConversationProps ) : 
 
     const hydrateMessages = () =>
     {
+        console.log("hydrating")
         websockets.conversations?.emit("getMessages", {id : currentConversation?.id}, (messages : MessageEntity[]) =>
         {
             setMessages(() => messages)
@@ -50,15 +52,18 @@ export default function OpenedConversation( props : OpenedConversationProps ) : 
 
     useEffect(() =>
     {
-        websockets.conversations?.off("newMessage", addNewMessage)
         if (currentConversation)
         {
-            console.error("Conversation already exists")
-            if (websockets.conversations?.connected)
+            if (websockets.conversations?.connected && socketConnected.current === false)
             {
                 hydrateMessages()
                 websockets.conversations.on("newMessage", addNewMessage)
-                console.error(lastElement.current)
+                socketConnected.current = true
+            }
+            else if (websockets.conversations?.disconnected)
+            {
+                console.error("Socket connection error")
+                socketConnected.current = false
             }
         }
         else
@@ -66,16 +71,15 @@ export default function OpenedConversation( props : OpenedConversationProps ) : 
             setMessages(m => [])
         }
         return (() => {
-            console.error("Cleaning up");
             websockets.conversations?.off("newMessage", addNewMessage) 
         })
-    }, [])
+    }, [currentConversation, websockets.conversations?.connected])
 
     useEffect(() =>
     {
         if (scroll)
             lastElement.current?.scrollIntoView({ behavior: "smooth" })
-    }, [messages])
+    }, [messages, scroll])
     
     return (
         <section className={ styles.openedConversationContainer }>
@@ -100,9 +104,9 @@ export default function OpenedConversation( props : OpenedConversationProps ) : 
                 websockets.conversations?.emit("createConversation", { groupConversation: false, participants: [newConversation?.userId]}, (conversation : any) => {
                     console.error(conversation)
                     createdConversation = conversation
+                    websockets.conversations?.emit('postMessage', { id : conversation.id, content :  message })
                 })
-                // websockets.conversations?.emit('postMessage', { id : newConversation.id, content :  message })
-                // props.conversation = newConversation
+                setCurrentConversation(createdConversation)
             }
             else
             {
