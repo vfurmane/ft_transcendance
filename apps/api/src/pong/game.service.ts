@@ -424,10 +424,10 @@ export class Racket extends Entity {
         -this.dir.y * this.defaultSpeed,
       );
     }
-    this.moveTo(this.speed, 1/*timeRatio*/);
+    this.moveTo(this.speed, timeRatio);
     for (const wall of walls) {
       if (this.sat(wall)) {
-        this.moveTo(new Vector(-this.speed.x, -this.speed.y), 1/*timeRatio*/);
+        this.moveTo(new Vector(-this.speed.x, -this.speed.y), timeRatio);
       }
     }
   }

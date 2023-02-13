@@ -152,19 +152,19 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   /*    THIS FUNCTION IS DEBUG ONLY (SHOW SERVER SIDE VISION OF THE GAME)    */
-  @Interval(10)
-  refresh() {
-  	if (!this.games || this.games === undefined) {
-  		return ;
-  	}
-  	this.games.forEach(async (key, room) => {
-  		let game = key[0];
-  		if (!game.await && game.boardType !== 0) {
-  			let state = game.getState();
-  			this.server.in(room).emit('refresh', state, Date.now());
-  		}
-  	});
-  }
+  // @Interval(10)
+  // refresh() {
+  // 	if (!this.games || this.games === undefined) {
+  // 		return ;
+  // 	}
+  // 	this.games.forEach(async (key, room) => {
+  // 		let game = key[0];
+  // 		if (!game.await && game.boardType !== 0) {
+  // 			let state = game.getState();
+  // 			this.server.in(room).emit('refresh', state, Date.now());
+  // 		}
+  // 	});
+  // }
 
   checkUser(client: Socket, room: undefined | string): boolean {
     if (room === undefined) {

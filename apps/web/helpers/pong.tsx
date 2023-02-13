@@ -89,7 +89,7 @@ class Game {
       players: [],
       ball: {
         point: new Point(state.ball.point.x * ratiox, state.ball.point.y * ratioy),
-        dir: this.ball.speed,
+        dir: state.ball.dir
       },
     };
     state.players.forEach((player) => {
@@ -134,7 +134,12 @@ class Game {
         this.board.wall
       );
     }
-    this.ball.speed = new Vector(state.ball.dir.x, state.ball.dir.y);
+    const speed = new Vector(state.ball.dir.x, state.ball.dir.y).normalized();
+    this.ball.defaultSpeed = 3 * (this.boardCanvas.width / ServerCanvas.width);
+    this.ball.speed = new Vector(
+      speed.x * this.ball.defaultSpeed,
+      speed.y * this.ball.defaultSpeed
+    );
     this.ball.calcNextCollision(this.player, this.board.wall, null);
   }
 
@@ -270,6 +275,7 @@ class Game {
         this.board.wall
       );
     }
+    this.ball.defaultSpeed = 3 * (this.boardCanvas.width / ServerCanvas.width);
     if (Game.isSolo)
       this.cible = new Target(
         this.createRect(
@@ -319,6 +325,7 @@ class Game {
         }
     }
 
+    this.ball.defaultSpeed = 3 * (this.boardCanvas.width / ServerCanvas.width);
 
 
     /*if (this.ballWidth !== tmp)
