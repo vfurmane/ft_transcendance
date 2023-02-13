@@ -271,17 +271,8 @@ export class Ball extends Entity {
       this.nextCollision.wall > this.nextCollision.racket &&
       this.nextCollision.racket < 1
     ) {
-      console.log("COULD HIT PLAYER")
+      let test = new Ball(this.copy(), rackets, walls);
       for (const racket of rackets) {
-        /******************* CHECK IF SPEED VECTOR WILL HIT RACKET VECTOR ******************/
-        // let test = new Ball(this.copy(), rackets, walls);
-        // for (let i = 0; i < 100; i++) {
-        //   test.moveTo(this.speed, 0.01);
-        //   if (test.sat(racket)) {
-        //     console.log("SHOULD HIT SOON")
-        //     break ;
-        //   }
-        // }
         if (this.sat(racket)) {
           console.log("HIT PLAYER");
           let angle = 0;
@@ -312,6 +303,43 @@ export class Ball extends Entity {
           this.calcNextCollision(rackets, walls, null);
           game.broadcaster.emit('refresh', game.getState(), Date.now()); // not sure if we keep this
           return;
+        }
+      }
+      // REDO A CHECK FOR EACH SUBPOSITION OF BALL (NOT OPTIMAL)
+      for (let i = 0; i < 100; i++) {
+        test.moveTo(this.speed, 0.01);
+        for (const racket of rackets) {
+          if (test.sat(racket)) {
+            console.log("SHOULD HAVE HIT")
+            let angle = 0;
+            let face;
+            const index = rackets.indexOf(racket);
+            if (rackets.length != 2) face = this.getFace(index);
+            else {
+              face = index === 1 ? this.getFace(2) : this.getFace(0);
+            }
+            let ratio = racket.point[2].intersect(
+              racket.point[1],
+              this.center(),
+              face,
+            );
+            if (ratio > 1) ratio = 1;
+            if (ratio < 0) ratio = 0;
+            angle = -(Math.PI / 4 + (Math.PI / 2) * (1 - ratio));
+            const norm = racket.point[2].vectorTo(racket.point[1]).normalized();
+            [norm.x, norm.y] = [
+              norm.x * Math.cos(angle) + norm.y * Math.sin(angle),
+              -(norm.x * Math.sin(angle)) + norm.y * Math.cos(angle),
+            ];
+            this.speed = new Vector(
+              norm.x * this.defaultSpeed,
+              norm.y * this.defaultSpeed,
+            );
+            this.moveTo(this.speed, timeRatio);
+            this.calcNextCollision(rackets, walls, null);
+            game.broadcaster.emit('refresh', game.getState(), Date.now()); // not sure if we keep this
+            return;
+          }
         }
       }
     }
@@ -396,10 +424,10 @@ export class Racket extends Entity {
         -this.dir.y * this.defaultSpeed,
       );
     }
-    this.moveTo(this.speed, timeRatio);
+    this.moveTo(this.speed, 1/*timeRatio*/);
     for (const wall of walls) {
       if (this.sat(wall)) {
-        this.moveTo(new Vector(-this.speed.x, -this.speed.y), timeRatio);
+        this.moveTo(new Vector(-this.speed.x, -this.speed.y), 1/*timeRatio*/);
       }
     }
   }

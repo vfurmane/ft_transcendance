@@ -99,7 +99,7 @@ class Game {
         hp : player.hp
       })
     })
-    return state;
+    return newState;
   }
 
   refresh(state: GameState): void {
@@ -242,8 +242,8 @@ class Game {
     const context = this.boardCanvas.getContext("2d");
     if (!context) return;
     this.boardContext = context;
-    this.boardCanvas.width = 400;//window.innerWidth * 0.6;
-    this.boardCanvas.height = 200;//(window.innerWidth * 0.6) * (1 / 2);
+    this.boardCanvas.width = window.innerWidth * 0.6;
+    this.boardCanvas.height = (window.innerWidth * 0.6) * (1 / 2);
     this.board = new Board(this.boardType, this.boardCanvas);
     this.ballWidth = this.board.wallSize * 0.00625;
     if (this.boardType !== Form.REC) {
@@ -293,8 +293,8 @@ class Game {
   updateGame() {
     if (this.await) return;
     const time = Math.round(Date.now() - this.start);
-    this.boardCanvas!.width = 400;//window.innerWidth * 0.6;
-    this.boardCanvas!.height = 200;//(window.innerWidth * 0.6) * (1 / 2);
+    this.boardCanvas!.width = window.innerWidth * 0.6;
+    this.boardCanvas!.height = (window.innerWidth * 0.6) * (1 / 2);
     let tmp = this.board.wallSize;
     //this.board = new Board(this.boardType, this.boardCanvas);
     /*if (this.boardType != Form.REC) {
