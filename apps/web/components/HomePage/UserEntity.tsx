@@ -36,7 +36,9 @@ export default function UserEntity(props: {
     })
       .then(function (response) {
         response.json().then((res) => {
-          if (res === 1) {
+          console.log(res);
+          if (res) {
+            console.log("validation succes");
             setAccept(true);
           }
         });
@@ -124,7 +126,7 @@ export default function UserEntity(props: {
         </div>
         {props.option.del ? (
           <div>
-            {!accept ? (
+            {!accept? (
               <div>
                 {props.option.ask ? (
                   <p className={textStyles.saira}>on hold...</p>

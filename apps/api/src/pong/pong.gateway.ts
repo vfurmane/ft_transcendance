@@ -105,7 +105,7 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
     console.log(client.data.name + ' DISCONNECTED');
   }
 
-  @Interval(17)
+  @Interval(17) // THIS FUNCTION CALLS UPDATE FOR EVERY CURRENT GAME
   update(): void {
     if (!this.pongService.games || this.pongService.games === undefined) {
       return;
@@ -117,7 +117,7 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
       } else {
         console.log('GAME ENDED');
         const sockets = await this.server.in(room).fetchSockets();
-        this.server.in(room).emit('endGame');
+        this.server.in(room).emit('endGame'); // TELL CLIENT TO LEAVE AND REMOVE THE ROOM
         sockets.forEach((socket) => {
           socket.leave(room);
           socket.data.room = undefined;
@@ -127,7 +127,7 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
     });
   }
 
-  @SubscribeMessage('ready')
+  @SubscribeMessage('ready') // THIS FUNCTION LISTEN FOR "READY" MESSAGE FROM CLIENT AND SEND THE FIRST REFRESH IF EVERY USER IS READY
   async clientIsReady(
     @ConnectedSocket() client: Socket,
   ): Promise<void | string> {
@@ -156,19 +156,19 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   /*    THIS FUNCTION IS DEBUG ONLY (SHOW SERVER SIDE VISION OF THE GAME)    */
-  @Interval(10)
-  refresh() {
-    if (!this.pongService.games || this.pongService.games === undefined) {
-      return;
-    }
-    this.pongService.games.forEach(async (key, room) => {
-      const game = key[0];
-      if (!game.await && game.boardType !== 0) {
-        const state = game.getState();
-        this.server.in(room).emit('refresh', state, Date.now());
-      }
-    });
-  }
+  // @Interval(10)
+  // refresh() {
+  // 	if (!this.games || this.games === undefined) {
+  // 		return ;
+  // 	}
+  // 	this.games.forEach(async (key, room) => {
+  // 		let game = key[0];
+  // 		if (!game.await && game.boardType !== 0) {
+  // 			let state = game.getState();
+  // 			this.server.in(room).emit('refresh', state, Date.now());
+  // 		}
+  // 	});
+  // }
 
   checkUser(client: Socket, room: undefined | string): boolean {
     if (room === undefined) {

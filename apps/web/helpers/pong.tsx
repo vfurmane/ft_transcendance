@@ -13,6 +13,7 @@ import React, { useRef, useEffect } from "react";
 import { useWebsocketContext } from "../components/Websocket";
 import { Socket } from "socket.io-client";
 import { DefaultEventsMap } from "socket.io/dist/typed-events";
+import { runInThisContext } from "vm";
 
 class Game {
   public static isSolo = false;
@@ -42,8 +43,7 @@ class Game {
   constructor(
     number_player: number | undefined,
     position: number | undefined,
-    changeLife: (index: number, val: number) => void
-  ) {
+    changeLife: (index: number, val: number) => void) {
     if (number_player) {
       this.boardType = number_player;
     } else {
@@ -87,21 +87,18 @@ class Game {
       numberPlayer: state.numberPlayer,
       players: [],
       ball: {
-        point: new Point(
-          state.ball.point.x * ratiox,
-          state.ball.point.y * ratioy
-        ),
-        dir: this.ball.speed,
+        point: new Point(state.ball.point.x * ratiox, state.ball.point.y * ratioy),
+        dir: state.ball.dir
       },
     };
     state.players.forEach((player) => {
       newState.players.push({
         point: new Point(player.point.x * ratiox, player.point.y * ratioy),
-        dir: player.dir,
-        hp: player.hp,
-      });
-    });
-    return state;
+        dir : player.dir,
+        hp : player.hp
+      })
+    })
+    return newState;
   }
 
   refresh(state: GameState): void {
@@ -136,7 +133,12 @@ class Game {
         this.board.wall
       );
     }
-    this.ball.speed = new Vector(state.ball.dir.x, state.ball.dir.y);
+    const speed = new Vector(state.ball.dir.x, state.ball.dir.y).normalized();
+    this.ball.defaultSpeed = 3 * (this.boardCanvas.width / ServerCanvas.width);
+    this.ball.speed = new Vector(
+      speed.x * this.ball.defaultSpeed,
+      speed.y * this.ball.defaultSpeed
+    );
     this.ball.calcNextCollision(this.player, this.board.wall, null);
   }
 
@@ -174,7 +176,6 @@ class Game {
   createRacket(wall: Wall[]): Racket[] {
     this.ballWidth = this.board.wallSize * 0.00625;
     if (Game.isSolo) {
-      console.log("wall: ");
       return [
         new Racket(
           0,
@@ -256,8 +257,8 @@ class Game {
     const context = this.boardCanvas.getContext("2d");
     if (!context) return;
     this.boardContext = context;
-    this.boardCanvas.width = 400; //window.innerWidth * 0.6;
-    this.boardCanvas.height = 200; //(window.innerWidth * 0.6) * (1 / 2);
+    this.boardCanvas.width = window.innerWidth * 0.6;
+    this.boardCanvas.height = (window.innerWidth * 0.6) * (1 / 2);
     this.board = new Board(this.boardType, this.boardCanvas);
     this.ballWidth = this.board.wallSize * 0.00625;
     if (this.boardType !== Form.REC) {
@@ -284,6 +285,7 @@ class Game {
         this.board.wall
       );
     }
+    this.ball.defaultSpeed = 3 * (this.boardCanvas.width / ServerCanvas.width);
     if (Game.isSolo)
       this.cible = new Target(
         this.createRect(
@@ -307,8 +309,8 @@ class Game {
   updateGame() {
     if (this.await) return;
     const time = Math.round(Date.now() - this.start);
-    this.boardCanvas!.width = 400; //window.innerWidth * 0.6;
-    this.boardCanvas!.height = 200; //(window.innerWidth * 0.6) * (1 / 2);
+    this.boardCanvas!.width = window.innerWidth * 0.6;
+    this.boardCanvas!.height = (window.innerWidth * 0.6) * (1 / 2);
     const tmp = this.board.wallSize;
     //this.board = new Board(this.boardType, this.boardCanvas);
     /*if (this.boardType != Form.REC) {
@@ -319,18 +321,21 @@ class Game {
         this.board.wall[2],
       ]);
     }*/
-    if (Game.isSolo) {
-      this.boardCanvas!.width = window.innerWidth * 0.6;
-      this.boardCanvas!.height = window.innerWidth * 0.6 * (1 / 2);
-      this.board = new Board(this.boardType, this.boardCanvas);
-      if (this.board.wallSize !== tmp) {
-        console.log("hello");
-        this.player = this.createRacket([
-          this.board.wall[0],
-          this.board.wall[2],
-        ]);
-      }
+    if (Game.isSolo)
+    {
+        this.boardCanvas!.width = window.innerWidth * 0.6;
+        this.boardCanvas!.height = (window.innerWidth * 0.6) * (1 / 2);
+        this.board = new Board(this.boardType, this.boardCanvas);
+        if (this.board.wallSize !== tmp) {
+          this.player = this.createRacket([
+            this.board.wall[0],
+            this.board.wall[2],
+          ]);
+        }
     }
+
+    this.ball.defaultSpeed = 3 * (this.boardCanvas.width / ServerCanvas.width);
+
 
     /*if (this.ballWidth !== tmp)
     {
@@ -389,21 +394,22 @@ class Game {
     const timeRatio = (Date.now() - this.start - this.lastUpdate) / 17;
     this.ball.update(this.player, this.board.wall, this.board, timeRatio);
     this.player.forEach((player) => player.update(this.board.wall, timeRatio));
-    if (Game.isSolo) this.cible.update(this.ball, this.boardCanvas);
+    if (Game.isSolo && this.cible) this.cible.update(this.ball, this.boardCanvas);
     this.board.wall.forEach((wall) => {
       wall.draw(this.boardContext, undefined);
     });
-    this.ball.draw(this.boardContext, undefined);
+    this.ball.draw(this.boardContext, 'green');
     for (const p of this.player) {
       p.draw(this.boardContext, p.color);
     }
-    if (Game.isSolo) this.cible.draw(this.boardContext);
+    if (Game.isSolo && this.cible) this.cible.draw(this.boardContext);
     if (Game.live === 0) {
       Game.point = 0;
       Game.live = 3;
       this.start = Date.now();
     }
     this.lastUpdate = Date.now() - this.start;
+    this.boardContext.setTransform(1, 0, 0, 1, 0, 0);
   }
 }
 
