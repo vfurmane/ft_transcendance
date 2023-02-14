@@ -1,6 +1,8 @@
 import { Conversation } from "./entities/conversation.entity";
+import { GameMode } from "./enums";
 import { Vector } from "./class/vector.class";
 import { Point } from "./class/point.class";
+import { User } from "./entities";
 
 export interface FtUser {
   login: string;
@@ -94,6 +96,21 @@ export interface Achivement {
   description: string;
 }
 
-export * from "./enums";
-export * from "./entities";
+export interface Matchmaking {
+  isInQueue: boolean;
+  gameMode: GameMode;
+}
+
+export interface GameStartPayload {
+  id: string;
+  users: User[];
+}
+
+export interface GameEntityFront {
+  id: string;
+  opponents: { user: Userfront }[];
+}
+
+export * from './enums';
+export * from './entities';
 export * from "./class";

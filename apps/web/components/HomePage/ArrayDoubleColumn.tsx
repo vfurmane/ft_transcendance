@@ -28,20 +28,20 @@ export default function ArrayDoubleColumn(props: {
       },
     })
       .then((res) => res.json())
-      .then((data) => {
-        data.map((e: User, i: number) =>
+      .then((data: User[]) => {
+        data.forEach((user, index) => {
           tmp.push(
             <LeaderboardEntity
-              key={i}
-              user={e}
-              index={i}
+              key={user.id}
+              user={user}
+              index={index}
               handleClick={props.handleClick}
             />
-          )
-        );
+          );
+        });
         setLeaderBoardList([...tmp]);
       })
-      .catch((error) => console.log(`error fetch : ${error.message}`));
+      .catch((error) => console.error(`error fetch : ${error.message}`));
   }, [props.handleClick]);
 
   function prevClick(): void {
@@ -62,7 +62,7 @@ export default function ArrayDoubleColumn(props: {
     function getColumn(num: number): JSX.Element[] {
       const column: JSX.Element[] = [];
       if (num > 0 && leaderBoardList) {
-        for (let i = 0; i < 5; i++)
+        for (let i = 0; i < Math.min(leaderBoardList.length, 5); i++)
           column.push(leaderBoardList[i + 5 * (num - 1)]);
       }
       return column;

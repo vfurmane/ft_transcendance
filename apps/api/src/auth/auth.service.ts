@@ -228,4 +228,9 @@ export class AuthService {
     this.statesRepository.delete({ token: state.token });
     return;
   }
+
+  async logout(jti: string): Promise<void> {
+    await this.jwtsRepository.delete({ originToken: { id: jti } });
+    await this.jwtsRepository.delete({ id: jti });
+  }
 }

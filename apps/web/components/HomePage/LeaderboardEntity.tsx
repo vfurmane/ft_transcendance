@@ -25,9 +25,7 @@ export default function LeaderboardEntity(props: {
     backgroundColor: color,
   };
 
-  if (
-    Number(props.index.toString().slice(-1)) < 5
-  ) {
+  if (Number(props.index.toString().slice(-1)) < 5) {
     div1 = (
       <div className={leaderBoardStyles.rank} style={style}>
         {props.user.rank}
@@ -47,7 +45,6 @@ export default function LeaderboardEntity(props: {
     <div className={leaderBoardStyles.leaderBoardContainer}>
       {div1}
       <UserEntity
-        key={props.user.rank}
         small={true}
         option={{ del: false, accept: true, ask: false }}
         user={props.user}

@@ -21,7 +21,6 @@ export default function Profil(): JSX.Element {
     null;
   };
 
-  
   const prevAchivementRef = useRef({ name: "", status: "", description: "" });
   const router = useRouter();
   const [user, setUser] = useState(initUser);
@@ -32,7 +31,7 @@ export default function Profil(): JSX.Element {
   const [openConfigProfil, setOpenConfigProfil] = useState(false);
   const [configProfil, setConfigProfil] = useState(<></>);
   const [matchHistory, setMatchHistory] = useState([initMatch]);
-  const [listOfMatch, setListOfMatch] = useState([<></>]);
+  const [listOfMatch, setListOfMatch] = useState<JSX.Element[]>([]);
 
   /*======for close topBar component when click on screen====*/
   const [openToggle, setOpenToggle] = useState(false);
@@ -88,7 +87,7 @@ export default function Profil(): JSX.Element {
           setMatchHistory(data);
         })
         .catch((error) => {
-          console.log(`problem with fetch : ${error.message}`);
+          console.error(`problem with fetch : ${error.message}`);
         });
     }
   }, [router.query, UserState]);
@@ -96,7 +95,13 @@ export default function Profil(): JSX.Element {
   useEffect(() => {
     const tmp: JSX.Element[] = [];
     for (let i = 0; i < matchHistory.length; i++) {
-      tmp.push(<MatchEntity match={matchHistory[i]} user={user} key={i} />);
+      tmp.push(
+        <MatchEntity
+          match={matchHistory[i]}
+          user={user}
+          key={matchHistory[i].id}
+        />
+      );
     }
     setListOfMatch([...tmp]);
 
@@ -153,18 +158,11 @@ export default function Profil(): JSX.Element {
         "Content-Type": "application/json",
         Authorization: "Bearer " + localStorage.getItem("access_token"),
       },
-    })
-      .then(function (response) {
-        response.json().then((res) => {
-          if (res === 1) console.log("friend add");
-          else console.log("friend allready add");
-        });
-      })
-      .catch(function (error) {
-        console.log(
-          "Il y a eu un problème avec l'opération fetch : " + error.message
-        );
-      });
+    }).catch(function (error) {
+      console.error(
+        "Il y a eu un problème avec l'opération fetch : " + error.message
+      );
+    });
   }
 
   //temporary before get the real data
@@ -200,7 +198,6 @@ export default function Profil(): JSX.Element {
           <div
             className={`col-10 offset-1 offset-md-0 offset-lg-1 col-md-2 ${styles.flexCenterColumn}`}
           >
-            
             <div className="fill">
               <Image
                 alt="avatar"
@@ -209,7 +206,9 @@ export default function Profil(): JSX.Element {
                 height={200}
               />
             </div>
-            <div className={styles.rank + ' ' + textStyles.saira}>{user.rank}</div>
+            <div className={styles.rank + " " + textStyles.saira}>
+              {user.rank}
+            </div>
             <p className={textStyles.saira} style={{ color: "white" }}>
               {user.status}
             </p>

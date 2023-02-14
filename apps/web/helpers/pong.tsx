@@ -10,7 +10,6 @@ import {
   ServerCanvas,
 } from "types";
 import React, { useRef, useEffect } from "react";
-import { NextRouter, useRouter } from "next/router";
 import { useWebsocketContext } from "../components/Websocket";
 import { Socket } from "socket.io-client";
 import { DefaultEventsMap } from "socket.io/dist/typed-events";
@@ -35,7 +34,7 @@ class Game {
   public lastUpdate = 0;
   public color: string[] = ["blue", "red", "orange", "white", "pink", "black"];
   public static position: number;
-  public static scoreMax: number = 10;
+  public static scoreMax = 10;
   public static changeLife: (index: number, val: number) => void;
   public static socket: Socket<DefaultEventsMap, DefaultEventsMap>;
   public static count: number;
@@ -82,8 +81,8 @@ class Game {
   }
 
   convertState(state: GameState): GameState {
-    const ratiox = (this.boardCanvas.width / ServerCanvas.width);
-    const ratioy = (this.boardCanvas.height / ServerCanvas.height);
+    const ratiox = this.boardCanvas.width / ServerCanvas.width;
+    const ratioy = this.boardCanvas.height / ServerCanvas.height;
     const newState: GameState = {
       numberPlayer: state.numberPlayer,
       players: [],
@@ -117,7 +116,7 @@ class Game {
           state.ball.point.x,
           state.ball.point.y,
           this.ballWidth,
-          this.ballWidth,
+          this.ballWidth
         ),
         this.player,
         this.board.wall
@@ -157,8 +156,14 @@ class Game {
         racketCenter.x + wallDir.x * (this.board.wallSize * 0.05),
         racketCenter.y + wallDir.y * (this.board.wallSize * 0.05)
       );
-      const p1 = new Point(p0.x + wallPerp.x * (this.ballWidth), p0.y + wallPerp.y * (this.ballWidth));
-      const p2 = new Point(p3.x + wallPerp.x * (this.ballWidth), p3.y + wallPerp.y * (this.ballWidth));
+      const p1 = new Point(
+        p0.x + wallPerp.x * this.ballWidth,
+        p0.y + wallPerp.y * this.ballWidth
+      );
+      const p2 = new Point(
+        p3.x + wallPerp.x * this.ballWidth,
+        p3.y + wallPerp.y * this.ballWidth
+      );
       if (this.player === undefined)
         racket.push(new Racket(i, [p0, p1, p2, p3], this.color[i]));
       else racket.push(new Racket(i, [p0, p1, p2, p3], this.player[i].color));
@@ -167,7 +172,6 @@ class Game {
     }
     return racket;
   }
-
 
   createRacket(wall: Wall[]): Racket[] {
     this.ballWidth = this.board.wallSize * 0.00625;
@@ -182,23 +186,31 @@ class Game {
     } else {
       const racket: Racket[] = [];
       for (let i = 0; i < wall.length; i++) {
-        let wallDir = wall[i].point[0].vectorTo(wall[i].point[2]).normalized();
-        let wallPerp = wallDir.perp().normalized();
-        let wallCenter = wall[i].center();
-        let racketCenter = new Point(
+        const wallDir = wall[i].point[0]
+          .vectorTo(wall[i].point[2])
+          .normalized();
+        const wallPerp = wallDir.perp().normalized();
+        const wallCenter = wall[i].center();
+        const racketCenter = new Point(
           wallCenter.x + wallPerp.x * 10,
           wallCenter.y + wallPerp.y * 10
         );
-        let p3 = new Point(
+        const p3 = new Point(
           racketCenter.x - wallDir.x * (this.board.wallSize * 0.05),
           racketCenter.y - wallDir.y * (this.board.wallSize * 0.05)
         );
-        let p0 = new Point(
+        const p0 = new Point(
           racketCenter.x + wallDir.x * (this.board.wallSize * 0.05),
           racketCenter.y + wallDir.y * (this.board.wallSize * 0.05)
         );
-        let p1 = new Point(p0.x + wallPerp.x * (this.ballWidth), p0.y + wallPerp.y * (this.ballWidth));
-        let p2 = new Point(p3.x + wallPerp.x * (this.ballWidth), p3.y + wallPerp.y * (this.ballWidth));
+        const p1 = new Point(
+          p0.x + wallPerp.x * this.ballWidth,
+          p0.y + wallPerp.y * this.ballWidth
+        );
+        const p2 = new Point(
+          p3.x + wallPerp.x * this.ballWidth,
+          p3.y + wallPerp.y * this.ballWidth
+        );
         if (this.player.length === 0)
           racket.push(new Racket(i, [p0, p1, p2, p3], this.color[i]));
         else racket.push(new Racket(i, [p0, p1, p2, p3], this.player[i].color));
@@ -241,7 +253,6 @@ class Game {
     }
     this.boardCanvas = this.boardCanvasRef.current;
     if (!this.boardCanvas) return;
-
 
     const context = this.boardCanvas.getContext("2d");
     if (!context) return;
@@ -367,10 +378,13 @@ class Game {
     if (this.player.length === 2) {
       this.boardContext!.beginPath();
       this.boardContext!.setLineDash([30, 15]);
-      this.boardContext!.moveTo((this.boardCanvas!.width / 2), this.boardCanvas!.height - 20);
-      this.boardContext!.lineTo((this.boardCanvas!.width / 2), 20);
+      this.boardContext!.moveTo(
+        this.boardCanvas!.width / 2,
+        this.boardCanvas!.height - 20
+      );
+      this.boardContext!.lineTo(this.boardCanvas!.width / 2, 20);
       this.boardContext!.lineWidth = 2;
-      this.boardContext!.strokeStyle = '#ffffff';
+      this.boardContext!.strokeStyle = "#ffffff";
       this.boardContext!.stroke();
       this.boardContext!.setLineDash([0, 0]);
       this.boardContext!.lineWidth = 1;

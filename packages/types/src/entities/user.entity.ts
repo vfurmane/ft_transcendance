@@ -3,15 +3,19 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinTable,
+  ManyToMany,
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
-} from "typeorm";
-import { Exclude, Expose } from "class-transformer";
-import { Message } from "./message.entity";
-import { ConversationRole } from "./conversationRole.entity";
-import { Match } from "./match.entity";
-import { Jwt } from "./jwt.entity";
+} from 'typeorm';
+import { Exclude, Expose } from 'class-transformer';
+import { Message } from './message.entity';
+import { ConversationRole } from './conversationRole.entity';
+import { Match } from './match.entity';
+import { Jwt } from './jwt.entity';
+import { JwtPayload } from '..';
+import {Opponent} from "./opponent.entity";
 
 @Exclude()
 @Entity()
@@ -69,4 +73,9 @@ export class User {
   level!: number;
   @OneToMany(() => Jwt, (jwt) => jwt.user)
   jwts!: Jwt[];
+
+  @OneToMany(() => Opponent, (opponent) => opponent.user)
+  opponents!: Opponent[];
+
+  currentJwt!: JwtPayload;
 }

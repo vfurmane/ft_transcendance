@@ -44,7 +44,7 @@ export default function UserEntity(props: {
         });
       })
       .catch(function (error) {
-        console.log(
+        console.error(
           "Il y a eu un problème avec l'opération fetch : " + error.message
         );
       });

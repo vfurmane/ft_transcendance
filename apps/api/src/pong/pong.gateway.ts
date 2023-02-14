@@ -6,22 +6,26 @@ import {
   WebSocketGateway,
   ConnectedSocket,
   WebSocketServer,
+  MessageBody,
 } from '@nestjs/websockets';
 import {
   ClassSerializerInterceptor,
+  Logger,
   UseInterceptors,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
 import { AuthService } from 'src/auth/auth.service';
-import { Game } from './game.service';
 import { Interval } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User, Userfront } from 'types';
+import { GameEntityFront, GameStartPayload, User } from 'types';
 import { Repository } from 'typeorm';
-import { isUUIDDto } from 'src/conversations/dtos/IsUUID.dto';
 import { TransformUserService } from 'src/TransformUser/TransformUser.service';
-
+import { SubscribedGameDto } from './subscribed-game.dto';
+import { PongService } from './pong.service';
+import { JoinQueueDto } from './join-queue.dto';
+import { UsersService } from 'src/users/users.service';
+import { instanceToPlain } from 'class-transformer';
 
 @UsePipes(new ValidationPipe())
 @UseInterceptors(ClassSerializerInterceptor)
@@ -30,17 +34,16 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer() server!: Server;
   room_id!: string[];
 
-  games!: Map<string, [Game, Array<{ id: string; ready: boolean }>]>;
-
   constructor(
     private readonly authService: AuthService,
+    private readonly logger: Logger,
+    private readonly pongService: PongService,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    private readonly usersService: UsersService,
     private readonly transformUserService: TransformUserService,
-  ) 
-  {
+  ) {
     this.room_id = [];
-    this.games = new Map();
   }
 
   async handleConnection(client: Socket): Promise<void | string> {
@@ -62,8 +65,8 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
     client.join(`user_${currentUser.sub}`);
     console.log('NEW CONNECTION!');
     console.log('YOU ARE ' + currentUser.name + ' OF ID ' + client.data.id);
-    if (this.games) {
-      this.games.forEach((value, key) => {
+    if (this.pongService.games) {
+      this.pongService.games.forEach((value, key) => {
         value[1].forEach((user) => {
           if (user.id === client.data.id) {
             client.data.room = key;
@@ -79,6 +82,7 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   async handleDisconnect(client: Socket): Promise<void> {
+    await this.leaveQueue(client);
     if (!client.data.room) {
       console.log(client.data.name + ' WAS NOT IN A ROOM');
       return;
@@ -103,22 +107,22 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   @Interval(17) // THIS FUNCTION CALLS UPDATE FOR EVERY CURRENT GAME
   update(): void {
-    if (!this.games || this.games === undefined) {
+    if (!this.pongService.games || this.pongService.games === undefined) {
       return;
     }
-    this.games.forEach(async (key, room) => {
+    this.pongService.games.forEach(async (key, room) => {
       const game = key[0];
       if (game.boardType !== 0) {
         game.updateGame();
       } else {
-        console.log("GAME ENDED")
+        console.log('GAME ENDED');
         const sockets = await this.server.in(room).fetchSockets();
         this.server.in(room).emit('endGame'); // TELL CLIENT TO LEAVE AND REMOVE THE ROOM
         sockets.forEach((socket) => {
           socket.leave(room);
           socket.data.room = undefined;
         });
-        this.games.delete(room);
+        this.pongService.games.delete(room);
       }
     });
   }
@@ -131,7 +135,7 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
     if (!this.checkUser(client, room)) {
       return 'You are not allowed to send this kind of message !';
     }
-    const game = this.games.get(room);
+    const game = this.pongService.games.get(room);
     if (!game || !game[0]) {
       return 'Game is not launched';
     }
@@ -185,7 +189,7 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
     if (!this.checkUser(client, room)) {
       return 'You are not allowed to send this kind of message !';
     }
-    const game = this.games.get(room)![0];
+    const game = this.pongService.games.get(room)![0];
     if (!game) {
       return 'Game not launched';
     }
@@ -202,7 +206,7 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
     if (!this.checkUser(client, room)) {
       return 'You are not allowed to send this kind of message !';
     }
-    const game = this.games.get(room)![0];
+    const game = this.pongService.games.get(room)![0];
     if (!game) {
       return 'Game not launched';
     }
@@ -211,101 +215,54 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
     return 'You moved down ';
   }
 
-  @SubscribeMessage('startGame')
-  async startGame(@ConnectedSocket() client: Socket): Promise<void | string> {
-    const room = client.data.room;
-    if (room === undefined) return 'You are not in a room';
-    if (this.room_id.indexOf(room) === -1) {
-      client.data.room = undefined;
-      return 'Your room doesnt exist !';
-    }
-    if (client.data.position === 0) {
-      const numberPlayer = (await this.server.in(room).fetchSockets()).length;
-      const fetchSockets = (await this.server.in(room).fetchSockets());
-      const ids = fetchSockets.map(e => e.data.id);
-      const users = await this.userRepository
-      ?.createQueryBuilder()
-      .where("id IN (:...ids)", {
-        ids: ids,
-      }).getMany();
-      const ListOfPlayers = await Promise.all(users.map(async (e : User) : Promise<Userfront> => await this.transformUserService.transform(e)));
-      //console.log(ListOfPlayers);
-      const list: Array<{ id: string; ready: boolean }> = [];
-      (await this.server.in(room).fetchSockets()).forEach((element) => {
-        list.push({ id: element.data.id, ready: false });
-        this.server.in(`user_${element.data.id}`).emit('startGame', { // SEND EVERY CLIENT THE NUMBER OF PLAYER AND ITS POSITION
-          listOfPlayers: ListOfPlayers,
-          number_player: numberPlayer,
-          position: element.data.position,
-        });
-      });
-      this.games.set(room, [
-        new Game(numberPlayer, this.server.in(room)), // CREATE A GAME SERVER SIDE. IT NEED THE NUMBER OF PLAYER AND THE BROADCASTER FOR THE ROOM
-        list,
-      ]);
-      return 'Launching the game for room ' + room;
-    }
-    return 'You are not player 1 !';
+  @SubscribeMessage('subscribe_game')
+  async subscribeGame(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() subscribedGameDto: SubscribedGameDto,
+  ): Promise<GameEntityFront> {
+    client.data.room = `game_${subscribedGameDto.id}`;
+    const game = await this.pongService.getGame(subscribedGameDto.id);
+    client.data.position = game.opponents.findIndex(
+      (opponent) => opponent.user.id === client.data.id,
+    );
+    client.join(`game_${subscribedGameDto.id}`);
+    return this.pongService.getGame(subscribedGameDto.id);
   }
 
-  @SubscribeMessage('searchGame')
-  async searchGame(@ConnectedSocket() client: Socket): Promise<void | string> {
-    console.log('SOMEBODY IS SEARCHING FOR A GAME');
-    const clientSockets = await this.server
-      .in(`user_${client.data.id}`)
-      .fetchSockets();
-    console.log(`YOU HAVE ${clientSockets.length} SOCKETS OPEN MY FRIEND`);
-    const connectedSockets = clientSockets.filter(
-      (socket) => socket.data.room !== undefined,
+  @SubscribeMessage('join_queue')
+  async joinQueue(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() joinQueueDto: JoinQueueDto,
+  ): Promise<void> {
+    const user = await this.usersService.getById(client.data.id);
+    if (!user) return;
+    const gameQueue = this.pongService.join(user, joinQueueDto.game_mode);
+    this.logger.log(
+      `'${user.id}' (${user.name}) has joined queue for game mode '${joinQueueDto.game_mode}'`,
     );
-    if (connectedSockets.length) return 'You are already in a room !';
-    if (this.room_id?.length) {
-      for (const room of this.room_id) {
-        const count = (await this.server.in(room).fetchSockets()).length;
-        if (count < 2) {
-          client.join(room);
-          client.data.room = room;
-          client.data.position = count;
-          console.log(count);
-          if (count === 1) {
-            // CHANGE BACK TO 5 FOR BATTLE ROYAL
-            const list: Array<{ id: string; ready: boolean }> = [];
-            const fetchSockets = (await this.server.in(room).fetchSockets());
-            const ids = fetchSockets.map(e => e.data.id);
-            const users = await this.userRepository
-            ?.createQueryBuilder()
-            .where("id IN (:...ids)", {
-              ids: ids,
-            }).getMany();
-            const ListOfPlayers = await Promise.all(users.map(async (e : User) : Promise<Userfront> => await this.transformUserService.transform(e)));
-            //console.log(ListOfPlayers);
+    if (gameQueue !== null) {
+      this.logger.log(`Queue is full, the game will start soon. Players:`);
+      gameQueue.forEach((user_loop) => {
+        this.logger.log(`- ${user_loop.id} (${user_loop.name})`);
+      });
 
-            (await this.server.in(room).fetchSockets()).forEach((element) => {
-              list.push({ id: element.data.id, ready: false });
-              this.server.in(`user_${element.data.id}`).emit('startGame', {  // SEND EVERY CLIENT THE NUMBER OF PLAYER AND ITS OWN POSITION
-                listOfPlayers: ListOfPlayers,
-                number_player: count + 1,
-                position: element.data.position,
-              });
-            });
-            this.games.set(room, [new Game(2, this.server.in(room)), list]);  // CREATE A GAME SERVER SIDE. IT NEED THE NUMBER OF PLAYER AND THE BROADCASTER FOR THE ROOM
-            this.room_id.splice(this.room_id.indexOf(room), 1); // pop the room out of waiting room list
-            return 'Launched game for room ' + room;
-          }
-          return 'Joined room of id ' + room + ' at position ' + count;
-        }
-      }
-      const num = (Number(this.room_id.at(-1)) + 1).toString(); // need to be changed to a random URI
-      this.room_id.push(num);
-      client.join(num);
-      client.data.room = num;
-      client.data.position = 0;
-      return 'Created room of id ' + num;
+      const game = await this.pongService.startGame(gameQueue, this.server);
+
+      this.server.emit(
+        'game_start',
+        instanceToPlain<GameStartPayload>({
+          id: game.id,
+          users: gameQueue,
+        }),
+      );
     }
-    this.room_id = ['0'];
-    client.join('0');
-    client.data.room = '0';
-    client.data.position = 0;
-    return 'Created the first ever room !';
+  }
+
+  @SubscribeMessage('leave_queue')
+  async leaveQueue(@ConnectedSocket() client: Socket): Promise<void> {
+    const user = await this.usersService.getById(client.data.id);
+    if (!user) return;
+    this.pongService.leave(user);
+    this.logger.log(`'${user.id}' (${user.name}) has left queue`);
   }
 }
