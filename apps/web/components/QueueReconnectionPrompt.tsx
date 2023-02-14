@@ -17,8 +17,8 @@ export function QueueReconnectionPrompt(
 
   const reconnectToQueueOnClick = () => {
     return () => {
-      if (websockets.matchmaking) {
-        websockets.matchmaking.emit("join_queue", {
+      if (websockets.pong) {
+        websockets.pong.emit("join_queue", {
           game_mode: MatchmakingState.gameMode,
         });
         props.onReconnection();

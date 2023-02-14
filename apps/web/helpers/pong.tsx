@@ -394,7 +394,7 @@ class Game {
     const timeRatio = (Date.now() - this.start - this.lastUpdate) / 17;
     this.ball.update(this.player, this.board.wall, this.board, timeRatio);
     this.player.forEach((player) => player.update(this.board.wall, timeRatio));
-    if (Game.isSolo) this.cible.update(this.ball, this.boardCanvas);
+    if (Game.isSolo && this.cible) this.cible.update(this.ball, this.boardCanvas);
     this.board.wall.forEach((wall) => {
       wall.draw(this.boardContext, undefined);
     });
@@ -402,7 +402,7 @@ class Game {
     for (const p of this.player) {
       p.draw(this.boardContext, p.color);
     }
-    if (Game.isSolo) this.cible.draw(this.boardContext);
+    if (Game.isSolo && this.cible) this.cible.draw(this.boardContext);
     if (Game.live === 0) {
       Game.point = 0;
       Game.live = 3;
