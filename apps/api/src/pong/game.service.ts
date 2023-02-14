@@ -308,21 +308,10 @@ export class Ball extends Entity {
     this.nextCollision.wall -= 1 * timeRatio;
     if (this.nextCollision.racket)
       this.nextCollision.racket.time -= 1 * timeRatio;
-
-    console.error(this.nextCollision)
     if (
       (this.nextCollision.racket && this.nextCollision.wall > this.nextCollision.racket.time) &&
       this.nextCollision.racket.time <= 0
     ) {
-      // const newCoords = new Point(
-      //   this.point[0].x - this.speed.x * this.nextCollision.wall,
-      //   this.point[0].y - this.speed.y * this.nextCollision.wall,
-      // );
-      // this.replaceTo(newCoords);
-      // let test = new Ball(this.copy(), rackets, walls);
-      // for (const racket of rackets) {
-        // if (this.sat(racket)) {
-
           console.log("HIT PLAYER");
           const racket = rackets[this.nextCollision.racket.index]
           let angle = 0;
