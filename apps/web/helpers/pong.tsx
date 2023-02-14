@@ -14,6 +14,7 @@ import { NextRouter, useRouter } from "next/router";
 import { useWebsocketContext } from "../components/Websocket";
 import { Socket } from "socket.io-client";
 import { DefaultEventsMap } from "socket.io/dist/typed-events";
+import { runInThisContext } from "vm";
 
 class Game {
   public static isSolo = false;
@@ -43,7 +44,6 @@ class Game {
   constructor(
     number_player: number | undefined,
     position: number | undefined,
-    private readonly router: NextRouter,
     changeLife: (index: number, val: number) => void) {
     if (number_player) {
       this.boardType = number_player;
@@ -172,7 +172,6 @@ class Game {
   createRacket(wall: Wall[]): Racket[] {
     this.ballWidth = this.board.wallSize * 0.00625;
     if (Game.isSolo) {
-      console.log("wall: ");
       return [
         new Racket(
           0,
@@ -301,7 +300,7 @@ class Game {
     const time = Math.round(Date.now() - this.start);
     this.boardCanvas!.width = window.innerWidth * 0.6;
     this.boardCanvas!.height = (window.innerWidth * 0.6) * (1 / 2);
-    let tmp = this.board.wallSize;
+    const tmp = this.board.wallSize;
     //this.board = new Board(this.boardType, this.boardCanvas);
     /*if (this.boardType != Form.REC) {
       this.player = this.createRacket(this.board.wall);
@@ -317,7 +316,6 @@ class Game {
         this.boardCanvas!.height = (window.innerWidth * 0.6) * (1 / 2);
         this.board = new Board(this.boardType, this.boardCanvas);
         if (this.board.wallSize !== tmp) {
-          console.log('hello');
           this.player = this.createRacket([
             this.board.wall[0],
             this.board.wall[2],
@@ -378,7 +376,6 @@ class Game {
       this.boardContext!.lineWidth = 1;
     }
 
-
     this.countUpdate++;
     const timeRatio = (Date.now() - this.start - this.lastUpdate) / 17;
     this.ball.update(this.player, this.board.wall, this.board, timeRatio);
@@ -398,6 +395,7 @@ class Game {
       this.start = Date.now();
     }
     this.lastUpdate = Date.now() - this.start;
+    this.boardContext.setTransform(1, 0, 0, 1, 0, 0);
   }
 }
 
