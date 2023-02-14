@@ -102,7 +102,13 @@ export interface Matchmaking {
 }
 
 export interface GameStartPayload {
+  id: string;
   users: User[];
+}
+
+export interface GameEntityFront {
+  id: string;
+  opponents: { user: Userfront }[];
 }
 
 export * from './enums';

@@ -13,7 +13,6 @@ import { LeaderBoardModule } from './leaderBoard/leaderBoard.module';
 import { TransformUserModule } from './TransformUser/TransformUser.module';
 import { PongModule } from './pong/pong.module';
 import { ScheduleModule } from '@nestjs/schedule';
-import { MatchmakingModule } from './matchmaking/matchmaking.module';
 
 @Module({
   imports: [
@@ -34,7 +33,7 @@ import { MatchmakingModule } from './matchmaking/matchmaking.module';
         // From NestJS docs:
         // Setting `synchronize: true` shouldn't be used in production - otherwise you can lose production data.
         synchronize: configService.get('NODE_ENV') === 'development',
-        //logging: configService.get('NODE_ENV') === 'development',
+        logging: configService.get('NODE_ENV') === 'development',
       }),
     }),
     ScheduleModule.forRoot(),
@@ -47,8 +46,7 @@ import { MatchmakingModule } from './matchmaking/matchmaking.module';
     MatchModule,
     LeaderBoardModule,
     TransformUserModule,
-    MatchmakingModule,
-    PongModule
+    PongModule,
   ],
   controllers: [AppController],
   providers: [AppService],

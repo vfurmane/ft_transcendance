@@ -17,14 +17,12 @@ interface WebsocketProps {
 interface OpenedSockets {
   general: Socket<DefaultEventsMap, DefaultEventsMap> | null;
   conversations: Socket<DefaultEventsMap, DefaultEventsMap> | null;
-  matchmaking: Socket<DefaultEventsMap, DefaultEventsMap> | null;
   pong: Socket<DefaultEventsMap, DefaultEventsMap> | null;
 }
 
 const WebsocketContext = createContext<OpenedSockets>({
   general: null,
   conversations: null,
-  matchmaking: null,
   pong: null,
 });
 
@@ -40,7 +38,6 @@ const deregisterSocket = (
 const closeOpenSockets = (sockets: OpenedSockets): void => {
   if (sockets.general) deregisterSocket(sockets.general);
   if (sockets.conversations) deregisterSocket(sockets.conversations);
-  if (sockets.matchmaking) deregisterSocket(sockets.matchmaking);
   if (sockets.pong) deregisterSocket(sockets.pong);
 };
 const OpenSocket = (
@@ -61,7 +58,6 @@ export default function Websocket({ children }: WebsocketProps): JSX.Element {
   const [socketInstances, setSocketInstances] = useState<OpenedSockets>({
     general: null,
     conversations: null,
-    matchmaking: null,
     pong: null,
   });
   const userState = useSelector(selectUserState);
@@ -70,13 +66,10 @@ export default function Websocket({ children }: WebsocketProps): JSX.Element {
     if (userState.id) {
       const general = OpenSocket("/");
       const conversations = OpenSocket("/conversations");
-      const matchmaking = OpenSocket("/matchmaking");
-      // const pong = OpenSocket("/pong");
-      const pong = null;
+      const pong = OpenSocket("/pong");
       setSocketInstances({
         general: general,
         conversations: conversations,
-        matchmaking: matchmaking,
         pong: pong,
       });
     } else {
@@ -84,7 +77,6 @@ export default function Websocket({ children }: WebsocketProps): JSX.Element {
       setSocketInstances({
         general: null,
         conversations: null,
-        matchmaking: null,
         pong: null,
       });
     }
@@ -94,7 +86,6 @@ export default function Websocket({ children }: WebsocketProps): JSX.Element {
         setSocketInstances({
           general: null,
           conversations: null,
-          matchmaking: null,
           pong: null,
         });
       }

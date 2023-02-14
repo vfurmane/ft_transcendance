@@ -23,22 +23,22 @@ export default function Matchmaking(): ReactElement {
   }, [MatchmakingState.isInQueue, router]);
 
   useEffect(() => {
-    if (websockets.matchmaking) {
-      websockets.matchmaking.on("game_start", (data: GameStartPayload) => {
+    if (websockets.pong) {
+      websockets.pong.on("game_start", (data: GameStartPayload) => {
         if (data.users.find((user) => user.id == UserState.id)) {
-          router.push("/pingPong");
+          router.push(`/pingPong/${data.id}`);
         }
       });
     }
 
     return () => {
-      if (websockets.matchmaking) {
-        websockets.matchmaking.off("game_start");
-        websockets.matchmaking.emit("leave_queue");
+      if (websockets.pong) {
+        websockets.pong.off("game_start");
+        websockets.pong.emit("leave_queue");
         setHasLeftQueue(true);
       }
     };
-  }, [websockets.matchmaking, UserState.id, router]);
+  }, [websockets.pong, UserState.id, router]);
 
   if (loading) return <Loading></Loading>;
 

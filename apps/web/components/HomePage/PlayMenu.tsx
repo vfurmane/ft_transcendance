@@ -16,8 +16,8 @@ export default function PlayMenu(props: { click?: () => void }): JSX.Element {
     mode: GameMode
   ): MouseEventHandler<HTMLDivElement> => {
     return () => {
-      if (websockets.matchmaking) {
-        websockets.matchmaking.emit("join_queue", {
+      if (websockets.pong) {
+        websockets.pong.emit("join_queue", {
           game_mode: mode,
         });
         dispatch(setGameMode(mode));
