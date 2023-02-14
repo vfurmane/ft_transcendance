@@ -44,7 +44,6 @@ class Game {
   constructor(
     number_player: number | undefined,
     position: number | undefined,
-    private readonly router: NextRouter,
     changeLife: (index: number, val: number) => void) {
     if (number_player) {
       this.boardType = number_player;
