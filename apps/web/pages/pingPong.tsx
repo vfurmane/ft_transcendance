@@ -1,6 +1,6 @@
 import TopBar from "../components/TopBar";
 import textStyles from "styles/text.module.scss";
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import MiniProfil from "../components/miniProfil";
 import { useRouter } from "next/router";
 import Game from "../helpers/pong";
@@ -30,6 +30,7 @@ export default function PingPong(): JSX.Element {
     const [win, setWin] = useState(false);
     const [endGame, setEndGame] = useState(false);
     const [printButton, setPrintButton] = useState(true);
+    const [gameInit, setGameInit] = useState(false);
 
     /*======for close topBar component when click on screen====*/
     const [openToggle, setOpenToggle] = useState(false);
@@ -48,26 +49,32 @@ export default function PingPong(): JSX.Element {
         setEndGame(true);
     });
    
-    function rotate(users : User[]){
-        let lastIndex = users.length - 1;
-        let i = 6
-        while (users[0].id !== UserState.id)
+    function rotate( user : User[]) {
+        let lastIndex = user.length - 1;
+        let i = 6;
+        const canvas = document.getElementById('canvas');
+        if (canvas)
+            canvas.style.transform = `rotate(${-180 * user.findIndex(e => e.id === UserState.id)}deg)`;
+        while ( user[0].id !== UserState.id)
         {
-            let last = users[lastIndex];
-            users.unshift(last);
-            users.pop();
+            console.log('yoooooooo');
+            const last = user[lastIndex];
+            user.unshift(last);
+            user.pop();
         }
-        return users;
-    }
+        return user
+
+    };
 
     useEffect(() => {
         if (typeof router.query.listOfPlayers === 'string')
         {
             setPrintButton(false);
             const tmp = JSON.parse(router.query.listOfPlayers);
-            //tmp = rotate(tmp);
-            setUsers(tmp);
-            usersRef.current = tmp;
+            usersRef.current = JSON.parse(router.query.listOfPlayers);
+           
+            if (tmp.length)
+                setUsers(rotate(tmp));
             setMiniProfilArray(tmp.map((e : User, i: number) => <MiniProfil key={i} left={i % 2 == 0 ? true : false} user={{ user: e, index: i }} life={Game.live} score={0} game={{ life: Game.live, score: Game.scoreMax, numOfPlayers: tmp.length }} />));
         }
         else
@@ -77,6 +84,7 @@ export default function PingPong(): JSX.Element {
                 e.preventDefault();
             }
         }, false);
+
     }, []);
 
 
@@ -85,13 +93,15 @@ export default function PingPong(): JSX.Element {
         if (canvasRef && users.length > 0) {
             if (websockets.pong?.connected && users.length > 1)
                 game.setWebsocket(websockets.pong);
-            game.init(canvasRef);
+            if (!gameInit)
+                game.init(canvasRef);
+            setGameInit(true);
             setIntervalState(setInterval(handleResize, 17, game));
         }
         return (() : void => {
             if (intervalState)
                 clearInterval(intervalState);
-        })
+        });  
     }, [users]);
 
 
@@ -171,6 +181,10 @@ export default function PingPong(): JSX.Element {
     }
 
     function changeLife(index: number, val: number) {
+        const rectifiIndex = usersRef.current.findIndex(e => e.id === UserState.id);
+        index = index - rectifiIndex >= 0? index - rectifiIndex : users.length - rectifiIndex;
+        console.log(rectifiIndex);
+
         let tmp = [...MiniProfilArray];
         if (val === 0 )
         {
@@ -283,7 +297,7 @@ export default function PingPong(): JSX.Element {
                     <span className={`textScroll ${textStyles.pixel}`}>- Pong - pOnG - poNg - PONG - pOng&nbsp;</span>
                 </div>
                 <div style={{ marginTop: users.length > 2? '25vh' : users.length === 1? '20vh' : '35vh', display:'flex', justifyContent:'center'}}>
-                    <canvas ref={canvasRef} style={{ marginLeft: users.length > 2 ? '30vw' : '', border:'1px solid white'}}></canvas>
+                    <canvas id="canvas" ref={canvasRef} style={{ marginLeft: users.length > 2 ? '30vw' : '', border:'1px solid white'}}></canvas>
                 </div>
             </div> :
             <div className={styles.afterGameContainer}>
