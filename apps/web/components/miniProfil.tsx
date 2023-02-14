@@ -118,7 +118,7 @@ export default function MiniProfil (props : {left: boolean, user : {user: User, 
                     />
                 </div>}
             </div>
-            <div className="d-none d-lg-block">
+            <div className={`d-none ${props.user.user.victory && props.user.user.defeat? "d-lg-block" : ""}`}>
                 <div style={{ width: "100%" }}>
                     <div className={stylesProfil.flex_between}>
                         <p className={textStyles.saira} style={{ color: "white" }}>
