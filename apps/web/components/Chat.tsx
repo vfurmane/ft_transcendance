@@ -4,6 +4,10 @@ import Conversation from "./Conversation"
 import OpenedConversation from "./OpenedConversation"
 import { useWebsocketContext } from "./Websocket"
 import styles from "styles/chat.module.scss";
+import { useDispatch, useSelector } from "react-redux"
+import { ReinitConversations, selectConversationsState } from "../store/ConversationSlice"
+import Image from "next/image"
+import back from "../public/back.png";
 
 export default function Chat( { conversation } : { conversation : {userId: string, userName: string} }) : JSX.Element
 {
@@ -11,10 +15,22 @@ export default function Chat( { conversation } : { conversation : {userId: strin
     const [conversationList, setConversationList] = useState<ConversationWithUnread[]>([])
     const [newConversation, setNewConversation] = useState<{userId: string, userName: string}>(conversation)
     const [loading, setLoading] = useState(true);
-    const websockets = useWebsocketContext()
+    const websockets = useWebsocketContext();
+    const conversationToOpen = useSelector(selectConversationsState)
+    const dispatch = useDispatch()
 
     useEffect(() =>
     {
+        if (conversationToOpen.userId.length)
+        {
+          setNewConversation(conversationToOpen)
+          dispatch(ReinitConversations())
+        }
+    }, [conversationToOpen])
+
+    useEffect(() =>
+    {
+        setLoading(true)
         console.error("Conversation selected: ", conversationSelected)
         if (newConversation.userId.length)
         {
@@ -52,7 +68,7 @@ export default function Chat( { conversation } : { conversation : {userId: strin
                     const conversation = conversationList.filter((e) => e.conversation.id === message.id)
                     if (conversation)
                     {
-                        conversation[0].numberOfUnreadMessages += 1
+                        conversation[0].numberOfUnreadMessages = conversation[0].numberOfUnreadMessages !== undefined ? conversation[0].numberOfUnreadMessages + 1 : 1;
                         const remainder = conversationList.filter((e) => e.conversation.id !== message.id)
                         setConversationList(() => [...conversation, ...remainder])
                     }
@@ -69,7 +85,7 @@ export default function Chat( { conversation } : { conversation : {userId: strin
                 websockets.conversations?.off("newMessage")
             }
         )
-    }, [conversationSelected])
+    }, [conversationSelected, newConversation])
 
     if (loading)
         return (<></>)
@@ -77,18 +93,32 @@ export default function Chat( { conversation } : { conversation : {userId: strin
     if (newConversation.userId.length)
     {
         return (
+            <>
+            <article className={styles.backButton} onClick={ (e) => {
+                selectConversation(null); setNewConversation({userId: "", userName: ""}); } 
+            }>
+            <Image alt="back" src={back} />
+            </article>
             <section className={styles.conversationsContainer}>
                 <OpenedConversation newConversation={newConversation} conversation={null} />
             </section>
+            </>
         )
     }
 
     if (conversationSelected !== null)
     {
         return (
+            <>
+            <article className={styles.backButton} onClick={ (e) => {
+                selectConversation(null); setNewConversation({userId: "", userName: ""}); } 
+            }>
+            <Image alt="back" src={back} />
+            </article>
             <section className={styles.conversationsContainer}>
                 <OpenedConversation newConversation={null} conversation={conversationSelected} />
             </section>
+            </>
         )
     }
     if (!conversationList.length)

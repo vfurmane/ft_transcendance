@@ -14,8 +14,20 @@
     .messages
     {
         height: 90%;
-        width: 100%;
+        width: 98%;
         overflow-y: auto;
+        overflow-x: hidden;
         overflow-wrap: break-word;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        article
+        {
+            margin: 7px 5px;
+            padding: 5px 3%;
+            width: 80%;
+            border-radius: 15px;
+            overflow-wrap: break-word;
+        }
     }
 }

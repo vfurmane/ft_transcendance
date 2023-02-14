@@ -12,6 +12,7 @@ import ToggleCross from "../public/toggleCross.png";
 export default function ChatBar(): JSX.Element {
   const [visibility, setVisibility] = useState<boolean>(false)
   const [unreadMessages, setUnreadMessages] = useState<number>(0)
+  const [goBack, setGoBack] = useState<boolean>(false)
   const websockets = useWebsocketContext();
   const conversationToOpen = useSelector(selectConversationsState)
   const dispatch = useDispatch()
@@ -65,7 +66,6 @@ export default function ChatBar(): JSX.Element {
     return (
       <div className={styles.containerChat} >
         <section className={`${textStyles.laquer} ${styles.chatControls}`} >
-          <article></article>
           <article className={styles.closeButton} onClick={ (e) => {
           setVisibility(false); setConversationIdProp({userId: "", userName: ""}); } 
         }>
