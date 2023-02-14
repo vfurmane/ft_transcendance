@@ -1,16 +1,18 @@
 import { useRouter } from "next/router";
 import React, { MouseEventHandler } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import styles from "styles/playButton.module.scss";
 import textStyle from "styles/text.module.scss";
 import { GameMode } from "types";
 import { setGameMode } from "../../store/MatchmakingSlice";
+import { selectUserState } from "../../store/UserSlice";
 import { useWebsocketContext } from "../Websocket";
 
 export default function PlayMenu(props: { click?: () => void }): JSX.Element {
   const websockets = useWebsocketContext();
   const dispatch = useDispatch();
   const router = useRouter();
+  const UserState = useSelector(selectUserState);
 
   const joinQueueOnClick = (
     mode: GameMode
@@ -32,7 +34,7 @@ export default function PlayMenu(props: { click?: () => void }): JSX.Element {
         className={`${styles.playMenuEntity} ${styles.bar}`}
         onClick={() => {
           if (props.click) props.click();
-          router.replace("/pingPong");
+          router.replace(`/pingPong`);
         }}
       >
         <h3 className={textStyle.laquer}>Training</h3>

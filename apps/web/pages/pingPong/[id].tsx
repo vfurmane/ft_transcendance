@@ -178,7 +178,7 @@ export default function PingPong(): JSX.Element {
   }, [websockets.pong, router.query.id]);
 
   useEffect(() => {
-    if (typeof router.query.id !== "string") setUsers([UserState]);
+    if (typeof router.query.id !== "string") setUsers([]);
     window.addEventListener(
       "keydown",
       function (e) {
@@ -196,10 +196,11 @@ export default function PingPong(): JSX.Element {
 
   useEffect(() => {
     if (users.length === 0) return;
+    console.log('he');
     setGame(
       new Game(
-        Number(users.length),
-        Number(usersRef.current.findIndex((user) => user.id === UserState.id)),
+        users.length,
+        usersRef.current.findIndex((user) => user.id === UserState.id),
         changeLife
       )
     );
@@ -207,7 +208,7 @@ export default function PingPong(): JSX.Element {
 
   useEffect(() => {
     if (canvasRef && users.length > 1) {
-      if (websockets.pong?.connected && users.length > 1) {
+      if (websockets.pong?.connected && users.length > 1 && game) {
         game?.setWebsocket(websockets.pong);
         game?.init(canvasRef);
         if (game) setIntervalState(setInterval(handleResize, 17, game));
