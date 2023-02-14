@@ -442,8 +442,8 @@ export class Ball extends Entity {
 }
 
 export class Racket extends Entity {
-  public defaultSpeed = 1.5;
-  public hp = 10;
+  public defaultSpeed = 1;
+  public hp = 1;
   public dir!: Vector;
 
   constructor(public index: number, points: Point[], public color: string) {
@@ -467,10 +467,10 @@ export class Racket extends Entity {
         -this.dir.y * this.defaultSpeed,
       );
     }
-    this.moveTo(this.speed, timeRatio);
+    this.moveTo(this.speed, 1/*timeRatio*/);
     for (const wall of walls) {
       if (this.sat(wall)) {
-        this.moveTo(new Vector(-this.speed.x, -this.speed.y), timeRatio);
+        this.moveTo(new Vector(-this.speed.x, -this.speed.y), 1/*timeRatio*/);
       }
     }
   }

@@ -124,6 +124,8 @@ export default function PingPong(): JSX.Element {
                 return ;
             }
             tmp.forEach((e, i) => <MiniProfil key={index} left={i % 2 == 0 ? true : false} user={{ user: tempUsers[i], index: i }} life={tmp[i]?.props.life} score={tmp[i]?.props.score} game={{ life: Game.live, score: Game.scoreMax, numOfPlayers: tmp.length }} />);
+            console.log('in changeLife');
+            console.log(router.query)
             setGame(new Game(tempUsers.length, Number(router.query.position), changeLife));
             setUsers(tempUsers);
             setMiniProfilArray(tmp);
@@ -196,7 +198,9 @@ export default function PingPong(): JSX.Element {
 
   useEffect(() => {
     if (users.length === 0) return;
-    console.log('he');
+    console.log('in setGame')
+    console.log(users);
+    console.log(users.length);
     setGame(
       new Game(
         users.length,
