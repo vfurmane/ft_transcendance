@@ -1,9 +1,8 @@
 import {
-  BadRequestException,
   Injectable,
   Logger,
   NotFoundException,
-  StreamableFile,
+  BadRequestException,
 } from '@nestjs/common';
 import { Repository, UpdateResult } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -108,6 +107,18 @@ export class UsersService {
     return this.transformUserService.transform(user);
   }
 
+  async getProfile(userId: string): Promise<Profile | null> {
+    return new Promise((resolve, reject) => {
+      this.profileRepository
+        .findOne({
+          where: { user: { id: userId } },
+          relations: ['user'],
+        })
+        .then((profile) => resolve(profile))
+        .catch((error) => reject(error));
+    });
+  }
+
   async updateLevel(user_id: string, xp: number): Promise<number> {
     const user = await this.usersRepository.findOneBy({ id: user_id });
     const level = user?.level;
@@ -128,21 +139,6 @@ export class UsersService {
       throw new BadRequestException('`username` is already in use');
     return this.usersRepository.update({ id: user.id }, { name: new_username });
   }
-  async getProfilePicture(userId: string): Promise<StreamableFile> {
-    const userProfile = await this.profileRepository
-      .findOne({
-        where: { user: { id: userId } },
-        relations: ['user'],
-      })
-      .catch(() => {
-        throw new BadRequestException(
-          `User: ${userId} does not match any profile`,
-        );
-      });
-    if (userProfile?.picture == null) throw new NotFoundException();
-    const file = fs.createReadStream(userProfile?.picture);
-    return new StreamableFile(file);
-  }
 
   async fetchAndStoreProfilePicture(
     user: User,
@@ -157,59 +153,41 @@ export class UsersService {
       path.parse(profilePictureUrl).ext
     }`;
     response.data.pipe(fs.createWriteStream(filepath));
-    this.profileRepository
-      .findOne({
-        where: { user: { id: user.id } },
-        relations: ['user'],
-      })
-      .then((profile) => {
-        this.profileRepository.update(
-          { id: profile?.id },
-          { picture: filepath },
-        );
-      });
+    this.getProfile(user.id).then((profile) => {
+      this.profileRepository.update({ id: profile?.id }, { picture: filepath });
+    });
   }
 
   async updateProfilePicture(
-    userId: string,
+    profile: Profile,
     file: Express.Multer.File,
-  ): Promise<void> {
-    this.profileRepository
-      .findOne({
-        where: { user: { id: userId } },
-        relations: ['user'],
-      })
-      .then((profile) => {
-        if (profile?.picture != null) {
-          fs.unlink(profile?.picture, (err) => {
-            console.error(err);
-          });
-        }
-        this.profileRepository.update(
-          { id: profile?.id },
-          { picture: file.path },
-        );
-      });
+  ): Promise<UpdateResult | null> {
+    try {
+      if (profile?.picture != null) {
+        fs.unlinkSync(profile.picture);
+      }
+      return this.profileRepository.update(
+        { id: profile?.id },
+        { picture: file.path },
+      );
+    } catch (error) {
+      this.logger.error(error);
+      return null;
+    }
   }
 
-  async deleteProfilePicture(userId: string): Promise<void> {
-    this.profileRepository
-      .findOne({
-        where: { user: { id: userId } },
-        relations: ['user'],
-      })
-      .then((profile) => {
-        if (profile?.picture != null) {
-          fs.unlink(profile?.picture, (err) => {
-            this.logger.error(err);
-          });
-        }
-        this.profileRepository.update({ id: profile?.id }, { picture: null });
-      })
-      .catch(() => {
-        throw new BadRequestException(
-          `User: ${userId} does not match any profile`,
-        );
-      });
+  async deleteProfilePicture(profile: Profile): Promise<UpdateResult | null> {
+    try {
+      if (profile?.picture != null) {
+        fs.unlinkSync(profile.picture);
+      }
+      return this.profileRepository.update(
+        { id: profile?.id },
+        { picture: null },
+      );
+    } catch (error) {
+      this.logger.error(error);
+      return null;
+    }
   }
 }
