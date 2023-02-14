@@ -36,7 +36,6 @@ export class FtOauth2Strategy extends PassportStrategy(Strategy) {
         name: ftUser.login,
         password: null,
       });
-      this.usersService.fetchAndStoreProfilePicture(user, ftUser.image.link);
     }
     profile = user;
     return cb(null, profile);

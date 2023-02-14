@@ -4,7 +4,6 @@ import { Conversation } from "./entities/conversation.entity";
 export interface FtUser {
   login: string;
   email: string;
-  image: { link: string };
 }
 
 export interface AccessTokenResponse {
