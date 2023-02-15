@@ -142,10 +142,12 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
     game[1].forEach((user) => {
       if (client.data.id === user.id) {
         if (user.ready === true) {
-          console.log(client.data.name + " SENT A READY REQUEST HE WASNT SUPPOSED TO ...");
-          return ;
+          console.log(
+            client.data.name + ' SENT A READY REQUEST HE WASNT SUPPOSED TO ...',
+          );
+          return;
         }
-        console.log(client.data.name + " IS READY IN GAME " + room)
+        console.log(client.data.name + ' IS READY IN GAME ' + room);
         user.ready = true;
         for (let i = 0; i < game[1].length; i++) {
           if (game[1][i].ready === false) {
@@ -252,14 +254,17 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
       });
 
       const game = await this.pongService.startGame(gameQueue, this.server);
-      console.log("SENDING game_start at ", Date.now())
-      this.server.emit(
-        'game_start',
-        instanceToPlain<GameStartPayload>({
-          id: game.id,
-          users: gameQueue,
-        }),
-      );
+
+      setInterval(() => {
+        console.log('SENDING game_start at ', Date.now());
+        this.server.emit(
+          'game_start',
+          instanceToPlain<GameStartPayload>({
+            id: game.id,
+            users: gameQueue,
+          }),
+        );
+      }, 2000);
     }
   }
 
