@@ -85,9 +85,7 @@ export default function PingPong(): JSX.Element {
     
     const canvas = document.getElementById("canvasElem");
     if (canvas)
-    {
       canvas.style.transform = `rotate(${angle * user.findIndex(e => e.id === UserState.id)}deg)`;
-    }
         
     while (user.length &&  user[0].id !== UserState.id)
     {
@@ -99,11 +97,13 @@ export default function PingPong(): JSX.Element {
   };
 
   const changeLife = useCallback((index: number, val: number) => {
+        if (!users.length) return;
         const rectifiIndex = usersRef.current.findIndex(e => e.id === UserState.id);
         index = index - rectifiIndex >= 0? index - rectifiIndex : users.length - rectifiIndex;
         let tmp = [...MiniProfilArray];
         if (val === 0 )
         {
+          console.log('chanhe life index :', index);
             if (intervalState)
                 clearInterval(intervalState);
             let tempUsers = [...users];
@@ -127,9 +127,8 @@ export default function PingPong(): JSX.Element {
                 return ;
             }
             tmp.forEach((e, i) => <MiniProfil key={index} left={i % 2 == 0 ? true : false} user={{ user: tempUsers[i], index: i }} life={tmp[i]?.props.life} score={tmp[i]?.props.score} game={{ life: Game.live, score: Game.scoreMax, numOfPlayers: tmp.length }} />);
-            console.log('in changeLife');
-            console.log(router.query)
-            setGame(new Game(tempUsers.length, Number(router.query.position), changeLife));
+            console.log('i update the game');
+            setGame(new Game(tempUsers.length, tempUsers.findIndex(e => e.id === UserState.id), changeLife));
             setUsers(tempUsers);
             setMiniProfilArray(tmp);
         }
@@ -142,8 +141,9 @@ export default function PingPong(): JSX.Element {
             }
             setMiniProfilArray(tmp);
         }
-    }, []);
+    }, [users]);
 
+  
   useEffect(() => {
     if (websockets.pong) {
       websockets.pong.emit(
@@ -175,15 +175,6 @@ export default function PingPong(): JSX.Element {
       );
     }
 
-    return () => {
-      if (websockets.pong) {
-        websockets.pong.emit("unsubscribe_game");
-      }
-    };
-  }, [websockets.pong, router.query.id]);
-
-  useEffect(() => {
-    if (typeof router.query.id !== "string") setUsers([]);
     window.addEventListener(
       "keydown",
       function (e) {
@@ -197,13 +188,18 @@ export default function PingPong(): JSX.Element {
       },
       false
     );
-  }, []);
+
+    return () => {
+      if (websockets.pong) {
+        websockets.pong.emit("unsubscribe_game");
+      }
+    };
+  }, [websockets.pong, router.query.id]);
+
 
   useEffect(() => {
     if (users.length === 0) return;
     console.log('in setGame')
-    console.log(users);
-    console.log(users.length);
     setGame(
       new Game(
         users.length,
@@ -224,7 +220,7 @@ export default function PingPong(): JSX.Element {
     return (): void => {
       if (intervalState) clearInterval(intervalState);
     };
-  }, [users, game]);
+  }, [game]);
 
   /*======for close topBar component when click on screen====*/
   function clickTopBarToggle(): void {
