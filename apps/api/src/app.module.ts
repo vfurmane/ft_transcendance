@@ -46,6 +46,7 @@ import { AppGateway } from './app.gateway';
     MatchModule,
     LeaderBoardModule,
     TransformUserModule,
+    PongModule,
     CacheModule.register(),
   ],
   controllers: [AppController],

@@ -9,10 +9,10 @@ import { Game, Opponent } from 'types';
 
 @Module({
   imports: [
+    TypeOrmModule.forFeature([Opponent, Game]),
     AuthModule,
     UsersModule,
     TransformUserModule,
-    TypeOrmModule.forFeature([Opponent, Game]),
   ],
   controllers: [],
   providers: [Logger, PongService, PongGateway],
