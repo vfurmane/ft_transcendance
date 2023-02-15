@@ -5,14 +5,14 @@ import { MatchService } from './Match.service';
 import { Match } from 'types';
 import { UsersModule } from '../users/users.module';
 import { TransformUserModule } from '../TransformUser/TransformUser.module';
-import { AchivementsModule } from 'src/Achivements/Achivements.module';
+import { AchievementsModule } from 'src/Achievements/Achievements.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Match]),
     UsersModule,
     TransformUserModule,
-    AchivementsModule,
+    AchievementsModule,
   ],
   controllers: [MatchController],
   providers: [MatchService],

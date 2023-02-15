@@ -1,9 +1,6 @@
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { Repository } from 'typeorm';
-import { AchivementsService } from './Achivements/Achivements.service';
-import { Match, User, Achivements } from 'types';
 import { AppModule } from './app.module';
 
 

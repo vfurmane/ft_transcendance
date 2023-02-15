@@ -4,7 +4,7 @@ import { TransformUserService } from 'src/TransformUser/TransformUser.service';
 import { Repository } from 'typeorm';
 import { Match, User, MatchFront } from 'types';
 import { UsersService } from '../users/users.service';
-import { AchivementsService } from 'src/Achivements/Achivements.service';
+import { AchievementsService } from 'src/Achievements/Achievements.service';
 
 @Injectable()
 export class MatchService {
@@ -15,7 +15,7 @@ export class MatchService {
     private readonly userRepository: Repository<User>,
     private readonly userService: UsersService,
     private readonly transformUserService: TransformUserService,
-    private readonly achivementService : AchivementsService,
+    private readonly achivementService : AchievementsService,
   ) {}
 
   #getXp(
@@ -53,7 +53,7 @@ export class MatchService {
       this.#getXp(winner, looser, score_winner, score_looser),
     );
 
-    this.achivementService.saveAchivement(winner_id, looser_id);
+    this.achivementService.saveAchievement(winner_id, looser_id);
 
   }
 

@@ -1,17 +1,17 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
-import { Match, User, Achivements } from 'types';
+import { Match, User, Achievements } from 'types';
 
 @Injectable()
-export class AchivementsService {
+export class AchievementsService {
   constructor(
     @InjectRepository(Match)
     private readonly matchRepository: Repository<Match>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-    @InjectRepository(Achivements)
-    private readonly AchivementsRepository: Repository<Achivements>,
+    @InjectRepository(Achievements)
+    private readonly AchievementsRepository: Repository<Achievements>,
   ) 
   {
     this.initAchivementsList();
@@ -37,7 +37,7 @@ export class AchivementsService {
     }
   };
 
-  saveAchivement(winner_id: string, looser_id: string){
+  saveAchievement(winner_id: string, looser_id: string){
     
   };
 
