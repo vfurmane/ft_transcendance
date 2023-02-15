@@ -204,9 +204,9 @@ export default function Profil(): JSX.Element {
             className={`col-10 offset-1 offset-md-0 offset-lg-1 col-md-2 ${styles.flexCenterColumn}`}
           >
             <div className="fill">
-              <Image
+              <img
                 alt="avatar"
-                src={`/avatar/avatar-${user.avatar_num}.png`}
+                src={`/api/users/${UserState.id}/profile-picture`}
                 width={200}
                 height={200}
               />

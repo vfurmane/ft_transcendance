@@ -49,7 +49,6 @@ export interface ConversationWithUnread {
 export interface Userfront {
   id: string;
   name: string;
-  avatar_num: number;
   status: string;
   victory: number;
   defeat: number;

@@ -158,9 +158,9 @@ function TopBar(props: propsTopBar): JSX.Element {
             />
           </div>
           <div className="fill small">
-            <Image
+            <img
               alt="avatar"
-              src={`/avatar/avatar-${UserState.avatar_num}.png`}
+              src={`/api/users/${UserState.id}/profile-picture`}
               width={45}
               height={45}
               onClick={clickProfil}
@@ -209,9 +209,9 @@ function TopBar(props: propsTopBar): JSX.Element {
                 />
               </div>
               <div className="fill small">
-                <Image
+                <img
                   alt="avatar"
-                  src={`/avatar/avatar-${UserState.avatar_num}.png`}
+                  src={`/api/usesr/${UserState.id}/profile-picture`}
                   width={42}
                   height={42}
                   onClick={clickProfil}

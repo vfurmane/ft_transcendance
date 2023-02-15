@@ -17,13 +17,13 @@ export default function MatchEntity(props: {
       >
         <div className={`${styles.entityContainer} ${styles.start}`}>
           <div className="fill small">
-            <Image
+            <img
               alt="avatar"
-              src={`/avatar/avatar-${
+              src={`/api/users/${
                 props.match.winner
-                  ? props.match.winner.avatar_num
-                  : props.user.avatar_num
-              }.png`}
+                  ? props.match.winner.id
+                  : props.user.id
+              }/profile-picture`}
               width={47}
               height={47}
             />
@@ -50,13 +50,13 @@ export default function MatchEntity(props: {
             </p>
           </div>
           <div className="fill small">
-            <Image
+            <img
               alt="avatar"
-              src={`/avatar/avatar-${
+              src={`/api/users/${
                 props.match.looser
-                  ? props.match.looser.avatar_num
-                  : props.user.avatar_num
-              }.png`}
+                  ? props.match.looser.id
+                  : props.user.id
+              }/profile-picture`}
               width={47}
               height={47}
             />

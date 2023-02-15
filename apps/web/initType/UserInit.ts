@@ -1,7 +1,6 @@
 export const initUser = {
   id: "",
   name: "",
-  avatar_num: 1,
   status: "",
   victory: 0,
   defeat: 0,

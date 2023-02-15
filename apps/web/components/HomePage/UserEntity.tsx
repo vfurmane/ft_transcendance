@@ -139,9 +139,9 @@ export default function UserEntity(props: {
           }
         >
           <div className="fill small">
-            <Image
+            <img
               alt="avatar"
-              src={`/avatar/avatar-${props.user.avatar_num}.png`}
+              src={`/api/users/${props.user.id}/profile-picture`}
               width={47}
               height={47}
             />
