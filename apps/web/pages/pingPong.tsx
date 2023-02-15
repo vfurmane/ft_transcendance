@@ -85,7 +85,6 @@ export default function PingPong(): JSX.Element {
         }
 
         const canvas = document.getElementById('canvas');
-        console.log('angle : ', angle);
         if (canvas)
             canvas.style.transform = `rotate(${angle * user.findIndex(e => e.id === UserState.id)}deg)`;
         while (user.length &&  user[0].id !== UserState.id)
@@ -108,7 +107,7 @@ export default function PingPong(): JSX.Element {
 
             tmp = rotate(tmp);
             setUsers(tmp);
-            setMiniProfilArray(tmp.map((e : User, i: number) => <MiniProfil key={i} left={i % 2 == 0 ? true : false} user={{ user: e, index: i }} life={Game.live} score={0} game={{ life: Game.live, score: Game.scoreMax, numOfPlayers: tmp.length }} />));
+            setMiniProfilArray(tmp.forEach((e : User, i: number) => <MiniProfil key={i} left={i % 2 == 0 ? true : false} user={{ user: e, index: i }} life={Game.live} score={0} game={{ life: Game.live, score: Game.scoreMax, numOfPlayers: tmp.length }} />));
         }
         else
             setUsers([UserState]);
