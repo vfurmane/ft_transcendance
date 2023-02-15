@@ -8,6 +8,8 @@ import { useDispatch, useSelector } from "react-redux"
 import { ReinitConversations, selectConversationsState } from "../store/ConversationSlice"
 import Image from "next/image"
 import back from "../public/back.png";
+import addCross from "../public/addCross.png";
+import CreateConversation from "./CreateConversation"
 
 export default function Chat( { conversation } : { conversation : {userId: string, userName: string} }) : JSX.Element
 {
@@ -15,6 +17,7 @@ export default function Chat( { conversation } : { conversation : {userId: strin
     const [conversationList, setConversationList] = useState<ConversationWithUnread[]>([])
     const [newConversation, setNewConversation] = useState<{userId: string, userName: string}>(conversation)
     const [loading, setLoading] = useState(true);
+    const [ createConversation, setCreateConversation ] = useState<boolean>(false)
     const websockets = useWebsocketContext();
     const conversationToOpen = useSelector(selectConversationsState)
     const dispatch = useDispatch()
@@ -24,6 +27,7 @@ export default function Chat( { conversation } : { conversation : {userId: strin
         if (conversationToOpen.userId.length)
         {
           setNewConversation(conversationToOpen)
+          setCreateConversation(false)
           dispatch(ReinitConversations())
         }
     }, [conversationToOpen])
@@ -85,12 +89,25 @@ export default function Chat( { conversation } : { conversation : {userId: strin
                 websockets.conversations?.off("newMessage")
             }
         )
-    }, [conversationSelected, newConversation])
+    }, [conversationSelected, newConversation, createConversation])
 
     if (loading)
         return (<></>)
-
-    if (newConversation.userId.length)
+    if (createConversation === true)
+    {
+        return (
+        <>
+        <article className={styles.backButton} onClick={ (e) => {
+                setCreateConversation(false) } 
+            }>
+            <Image alt="back" src={back} />
+        </article>
+        <section className={styles.conversationsContainer}>
+            < CreateConversation changeConversation={ selectConversation } closeCreator={ setCreateConversation } />
+        </section>
+        </>)
+    }
+    else if (newConversation.userId.length || conversationSelected !== null )
     {
         return (
             <>
@@ -100,41 +117,28 @@ export default function Chat( { conversation } : { conversation : {userId: strin
             <Image alt="back" src={back} />
             </article>
             <section className={styles.conversationsContainer}>
-                <OpenedConversation newConversation={newConversation} conversation={null} />
+                <OpenedConversation newConversation={newConversation.userId.length ? newConversation : null} conversation={newConversation.userId.length ? null : conversationSelected} />
             </section>
             </>
-        )
-    }
-
-    if (conversationSelected !== null)
-    {
-        return (
-            <>
-            <article className={styles.backButton} onClick={ (e) => {
-                selectConversation(null); setNewConversation({userId: "", userName: ""}); } 
-            }>
-            <Image alt="back" src={back} />
-            </article>
-            <section className={styles.conversationsContainer}>
-                <OpenedConversation newConversation={null} conversation={conversationSelected} />
-            </section>
-            </>
-        )
-    }
-    if (!conversationList.length)
-    {
-        return (
-            <section className={styles.conversationsContainer}><h3>No conversations yet</h3></section>
         )
     }
     return (
+        <>
+        <article className={styles.createButton} title="Create a group conversation" onClick={ (e) => {
+            setCreateConversation(true);
+            console.error("Creating conversation")
+        } 
+        }>
+        <Image alt="create Conversation" src={ addCross } />
+        </article>
         <section className={styles.conversationsContainer}>
-            {conversationList.map((conversation) => (
+            {conversationList.length ? conversationList.map((conversation) => (
                 <article key={`${conversation.conversation.id}_container`} onClick={() => { selectConversation(conversation.conversation) }}>
                 <Conversation key={conversation.conversation.id} conversation={conversation}/>
                 </article>
             ))
-            }
+             : <article>No conversations yet</article>}
         </section>
+        </>
     )
 }

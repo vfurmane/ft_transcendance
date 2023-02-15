@@ -1,6 +1,7 @@
 import { useContext, useEffect, useRef, useState } from "react"
 import { Conversation as ConversationEntity, Message as MessageEntity } from "types"
 import Message from "./Message"
+import ConversationControls from "./ConversationControls"
 import { useWebsocketContext } from "./Websocket"
 import styles from "styles/openedConversation.module.scss";
 
@@ -83,6 +84,9 @@ export default function OpenedConversation( props : OpenedConversationProps ) : 
     
     return (
         <section className={ styles.openedConversationContainer }>
+        <section className={ styles.conversationControls }>
+            < ConversationControls conversation={ currentConversation } newConversation={ newConversation }  />
+        </section>
         <section className={ styles.messages }>
             { messages.map((currentMessage) => <Message message={currentMessage} key={currentMessage.id}/>) }
             <article ref={lastElement}></article>
@@ -107,6 +111,7 @@ export default function OpenedConversation( props : OpenedConversationProps ) : 
                     websockets.conversations?.emit('postMessage', { id : conversation.id, content :  message })
                 })
                 setCurrentConversation(createdConversation)
+                setNewConversation(null)
             }
             else
             {
