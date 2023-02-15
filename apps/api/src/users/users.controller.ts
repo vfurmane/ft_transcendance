@@ -74,7 +74,7 @@ export class UsersController {
   )
   @HttpCode(204)
   async updateProfilePicture(
-    @Param('id') id: string,
+    @User() user: UserEntity,
     @UploadedFile(
       new ParseFilePipeBuilder()
         .addFileTypeValidator({
@@ -92,9 +92,9 @@ export class UsersController {
     if (!file) {
       throw new BadRequestException('No file provided');
     }
-    const profile = await this.usersService.getProfile(id);
+    const profile = await this.usersService.getProfile(user.id);
     if (!profile) {
-      throw new NotFoundException(`User: ${id} not found`);
+      throw new NotFoundException(`User: ${user.id} not found`);
     }
     this.usersService.updateProfilePicture(profile, file);
   }
@@ -102,10 +102,10 @@ export class UsersController {
   @UseGuards(JwtAuthGuard)
   @HttpCode(204)
   @Delete('/:id/delete-profile-picture')
-  async deleteProfilePicture(@Param('id') id: string): Promise<void> {
-    const profile = await this.usersService.getProfile(id);
+  async deleteProfilePicture(@User() user: UserEntity): Promise<void> {
+    const profile = await this.usersService.getProfile(user.id);
     if (!profile) {
-      throw new NotFoundException(`User: ${id} not found`);
+      throw new NotFoundException(`User: ${user.id} not found`);
     }
     this.usersService.deleteProfilePicture(profile);
   }
