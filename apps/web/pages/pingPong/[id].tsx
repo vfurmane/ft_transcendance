@@ -114,6 +114,9 @@ export default function PingPong(): JSX.Element {
                 setOpenOverlay(true);
             tempUsers.splice(index, 1);
             tmp.splice(index, 1);
+            if (tempUsers.length === 0) {
+              return ;
+            }
             if (tempUsers.length === 1)
             {
                 if (tempUsers[0].id === UserState.id)
@@ -216,7 +219,6 @@ export default function PingPong(): JSX.Element {
         game?.setWebsocket(websockets.pong);
         game?.init(canvasRef);
         if (game) setIntervalState(setInterval(handleResize, 17, game));
-        websockets.pong.emit("ready");
       }
     }
     return (): void => {

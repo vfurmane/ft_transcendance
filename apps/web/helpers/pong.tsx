@@ -44,6 +44,7 @@ class Game {
     number_player: number | undefined,
     position: number | undefined,
     changeLife: (index: number, val: number) => void) {
+      console.log("IN GAME CONSTRUCTOR NB PLAYER IS ", number_player)
     if (number_player) {
       this.boardType = number_player;
     } else {
