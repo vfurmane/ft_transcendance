@@ -122,6 +122,8 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
           socket.leave(room);
           socket.data.room = undefined;
         });
+        if (key[1].length === 2)
+          this.pongService.saveGame(key[1].map(e => e.id), key[0].player.map(e => e.hp), key[0].live);
         this.pongService.games.delete(room);
       }
     });

@@ -13,6 +13,7 @@ import { LeaderBoardModule } from './leaderBoard/leaderBoard.module';
 import { TransformUserModule } from './TransformUser/TransformUser.module';
 import { PongModule } from './pong/pong.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { AchivementsModule } from './Achivements/Achivements.module';
 
 @Module({
   imports: [
@@ -47,6 +48,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     LeaderBoardModule,
     TransformUserModule,
     PongModule,
+    AchivementsModule
   ],
   controllers: [AppController],
   providers: [AppService],

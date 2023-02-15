@@ -13,9 +13,7 @@ import Image from "next/image";
 import styles from 'styles/pingPong.module.scss';
 import { useSelector } from "react-redux";
 import { selectUserState } from "../store/UserSlice";
-import { useWebsocketContext } from "../components/Websocket";
-import { current } from "@reduxjs/toolkit";
-import { initUser } from "../initType/UserInit";
+
 
 export default function PingPong(): JSX.Element {
     let router = useRouter();
@@ -43,74 +41,10 @@ export default function PingPong(): JSX.Element {
     /*===========================================================*/
 
     const UserState = useSelector(selectUserState);
-    const websockets = useWebsocketContext();
-
-    websockets.pong?.on('endGame', () => {
-        //if (!Game.isSolo)
-        setEndGame(true);
-    });
-
-    function rotate( user : User[]) {
-        let lastIndex = user.length - 1;
-        let angle : number = 0;
-        switch (user.length)
-        {
-            case 2 :
-            {
-                angle = -180;
-                break;
-            }
-            case 3 :
-            {
-                angle = -120;
-                break;
-            }
-            case 4 :
-            {
-                angle = -90;
-                break;
-            }
-            case 5 :
-            {
-                angle = -72;
-                break;
-            }
-            case 6 :
-            {
-                angle = -60;
-                break;
-            }
-            default :
-                break;
-        }
-
-        const canvas = document.getElementById('canvas');
-        if (canvas)
-            canvas.style.transform = `rotate(${angle * user.findIndex(e => e.id === UserState.id)}deg)`;
-        while (user.length &&  user[0].id !== UserState.id)
-        {
-            const last = user[lastIndex];
-            user.unshift(last);
-            user.pop();
-        }
-        return user
-
-    };
 
     useEffect(() => {
-        if (typeof router.query.listOfPlayers === 'string')
-        {
-            setPrintButton(false);
-            let tmp = JSON.parse(router.query.listOfPlayers);
-            usersRef.current = JSON.parse(router.query.listOfPlayers);
-            //tmp.push(initUser);
-
-            tmp = rotate(tmp);
-            setUsers(tmp);
-            setMiniProfilArray(tmp.forEach((e : User, i: number) => <MiniProfil key={i} left={i % 2 == 0 ? true : false} user={{ user: e, index: i }} life={Game.live} score={0} game={{ life: Game.live, score: Game.scoreMax, numOfPlayers: tmp.length }} />));
-        }
-        else
-            setUsers([UserState]);
+   
+        setUsers([UserState]);
         window.addEventListener("keydown", function(e) {
             if(["Space","ArrowUp","ArrowDown","ArrowLeft","ArrowRight"].indexOf(e.code) > -1) {
                 e.preventDefault();
@@ -123,8 +57,6 @@ export default function PingPong(): JSX.Element {
     let game = new Game(Number(router.query.number_player), Number(router.query.position), changeLife);
     useEffect(() => {
         if (canvasRef && users.length > 0) {
-            if (websockets.pong?.connected && users.length > 1)
-                game.setWebsocket(websockets.pong);
             if (!gameInit)
                 game.init(canvasRef);
             setGameInit(true);

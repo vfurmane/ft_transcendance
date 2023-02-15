@@ -72,7 +72,20 @@ export default function Profil(): JSX.Element {
 
   useEffect((): void => {
     if (typeof router.query.user === "string") {
-      setUser(JSON.parse(router.query.user));
+      const id = JSON.parse(router.query.user).id;
+      fetch(`/api/user/${id}`, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + localStorage.getItem("access_token"),
+        },
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          setUser(data);
+        })
+        .catch((error) => {
+          console.error(`problem with fetch : ${error.message}`);
+        }); 
       if (JSON.parse(router.query.user).id === UserState.id)
         setUserProfil(true);
       else setUserProfil(false);
@@ -385,7 +398,7 @@ export default function Profil(): JSX.Element {
                       className="card"
                       style={{ background: "rgba(0,0,0,0)" }}
                     >
-                      <h2 className={textStyles.pixel}>
+                      <h2 className={textStyles.pixel} style={{marginBottom:'20px'}}>
                         <Image
                           alt="achivement"
                           src={`/achivement.png`}
@@ -393,7 +406,7 @@ export default function Profil(): JSX.Element {
                           height={32}
                           onClick={achivementListClick}
                         />{" "}
-                        Achivement
+                        Achivements
                       </h2>
                       <div className="cardList">{achivementList}</div>
                     </div>
