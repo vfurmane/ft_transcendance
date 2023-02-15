@@ -41,19 +41,18 @@ export class UsersController {
     return user;
   }
 
-  @UseGuards(JwtAuthGuard)
   @Header('Content-Type', 'image/jpeg')
   @Get(':id/profile-picture')
   async getUserProfilePicture(
     @Param('id') id: string,
   ): Promise<StreamableFile> {
     const profile = await this.usersService.getProfile(id);
-    if (profile?.picture == null) {
-      throw new NotFoundException(
-        `User: ${id} does not have a profile picture`,
-      );
+    if (profile === null) {
+      throw new NotFoundException(`User: ${id} not found`);
     }
-    const file = fs.createReadStream(profile.picture);
+    const file = profile.picture
+      ? fs.createReadStream(profile.picture)
+      : fs.createReadStream('./assets/default_avatar.jpg');
     return new StreamableFile(file);
   }
 
