@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
 import Image from "next/image";
 import Connect from "../../public/statusConnect.png";
-import { Userfront as User } from "types";
+import { Userfront as User, UserStatusUpdatePayload } from "types";
 import styles from "styles/entity.module.scss";
 import textStyles from "styles/text.module.scss";
 import Link from "next/link";
@@ -25,11 +25,46 @@ export default function UserEntity(props: {
   }) => void;
   delFriendClick: (e: { idToDelete: string; index: number }) => void;
 }): JSX.Element {
+  const [status, setStatus] = useState(props.user.status);
   const [openMenu, setOpenMenu] = useState(false);
   const [accept, setAccept] = useState(props.option?.accept);
   const UserState = useSelector(selectUserState);
   const router = useRouter();
   const websockets = useWebsocketContext();
+
+  useEffect(() => {
+    const onUserStatusUpdate = (
+      userId: string,
+      setStatus: Dispatch<SetStateAction<string>>
+    ) => {
+      return (data: UserStatusUpdatePayload): void => {
+        if (data.userId === userId) {
+          setStatus(data.type);
+        }
+      };
+    };
+
+    if (props.user.id === UserState.id) {
+      setStatus("online");
+    } else if (websockets.general?.connected) {
+      websockets.general.on(
+        "user_status_update",
+        onUserStatusUpdate(props.user.id, setStatus)
+      );
+      websockets.general.emit(
+        "subscribe_user",
+        { userId: props.user.id },
+        onUserStatusUpdate(props.user.id, setStatus)
+      );
+    }
+
+    return () => {
+      if (websockets.general?.connected && props.user.id !== UserState.id) {
+        websockets.general.emit("unsubscribe_user", { userId: props.user.id });
+        websockets.general.off("user_status_update");
+      }
+    };
+  }, [websockets.general, props.user.id, UserState]);
 
   if (typeof props.user === "undefined" || !props.option) return <></>;
 
@@ -131,7 +166,7 @@ export default function UserEntity(props: {
               height={47}
             />
           </div>
-          {props.user.status === "online" ? (
+          {status === "online" ? (
             <Image
               alt="status"
               src={Connect}
@@ -144,7 +179,7 @@ export default function UserEntity(props: {
           )}
           <div className={styles.entityText}>
             <h3 className={textStyles.laquer}>{props.user.name}</h3>
-            <p className={textStyles.saira}>{props.user.status}</p>
+            <p className={textStyles.saira}>{status}</p>
           </div>
         </div>
         {props.option.del ? (

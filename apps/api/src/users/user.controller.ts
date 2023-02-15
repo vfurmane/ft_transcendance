@@ -6,7 +6,7 @@ import { User as CurrentUser } from '../common/decorators/user.decorator';
 
 @UseGuards(JwtAuthGuard)
 @Controller('user')
-export class UsersController {
+export class UserController {
   constructor(private readonly usersService: UsersService) {}
 
   @Get()
