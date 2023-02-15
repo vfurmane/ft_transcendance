@@ -114,9 +114,8 @@ export interface GameEntityFront {
 export interface UserStatusUpdatePayload {
   type: string;
   userId: string;
-
 }
 
-export * from './enums';
-export * from './entities';
+export * from "./enums";
+export * from "./entities";
 export * from "./class";
