@@ -15,6 +15,7 @@ import { useSelector } from "react-redux";
 import { selectUserState } from "../../store/UserSlice";
 import { useWebsocketContext } from "../../components/Websocket";
 import { current } from "@reduxjs/toolkit";
+import { clear } from "console";
 
 export default function PingPong(): JSX.Element {
   const router = useRouter();
@@ -47,6 +48,7 @@ export default function PingPong(): JSX.Element {
   websockets.pong?.on('endGame', () => {
       //if (!Game.isSolo)
       setEndGame(true);
+      setGame(null)
   });
 
   function rotate( user : User[]) {
@@ -103,9 +105,8 @@ export default function PingPong(): JSX.Element {
         let tmp = [...MiniProfilArray];
         if (val === 0 )
         {
-          console.log('chanhe life index :', index);
-            if (intervalState)
-                clearInterval(intervalState);
+            console.log('chanhe life index :', index);
+            if (intervalState) clearInterval(intervalState);
             let tempUsers = [...users];
             let newClassement = [createTrClassement(tempUsers[index], classement), ...classement];
             if (newClassement.length <= usersRef.current.length)
@@ -124,6 +125,7 @@ export default function PingPong(): JSX.Element {
                 if (newClassement.length + 1 <= usersRef.current.length)
                     setClassement([createTrClassement(tempUsers[0], newClassement), ...newClassement]);
                 setPrintButton(true);
+                //setGame(null)
                 return ;
             }
             tmp.forEach((e, i) => <MiniProfil key={index} left={i % 2 == 0 ? true : false} user={{ user: tempUsers[i], index: i }} life={tmp[i]?.props.life} score={tmp[i]?.props.score} game={{ life: Game.live, score: Game.scoreMax, numOfPlayers: tmp.length }} />);

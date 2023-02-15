@@ -1,4 +1,3 @@
-import { of } from 'rxjs';
 import {
   GameState,
   Form,
@@ -48,11 +47,10 @@ export class Game {
     return state;
   }
 
-  movePlayer(playerPosition: number, dir: boolean): void {
-    const timeRatio = (Date.now() - this.start - this.lastUpdate) / 17;
+  movePlayer(playerPosition: number, up: boolean, keyUp: boolean): void {
     const player = this.player[playerPosition];
-    player.move(dir, this.board.wall, timeRatio);
-    this.ball.updateRacketCollision(this.player, null)
+    player.isMoving = (keyUp) ? true : false;
+    player.up = up;
   }
 
   createRegularPolygon(point: Point, side: number, n: number): Point[] {
@@ -163,8 +161,20 @@ export class Game {
     }
     this.countUpdate++;
     const timeRatio = (Date.now() - this.start - this.lastUpdate) / 17;
+    for (const p of this.player) {
+      if (p.isMoving) {
+        p.move(p.up, this.board.wall, timeRatio);
+        this.broadcaster.emit('refresh', this.getState(), Date.now());
+        this.ball.updateRacketCollision(this.player, null)
+      }
+    }
     this.ball.update(this.player, this.board.wall, this.board, timeRatio, this);
     this.lastUpdate = Date.now() - this.start;
+    if (!this.ball.sat(this.board.board)) {
+      this.ball.replaceTo(this.board.board.center())
+      this.ball.goToRandomPlayer(this.player, this);
+      this.ball.calcNextCollision(this.player, this.board.wall, null, null);
+    }
   }
 }
 
@@ -340,48 +350,9 @@ export class Ball extends Entity {
           );
           this.moveTo(this.speed, timeRatio);
           this.calcNextCollision(rackets, walls, null, index);
-          game.broadcaster.emit('refresh', game.getState(), Date.now()); // not sure if we keep this
+          game.broadcaster.emit('refresh', game.getState(), Date.now());
           return;
         }
-      // }
-      // REDO A CHECK FOR EACH SUBPOSITION OF BALL (NOT OPTIMAL)
-      // for (let i = 0; i < 100; i++) {
-      //   test.moveTo(this.speed, 0.01);
-      //   for (const racket of rackets) {
-      //     if (test.sat(racket)) {
-      //       console.log("SHOULD HAVE HIT")
-      //       let angle = 0;
-      //       let face;
-      //       const index = rackets.indexOf(racket);
-      //       if (rackets.length != 2) face = this.getFace(index);
-      //       else {
-      //         face = index === 1 ? this.getFace(2) : this.getFace(0);
-      //       }
-      //       let ratio = racket.point[2].intersect(
-      //         racket.point[1],
-      //         this.center(),
-      //         face,
-      //       );
-      //       if (ratio > 1) ratio = 1;
-      //       if (ratio < 0) ratio = 0;
-      //       angle = -(Math.PI / 4 + (Math.PI / 2) * (1 - ratio));
-      //       const norm = racket.point[2].vectorTo(racket.point[1]).normalized();
-      //       [norm.x, norm.y] = [
-      //         norm.x * Math.cos(angle) + norm.y * Math.sin(angle),
-      //         -(norm.x * Math.sin(angle)) + norm.y * Math.cos(angle),
-      //       ];
-      //       this.speed = new Vector(
-      //         norm.x * this.defaultSpeed,
-      //         norm.y * this.defaultSpeed,
-      //       );
-      //       this.moveTo(this.speed, timeRatio);
-      //       this.calcNextCollision(rackets, walls, null);
-      //       game.broadcaster.emit('refresh', game.getState(), Date.now()); // not sure if we keep this
-      //       return;
-      //     }
-      //   }
-      // }
-    // }
     if (this.nextCollision.wall <= 0) {
       const newCoords = new Point(
         this.point[0].x - this.speed.x * this.nextCollision.wall,
@@ -434,7 +405,7 @@ export class Ball extends Entity {
         this.goToRandomPlayer(rackets, game);
         this.calcNextCollision(rackets, walls, null, null);
       }
-      game.broadcaster.emit('refresh', game.getState(), Date.now()); // not sure if we keep this
+      game.broadcaster.emit('refresh', game.getState(), Date.now());
       return;
     }
     this.moveTo(this.speed, timeRatio);
@@ -443,8 +414,10 @@ export class Ball extends Entity {
 
 export class Racket extends Entity {
   public defaultSpeed = 1;
-  public hp = 1;
+  public hp = 10;
   public dir!: Vector;
+  public isMoving = false;
+  public up = true;
 
   constructor(public index: number, points: Point[], public color: string) {
     super(points);

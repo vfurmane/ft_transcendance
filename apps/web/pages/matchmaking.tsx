@@ -30,15 +30,6 @@ export default function Matchmaking(): ReactElement {
         if (data.users.find((user) => user.id == UserState.id)) {
           console.log("game_start was for me, im rerouting !");
           router.push(`/pingPong/${data.id}`);
-          // router.replace({
-          //   pathname: `/pingPong/${data.id}`,
-          //   query: {
-          //     number_player: data.users.length,
-          //     position: data.users.findIndex((user) => user.id == UserState.id)
-          //   },
-          // },
-          // `/pingPong/${data.id}`
-          // )
         }
       });
     }
