@@ -24,7 +24,7 @@ export default function Matchmaking(): ReactElement {
 
   useEffect(() => {
     if (websockets.pong) {
-      console.log("Im not yet ready for game_start at ", Date.now())
+      console.log("Im not yet ready for game_start at ", Date.now());
       websockets.pong.on("game_start", (data: GameStartPayload) => {
         console.log("received a game_start from server");
         if (data.users.find((user) => user.id == UserState.id)) {

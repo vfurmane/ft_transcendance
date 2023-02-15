@@ -52,7 +52,7 @@ export class FriendshipsService {
     const newFriendship = new friendshipsEntity();
     newFriendship.initiator = currentUser;
     newFriendship.target = target;
-    
+
     this.friendshipsRepository.save(newFriendship);
     return true;
   }

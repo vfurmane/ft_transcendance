@@ -129,7 +129,7 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
     });
   }
 
-  @SubscribeMessage('ready') 
+  @SubscribeMessage('ready')
   async clientIsReady(
     @ConnectedSocket() client: Socket,
   ): Promise<void | string> {
@@ -223,9 +223,7 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage('pressDown')
-  async pressDown(
-    @ConnectedSocket() client: Socket,
-  ): Promise<void | string> {
+  async pressDown(@ConnectedSocket() client: Socket): Promise<void | string> {
     const room = client.data.room;
     if (!this.checkUser(client, room)) {
       return 'You are not allowed to send this kind of message !';
@@ -240,9 +238,7 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage('unpressDown')
-  async unpressDown(
-    @ConnectedSocket() client: Socket,
-  ): Promise<void | string> {
+  async unpressDown(@ConnectedSocket() client: Socket): Promise<void | string> {
     const room = client.data.room;
     if (!this.checkUser(client, room)) {
       return 'You are not allowed to send this kind of message !';
@@ -255,7 +251,6 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.server.in(room).emit('refresh', game.getState(), Date.now());
     return 'You moved down ';
   }
-
 
   @SubscribeMessage('subscribe_game')
   async subscribeGame(

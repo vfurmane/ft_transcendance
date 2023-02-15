@@ -111,6 +111,6 @@ export interface GameEntityFront {
   opponents: { user: Userfront }[];
 }
 
-export * from './enums';
-export * from './entities';
+export * from "./enums";
+export * from "./entities";
 export * from "./class";

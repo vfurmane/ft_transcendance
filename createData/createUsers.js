@@ -1,6 +1,7 @@
 const fetch = require("node-fetch");
 
-var access_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1ZjhkMDY0ZS05YmM4LTRjOWEtYWY2Yy04OWMxMDY3YjE1MTciLCJuYW1lIjoibWF4IiwianRpIjoiYzJkYjg2ZmYtYTZlMC00Yzg0LTg5MmUtZWE1OGY4ZGE5OGMxIiwiaWF0IjoxNjc1NzYyNTkxLCJleHAiOjE2NzU3NjI4OTF9.wwfjkmiYUYkrlroYf8aU5fJNVguSzNZ-Lq3mVmkaOXY"
+var access_token =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1ZjhkMDY0ZS05YmM4LTRjOWEtYWY2Yy04OWMxMDY3YjE1MTciLCJuYW1lIjoibWF4IiwianRpIjoiYzJkYjg2ZmYtYTZlMC00Yzg0LTg5MmUtZWE1OGY4ZGE5OGMxIiwiaWF0IjoxNjc1NzYyNTkxLCJleHAiOjE2NzU3NjI4OTF9.wwfjkmiYUYkrlroYf8aU5fJNVguSzNZ-Lq3mVmkaOXY";
 
 async function createMatch(ids) {
   for (let j = 0; j < ids.length; j++) {

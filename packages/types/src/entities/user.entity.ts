@@ -8,14 +8,14 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
-} from 'typeorm';
-import { Exclude, Expose } from 'class-transformer';
-import { Message } from './message.entity';
-import { ConversationRole } from './conversationRole.entity';
-import { Match } from './match.entity';
-import { Jwt } from './jwt.entity';
-import { JwtPayload } from '..';
-import {Opponent} from "./opponent.entity";
+} from "typeorm";
+import { Exclude, Expose } from "class-transformer";
+import { Message } from "./message.entity";
+import { ConversationRole } from "./conversationRole.entity";
+import { Match } from "./match.entity";
+import { Jwt } from "./jwt.entity";
+import { JwtPayload } from "..";
+import { Opponent } from "./opponent.entity";
 
 @Exclude()
 @Entity()
