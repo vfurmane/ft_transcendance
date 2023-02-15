@@ -62,7 +62,7 @@ export class UsersService {
 
   async addUser(user: AddUserData): Promise<User> {
     const userProfile = new Profile();
-    this.profileRepository.save(userProfile);
+    await this.profileRepository.save(userProfile);
     const userEntity = new User();
     userEntity.email = user.email;
     userEntity.name = user.name;
