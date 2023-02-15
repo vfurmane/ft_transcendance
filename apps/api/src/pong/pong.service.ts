@@ -73,6 +73,13 @@ export class PongService {
     return gameEntity;
   }
 
+  userIsInGame(user: User): boolean {
+    for (const [game_id, game] of this.games) {
+      if (game[1].find((opponent) => opponent.id === user.id)) return true;
+    }
+    return false;
+  }
+
   async getGame(gameId: string): Promise<GameEntityFront> {
     const game = await this.gamesRepository.findOne({
       where: { id: gameId },
@@ -131,7 +138,7 @@ export class PongService {
   }
 
   join(user: User, mode: GameMode): QueueList | null {
-    if (this.userIsInQueue(user)) return null;
+    if (this.userIsInQueue(user) || this.userIsInGame(user)) return null;
     this.getGameModeQueue(mode).push(user);
     if (this.queueIsFull(mode)) return this.getFirstGameModeQueue(mode);
     return null;
