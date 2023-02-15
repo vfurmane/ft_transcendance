@@ -18,6 +18,7 @@ import { JwtPayload } from "..";
 import { Opponent } from "./opponent.entity";
 import { Profile } from './profile.entity';
 import { Block } from "./block.entity";
+import { Achivements } from "./Achivements.entity";
 
 @Exclude()
 @Entity()
@@ -92,4 +93,7 @@ export class User {
 
   @OneToMany(() => Block, (block) => block.target)
   beenBlocked!: Block[];
+  
+  @OneToMany(() => Achivements, (achivement) => achivement.user)
+  achivements!: Achivements[];
 }

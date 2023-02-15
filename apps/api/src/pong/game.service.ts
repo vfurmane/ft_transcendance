@@ -22,6 +22,7 @@ export class Game {
   public lastUpdate = 0;
   public await = true;
   public color: string[] = ['blue', 'red', 'orange', 'white', 'pink', 'black'];
+  public live = 1;
 
   constructor(playerNumber: number, broadcaster: any) {
     this.boardType = playerNumber;

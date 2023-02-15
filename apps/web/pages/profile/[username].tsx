@@ -477,7 +477,7 @@ export default function Profil(): JSX.Element {
                       className="card"
                       style={{ background: "rgba(0,0,0,0)" }}
                     >
-                      <h2 className={textStyles.pixel}>
+                      <h2 className={textStyles.pixel} style={{marginBottom:'20px'}}>
                         <Image
                           alt="achivement"
                           src={`/achivement.png`}
@@ -485,7 +485,7 @@ export default function Profil(): JSX.Element {
                           height={32}
                           onClick={achivementListClick}
                         />{" "}
-                        Achivement
+                        Achivements
                       </h2>
                       <div className="cardList">{achivementList}</div>
                     </div>

@@ -8,6 +8,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Server } from 'socket.io';
 import { DefaultEventsMap } from 'socket.io/dist/typed-events';
+import { MatchService } from 'src/Match/Match.service';
 import { TransformUserService } from 'src/TransformUser/TransformUser.service';
 import { Repository } from 'typeorm';
 import {
@@ -44,6 +45,7 @@ export class PongService {
     @InjectRepository(Opponent)
     private readonly opponentsRepository: Repository<Opponent>,
     private readonly transformUserService: TransformUserService,
+    private readonly matchService : MatchService,
   ) {
     this.games = new Map();
     for (const mode in GameMode) {
@@ -195,6 +197,11 @@ export class PongService {
       if (pos >= 0) this.invitesList.splice(pos, 1);
     }
     console.log(invitations);
-    return invitations;
+      return invitations;
+    }
+    
+    saveGame(ids : string[], hps : number[], hpStart : number){
+    let indexWin = hps.indexOf(Math.max(hps[0], hps[1]));
+    this.matchService.addMatch(ids[indexWin], ids[1 - indexWin], hpStart - hps[1 - indexWin], hpStart - hps[indexWin]);
   }
 }
