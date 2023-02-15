@@ -10,7 +10,7 @@ import {
   import { User } from "./user.entity";
   
   @Entity()
-  export class Achivements {
+  export class Achievements {
     @PrimaryGeneratedColumn("uuid")
     id!: string;
     
@@ -24,7 +24,7 @@ import {
     @JoinTable()
     users!: User[]*/
 
-    @ManyToOne(() => User, (user) => user.achivements)
+    @ManyToOne(() => User, (user) => user.achievements)
     user!: User;
   
     @CreateDateColumn()

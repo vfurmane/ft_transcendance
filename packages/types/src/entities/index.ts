@@ -12,4 +12,4 @@ export * from "./match.entity";
 export * from "./jwt.entity";
 export * from "./upload.entity";
 export * from "./profile.entity";
-export * from "./Achivements.entity";
+export * from "./Achievements.entity";

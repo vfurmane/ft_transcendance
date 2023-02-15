@@ -14,7 +14,7 @@ import { TransformUserModule } from './TransformUser/TransformUser.module';
 import { PongModule } from './pong/pong.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { AppGateway } from './app.gateway';
-import { AchivementsModule } from './Achivements/Achivements.module';
+import { AchievementsModule } from './Achievements/Achievements.module';
 
 @Module({
   imports: [
@@ -48,11 +48,8 @@ import { AchivementsModule } from './Achivements/Achivements.module';
     LeaderBoardModule,
     TransformUserModule,
     PongModule,
-<<<<<<< HEAD
     CacheModule.register(),
-=======
-    AchivementsModule
->>>>>>> ad5e0be (achivements)
+    AchievementsModule
   ],
   controllers: [AppController],
   providers: [AppService, AppGateway, Logger],
