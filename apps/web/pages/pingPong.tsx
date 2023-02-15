@@ -1,6 +1,6 @@
 import TopBar from "../components/TopBar";
 import textStyles from "styles/text.module.scss";
-import React, { useState, useRef, useEffect, useCallback } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import MiniProfil from "../components/miniProfil";
 import { useRouter } from "next/router";
 import Game from "../helpers/pong";
@@ -14,11 +14,9 @@ import styles from "styles/pingPong.module.scss";
 import { useSelector } from "react-redux";
 import { selectUserState } from "../store/UserSlice";
 import { useWebsocketContext } from "../components/Websocket";
-import { current } from "@reduxjs/toolkit";
-import { initUser } from "../initType/UserInit";
 
 export default function PingPong(): JSX.Element {
-  let router = useRouter();
+  const router = useRouter();
   const [users, setUsers] = useState<User[]>([]);
   const usersRef = useRef<User[]>([]);
   const canvasRef = useRef(null);
@@ -41,7 +39,9 @@ export default function PingPong(): JSX.Element {
   const prevIndexOfUserRef = useRef(-1);
   const prevSetterUsermenuRef = useRef<
     React.Dispatch<React.SetStateAction<boolean>>
-  >(() => {});
+  >(() => {
+    null;
+  });
   /*===========================================================*/
 
   const UserState = useSelector(selectUserState);
@@ -53,8 +53,8 @@ export default function PingPong(): JSX.Element {
   });
 
   function rotate(user: User[]) {
-    let lastIndex = user.length - 1;
-    let angle: number = 0;
+    const lastIndex = user.length - 1;
+    let angle = 0;
     switch (user.length) {
       case 2: {
         angle = -180;
@@ -172,7 +172,10 @@ export default function PingPong(): JSX.Element {
   }): void {
     e.setOpenMenu(true);
     if (
-      prevSetterUsermenuRef.current !== (() => {}) &&
+      prevSetterUsermenuRef.current !==
+        (() => {
+          null;
+        }) &&
       prevSetterUsermenuRef.current !== e.setOpenMenu
     )
       prevSetterUsermenuRef.current(false);
@@ -230,11 +233,11 @@ export default function PingPong(): JSX.Element {
       index - rectifiIndex >= 0
         ? index - rectifiIndex
         : users.length - rectifiIndex;
-    let tmp = [...MiniProfilArray];
+    const tmp = [...MiniProfilArray];
     if (val === 0) {
       if (intervalState) clearInterval(intervalState);
-      let tempUsers = [...users];
-      let newClassement = [
+      const tempUsers = [...users];
+      const newClassement = [
         createTrClassement(tempUsers[index], classement),
         ...classement,
       ];
@@ -328,7 +331,9 @@ export default function PingPong(): JSX.Element {
     <div className={styles.buttons}>
       <Link href={"/home"} className={styles.link}>
         <PlayButton
-          handleClick={() => {}}
+          handleClick={() => {
+            null;
+          }}
           open={false}
           style={{
             text: openPlayButton ? "" : "HOME",
@@ -340,7 +345,9 @@ export default function PingPong(): JSX.Element {
       {openOverlay ? (
         <div>
           <PlayButton
-            handleClick={() => {}}
+            handleClick={() => {
+              null;
+            }}
             open={false}
             style={{
               text: openPlayButton ? "" : "continu to WATCH",

@@ -4,7 +4,7 @@ import React, { useState, useRef, useEffect, useCallback } from "react";
 import MiniProfil from "../../components/miniProfil";
 import { useRouter } from "next/router";
 import Game from "../../helpers/pong";
-import { Game as GameEntity, GameEntityFront, Userfront as User } from "types";
+import { GameEntityFront, Userfront as User } from "types";
 import PlayButton from "../../components/HomePage/PlayButton";
 import Link from "next/link";
 import playButtonStyles from "styles/playButton.module.scss";
@@ -14,8 +14,6 @@ import styles from "styles/pingPong.module.scss";
 import { useSelector } from "react-redux";
 import { selectUserState } from "../../store/UserSlice";
 import { useWebsocketContext } from "../../components/Websocket";
-import { current } from "@reduxjs/toolkit";
-import { clear } from "console";
 
 export default function PingPong(): JSX.Element {
   const router = useRouter();
@@ -51,9 +49,9 @@ export default function PingPong(): JSX.Element {
     setGame(null);
   });
 
-  function rotate(user: User[]) {
-    let lastIndex = user.length - 1;
-    let angle: number = 0;
+  function rotate(user: User[]): User[] {
+    const lastIndex = user.length - 1;
+    let angle = 0;
     switch (user.length) {
       case 2: {
         angle = -180;
@@ -103,12 +101,12 @@ export default function PingPong(): JSX.Element {
         index - rectifiIndex >= 0
           ? index - rectifiIndex
           : users.length - rectifiIndex;
-      let tmp = [...MiniProfilArray];
+      const tmp = [...MiniProfilArray];
       if (val === 0) {
         console.log("chanhe life index :", index);
         if (intervalState) clearInterval(intervalState);
-        let tempUsers = [...users];
-        let newClassement = [
+        const tempUsers = [...users];
+        const newClassement = [
           createTrClassement(tempUsers[index], classement),
           ...classement,
         ];
@@ -129,7 +127,6 @@ export default function PingPong(): JSX.Element {
               ...newClassement,
             ]);
           setPrintButton(true);
-          //setGame(null)
           return;
         }
         tmp.forEach((e, i) => (
@@ -317,8 +314,9 @@ export default function PingPong(): JSX.Element {
       setOpenOverlay(false);
   }
 
-  function handleResize(game: Game) {
+  function handleResize(game: Game): void {
     game.updateGame();
+    return;
   }
 
   function createTrClassement(user: User, classement: JSX.Element[]) {

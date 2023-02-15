@@ -74,26 +74,26 @@ export class Game {
     this.ballWidth = this.board.wallSize * 0.00625;
     const racket: Racket[] = [];
     for (let i = 0; i < wall.length; i++) {
-      let wallDir = wall[i].point[0].vectorTo(wall[i].point[2]).normalized();
-      let wallPerp = wallDir.perp().normalized();
-      let wallCenter = wall[i].center();
-      let racketCenter = new Point(
+      const wallDir = wall[i].point[0].vectorTo(wall[i].point[2]).normalized();
+      const wallPerp = wallDir.perp().normalized();
+      const wallCenter = wall[i].center();
+      const racketCenter = new Point(
         wallCenter.x + wallPerp.x * 10,
         wallCenter.y + wallPerp.y * 10,
       );
-      let p3 = new Point(
+      const p3 = new Point(
         racketCenter.x - wallDir.x * (this.board.wallSize * 0.05),
         racketCenter.y - wallDir.y * (this.board.wallSize * 0.05),
       );
-      let p0 = new Point(
+      const p0 = new Point(
         racketCenter.x + wallDir.x * (this.board.wallSize * 0.05),
         racketCenter.y + wallDir.y * (this.board.wallSize * 0.05),
       );
-      let p1 = new Point(
+      const p1 = new Point(
         p0.x + wallPerp.x * this.ballWidth,
         p0.y + wallPerp.y * this.ballWidth,
       );
-      let p2 = new Point(
+      const p2 = new Point(
         p3.x + wallPerp.x * this.ballWidth,
         p3.y + wallPerp.y * this.ballWidth,
       );
@@ -211,7 +211,7 @@ export class Ball extends Entity {
 
   copy() {
     const lst = [];
-    for (let point of this.point) {
+    for (const point of this.point) {
       lst.push(new Point(point.x, point.y));
     }
     return lst;
