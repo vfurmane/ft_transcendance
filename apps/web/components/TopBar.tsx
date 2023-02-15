@@ -233,10 +233,7 @@ function TopBar(props: propsTopBar): JSX.Element {
         >
           <div className={styles.contextMenuContainer}>
             <Link
-              href={{
-                pathname: "/profile",
-                query: { user: JSON.stringify(UserState) },
-              }}
+              href={`/profile/${UserState.name}`}
               style={{ textDecoration: "none" }}
             >
               <div className={`${styles.contextMenuEntity}  ${styles.bar}`}>
