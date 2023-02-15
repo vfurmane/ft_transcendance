@@ -54,31 +54,7 @@ export default function PingPong(): JSX.Element {
 
   function rotate(user: User[]) {
     const lastIndex = user.length - 1;
-    let angle = 0;
-    switch (user.length) {
-      case 2: {
-        angle = -180;
-        break;
-      }
-      case 3: {
-        angle = -120;
-        break;
-      }
-      case 4: {
-        angle = -90;
-        break;
-      }
-      case 5: {
-        angle = -72;
-        break;
-      }
-      case 6: {
-        angle = -60;
-        break;
-      }
-      default:
-        break;
-    }
+    let angle = -360 / users.length;
 
     const canvas = document.getElementById("canvas");
     if (canvas)

@@ -41,6 +41,13 @@ export class UsersService {
     });
   }
 
+  async getUserById(id: string): Promise<Userfront | null> {
+    const user = await this.usersRepository.findOneBy({
+      id,
+    });
+    return await this.transformUserService.transform(user);
+  }
+
   async getByUsername(username: string): Promise<User | null> {
     return this.usersRepository.findOneBy({
       name: username,
