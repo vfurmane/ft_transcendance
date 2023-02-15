@@ -9,6 +9,7 @@ import {
   MessageBody,
 } from '@nestjs/websockets';
 import {
+  BadRequestException,
   ClassSerializerInterceptor,
   Logger,
   UseInterceptors,
@@ -26,6 +27,7 @@ import { PongService } from './pong.service';
 import { JoinQueueDto } from './join-queue.dto';
 import { UsersService } from 'src/users/users.service';
 import { instanceToPlain } from 'class-transformer';
+import { InviteUserDto } from './invite-user.dto';
 
 @UsePipes(new ValidationPipe())
 @UseInterceptors(ClassSerializerInterceptor)
@@ -273,5 +275,50 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
     if (!user) return;
     this.pongService.leave(user);
     this.logger.log(`'${user.id}' (${user.name}) has left queue`);
+  }
+
+  @SubscribeMessage('invite')
+  async invite(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() inviteUserDto: InviteUserDto,
+  ): Promise<{ message: string }> {
+    const host = await this.usersService.getById(client.data.id);
+    const target = await this.usersService.getById(inviteUserDto.id);
+    if (!host || !target)
+      throw new BadRequestException('`host` or `target` not found');
+
+    const gameQueue = this.pongService.invite(host, target);
+    if (gameQueue) {
+      this.logger.log(
+        `Invitation accepted, the game will start soon. Players:`,
+      );
+      gameQueue.forEach((user_loop) => {
+        this.logger.log(`- ${user_loop.id} (${user_loop.name})`);
+      });
+
+      setTimeout(async () => {
+        console.log('SENDING game_start at ', Date.now());
+        const game = await this.pongService.startGame(gameQueue, this.server);
+        this.server.emit(
+          'game_start',
+          instanceToPlain<GameStartPayload>({
+            id: game.id,
+            users: gameQueue,
+          }),
+        );
+      }, 2000);
+    }
+
+    return { message: 'Waiting for approval' };
+  }
+
+  @SubscribeMessage('discard')
+  async discard(
+    @ConnectedSocket() client: Socket,
+  ): Promise<{ message: string }> {
+    const host = await this.usersService.getById(client.data.id);
+    if (!host) throw new BadRequestException('`host` not found');
+    this.pongService.discardInvitations(host);
+    return { message: 'Invitations discarded' };
   }
 }
