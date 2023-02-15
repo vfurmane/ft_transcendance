@@ -16,7 +16,7 @@ import { Match } from './match.entity';
 import { Jwt } from './jwt.entity';
 import { JwtPayload } from '..';
 import {Opponent} from "./opponent.entity";
-import { Achivements } from "./Achivements.entity";
+import { Achievements } from "./Achievements.entity";
 
 @Exclude()
 @Entity()
@@ -80,6 +80,6 @@ export class User {
 
   currentJwt!: JwtPayload;
 
-  @OneToMany(() => Achivements, (achivement) => achivement.user)
-  achivements!: Achivements[];
+  @OneToMany(() => Achievements, (achievement) => achievement.user)
+  achievements!: Achievements[];
 }
