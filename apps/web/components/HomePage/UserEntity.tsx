@@ -8,6 +8,10 @@ import Link from "next/link";
 import Message from "../../public/message.png";
 import valide from "../../public/valide.png";
 import refuse from "../../public/crossRed.png";
+import { useWebsocketContext } from "../Websocket";
+import { useSelector } from "react-redux";
+import { selectUserState } from "../../store/UserSlice";
+import { useRouter } from "next/router";
 
 export default function UserEntity(props: {
   user: User;
@@ -23,6 +27,9 @@ export default function UserEntity(props: {
 }): JSX.Element {
   const [openMenu, setOpenMenu] = useState(false);
   const [accept, setAccept] = useState(props.option?.accept);
+  const UserState = useSelector(selectUserState);
+  const router = useRouter();
+  const websockets = useWebsocketContext();
 
   if (typeof props.user === "undefined" || !props.option) return <></>;
 
@@ -70,9 +77,25 @@ export default function UserEntity(props: {
           <Link href={""} className={styles.buttonEntity}>
             <Image alt="message" src={Message} width={30} height={30} />
           </Link>
-          <Link href={""} className={styles.buttonEntity}>
-            <h3 className={textStyles.laquer}>Play</h3>
-          </Link>
+          {UserState.id !== props.user.id ? (
+            <Link
+              href={""}
+              className={styles.buttonEntity}
+              onClick={(): void => {
+                websockets.pong?.emit(
+                  "invite",
+                  {
+                    id: props.user.id,
+                  },
+                  () => {
+                    router.push("/invite");
+                  }
+                );
+              }}
+            >
+              <h3 className={textStyles.laquer}>Play</h3>
+            </Link>
+          ) : null}
         </div>
         <div
           className={`${styles.entityShadow} ${
@@ -126,7 +149,7 @@ export default function UserEntity(props: {
         </div>
         {props.option.del ? (
           <div>
-            {!accept? (
+            {!accept ? (
               <div>
                 {props.option.ask ? (
                   <p className={textStyles.saira}>on hold...</p>
