@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 import { useSelector } from "react-redux";
 import { Conversation as ConversationEntity, ConversationRole } from "types";
 import { selectUserState } from "../store/UserSlice";
@@ -9,22 +9,25 @@ import ToggleBar from "../public/toggleBar.png";
 interface conversationControlsProps
 {
     newConversation: {userId: string, userName: string} | null,
-    conversation: ConversationEntity | null
+    conversation: ConversationEntity | null,
+    visibility: boolean,
+    setVisibility: Dispatch<SetStateAction<boolean>>
+
 }
 
 export default function ConversationControls( props : conversationControlsProps ) : JSX.Element
 {
-    const [ menuVisibility, setMenuVisibility ] = useState<boolean>(false)
+    
     const userState = useSelector(selectUserState);
 
-    if (!menuVisibility)
+    if (!props.visibility)
     {
         return (
             <>
             <p className={ styles.conversationName }>
                 { props.conversation ? props.conversation.name.replace(userState.name, '').replace(' - ', '') : props.newConversation?.userName }
             </p>
-            <section className={ styles.conversationMenu } onClick={ () => {setMenuVisibility(true)} }>
+            <section className={ styles.conversationMenu } onClick={ () => {props.setVisibility(true)} }>
                 < Image src={ ToggleBar } alt="toggle bar" />
             </section>
             </ >
@@ -35,10 +38,9 @@ export default function ConversationControls( props : conversationControlsProps 
         <p className={ styles.conversationName }>
             { props.conversation ? props.conversation.name.replace(userState.name, '').replace(' - ', '') : props.newConversation?.userName }
         </p>
-        <section className={ styles.conversationMenu } onClick={ () => {setMenuVisibility(false)} }>
+        <section className={ styles.conversationMenu } onClick={ () => {props.setVisibility(false)} }>
             < Image src={ ToggleBar } alt="toggle bar" />
         </section>
-        <section>Useless</section>
         </ >
     )
 }

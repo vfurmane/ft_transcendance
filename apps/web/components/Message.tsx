@@ -5,7 +5,8 @@ import { selectUserState } from "../store/UserSlice";
 
 interface MessageProps
 {
-    message: MessageEntity
+    message: MessageEntity,
+    group: boolean
 }
 
 export default function Message ( props : MessageProps ) : JSX.Element {
@@ -20,7 +21,7 @@ export default function Message ( props : MessageProps ) : JSX.Element {
     else if (props.message.sender && props.message.sender.id !== userState.id)
     {
         return (
-            <article className={styles.containerOtherMessage}><p className={styles.senderName}>{ props.message.sender?.name }</p><p className={styles.messageContent}>{ props.message.content }</p></article>
+            <article className={styles.containerOtherMessage}>{props.group ? <p className={styles.senderName}>{ props.message.sender?.name }</p> : <></> }<p className={styles.messageContent}>{ props.message.content }</p></article>
         )
     }
     else

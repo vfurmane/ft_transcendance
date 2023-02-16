@@ -1,4 +1,7 @@
-
+.conversationControls
+{
+    border-bottom: rgba($color: #ddd4d4, $alpha: 0.7) solid 1px;
+}
 
 .openedConversationContainer
 {
@@ -7,10 +10,6 @@
     display: grid;
     grid-template-rows: 30px auto 5vh;
     gap: 1px;
-    .conversationControls
-    {
-        border-bottom: rgba($color: #ddd4d4, $alpha: 0.7) solid 1px;
-    }
     .messages
     {
         height: 100%;
@@ -48,4 +47,15 @@
             }
         }
     }
+}
+
+.chatParams
+{
+    height: 99%;
+    width: 99.5%;
+    position: absolute;
+    top: 70px;
+    right: 0;
+    width: 60%;
+    background: rgba($color: #302e2e, $alpha: 0.75);
 }

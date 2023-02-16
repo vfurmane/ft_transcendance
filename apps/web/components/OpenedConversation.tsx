@@ -21,6 +21,7 @@ export default function OpenedConversation( props : OpenedConversationProps ) : 
     const formRef = useRef<HTMLFormElement | null>(null)
     const [ scroll, setScroll ] = useState<boolean>(true)
     const socketConnected = useRef<boolean>(false);
+    const [ menuVisibility, setMenuVisibility ] = useState<boolean>(false)
 
     const addNewMessage = (message : any) => {
         if (message.id === currentConversation?.id)
@@ -83,12 +84,13 @@ export default function OpenedConversation( props : OpenedConversationProps ) : 
     }, [messages, scroll])
     
     return (
+        <>
         <section className={ styles.openedConversationContainer }>
         <section className={ styles.conversationControls }>
-            < ConversationControls conversation={ currentConversation } newConversation={ newConversation }  />
+            < ConversationControls conversation={ currentConversation } newConversation={ newConversation } visibility={ menuVisibility } setVisibility={ setMenuVisibility }  />
         </section>
         <section className={ styles.messages }>
-            { messages.map((currentMessage) => <Message message={currentMessage} key={currentMessage.id}/>) }
+            { messages.map((currentMessage) => <Message message={currentMessage} key={currentMessage.id} group={ currentConversation?.groupConversation ? true : false }/>) }
             <article ref={lastElement}></article>
         </section>
         <section className={ styles.sendForm }>
@@ -135,5 +137,9 @@ export default function OpenedConversation( props : OpenedConversationProps ) : 
             </form>
         </section>
         </section>
+        { menuVisibility && currentConversation ?
+            <section  className={ styles.chatParams }></section>
+            : <></>}
+        </>
     )
 }
