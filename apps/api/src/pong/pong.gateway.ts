@@ -12,6 +12,7 @@ import {
   BadRequestException,
   ClassSerializerInterceptor,
   Logger,
+  NotFoundException,
   UseInterceptors,
   UsePipes,
   ValidationPipe,
@@ -19,7 +20,7 @@ import {
 import { AuthService } from 'src/auth/auth.service';
 import { Interval } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
-import { GameEntityFront, GameStartPayload, User } from 'types';
+import { GameEntityFront, GameStartPayload, User, Userfront } from 'types';
 import { Repository } from 'typeorm';
 import { TransformUserService } from 'src/TransformUser/TransformUser.service';
 import { SubscribedGameDto } from './subscribed-game.dto';
@@ -290,7 +291,11 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
           'game_start',
           instanceToPlain<GameStartPayload>({
             id: game.id,
-            users: gameQueue,
+            users: await Promise.all(
+              gameQueue.map((opponent) =>
+                this.transformUserService.transform(opponent),
+              ),
+            ),
           }),
         );
       }, 2000);
@@ -331,7 +336,11 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
           'game_start',
           instanceToPlain<GameStartPayload>({
             id: game.id,
-            users: gameQueue,
+            users: await Promise.all(
+              gameQueue.map((opponent) =>
+                this.transformUserService.transform(opponent),
+              ),
+            ),
           }),
         );
       }, 2000);
@@ -348,5 +357,22 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
     if (!host) throw new BadRequestException('`host` not found');
     this.pongService.discardInvitations(host);
     return { message: 'Invitations discarded' };
+  }
+
+  @SubscribeMessage('get_featuring')
+  async getFeaturing(): Promise<GameStartPayload[]> {
+    const games: GameStartPayload[] = [];
+    for (const [gameId, game] of this.pongService.games) {
+      games.push({
+        id: gameId,
+        users: await Promise.all(
+          game[1].map(async (opponent): Promise<Userfront> => {
+            const user = await this.usersService.getById(opponent.id);
+            return this.transformUserService.transform(user);
+          }),
+        ),
+      });
+    }
+    return games;
   }
 }
