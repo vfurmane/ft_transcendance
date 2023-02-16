@@ -452,7 +452,7 @@ export default function PingPong(): JSX.Element {
               display: "flex",
               justifyContent: "center",
             }}
-          >
+          >  let index = 0;
             <canvas
               id="canvasElem"
               ref={canvasRef}

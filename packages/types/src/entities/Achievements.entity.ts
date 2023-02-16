@@ -20,9 +20,8 @@ import {
     @Column("varchar", { length: 300 })
     description!: string;
 
-    @Column("varchar", { length: 30, unique: true })
-    logo!: string;
-
+    @Column("smallint", { default: 0 })
+    logo!: number;
     /*@ManyToMany(() => User)
     @JoinTable()
     users!: User[]*/

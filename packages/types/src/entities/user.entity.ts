@@ -74,6 +74,7 @@ export class User {
 
   @Column("smallint", { default: 0 })
   level!: number;
+  
   @OneToMany(() => Jwt, (jwt) => jwt.user)
   jwts!: Jwt[];
 
