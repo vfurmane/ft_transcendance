@@ -160,6 +160,7 @@ export class Game {
               this.player[i].index--;
             }
           }
+          console.log("SOMEBODY LOST")
           this.boardType--;
           this.init();
         }

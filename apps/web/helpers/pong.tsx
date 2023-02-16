@@ -133,6 +133,11 @@ class Game {
     if (!this.boardType) {
       return;
     }
+    if (state.numberPlayer !== this.boardType) {
+      this.boardType = state.numberPlayer;
+      this.player = [];
+      this.init(this.boardCanvasRef);
+    }
     state = this.convertStateServer(state);
     if (this.boardType == Form.REC) {
       this.player = this.updatePlayer(state.players, [

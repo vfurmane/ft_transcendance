@@ -103,7 +103,7 @@ export default function PingPong(): JSX.Element {
           : users.length - rectifiIndex;
       const tmp = [...MiniProfilArray];
       if (val === 0) {
-        console.log("chanhe life index :", index);
+        console.log("change life index :", index);
         if (intervalState) clearInterval(intervalState);
         const tempUsers = [...users];
         const newClassement = [
@@ -456,7 +456,7 @@ export default function PingPong(): JSX.Element {
               ref={canvasRef}
               style={{
                 marginLeft: users.length > 2 ? "30vw" : "",
-                border: "1px solid white",
+              //  border: "1px solid white", // NEED TO REMOVE FOR BATTLE ROYAL SINCE NON-RECTANGULAR BOARD DOESNT NOT FIT THE CANVAS
               }}
             ></canvas>
           </div>

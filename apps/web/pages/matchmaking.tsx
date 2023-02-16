@@ -45,9 +45,15 @@ export default function Matchmaking(): ReactElement {
 
   if (loading) return <Loading></Loading>;
 
+  function launch() {
+    console.log('sending launch')
+    websockets.pong?.emit('launch')
+  }
+
   return (
     <div className={styles.container}>
       <h1>Waiting for an opponent...</h1>
+      <button onClick={launch}>LAUNCH</button>
       {hasLeftQueue ? (
         <QueueReconnectionPrompt
           onReconnection={(): void => {
