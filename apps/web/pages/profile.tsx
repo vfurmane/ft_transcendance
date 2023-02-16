@@ -7,8 +7,7 @@ import { selectUserState } from "../store/UserSlice";
 import { useSelector } from "react-redux";
 import { initUser } from "../initType/UserInit";
 import AchivementEntity from "../components/ProfilePage/achivementEntity";
-import { initAchivement } from "../initType/AchivementInit";
-import { Achivement } from "types";
+import { Achievements} from "types";
 import ChangePswrd from "../components/ProfilePage/ChangePswrd";
 import ChatBar from "../components/chatBar";
 import styles from "styles/profil.module.scss";
@@ -21,12 +20,13 @@ export default function Profil(): JSX.Element {
     null;
   };
 
-  const prevAchivementRef = useRef({ name: "", status: "", description: "" });
+  const prevAchievementRef = useRef<Achievements>();
   const router = useRouter();
   const [user, setUser] = useState(initUser);
   const [openAchivementList, setOpenAchivementList] = useState(false);
   const [openAchivement, setOpenAchivement] = useState(false);
-  const [achivementSelect, setAchivementSelect] = useState(initAchivement);
+  const [achievementsList, setAchievementsList] = useState<JSX.Element[]>([]);
+  const [achievementSelect, setAchievementSelect] = useState<Achievements>();
   const [userProfil, setUserProfil] = useState(false);
   const [openConfigProfil, setOpenConfigProfil] = useState(false);
   const [configProfil, setConfigProfil] = useState(<></>);
@@ -70,9 +70,37 @@ export default function Profil(): JSX.Element {
   }
   /*==========================================================*/
 
+  
+
   useEffect((): void => {
     if (typeof router.query.user === "string") {
       const id = JSON.parse(router.query.user).id;
+      fetch(`/api/achievements/${id}`, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + localStorage.getItem("access_token"),
+        },
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          setAchievementsList(data.map((e: Achievements, i: number) => 
+            <AchivementEntity
+              achievement={{
+                id: e.id,
+                title: e.title,
+                description: e.description,
+                logo: e.logo,
+                created_at: e.created_at,
+                user: e.user
+              }}
+              key={i}
+              handleClick={achievementClick}
+            />
+          ));
+        })
+        .catch((error) => {
+          console.error(`problem with fetch : ${error.message}`);
+        }); 
       fetch(`/api/user/${id}`, {
         headers: {
           "Content-Type": "application/json",
@@ -138,10 +166,10 @@ export default function Profil(): JSX.Element {
     setOpenAchivementList(true);
   }
 
-  function achivementClick(e: { achivement: Achivement }): void {
+  function achievementClick(e: { achievement: Achievements }): void {
     setOpenAchivement(true);
-    setAchivementSelect(e.achivement);
-    prevAchivementRef.current = achivementSelect;
+    setAchievementSelect(e.achievement);
+    prevAchievementRef.current = achievementSelect;
   }
 
   function changePswrd(): void {
@@ -151,9 +179,9 @@ export default function Profil(): JSX.Element {
   }
 
   function close(): void {
-    if (openAchivementList && prevAchivementRef.current !== achivementSelect)
+    if (openAchivementList && prevAchievementRef.current !== achievementSelect)
       setOpenAchivementList(false);
-    if (openAchivement && prevAchivementRef.current !== achivementSelect)
+    if (openAchivement && prevAchievementRef.current !== achievementSelect)
       setOpenAchivement(false);
     if (openProfil) setOpenProfil(false);
     if (openUserList && indexOfUser === prevIndexOfUserRef.current) {
@@ -176,23 +204,6 @@ export default function Profil(): JSX.Element {
         "Il y a eu un problème avec l'opération fetch : " + error.message
       );
     });
-  }
-
-  //temporary before get the real data
-  const achivementList: JSX.Element[] = [];
-  for (let i = 0; i < 22; i++) {
-    achivementList.push(
-      <AchivementEntity
-        achivement={{
-          name: "achivement" + (i + 1).toString(),
-          status: "done",
-          description:
-            "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Leo duis ut diam quam nulla. Et ligula ullamcorper malesuada proin libero nunc consequat. Tincidunt eget nullam non nisi est sit amet facilisis magna. Eu turpis egestas pretium aenean. Nunc consequat interdum varius sit amet. Cras adipiscing enim eu turpis egestas pretium. Integer eget aliquet nibh praesent. Ut sem viverra aliquet eget sit amet. Auctor augue mauris augue neque gravida in. Ut eu sem integer vitae. Viverra accumsan in nisl nisi scelerisque eu ultrices vitae auctor. Orci ac auctor augue mauris. Tempor id eu nisl nunc mi ipsum faucibus vitae.",
-        }}
-        key={i}
-        handleClick={achivementClick}
-      />
-    );
   }
 
   return (
@@ -300,7 +311,7 @@ export default function Profil(): JSX.Element {
                     className={textStyles.laquer}
                     style={{ marginLeft: "10px" }}
                   >
-                    10
+                    {achievementsList.length}
                   </h3>
                 </div>
               </div>
@@ -408,7 +419,7 @@ export default function Profil(): JSX.Element {
                         />{" "}
                         Achivements
                       </h2>
-                      <div className="cardList">{achivementList}</div>
+                      <div className="cardList">{achievementsList}</div>
                     </div>
                     {openAchivement ? (
                       <div
@@ -423,11 +434,11 @@ export default function Profil(): JSX.Element {
                             height={32}
                             onClick={achivementListClick}
                           />
-                          {achivementSelect.name}
+                          {achievementSelect?.title}
                         </h3>
                         <div className="cardList">
                           <p className={textStyles.saira}>
-                            {achivementSelect.description}
+                            {achievementSelect?.description}
                           </p>
                         </div>
                       </div>

@@ -1,21 +1,21 @@
 import React from "react";
 import Image from "next/image";
-import { Achivement } from "types";
+import { Achievements } from "types";
 import styles from "styles/entity.module.scss";
 import textStyles from "styles/text.module.scss";
 
 export default function AchivementEntity(props: {
-  achivement: Achivement;
+  achievement: Achievements;
   key: number;
-  handleClick: (e: { achivement: Achivement }) => void;
+  handleClick: (e: { achievement: Achievements }) => void;
 }): JSX.Element {
-  if (typeof props.achivement === "undefined") return <></>;
+  if (typeof props.achievement === "undefined") return <></>;
   return (
     <div className={styles.shadowContainer}>
       <div
         className={`${styles.entityContainer} ${styles.entity}`}
         onClick={(): void =>
-          props.handleClick({ achivement: props.achivement })
+          props.handleClick({ achievement: props.achievement })
         }
       >
         <div className={styles.imageText}>
@@ -27,8 +27,7 @@ export default function AchivementEntity(props: {
             style={{ marginLeft: "10px" }}
           />
           <div className={styles.entityText}>
-            <h3 className={textStyles.laquer}>{props.achivement.name}</h3>
-            <p className={textStyles.saira}> {props.achivement.status}</p>
+            <h3 className={textStyles.laquer}>{props.achievement.title}</h3>
           </div>
         </div>
       </div>
