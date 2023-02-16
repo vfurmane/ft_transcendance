@@ -98,33 +98,6 @@ export class UsersService {
     return (level ? level : 0) + xp;
   }
 
-  async updateUserPassword(
-    user: User,
-    updateUserPasswordDto: UpdateUserPasswordDto,
-  ): Promise<AccessTokenResponse> {
-    const salt = await bcrypt.genSalt();
-    updateUserPasswordDto.password = await bcrypt.hash(
-      updateUserPasswordDto.password,
-      salt,
-    );
-
-    await this.jwtsRepository
-      .find({
-        relations: ['user'],
-        loadRelationIds: true,
-        where: { user: In([user.id]) },
-      })
-      .then((jwts) => {
-        this.jwtsRepository.remove(jwts);
-      });
-
-    await this.usersRepository.update(
-      { id: user.id },
-      { password: updateUserPasswordDto.password },
-    );
-    return this.authService.login(user);
-  }
-
   async updateName(user: User, new_username: string): Promise<UpdateResult> {
     const usernameTaken = await this.usersRepository
       .createQueryBuilder()
