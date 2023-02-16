@@ -444,7 +444,7 @@ export class Ball extends Entity {
 
 export class Racket extends Entity {
   public defaultSpeed = 1;
-  public hp = 1;
+  public hp = 11;
   public dir!: Vector;
 
   constructor(public index: number, points: Point[], public color: string) {

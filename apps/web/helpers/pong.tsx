@@ -25,7 +25,7 @@ class Game {
   public board!: Board;
   public countUpdate = 0;
   public static point = 0;
-  public static live = 1;
+  public static live = 11;
   public ball!: Ball;
   public player: Racket[] = [];
   public cible!: Target;
@@ -34,7 +34,7 @@ class Game {
   public lastUpdate = 0;
   public color: string[] = ["blue", "red", "orange", "white", "pink", "black"];
   public static position: number;
-  public static scoreMax = 1;
+  public static scoreMax = 10;
   public static changeLife: (index: number, val: number) => void;
   public static socket: Socket<DefaultEventsMap, DefaultEventsMap>;
   public static count: number;
@@ -405,7 +405,7 @@ class Game {
     if (Game.isSolo && this.cible) this.cible.draw(this.boardContext);
     if (Game.live === 0) {
       Game.point = 0;
-      Game.live = 1;
+      Game.live = 11;
       this.start = Date.now();
     }
     this.lastUpdate = Date.now() - this.start;
@@ -612,7 +612,7 @@ class Ball extends Entity {
       const index = this.nextCollision.wallIndex;
       if (rackets.length === 2) {
         if (index === 2) {
-          rackets[1].hp--;
+          //rackets[1].hp--;
           this.replaceTo(board.board.center());
           this.goToRandomPlayer(rackets);
           //  Game.changeLife(1, rackets[1].hp);
@@ -644,7 +644,7 @@ class Ball extends Entity {
 
 class Racket extends Entity {
   public defaultSpeed = 1.5;
-  public hp = 1;
+  public hp = 11;
   public dir!: Vector;
 
   constructor(public index: number, points: Point[], public color: string) {
