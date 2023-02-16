@@ -14,6 +14,7 @@ import List from "./HomePage/List";
 import { Userfront as User } from "types";
 import { initUser } from "../initType/UserInit";
 import { clearTokens } from "../helpers/clearTokens";
+import { useRouter } from "next/router";
 
 interface propsTopBar {
   openToggle: boolean;
@@ -29,7 +30,27 @@ interface propsTopBar {
   }): void;
 }
 
+async function logout(): Promise<null> {
+  const response = await fetch(`/api/auth/logout`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+    },
+  }).then(async (response) => {
+    if (!response.ok) {
+      return response.json().then((error) => {
+        throw new Error(error.message || "An unexpected error occured...");
+      });
+    } else {
+      return response.json();
+    }
+  });
+  if (!response) return null;
+  return response;
+}
+
 function TopBar(props: propsTopBar): JSX.Element {
+  const router = useRouter();
   const [value, setValue] = useState("");
   const [userList, setUserList] = useState([<></>]);
 
@@ -55,6 +76,15 @@ function TopBar(props: propsTopBar): JSX.Element {
     setValue(val);
     if (!val.length) props.writeSearchTopBar(false);
     else props.writeSearchTopBar(true);
+  }
+
+  function logoutHandler(): void {
+    logout()
+      .then(() => {
+        clearTokens();
+        dispatch(setUserState(initUser));
+      })
+      .catch((error) => console.error(error));
   }
 
   useEffect((): void => {
@@ -89,7 +119,7 @@ function TopBar(props: propsTopBar): JSX.Element {
           });
         })
         .catch(function (error) {
-          console.log(
+          console.error(
             "Il y a eu un problème avec l'opération fetch : " + error.message
           );
         });
@@ -100,10 +130,10 @@ function TopBar(props: propsTopBar): JSX.Element {
     <div className={styles.containerTopBar}>
       <div className="d-none d-md-block">
         <div className={styles.elementTopBar}>
-          <Link href={"/home"}>
+          <Link href={"/home#top"}>
             <Image alt="logo" src={Logo} width={200} height={30} />
           </Link>
-          <Link className={styles.leaderBoardLink} href="/home#leaderBoard">
+          <Link className={styles.leaderBoardLink} href="/home#leaderboard">
             Leaderboard
           </Link>
         </div>
@@ -203,10 +233,7 @@ function TopBar(props: propsTopBar): JSX.Element {
         >
           <div className={styles.contextMenuContainer}>
             <Link
-              href={{
-                pathname: "/profile",
-                query: { user: JSON.stringify(UserState) },
-              }}
+              href={`/profile/${UserState.name}`}
               style={{ textDecoration: "none" }}
             >
               <div className={`${styles.contextMenuEntity}  ${styles.bar}`}>
@@ -214,13 +241,7 @@ function TopBar(props: propsTopBar): JSX.Element {
               </div>
             </Link>
             <div className={styles.contextMenuEntity}>
-              <h3
-                className={textStyles.laquer}
-                onClick={(): void => {
-                  clearTokens();
-                  dispatch(setUserState(initUser));
-                }}
-              >
+              <h3 className={textStyles.laquer} onClick={logoutHandler}>
                 logout
               </h3>
             </div>

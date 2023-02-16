@@ -8,6 +8,7 @@ import {
   HttpCode,
   InternalServerErrorException,
   Logger,
+  Patch,
   Post,
   UnauthorizedException,
   UseGuards,
@@ -45,6 +46,7 @@ import { State as StateEntity } from 'types';
 import { LocalAuthGuard } from './local-auth.guard';
 import { RegisterUserDto } from '../users/register-user.dto';
 import { JwtRefreshAuthGuard } from './jwt-refresh-auth.guard';
+import { ChangePasswordDto } from './change-password.dto';
 
 @ApiTags()
 @UseInterceptors(ClassSerializerInterceptor)
@@ -199,5 +201,39 @@ export class AuthController {
   @UseGuards(JwtRefreshAuthGuard)
   refreshToken(@User() user: UserEntity): Promise<AccessTokenResponse> {
     return this.authService.login(user);
+  }
+
+  @Patch('change_password')
+  @UseGuards(JwtAuthGuard)
+  async changePassword(
+    @Body() changePasswordDto: ChangePasswordDto,
+    @User() user: UserEntity,
+  ): Promise<{ message: string }> {
+    if (
+      changePasswordDto.new_password !== changePasswordDto.confirm_new_password
+    )
+      throw new BadRequestException('Both new passwords must match');
+    if (
+      user.password !== null &&
+      (await this.authService.validateUser(
+        user.name,
+        changePasswordDto.old_password,
+      )) === null
+    )
+      throw new UnauthorizedException('Old password is incorrect');
+
+    await this.authService.changePassword(
+      user.id,
+      changePasswordDto.new_password,
+    );
+    await this.authService.revokeAllToken(user);
+    return { message: 'Successfully changed password' };
+  }
+
+  @Post('logout')
+  @UseGuards(JwtAuthGuard)
+  async logout(@User() user: UserEntity): Promise<{ message: string }> {
+    await this.authService.logout(user.currentJwt.jti);
+    return { message: 'Successfully logged out' };
   }
 }

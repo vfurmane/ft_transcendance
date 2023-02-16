@@ -1,6 +1,5 @@
 import "../styles/global.css";
 import Script from "next/script";
-import Head from "next/head";
 import { AppProps } from "next/app";
 import { wrapper } from "../store/store";
 import Websocket from "../components/Websocket";
@@ -13,18 +12,6 @@ function App({ Component, ...rest }: AppProps): JSX.Element {
   const { pageProps } = props;
   return (
     <>
-      <Head>
-        <style>
-          @import
-          url("https://fonts.googleapis.com/css2?family=Saira:wght@100&family=Press+Start+2P&family=Rubik+Vinyl&family=Lacquer&display=swap");
-        </style>
-        <link
-          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
-          rel="stylesheet"
-          integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD"
-          crossOrigin="anonymous"
-        ></link>
-      </Head>
       <Provider store={store}>
         <Auth>
           <Websocket>

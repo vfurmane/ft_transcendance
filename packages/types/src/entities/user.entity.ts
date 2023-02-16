@@ -1,23 +1,27 @@
-import { State } from './state.entity';
+import { State } from "./state.entity";
 import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinTable,
+  ManyToMany,
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
-} from 'typeorm';
-import { Exclude, Expose } from 'class-transformer';
-import { Message } from './message.entity';
-import { ConversationRole } from './conversationRole.entity';
-import { Match } from './match.entity';
-import { Jwt } from './jwt.entity';
+} from "typeorm";
+import { Exclude, Expose } from "class-transformer";
+import { Message } from "./message.entity";
+import { ConversationRole } from "./conversationRole.entity";
+import { Match } from "./match.entity";
+import { Jwt } from "./jwt.entity";
+import { JwtPayload } from "..";
+import { Opponent } from "./opponent.entity";
 
 @Exclude()
 @Entity()
 export class User {
   @Expose()
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryGeneratedColumn("uuid")
   id!: string;
 
   @CreateDateColumn()
@@ -30,20 +34,20 @@ export class User {
   @OneToMany(() => State, (state) => state.user)
   states!: State[];
 
-  @Column('varchar', { length: 255, unique: true })
+  @Column("varchar", { length: 255, unique: true })
   email!: string;
 
   @Expose()
-  @Column('varchar', { length: 30, unique: true })
+  @Column("varchar", { length: 30, unique: true })
   name!: string;
 
-  @Column('varchar', { length: 255, nullable: true })
+  @Column("varchar", { length: 255, nullable: true })
   password!: string | null;
 
-  @Column('varchar', { length: 255, nullable: true })
+  @Column("varchar", { length: 255, nullable: true })
   tfa_secret!: string | null;
 
-  @Column('boolean', { default: false })
+  @Column("boolean", { default: false })
   tfa_setup!: boolean;
 
   @OneToMany(() => Message, (message) => message.sender)
@@ -51,7 +55,7 @@ export class User {
 
   @OneToMany(
     () => ConversationRole,
-    (conversationRole) => conversationRole.user,
+    (conversationRole) => conversationRole.user
   )
   conversationRoles!: ConversationRole[];
 
@@ -63,8 +67,13 @@ export class User {
   @OneToMany(() => Match, (match) => match.looser_id)
   defeat!: Match[];
 
-  @Column('smallint', {default: 0})
+  @Column("smallint", { default: 0 })
   level!: number;
   @OneToMany(() => Jwt, (jwt) => jwt.user)
   jwts!: Jwt[];
+
+  @OneToMany(() => Opponent, (opponent) => opponent.user)
+  opponents!: Opponent[];
+
+  currentJwt!: JwtPayload;
 }

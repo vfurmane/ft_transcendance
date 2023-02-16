@@ -50,12 +50,6 @@ const OpenSocket = (
       token: localStorage.getItem("access_token"),
     },
   });
-  newSocket.on("connect", () => {
-    console.error(`socket ${namespace} is connected`);
-  });
-  newSocket.on("disconnect", () => {
-    console.error(`socket ${namespace} is disconnected`);
-  });
   newSocket.on("connect_error", () => {
     console.error(`Error while trying to connect to socket ${namespace}`);
   });
@@ -82,12 +76,20 @@ export default function Websocket({ children }: WebsocketProps): JSX.Element {
       });
     } else {
       closeOpenSockets(socketInstances);
-      setSocketInstances({ general: null, conversations: null, pong: null });
+      setSocketInstances({
+        general: null,
+        conversations: null,
+        pong: null,
+      });
     }
     return (): void => {
         console.error("returning to close sockets")
         closeOpenSockets(socketInstances);
-        setSocketInstances({ general: null, conversations: null, pong: null });
+        setSocketInstances({
+          general: null,
+          conversations: null,
+          pong: null,
+        });
     };
   }, [userState.id]);
   return (

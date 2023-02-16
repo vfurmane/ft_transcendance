@@ -6,7 +6,6 @@ import UserEntity from "./UserEntity";
 export default function LeaderboardEntity(props: {
   user: User;
   index: number;
-  key: number;
   handleClick: (e: {
     index: number;
     openMenu: boolean;
@@ -26,11 +25,7 @@ export default function LeaderboardEntity(props: {
     backgroundColor: color,
   };
 
-  if (
-    props.user.rank &&
-    Number(props.user.rank.toString().slice(-1)) <= 5 &&
-    Number(props.user.rank.toString().slice(-1)) != 0
-  ) {
+  if (Number(props.index.toString().slice(-1)) < 5) {
     div1 = (
       <div className={leaderBoardStyles.rank} style={style}>
         {props.user.rank}
@@ -50,7 +45,6 @@ export default function LeaderboardEntity(props: {
     <div className={leaderBoardStyles.leaderBoardContainer}>
       {div1}
       <UserEntity
-        key={props.user.rank}
         small={true}
         option={{ del: false, accept: true, ask: false }}
         user={props.user}

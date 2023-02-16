@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   forwardRef,
   Inject,
   Injectable,
@@ -9,11 +10,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User, Userfront } from 'types';
 import * as speakeasy from 'speakeasy';
 import { SpeakeasyGeneratedSecretDto } from '../auth/speakeasy-generated-secret.dto';
-import { AccessTokenResponse } from 'types';
-import * as bcrypt from 'bcrypt';
-import { UpdateUserPasswordDto } from './update-user-password.dto';
-import { Jwt as JwtEntity } from 'types';
-import { AuthService } from '../auth/auth.service';
 import { TransformUserService } from 'src/TransformUser/TransformUser.service';
 
 export interface AddUserData {
@@ -28,10 +24,6 @@ export class UsersService {
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
     private readonly transformUserService: TransformUserService,
-    @Inject(forwardRef(() => AuthService))
-    private readonly authService: AuthService,
-    @InjectRepository(JwtEntity)
-    private readonly jwtsRepository: Repository<JwtEntity>,
   ) {}
 
   async getById(id: string): Promise<User | null> {
@@ -97,6 +89,12 @@ export class UsersService {
     return await this.transformUserService.transform(currentUser);
   }
 
+  async getUserByUsername(username: string): Promise<Userfront | null> {
+    const user = await this.getByUsername(username);
+    if (user === null) throw new NotFoundException('`username` not found');
+    return this.transformUserService.transform(user);
+  }
+
   async updateLevel(user_id: string, xp: number): Promise<number> {
     const user = await this.usersRepository.findOneBy({ id: user_id });
     const level = user?.level;
@@ -106,30 +104,15 @@ export class UsersService {
     return (level ? level : 0) + xp;
   }
 
-  async updateUserPassword(
-    user: User,
-    updateUserPasswordDto: UpdateUserPasswordDto,
-  ): Promise<AccessTokenResponse> {
-    const salt = await bcrypt.genSalt();
-    updateUserPasswordDto.password = await bcrypt.hash(
-      updateUserPasswordDto.password,
-      salt,
-    );
-
-    await this.jwtsRepository
-      .find({
-        relations: ['user'],
-        loadRelationIds: true,
-        where: { user: In([user.id]) },
+  async updateName(user: User, new_username: string): Promise<UpdateResult> {
+    const usernameTaken = await this.usersRepository
+      .createQueryBuilder()
+      .where('LOWER(name) = :name', {
+        name: new_username.toLowerCase(),
       })
-      .then((jwts) => {
-        this.jwtsRepository.remove(jwts);
-      });
-
-    await this.usersRepository.update(
-      { id: user.id },
-      { password: updateUserPasswordDto.password },
-    );
-    return this.authService.login(user);
+      .getOne();
+    if (usernameTaken)
+      throw new BadRequestException('`username` is already in use');
+    return this.usersRepository.update({ id: user.id }, { name: new_username });
   }
 }
