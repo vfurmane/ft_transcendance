@@ -49,10 +49,11 @@ export default function PingPong(): JSX.Element {
     setGame(null);
   });
 
-  function rotate(user: User[]): User[] {
-    const lastIndex = user.length - 1;
+  function rotate(users: User[]): User[] {
+    if (!users.find((user) => UserState.id === user.id)) return users;
+    const lastIndex = users.length - 1;
     let angle = 0;
-    switch (user.length) {
+    switch (users.length) {
       case 2: {
         angle = -180;
         break;
@@ -80,15 +81,15 @@ export default function PingPong(): JSX.Element {
     const canvas = document.getElementById("canvasElem");
     if (canvas)
       canvas.style.transform = `rotate(${
-        angle * user.findIndex((e) => e.id === UserState.id)
+        angle * users.findIndex((e) => e.id === UserState.id)
       }deg)`;
 
-    while (user.length && user[0].id !== UserState.id) {
-      const last = user[lastIndex];
-      user.unshift(last);
-      user.pop();
+    while (users.length && users[0].id !== UserState.id) {
+      const last = users[lastIndex];
+      users.unshift(last);
+      users.pop();
     }
-    return user;
+    return users;
   }
 
   const changeLife = useCallback(
@@ -197,10 +198,13 @@ export default function PingPong(): JSX.Element {
         "subscribe_game",
         { id: router.query.id },
         (game: GameEntityFront) => {
+          console.log("first hi");
           setPrintButton(false);
           let tmp = game.opponents.map((opponent) => opponent.user);
           usersRef.current = game.opponents.map((opponent) => opponent.user);
+          console.log("second hi");
           tmp = rotate(tmp);
+          console.log("third hi");
           setUsers(tmp);
           setMiniProfilArray(
             tmp.map((e: User, i: number) => (
@@ -244,6 +248,7 @@ export default function PingPong(): JSX.Element {
   }, [websockets.pong, router.query.id]);
 
   useEffect(() => {
+    console.log(users);
     if (users.length === 0) return;
     console.log("in setGame");
     setGame(

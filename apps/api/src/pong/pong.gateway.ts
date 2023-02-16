@@ -95,17 +95,6 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
       return;
     }
     client.leave(client.data.room);
-    console.log(client.data.name + ' LEFT WAITING ROOM');
-    const socketWaiting = await this.server.in(client.data.room).fetchSockets();
-    if (socketWaiting.length === 0) {
-      this.room_id.splice(this.room_id.indexOf(client.data.room), 1);
-      console.log('REMOVED THE ROOM');
-      console.log(this.room_id);
-    } else {
-      let i = 0;
-      socketWaiting.forEach((socket) => (socket.data.position = i++));
-    }
-    console.log(client.data.name + ' DISCONNECTED');
   }
 
   @Interval(17) // THIS FUNCTION CALLS UPDATE FOR EVERY CURRENT GAME
@@ -119,10 +108,10 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
         game.updateGame();
       } else {
         console.log('GAME ENDED');
-        const sockets = await this.server.in(room).fetchSockets();
-        this.server.in(room).emit('endGame');
+        const sockets = await this.server.in(`game_${room}`).fetchSockets();
+        this.server.in(`game_${room}`).emit('endGame');
         sockets.forEach((socket) => {
-          socket.leave(room);
+          socket.leave(`game_${room}`);
           socket.data.room = undefined;
         });
         this.pongService.games.delete(room);
@@ -160,7 +149,9 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
         console.log('LAUNCHING GAME AT ', Date.now());
         game[0].init();
         game[0].await = false;
-        this.server.in(room).emit('refresh', game[0].getState(), Date.now());
+        this.server
+          .in(`game_${room}`)
+          .emit('refresh', game[0].getState(), Date.now());
       }
     });
   }
@@ -204,7 +195,7 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
       return 'Game not launched';
     }
     game.movePlayer(client.data.position, true, true);
-    this.server.in(room).emit('refresh', game.getState(), Date.now());
+    this.server.in(`game_${room}`).emit('refresh', game.getState(), Date.now());
     return 'You pressed up';
   }
 
@@ -219,7 +210,7 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
       return 'Game not launched';
     }
     game.movePlayer(client.data.position, true, false);
-    this.server.in(room).emit('refresh', game.getState(), Date.now());
+    this.server.in(`game_${room}`).emit('refresh', game.getState(), Date.now());
     return 'You moved up';
   }
 
@@ -234,7 +225,7 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
       return 'Game not launched';
     }
     game.movePlayer(client.data.position, false, true);
-    this.server.in(room).emit('refresh', game.getState(), Date.now());
+    this.server.in(`game_${room}`).emit('refresh', game.getState(), Date.now());
     return 'You moved down ';
   }
 
@@ -249,7 +240,7 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
       return 'Game not launched';
     }
     game.movePlayer(client.data.position, false, false);
-    this.server.in(room).emit('refresh', game.getState(), Date.now());
+    this.server.in(`game_${room}`).emit('refresh', game.getState(), Date.now());
     return 'You moved down ';
   }
 
@@ -258,7 +249,7 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @ConnectedSocket() client: Socket,
     @MessageBody() subscribedGameDto: SubscribedGameDto,
   ): Promise<GameEntityFront> {
-    client.data.room = `game_${subscribedGameDto.id}`;
+    client.data.room = subscribedGameDto.id;
     const game = await this.pongService.getGame(subscribedGameDto.id);
     client.data.position = game.opponents.findIndex(
       (opponent) => opponent.user.id === client.data.id,
@@ -315,6 +306,7 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @ConnectedSocket() client: Socket,
     @MessageBody() inviteUserDto: InviteUserDto,
   ): Promise<{ message: string }> {
+    this.logger.debug('invite');
     const host = await this.usersService.getById(client.data.id);
     const target = await this.usersService.getById(inviteUserDto.id);
     if (!host || !target)
