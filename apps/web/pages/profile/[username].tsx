@@ -1,21 +1,21 @@
 import React, { useEffect, useRef, useState } from "react";
-import TopBar from "../components/TopBar";
+import TopBar from "../../components/TopBar";
 import { useRouter } from "next/router";
 import Image from "next/image";
-import MatchEntity from "../components/HomePage/MatchEntity";
-import { selectUserState } from "../store/UserSlice";
+import MatchEntity from "../../components/HomePage/MatchEntity";
+import { selectUserState, setUserState } from "../../store/UserSlice";
 import { useSelector } from "react-redux";
-import { initUser } from "../initType/UserInit";
-import AchivementEntity from "../components/ProfilePage/achivementEntity";
-import { initAchivement } from "../initType/AchivementInit";
+import { initUser } from "../../initType/UserInit";
+import AchivementEntity from "../../components/ProfilePage/achivementEntity";
+import { initAchivement } from "../../initType/AchivementInit";
 import { Achivement } from "types";
-import ChangePswrd from "../components/ProfilePage/ChangePswrd";
-import ChangeUsername from "../components/ProfilePage/ChangeUsername";
-import ChatBar from "../components/chatBar";
+import ChangePswrd from "../../components/ProfilePage/ChangePswrd";
+import ChangeUsername from "../../components/ProfilePage/ChangeUsername";
+import ChatBar from "../../components/chatBar";
 import styles from "styles/profil.module.scss";
 import textStyles from "styles/text.module.scss";
-import { initMatch } from "../initType/MatchInit";
-import ConfigTfa from "../components/ProfilePage/ConfigTfa";
+import { initMatch } from "../../initType/MatchInit";
+import ConfigTfa from "../../components/ProfilePage/ConfigTfa";
 
 export default function Profil(): JSX.Element {
   const UserState = useSelector(selectUserState);
@@ -73,26 +73,50 @@ export default function Profil(): JSX.Element {
   /*==========================================================*/
 
   useEffect((): void => {
-    if (typeof router.query.user === "string") {
-      setUser(JSON.parse(router.query.user));
-      if (JSON.parse(router.query.user).id === UserState.id)
-        setUserProfil(true);
-      else setUserProfil(false);
-      fetch(`/api/match/${JSON.parse(router.query.user).id}`, {
+    if (router.query.username !== UserState.name) {
+      // if foreign user
+      fetch(`/api/user/${router.query.username}`, {
         headers: {
-          "Content-Type": "application/json",
           Authorization: "Bearer " + localStorage.getItem("access_token"),
         },
       })
-        .then((res) => res.json())
-        .then((data) => {
-          setMatchHistory(data);
+        .then(async (response) => {
+          if (!response.ok) {
+            return response.json().then((error) => {
+              throw new Error(
+                error.message || "An unexpected error occured..."
+              );
+            });
+          } else {
+            return response.json();
+          }
         })
-        .catch((error) => {
-          console.error(`problem with fetch : ${error.message}`);
+        .then((response) => {
+          setUser(response);
+          setUserProfil(false);
+        })
+        .catch(() => {
+          router.replace("/");
         });
+    } else {
+      // if us
+      setUser(UserState);
+      setUserProfil(true);
     }
-  }, [router.query, UserState]);
+    fetch(`/api/match/${user.id}`, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + localStorage.getItem("access_token"),
+      },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        setMatchHistory(data);
+      })
+      .catch((error) => {
+        console.error(`problem with fetch : ${error.message}`);
+      });
+  }, [router.query, UserState, router, user.id]);
 
   useEffect(() => {
     const tmp: JSX.Element[] = [];

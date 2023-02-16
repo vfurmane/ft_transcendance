@@ -89,6 +89,12 @@ export class UsersService {
     return await this.transformUserService.transform(currentUser);
   }
 
+  async getUserByUsername(username: string): Promise<Userfront | null> {
+    const user = await this.getByUsername(username);
+    if (user === null) throw new NotFoundException('`username` not found');
+    return this.transformUserService.transform(user);
+  }
+
   async updateLevel(user_id: string, xp: number): Promise<number> {
     const user = await this.usersRepository.findOneBy({ id: user_id });
     const level = user?.level;
