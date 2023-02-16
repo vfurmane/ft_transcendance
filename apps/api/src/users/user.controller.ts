@@ -7,7 +7,7 @@ import { ChangeNameDto } from './change-name.dto';
 
 @UseGuards(JwtAuthGuard)
 @Controller('user')
-export class UsersController {
+export class UserController {
   constructor(private readonly usersService: UsersService) {}
 
   @Get()

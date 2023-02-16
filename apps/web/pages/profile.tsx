@@ -15,6 +15,7 @@ import ChatBar from "../components/chatBar";
 import styles from "styles/profil.module.scss";
 import textStyles from "styles/text.module.scss";
 import { initMatch } from "../initType/MatchInit";
+import ConfigTfa from "../components/ProfilePage/ConfigTfa";
 
 export default function Profil(): JSX.Element {
   const UserState = useSelector(selectUserState);
@@ -22,7 +23,6 @@ export default function Profil(): JSX.Element {
     null;
   };
 
-  const prevSetterUsermenuRef = useRef(setterInit);
   const prevAchivementRef = useRef({ name: "", status: "", description: "" });
   const router = useRouter();
   const [user, setUser] = useState(initUser);
@@ -33,7 +33,7 @@ export default function Profil(): JSX.Element {
   const [openConfigProfil, setOpenConfigProfil] = useState(false);
   const [configProfil, setConfigProfil] = useState(<></>);
   const [matchHistory, setMatchHistory] = useState([initMatch]);
-  const [listOfMatch, setListOfMatch] = useState([<></>]);
+  const [listOfMatch, setListOfMatch] = useState<JSX.Element[]>([]);
 
   /*======for close topBar component when click on screen====*/
   const [openToggle, setOpenToggle] = useState(false);
@@ -41,6 +41,7 @@ export default function Profil(): JSX.Element {
   const [openUserList, setOpenUserList] = useState(false);
   const [indexOfUser, setIndexOfUser] = useState(-1);
   const prevIndexOfUserRef = useRef(-1);
+  const prevSetterUsermenuRef = useRef(setterInit);
 
   function clickTopBarToggle(): void {
     setOpenToggle(!openToggle);
@@ -88,7 +89,7 @@ export default function Profil(): JSX.Element {
           setMatchHistory(data);
         })
         .catch((error) => {
-          console.log(`problem with fetch : ${error.message}`);
+          console.error(`problem with fetch : ${error.message}`);
         });
     }
   }, [router.query, UserState]);
@@ -96,7 +97,13 @@ export default function Profil(): JSX.Element {
   useEffect(() => {
     const tmp: JSX.Element[] = [];
     for (let i = 0; i < matchHistory.length; i++) {
-      tmp.push(<MatchEntity match={matchHistory[i]} user={user} key={i} />);
+      tmp.push(
+        <MatchEntity
+          match={matchHistory[i]}
+          user={user}
+          key={matchHistory[i].id}
+        />
+      );
     }
     setListOfMatch([...tmp]);
 
@@ -105,8 +112,8 @@ export default function Profil(): JSX.Element {
       level.innerText = "0";
       const incrementLevel = (): void => {
         const c = +level.innerText;
-        if (c + 10 <= user.level) {
-          level.innerText = `${c + 10}`;
+        if (c + 1 <= user.level) {
+          level.innerText = `${c + 1}`;
           setTimeout(incrementLevel, 100);
         } else {
           level.innerText = `${user.level}`;
@@ -138,6 +145,12 @@ export default function Profil(): JSX.Element {
     setConfigProfil(<ChangePswrd />);
   }
 
+  function configTfa(): void {
+    setOpenConfigProfil(true);
+    setOpenAchivementList(false);
+    setConfigProfil(<ConfigTfa />);
+  }
+
   function close(): void {
     if (openAchivementList && prevAchivementRef.current !== achivementSelect)
       setOpenAchivementList(false);
@@ -153,29 +166,17 @@ export default function Profil(): JSX.Element {
   }
 
   function addFriend(): void {
-    const data = {
-      id: user.id,
-    };
-
-    fetch(`/api/friendships`, {
+    fetch(`/api/friendships/${user.id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
         Authorization: "Bearer " + localStorage.getItem("access_token"),
       },
-      body: JSON.stringify(data),
-    })
-      .then(function (response) {
-        response.json().then((res) => {
-          if (res === 1) console.log("friend add");
-          else console.log("friend allready add");
-        });
-      })
-      .catch(function (error) {
-        console.log(
-          "Il y a eu un problème avec l'opération fetch : " + error.message
-        );
-      });
+    }).catch(function (error) {
+      console.error(
+        "Il y a eu un problème avec l'opération fetch : " + error.message
+      );
+    });
   }
 
   //temporary before get the real data
@@ -218,6 +219,9 @@ export default function Profil(): JSX.Element {
                 width={200}
                 height={200}
               />
+            </div>
+            <div className={styles.rank + " " + textStyles.saira}>
+              {user.rank}
             </div>
             <p className={textStyles.saira} style={{ color: "white" }}>
               {user.status}
@@ -322,7 +326,7 @@ export default function Profil(): JSX.Element {
                       Change password
                     </h3>
                   </button>
-                  <button className={styles.buttonProfil}>
+                  <button className={styles.buttonProfil} onClick={configTfa}>
                     <h3
                       className={textStyles.laquer}
                       style={{ fontSize: "18px" }}

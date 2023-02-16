@@ -12,6 +12,7 @@ async function fetchUser(): Promise<Response | null> {
 }
 
 export async function identifyUser(): Promise<null | Userfront> {
+  if (localStorage.getItem("access_token") === null) return null;
   let response = await fetchUser();
   if (!response || !response.ok) {
     if (await refreshToken()) {

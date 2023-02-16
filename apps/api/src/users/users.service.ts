@@ -10,11 +10,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User, Userfront } from 'types';
 import * as speakeasy from 'speakeasy';
 import { SpeakeasyGeneratedSecretDto } from '../auth/speakeasy-generated-secret.dto';
-import { AccessTokenResponse } from 'types';
-import * as bcrypt from 'bcrypt';
-import { UpdateUserPasswordDto } from './update-user-password.dto';
-import { Jwt as JwtEntity } from 'types';
-import { AuthService } from '../auth/auth.service';
 import { TransformUserService } from 'src/TransformUser/TransformUser.service';
 
 export interface AddUserData {
@@ -29,10 +24,6 @@ export class UsersService {
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
     private readonly transformUserService: TransformUserService,
-    @Inject(forwardRef(() => AuthService))
-    private readonly authService: AuthService,
-    @InjectRepository(JwtEntity)
-    private readonly jwtsRepository: Repository<JwtEntity>,
   ) {}
 
   async getById(id: string): Promise<User | null> {

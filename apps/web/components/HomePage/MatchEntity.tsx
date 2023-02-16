@@ -7,7 +7,6 @@ import { Userfront as User, MatchFront as Match } from "types";
 export default function MatchEntity(props: {
   match: Match;
   user: User;
-  key: number;
 }): JSX.Element {
   if (!props || !props.match) return <></>;
 

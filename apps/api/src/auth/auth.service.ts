@@ -16,7 +16,7 @@ import { User } from 'types';
 import { UsersService } from '../users/users.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { State } from 'types';
-import { Repository } from 'typeorm';
+import { Repository, UpdateResult } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { RegisterUserDto } from '../users/register-user.dto';
 import { Jwt } from 'types';
@@ -177,7 +177,7 @@ export class AuthService {
   async login(user: User, state?: State): Promise<AccessTokenResponse> {
     const [accessToken, refreshToken] = await this.createTokensPair(user);
     if (state) {
-      this.statesRepository.delete({ token: state.token });
+      this.removeState(state);
     }
     return {
       access_token: accessToken,
@@ -225,7 +225,21 @@ export class AuthService {
   }
 
   async removeState(state: State): Promise<void> {
-    state;
+    this.statesRepository.delete({ token: state.token });
     return;
+  }
+
+  async changePassword(
+    userId: string,
+    newPassword: string,
+  ): Promise<UpdateResult> {
+    const salt = await bcrypt.genSalt();
+    const password = await bcrypt.hash(newPassword, salt);
+    return this.usersRepository.update({ id: userId }, { password });
+  }
+
+  async logout(jti: string): Promise<void> {
+    await this.jwtsRepository.delete({ originToken: { id: jti } });
+    await this.jwtsRepository.delete({ id: jti });
   }
 }

@@ -1,0 +1,19 @@
+@import "variables";
+
+.container {
+  border-left: 3px solid $dark-system-red;
+  border-radius: 0 3px 3px 0;
+  padding: 16px 72px;
+
+  display: flex;
+  gap: 24px;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+
+  background-color: $dark-system-red-transparent;
+
+  * {
+    margin: 0;
+  }
+}
