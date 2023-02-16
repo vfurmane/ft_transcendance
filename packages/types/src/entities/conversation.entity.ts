@@ -1,4 +1,4 @@
-import { Exclude, Expose } from 'class-transformer';
+import { Exclude, Expose } from "class-transformer";
 import {
   Column,
   CreateDateColumn,
@@ -6,14 +6,14 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
-} from 'typeorm';
-import { ConversationRole } from './conversationRole.entity';
-import { Message } from './message.entity';
+} from "typeorm";
+import { ConversationRole } from "./conversationRole.entity";
+import { Message } from "./message.entity";
 
 @Expose()
 @Entity()
 export class Conversation {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryGeneratedColumn("uuid")
   id!: string;
 
   @Column()
@@ -23,7 +23,7 @@ export class Conversation {
   groupConversation!: boolean;
 
   @Exclude()
-  @Column('varchar', { length: 255, nullable: true, default: null })
+  @Column("varchar", { length: 255, nullable: true, default: null })
   password!: string | null;
 
   @CreateDateColumn()
@@ -40,7 +40,7 @@ export class Conversation {
   @OneToMany(
     () => ConversationRole,
     (conversationRole) => conversationRole.conversation,
-    { cascade: true },
+    { cascade: true }
   )
   conversationRoles!: ConversationRole[];
 }

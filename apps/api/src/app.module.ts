@@ -11,6 +11,7 @@ import { ConversationsModule } from './conversations/conversations.module';
 import { MatchModule } from './Match/Match.module';
 import { LeaderBoardModule } from './leaderBoard/leaderBoard.module';
 import { TransformUserModule } from './TransformUser/TransformUser.module';
+import { PongModule } from './pong/pong.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { AppGateway } from './app.gateway';
 
@@ -45,6 +46,7 @@ import { AppGateway } from './app.gateway';
     MatchModule,
     LeaderBoardModule,
     TransformUserModule,
+    PongModule,
     CacheModule.register(),
   ],
   controllers: [AppController],

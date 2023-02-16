@@ -1,25 +1,25 @@
-import { User } from './user.entity';
+import { User } from "./user.entity";
 import {
   Column,
   Entity,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
-} from 'typeorm';
-import { Conversation } from './conversation.entity';
-import { ConversationRoleEnum } from '../enums/conversationRole.enum';
-import { Exclude, Expose } from 'class-transformer';
-import { ConversationRestriction } from './conversationRestriction.entity';
+} from "typeorm";
+import { Conversation } from "./conversation.entity";
+import { ConversationRoleEnum } from "../enums/conversationRole.enum";
+import { Exclude, Expose } from "class-transformer";
+import { ConversationRestriction } from "./conversationRestriction.entity";
 
 @Expose()
 @Entity()
 export class ConversationRole {
   @Exclude()
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryGeneratedColumn("uuid")
   id!: string;
 
   @Column({
-    type: 'enum',
+    type: "enum",
     enum: ConversationRoleEnum,
     default: ConversationRoleEnum.USER,
   })
@@ -33,14 +33,14 @@ export class ConversationRole {
 
   @ManyToOne(
     () => Conversation,
-    (conversation) => conversation.conversationRoles,
+    (conversation) => conversation.conversationRoles
   )
   conversation!: Conversation;
 
   @OneToMany(
     () => ConversationRestriction,
     (conversationRestriction) => conversationRestriction.target,
-    { eager: true, cascade: true },
+    { eager: true, cascade: true }
   )
   restrictions!: ConversationRestriction[];
 }

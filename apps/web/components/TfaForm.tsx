@@ -2,6 +2,10 @@ import { Dispatch, ReactElement, SetStateAction, useState } from "react";
 import { Input } from "./Input";
 import styles from "../styles/TfaForm.module.scss";
 import { useForm } from "react-hook-form";
+import { identifyUser } from "../helpers/identifyUser";
+import { setUserState } from "../store/UserSlice";
+import { useDispatch } from "react-redux";
+import { AccessTokenResponse } from "types";
 
 export interface TfaFormProps {
   setAccessToken: Dispatch<SetStateAction<string>>;
@@ -15,7 +19,7 @@ export interface TfaFormData {
 async function checkTfa(
   data: TfaFormData,
   state: string
-): Promise<string | null> {
+): Promise<AccessTokenResponse | null> {
   const response = await fetch(`/api/auth/login/tfa`, {
     method: "POST",
     headers: {
@@ -31,8 +35,8 @@ async function checkTfa(
       return response.json();
     }
   });
-  if (response && response.access_token) return response.access_token;
-  return null;
+  if (!response) return null;
+  return response;
 }
 
 export function TfaForm(props: TfaFormProps): ReactElement {
@@ -44,19 +48,24 @@ export function TfaForm(props: TfaFormProps): ReactElement {
   const [formError, setFormError] = useState("");
   const [formSuccess, setFormSuccess] = useState("");
   const [loading, setLoading] = useState(false);
+  const dispatch = useDispatch();
   const onSubmit = async (data: TfaFormData): Promise<void> => {
     setLoading(true);
     setFormError("");
     setFormSuccess("");
 
     await checkTfa(data, props.state)
-      .then((accessToken) => {
-        if (accessToken === null) {
+      .then(async (response) => {
+        if (response === null) {
           throw new Error("An unexpected error occured...");
         } else {
           setFormSuccess("Success! Redirecting...");
-          localStorage.setItem("access_token", accessToken);
-          props.setAccessToken(accessToken);
+          props.setAccessToken(response.access_token);
+          localStorage.setItem("access_token", response.access_token);
+          localStorage.setItem("refresh_token", response.refresh_token);
+          localStorage.removeItem("state");
+          const user = await identifyUser();
+          if (user) dispatch(setUserState(user));
           localStorage.removeItem("state");
           return;
         }

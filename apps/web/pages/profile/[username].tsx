@@ -10,10 +10,12 @@ import AchivementEntity from "../../components/ProfilePage/achivementEntity";
 import { initAchivement } from "../../initType/AchivementInit";
 import { Achivement } from "types";
 import ChangePswrd from "../../components/ProfilePage/ChangePswrd";
+import ChangeUsername from "../../components/ProfilePage/ChangeUsername";
 import ChatBar from "../../components/chatBar";
 import styles from "styles/profil.module.scss";
 import textStyles from "styles/text.module.scss";
 import { initMatch } from "../../initType/MatchInit";
+import ConfigTfa from "../../components/ProfilePage/ConfigTfa";
 
 export default function Profil(): JSX.Element {
   const UserState = useSelector(selectUserState);
@@ -21,7 +23,6 @@ export default function Profil(): JSX.Element {
     null;
   };
 
-  const prevSetterUsermenuRef = useRef(setterInit);
   const prevAchivementRef = useRef({ name: "", status: "", description: "" });
   const router = useRouter();
   const [user, setUser] = useState(initUser);
@@ -40,6 +41,7 @@ export default function Profil(): JSX.Element {
   const [openUserList, setOpenUserList] = useState(false);
   const [indexOfUser, setIndexOfUser] = useState(-1);
   const prevIndexOfUserRef = useRef(-1);
+  const prevSetterUsermenuRef = useRef(setterInit);
 
   function clickTopBarToggle(): void {
     setOpenToggle(!openToggle);
@@ -134,8 +136,8 @@ export default function Profil(): JSX.Element {
       level.innerText = "0";
       const incrementLevel = (): void => {
         const c = +level.innerText;
-        if (c + 10 <= user.level) {
-          level.innerText = `${c + 10}`;
+        if (c + 1 <= user.level) {
+          level.innerText = `${c + 1}`;
           setTimeout(incrementLevel, 100);
         } else {
           level.innerText = `${user.level}`;
@@ -155,10 +157,22 @@ export default function Profil(): JSX.Element {
     prevAchivementRef.current = achivementSelect;
   }
 
+  function changeUsername(): void {
+    setOpenConfigProfil(true);
+    setOpenAchivementList(false);
+    setConfigProfil(<ChangeUsername />);
+  }
+
   function changePswrd(): void {
     setOpenConfigProfil(true);
     setOpenAchivementList(false);
     setConfigProfil(<ChangePswrd />);
+  }
+
+  function configTfa(): void {
+    setOpenConfigProfil(true);
+    setOpenAchivementList(false);
+    setConfigProfil(<ConfigTfa />);
   }
 
   function close(): void {
@@ -176,17 +190,12 @@ export default function Profil(): JSX.Element {
   }
 
   function addFriend(): void {
-    const data = {
-      id: user.id,
-    };
-
-    fetch(`/api/friendships`, {
+    fetch(`/api/friendships/${user.id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
         Authorization: "Bearer " + localStorage.getItem("access_token"),
       },
-      body: JSON.stringify(data),
     }).catch(function (error) {
       console.error(
         "Il y a eu un problème avec l'opération fetch : " + error.message
@@ -234,6 +243,9 @@ export default function Profil(): JSX.Element {
                 width={200}
                 height={200}
               />
+            </div>
+            <div className={styles.rank + " " + textStyles.saira}>
+              {user.rank}
             </div>
             <p className={textStyles.saira} style={{ color: "white" }}>
               {user.status}
@@ -319,6 +331,17 @@ export default function Profil(): JSX.Element {
               </div>
               {userProfil ? (
                 <div className={styles.buttonProfilContainer}>
+                  <button
+                    className={styles.buttonProfil}
+                    onClick={changeUsername}
+                  >
+                    <h3
+                      className={textStyles.laquer}
+                      style={{ fontSize: "18px" }}
+                    >
+                      Change username
+                    </h3>
+                  </button>
                   <button className={styles.buttonProfil} onClick={changePswrd}>
                     <h3
                       className={textStyles.laquer}
@@ -327,7 +350,7 @@ export default function Profil(): JSX.Element {
                       Change password
                     </h3>
                   </button>
-                  <button className={styles.buttonProfil}>
+                  <button className={styles.buttonProfil} onClick={configTfa}>
                     <h3
                       className={textStyles.laquer}
                       style={{ fontSize: "18px" }}

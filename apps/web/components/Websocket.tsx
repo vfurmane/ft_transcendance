@@ -66,8 +66,7 @@ export default function Websocket({ children }: WebsocketProps): JSX.Element {
     if (userState.id) {
       const general = OpenSocket("/");
       const conversations = OpenSocket("/conversations");
-      // const pong = OpenSocket("/pong");
-      const pong = null;
+      const pong = OpenSocket("/pong");
       setSocketInstances({
         general: general,
         conversations: conversations,
@@ -75,12 +74,20 @@ export default function Websocket({ children }: WebsocketProps): JSX.Element {
       });
     } else {
       closeOpenSockets(socketInstances);
-      setSocketInstances({ general: null, conversations: null, pong: null });
+      setSocketInstances({
+        general: null,
+        conversations: null,
+        pong: null,
+      });
     }
     return (): void => {
       if (socketInstances) {
         closeOpenSockets(socketInstances);
-        setSocketInstances({ general: null, conversations: null, pong: null });
+        setSocketInstances({
+          general: null,
+          conversations: null,
+          pong: null,
+        });
       }
     };
   }, [userState.id]);

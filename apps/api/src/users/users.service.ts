@@ -1,5 +1,11 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { Repository, UpdateResult } from 'typeorm';
+import {
+  BadRequestException,
+  forwardRef,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { In, Repository, UpdateResult } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User, Userfront } from 'types';
 import * as speakeasy from 'speakeasy';
@@ -96,5 +102,17 @@ export class UsersService {
     user.level = (user.level ? user.level : 0) + xp;
     this.usersRepository.save(user);
     return (level ? level : 0) + xp;
+  }
+
+  async updateName(user: User, new_username: string): Promise<UpdateResult> {
+    const usernameTaken = await this.usersRepository
+      .createQueryBuilder()
+      .where('LOWER(name) = :name', {
+        name: new_username.toLowerCase(),
+      })
+      .getOne();
+    if (usernameTaken)
+      throw new BadRequestException('`username` is already in use');
+    return this.usersRepository.update({ id: user.id }, { name: new_username });
   }
 }

@@ -1,4 +1,4 @@
 export enum conversationRestrictionEnum {
-  BAN = 'ban',
-  MUTE = 'mute',
+  BAN = "ban",
+  MUTE = "mute",
 }
