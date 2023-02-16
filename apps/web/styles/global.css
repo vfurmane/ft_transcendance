@@ -96,9 +96,7 @@ body::-webkit-scrollbar {
   bottom: 10px;
 }
 
-
-.containerScrollHorizon
-{
+.containerScrollHorizon {
   display: flex;
   overflow: hidden;
   width: 100%;
@@ -107,14 +105,11 @@ body::-webkit-scrollbar {
   transform: translateX(0%);
 }
 
-.containerScrollHorizon.midle
-{
+.containerScrollHorizon.midle {
   top: 30vh;
 }
 
-
-.containerScrollVertical
-{
+.containerScrollVertical {
   display: flex;
   width: 0px;
   height: 60px;
@@ -124,57 +119,50 @@ body::-webkit-scrollbar {
   z-index: -1;
 }
 
-.containerScrollVertical.inv
-{
+.containerScrollVertical.inv {
   transform: rotate(90deg) translate(-50px);
 }
 
-
-.textScroll
-{
+.textScroll {
   color: rgba(255, 255, 255, 0.1);
   font-size: 200px;
   white-space: nowrap;
   animation: scrollTxt 180s linear infinite;
 }
 
-.textScroll.inv
-{
+.textScroll.inv {
   color: transparent;
   -webkit-text-stroke: 2px #fff;
   animation: scrollTxt 200s linear infinite;
 }
 
 @keyframes scrollTxt {
-  0%{
-    transform: translate(0, 0)
+  0% {
+    transform: translate(0, 0);
   }
-  100%{
+  100% {
     transform: translate(-100%, 0);
   }
 }
 
-table
-{
+table {
   color: white;
   width: 100%;
   backdrop-filter: blur(8px);
 }
 
-td, th
-{
+td,
+th {
   border: 1px solid #fff;
   padding: 20px;
   font-size: 17px;
 }
 
-th
-{
+th {
   text-align: center;
 }
 
-.overlay
-{
+.overlay {
   background: rgba(151, 150, 150, 0.1);
   border-radius: 10px;
   position: absolute;

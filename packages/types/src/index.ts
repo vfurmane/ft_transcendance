@@ -111,6 +111,11 @@ export interface GameEntityFront {
   opponents: { user: Userfront }[];
 }
 
-export * from './enums';
-export * from './entities';
+export interface UserStatusUpdatePayload {
+  type: string;
+  userId: string;
+}
+
+export * from "./enums";
+export * from "./entities";
 export * from "./class";

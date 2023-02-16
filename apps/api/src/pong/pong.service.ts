@@ -2,6 +2,7 @@ import {
   HttpException,
   HttpStatus,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -22,12 +23,15 @@ import { Game } from './game.service';
 export type QueueList = User[];
 export type QueuesMap = { [key in GameMode]: QueueList };
 export type GameModeDetails = { maxPlayersNumber: number };
+export type Invitation = { hostId: string; targetId: string };
 
 @Injectable()
 export class PongService {
   games!: Map<string, [Game, Array<{ id: string; ready: boolean }>]>;
 
   queues: QueuesMap = {} as QueuesMap;
+
+  invitesList: Invitation[] = [];
 
   static gameModes: { [key in GameMode]: GameModeDetails } = {
     CLASSIC: { maxPlayersNumber: 2 },
@@ -37,6 +41,7 @@ export class PongService {
   constructor(
     @InjectRepository(GameEntity)
     private readonly gamesRepository: Repository<GameEntity>,
+    private readonly logger: Logger,
     @InjectRepository(Opponent)
     private readonly opponentsRepository: Repository<Opponent>,
     private readonly transformUserService: TransformUserService,
@@ -162,5 +167,41 @@ export class PongService {
   saveGame(ids : string[], hps : number[], hpStart : number){
     let indexWin = hps.indexOf(Math.max(hps[0], hps[1]));
     this.matchService.addMatch(ids[indexWin], ids[1 - indexWin], hpStart - hps[1 - indexWin], hpStart - hps[indexWin]);
+  }
+  
+  invite(host: User, target: User): QueueList | null {
+    this.logger.debug(
+      `'${host.id}' (${host.name}) invites '${target.id}' (${target.name})`,
+    );
+    const invitation = this.invitesList.find(
+      (invitation) =>
+        invitation.hostId === target.id && invitation.targetId === host.id,
+    );
+    if (invitation) {
+      this.logger.debug(
+        `'${target.id}' (${target.name}) has already invited '${host.id}' (${host.name})`,
+      );
+      return [target, host];
+    }
+    this.invitesList.push({ hostId: host.id, targetId: target.id });
+    return null;
+  }
+
+  discardInvitations(user: User): Invitation[] {
+    this.logger.debug(
+      `'${user.id}' (${user.name}) is discarding all their invitations`,
+    );
+    const invitations = [];
+    let pos;
+    while (
+      (pos = this.invitesList.findIndex(
+        (invitation) => invitation.hostId === user.id,
+      )) >= 0
+    ) {
+      invitations.push(this.invitesList[pos]);
+      if (pos >= 0) this.invitesList.splice(pos, 1);
+    }
+    console.log(invitations);
+    return invitations;
   }
 }

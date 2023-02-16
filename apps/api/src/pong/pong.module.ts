@@ -10,6 +10,7 @@ import { MatchModule } from 'src/Match/Match.module';
 
 @Module({
   imports: [
+    TypeOrmModule.forFeature([Opponent, Game]),
     AuthModule,
     UsersModule,
     TransformUserModule,

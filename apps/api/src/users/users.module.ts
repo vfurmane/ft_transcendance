@@ -4,7 +4,8 @@ import { AuthModule } from '../auth/auth.module';
 import { UsersGateway } from './users.gateway';
 import { User, Jwt } from 'types';
 import { UsersService } from './users.service';
-import { UsersController } from './user.controller';
+import { UserController } from './user.controller';
+import { UsersController } from './users.controller';
 import { TransformUserModule } from '../TransformUser/TransformUser.module';
 
 @Module({
@@ -14,7 +15,7 @@ import { TransformUserModule } from '../TransformUser/TransformUser.module';
     forwardRef(() => TransformUserModule),
   ],
   providers: [UsersService, Logger, UsersGateway],
-  controllers: [UsersController],
+  controllers: [UsersController, UserController],
   exports: [TypeOrmModule, UsersService],
 })
 export class UsersModule {}

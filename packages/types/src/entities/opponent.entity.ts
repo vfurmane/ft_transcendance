@@ -19,7 +19,7 @@ export class Opponent {
 
   @UpdateDateColumn()
   updated_at!: Date;
-  
+
   @Column("smallint", { default: 0 })
   score!: number;
 

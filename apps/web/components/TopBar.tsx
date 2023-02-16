@@ -134,7 +134,7 @@ function TopBar(props: propsTopBar): JSX.Element {
             <Image alt="logo" src={Logo} width={200} height={30} />
           </Link>
           <Link className={styles.leaderBoardLink} href="/home#leaderboard">
-            Learderbord
+            Leaderboard
           </Link>
         </div>
       </div>

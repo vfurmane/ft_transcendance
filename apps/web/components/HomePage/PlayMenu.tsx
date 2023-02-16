@@ -23,7 +23,6 @@ export default function PlayMenu(props: { click?: () => void }): JSX.Element {
           game_mode: mode,
         });
         dispatch(setGameMode(mode));
-        console.log("im rerouting to matchmaking at ", Date.now());
         router.push("/matchmaking");
       }
     };

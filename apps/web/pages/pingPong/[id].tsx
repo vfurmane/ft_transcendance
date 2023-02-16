@@ -4,7 +4,7 @@ import React, { useState, useRef, useEffect, useCallback } from "react";
 import MiniProfil from "../../components/miniProfil";
 import { useRouter } from "next/router";
 import Game from "../../helpers/pong";
-import { Game as GameEntity, GameEntityFront, Userfront as User } from "types";
+import { GameEntityFront, Userfront as User } from "types";
 import PlayButton from "../../components/HomePage/PlayButton";
 import Link from "next/link";
 import playButtonStyles from "styles/playButton.module.scss";
@@ -14,7 +14,6 @@ import styles from "styles/pingPong.module.scss";
 import { useSelector } from "react-redux";
 import { selectUserState } from "../../store/UserSlice";
 import { useWebsocketContext } from "../../components/Websocket";
-import { current } from "@reduxjs/toolkit";
 
 export default function PingPong(): JSX.Element {
   const router = useRouter();
@@ -44,104 +43,155 @@ export default function PingPong(): JSX.Element {
 
   const UserState = useSelector(selectUserState);
   const websockets = useWebsocketContext();
-  websockets.pong?.on('endGame', () => {
-      //if (!Game.isSolo)
-      setEndGame(true);
+  websockets.pong?.on("endGame", () => {
+    //if (!Game.isSolo)
+    setEndGame(true);
+    setGame(null);
   });
 
-  function rotate( user : User[]) {
-    let lastIndex = user.length - 1;
-    let angle : number = 0;
-    switch (user.length)
-    {
-        case 2 :
-        {
-            angle = -180;
-            break;
-        }
-        case 3 :
-        {
-            angle = -120;
-            break;
-        }
-        case 4 :
-        {
-            angle = -90;
-            break;
-        }
-        case 5 :
-        {
-            angle = -72;
-            break;
-        }
-        case 6 :
-        {
-            angle = -60;
-            break;
-        }
-        default :
-            break;
+  function rotate(user: User[]): User[] {
+    const lastIndex = user.length - 1;
+    let angle = 0;
+    switch (user.length) {
+      case 2: {
+        angle = -180;
+        break;
+      }
+      case 3: {
+        angle = -120;
+        break;
+      }
+      case 4: {
+        angle = -90;
+        break;
+      }
+      case 5: {
+        angle = -72;
+        break;
+      }
+      case 6: {
+        angle = -60;
+        break;
+      }
+      default:
+        break;
     }
-    
+
     const canvas = document.getElementById("canvasElem");
     if (canvas)
-      canvas.style.transform = `rotate(${angle * user.findIndex(e => e.id === UserState.id)}deg)`;
-        
-    while (user.length &&  user[0].id !== UserState.id)
-    {
-        const last = user[lastIndex];
-        user.unshift(last);
-        user.pop();
+      canvas.style.transform = `rotate(${
+        angle * user.findIndex((e) => e.id === UserState.id)
+      }deg)`;
+
+    while (user.length && user[0].id !== UserState.id) {
+      const last = user[lastIndex];
+      user.unshift(last);
+      user.pop();
     }
     return user;
-  };
+  }
 
-  const changeLife = useCallback((index: number, val: number) => {
-        if (!users.length) return;
-        const rectifiIndex = usersRef.current.findIndex(e => e.id === UserState.id);
-        index = index - rectifiIndex >= 0? index - rectifiIndex : users.length - rectifiIndex;
-        let tmp = [...MiniProfilArray];
-        if (val === 0 )
-        {
-          console.log('chanhe life index :', index);
-            if (intervalState)
-                clearInterval(intervalState);
-            let tempUsers = [...users];
-            let newClassement = [createTrClassement(tempUsers[index], classement), ...classement];
-            if (newClassement.length <= usersRef.current.length)
-                setClassement(newClassement);
-            if (users.length > 2 && tempUsers[index].id === UserState.id)
-                setOpenOverlay(true);
-            tempUsers.splice(index, 1);
-            tmp.splice(index, 1);
-            if (tempUsers.length === 1)
-            {
-                if (tempUsers[0].id === UserState.id)
-                    setWin(true);
-                if (newClassement.length + 1 <= usersRef.current.length)
-                    setClassement([createTrClassement(tempUsers[0], newClassement), ...newClassement]);
-                setPrintButton(true);
-                return ;
-            }
-            tmp.forEach((e, i) => <MiniProfil key={index} left={i % 2 == 0 ? true : false} user={{ user: tempUsers[i], index: i }} life={tmp[i]?.props.life} score={tmp[i]?.props.score} game={{ life: Game.live, score: Game.scoreMax, numOfPlayers: tmp.length }} />);
-            console.log('i update the game');
-            setGame(new Game(tempUsers.length, tempUsers.findIndex(e => e.id === UserState.id), changeLife));
-            setUsers(tempUsers);
-            setMiniProfilArray(tmp);
+  const changeLife = useCallback(
+    (index: number, val: number) => {
+      if (!users.length) return;
+      const rectifiIndex = usersRef.current.findIndex(
+        (e) => e.id === UserState.id
+      );
+      index =
+        index - rectifiIndex >= 0
+          ? index - rectifiIndex
+          : users.length - rectifiIndex;
+      const tmp = [...MiniProfilArray];
+      if (val === 0) {
+        console.log("chanhe life index :", index);
+        if (intervalState) clearInterval(intervalState);
+        const tempUsers = [...users];
+        const newClassement = [
+          createTrClassement(tempUsers[index], classement),
+          ...classement,
+        ];
+        if (newClassement.length <= usersRef.current.length)
+          setClassement(newClassement);
+        if (users.length > 2 && tempUsers[index].id === UserState.id)
+          setOpenOverlay(true);
+        tempUsers.splice(index, 1);
+        tmp.splice(index, 1);
+        if (tempUsers.length === 0) {
+          return;
         }
-        else if (tmp[index]?.props.life !== val)
-        {
-            tmp[index] = <MiniProfil key={index} left={index % 2 == 0 ? true : false} user={{ user: users[index], index: index }} life={val} score={tmp[index]?.props.score} game={{ life: Game.live, score: Game.scoreMax, numOfPlayers: tmp.length }} />
-            if (users.length === 2) {
-              console.log('hello');
-                index = index ? 0 : 1;
-                tmp[index] = <MiniProfil key={index} left={index % 2 == 0 ? true : false} user={{ user: users[index], index: index }} life={tmp[index]?.props.life} score={tmp[index]?.props.score + 1} game={{ life: Game.live, score: Game.scoreMax, numOfPlayers: tmp.length}} />
-            }
-            setMiniProfilArray(tmp);
+        if (tempUsers.length === 1) {
+          if (tempUsers[0].id === UserState.id) setWin(true);
+          if (newClassement.length + 1 <= usersRef.current.length)
+            setClassement([
+              createTrClassement(tempUsers[0], newClassement),
+              ...newClassement,
+            ]);
+          setPrintButton(true);
+          return;
         }
-    }, [users]);
+        tmp.forEach((e, i) => (
+          <MiniProfil
+            key={index}
+            left={i % 2 == 0 ? true : false}
+            user={{ user: tempUsers[i], index: i }}
+            life={tmp[i]?.props.life}
+            score={tmp[i]?.props.score}
+            game={{
+              life: Game.live,
+              score: Game.scoreMax,
+              numOfPlayers: tmp.length,
+            }}
+          />
+        ));
+        console.log("i update the game");
+        setGame(
+          new Game(
+            tempUsers.length,
+            tempUsers.findIndex((e) => e.id === UserState.id),
+            changeLife
+          )
+        );
+        setUsers(tempUsers);
+        setMiniProfilArray(tmp);
+      } else if (tmp[index]?.props.life !== val) {
+        tmp[index] = (
+          <MiniProfil
+            key={index}
+            left={index % 2 == 0 ? true : false}
+            user={{ user: users[index], index: index }}
+            life={val}
+            score={tmp[index]?.props.score}
+            game={{
+              life: Game.live,
+              score: Game.scoreMax,
+              numOfPlayers: tmp.length,
+            }}
+          />
+        );
+        if (users.length === 2) {
+          console.log('hello');
+          index = index ? 0 : 1;
+          tmp[index] = (
+            <MiniProfil
+              key={index}
+              left={index % 2 == 0 ? true : false}
+              user={{ user: users[index], index: index }}
+              life={tmp[index]?.props.life}
+              score={tmp[index]?.props.score + 1}
+              game={{
+                life: Game.live,
+                score: Game.scoreMax,
+                numOfPlayers: tmp.length,
+              }}
+            />
+          );
+        }
+        setMiniProfilArray(tmp);
+      }
+    },
+    [users]
+  );
 
-  
   useEffect(() => {
     if (websockets.pong) {
       websockets.pong.emit(
@@ -194,10 +244,9 @@ export default function PingPong(): JSX.Element {
     };
   }, [websockets.pong, router.query.id]);
 
-
   useEffect(() => {
     if (users.length === 0) return;
-    console.log('in setGame')
+    console.log("in setGame");
     setGame(
       new Game(
         users.length,
@@ -266,8 +315,9 @@ export default function PingPong(): JSX.Element {
       setOpenOverlay(false);
   }
 
-  function handleResize(game: Game) {
+  function handleResize(game: Game): void {
     game.updateGame();
+    return;
   }
 
   function createTrClassement(user: User, classement: JSX.Element[]) {

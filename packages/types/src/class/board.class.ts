@@ -9,7 +9,6 @@ export class Board {
   public wall!: Wall[];
   public wallSize!: number;
 
-
   constructor(boardType: number, canvas: any) {
     let height = 0;
     let size = 1;

@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { CacheModule, Logger, Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -14,6 +14,7 @@ import { TransformUserModule } from './TransformUser/TransformUser.module';
 import { PongModule } from './pong/pong.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { AchievementsModule } from './Achievements/Achievements.module';
+import { AppGateway } from './app.gateway';
 
 @Module({
   imports: [
@@ -34,7 +35,7 @@ import { AchievementsModule } from './Achievements/Achievements.module';
         // From NestJS docs:
         // Setting `synchronize: true` shouldn't be used in production - otherwise you can lose production data.
         synchronize: configService.get('NODE_ENV') === 'development',
-        //logging: configService.get('NODE_ENV') === 'development',
+        logging: configService.get('NODE_ENV') === 'development',
       }),
     }),
     ScheduleModule.forRoot(),
@@ -42,15 +43,15 @@ import { AchievementsModule } from './Achievements/Achievements.module';
     AuthModule,
     SearchModule,
     FriendshipsModule,
-    UsersModule,
     ConversationsModule,
     MatchModule,
     LeaderBoardModule,
     TransformUserModule,
     PongModule,
-    AchievementsModule
+    AchievementsModule,
+    CacheModule.register(),
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, AppGateway, Logger],
 })
 export class AppModule {}
