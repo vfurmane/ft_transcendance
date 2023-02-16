@@ -1,0 +1,57 @@
+.afterGameContainer {
+  display: flex;
+  align-items: center;
+  margin-top: 200px;
+  flex-direction: column;
+}
+
+@keyframes bounce {
+  0% {
+    transform: scale(1, 1) translateY(0);
+  }
+  10% {
+    transform: scale(1.1, 0.9) translateY(0);
+  }
+  30% {
+    transform: scale(0.9, 1.1) translateY(-55px);
+  }
+  50% {
+    transform: scale(1.05, 0.95) translateY(0);
+  }
+  58% {
+    transform: scale(1, 1) translateY(-7px);
+  }
+  65% {
+    transform: scale(1, 1) translateY(0);
+  }
+  100% {
+    transform: scale(1, 1) translateY(0);
+  }
+}
+
+.title {
+  color: white;
+  margin-bottom: 20px;
+  font-size: 50px;
+  animation: bounce 1s ease 2;
+}
+
+.tableContainer {
+  width: 50%;
+  border: solid 1px white;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.buttons {
+  display: flex;
+  width: 50%;
+  justify-content: center;
+  margin-top: 30px;
+  margin-bottom: 20px;
+}
+
+.link {
+  text-decoration: none;
+  width: 80%;
+}
