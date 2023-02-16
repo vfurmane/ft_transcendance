@@ -1,5 +1,4 @@
 import React from "react";
-import Image from "next/image";
 import textStyle from "styles/text.module.scss";
 import styles from "styles/entity.module.scss";
 import { Userfront as User, MatchFront as Match } from "types";
@@ -20,9 +19,7 @@ export default function MatchEntity(props: {
             <img
               alt="avatar"
               src={`/api/users/${
-                props.match.winner
-                  ? props.match.winner.id
-                  : props.user.id
+                props.match.winner ? props.match.winner.id : props.user.id
               }/profile-picture`}
               width={47}
               height={47}
@@ -53,9 +50,7 @@ export default function MatchEntity(props: {
             <img
               alt="avatar"
               src={`/api/users/${
-                props.match.looser
-                  ? props.match.looser.id
-                  : props.user.id
+                props.match.looser ? props.match.looser.id : props.user.id
               }/profile-picture`}
               width={47}
               height={47}
