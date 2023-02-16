@@ -1,4 +1,4 @@
-import { User } from './user.entity';
+import { User } from "./user.entity";
 import {
   Column,
   CreateDateColumn,
@@ -6,12 +6,12 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
-} from 'typeorm';
-import { Exclude } from 'class-transformer';
+} from "typeorm";
+import { Exclude } from "class-transformer";
 
 @Entity()
 export class State {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryGeneratedColumn("uuid")
   id!: string;
 
   @Exclude()
@@ -22,7 +22,7 @@ export class State {
   @UpdateDateColumn()
   updated_at!: Date;
 
-  @Column('varchar', { length: 255, unique: true })
+  @Column("varchar", { length: 255, unique: true })
   token!: string;
 
   @Exclude()

@@ -22,7 +22,6 @@ export default function Profil(): JSX.Element {
     null;
   };
 
-  const prevSetterUsermenuRef = useRef(setterInit);
   const prevAchivementRef = useRef({ name: "", status: "", description: "" });
   const router = useRouter();
   const [user, setUser] = useState(initUser);
@@ -41,6 +40,7 @@ export default function Profil(): JSX.Element {
   const [openUserList, setOpenUserList] = useState(false);
   const [indexOfUser, setIndexOfUser] = useState(-1);
   const prevIndexOfUserRef = useRef(-1);
+  const prevSetterUsermenuRef = useRef(setterInit);
 
   function clickTopBarToggle(): void {
     setOpenToggle(!openToggle);
@@ -111,8 +111,8 @@ export default function Profil(): JSX.Element {
       level.innerText = "0";
       const incrementLevel = (): void => {
         const c = +level.innerText;
-        if (c + 10 <= user.level) {
-          level.innerText = `${c + 10}`;
+        if (c + 1 <= user.level) {
+          level.innerText = `${c + 1}`;
           setTimeout(incrementLevel, 100);
         } else {
           level.innerText = `${user.level}`;
@@ -159,17 +159,12 @@ export default function Profil(): JSX.Element {
   }
 
   function addFriend(): void {
-    const data = {
-      id: user.id,
-    };
-
-    fetch(`/api/friendships`, {
+    fetch(`/api/friendships/${user.id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
         Authorization: "Bearer " + localStorage.getItem("access_token"),
       },
-      body: JSON.stringify(data),
     }).catch(function (error) {
       console.error(
         "Il y a eu un problème avec l'opération fetch : " + error.message
@@ -217,6 +212,9 @@ export default function Profil(): JSX.Element {
                 width={200}
                 height={200}
               />
+            </div>
+            <div className={styles.rank + " " + textStyles.saira}>
+              {user.rank}
             </div>
             <p className={textStyles.saira} style={{ color: "white" }}>
               {user.status}

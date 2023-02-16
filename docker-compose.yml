@@ -50,7 +50,15 @@ services:
       POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
       POSTGRES_PORT: ${DATABASE_PORT}
     healthcheck:
-      test: ["CMD", "pg_isready", "-U", "${DATABASE_USERNAME}", "-d", "${DATABASE_NAME}"]
+      test:
+        [
+          "CMD",
+          "pg_isready",
+          "-U",
+          "${DATABASE_USERNAME}",
+          "-d",
+          "${DATABASE_NAME}",
+        ]
       interval: 5s
       timeout: 5s
       retries: 50
