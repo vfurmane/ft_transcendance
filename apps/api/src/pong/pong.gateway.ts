@@ -279,21 +279,17 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
     );
     if (gameQueue !== null) {
       this.logger.log(`Queue is full, the game will start soon. Players:`);
+      const game = await this.pongService.startGame(gameQueue, this.server);
       gameQueue.forEach((user_loop) => {
         this.logger.log(`- ${user_loop.id} (${user_loop.name})`);
-      });
-
-      setTimeout(async () => {
-        console.log('SENDING game_start at ', Date.now());
-        const game = await this.pongService.startGame(gameQueue, this.server);
-        this.server.emit(
+        this.server.in(`user_${user_loop.id}`).emit(
           'game_start',
           instanceToPlain<GameStartPayload>({
             id: game.id,
             users: gameQueue,
           }),
         );
-      }, 2000);
+      });
     }
   }
 
