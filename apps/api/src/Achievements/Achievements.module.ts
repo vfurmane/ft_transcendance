@@ -8,7 +8,6 @@ import { AchievementsService } from "./Achievements.service";
     imports: [
       TypeOrmModule.forFeature([AchievementsEntity]),
       UsersModule,
-      UsersModule
     ],
     providers: [AchievementsService],
     exports: [AchievementsService],

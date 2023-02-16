@@ -32,7 +32,7 @@ class Game {
   public lastUpdate = 0;
   public color: string[] = ["blue", "red", "orange", "white", "pink", "black"];
   public static position: number;
-  public static scoreMax = 1;
+  public static scoreMax = 10;
   public static changeLife: (index: number, val: number) => void;
   public static socket: Socket<DefaultEventsMap, DefaultEventsMap>;
   public static count: number;
@@ -482,7 +482,7 @@ class Game {
     if (Game.isSolo && this.cible) this.cible.draw(this.boardContext);
     if (Game.live === 0) {
       Game.point = 0;
-      Game.live = 1;
+      Game.live = 11;
       this.start = Date.now();
     }
     this.lastUpdate = Date.now() - this.start;
@@ -746,8 +746,7 @@ class Ball extends Entity {
       const index = this.nextCollision.wallIndex;
       if (rackets.length === 2) {
         if (index === 2) {
-          console.log("LEFT PLAYER GOAL");
-          rackets[1].hp--;
+          //rackets[1].hp--;
           this.replaceTo(board.board.center());
           this.goToRandomPlayer(rackets);
           this.calcNextCollision(rackets, walls, null, null);

@@ -1,13 +1,11 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
-import { Match, User, Achievements } from 'types';
+import { User, Achievements } from 'types';
 
 @Injectable()
 export class AchievementsService {
   constructor(
-    @InjectRepository(Match)
-    private readonly matchRepository: Repository<Match>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     @InjectRepository(Achievements)
