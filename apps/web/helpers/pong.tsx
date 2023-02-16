@@ -36,7 +36,7 @@ class Game {
   public static changeLife: (index: number, val: number) => void;
   public static socket: Socket<DefaultEventsMap, DefaultEventsMap>;
   public static count: number;
-  public await = true;changeLife
+  public await = true;
 
   constructor(
     number_player: number | undefined,
@@ -533,7 +533,7 @@ class Ball extends Entity {
     racket: { index: number; time: number } | null;
   } = {
     wall: 0,
-    wallIndex: 0,changeLife
+    wallIndex: 0,
     racket: null,
   };
 
@@ -609,7 +609,7 @@ class Ball extends Entity {
       }
     });
   }
-  changeLife
+
   calcNextCollision(
     rackets: Racket[],
     walls: Wall[],

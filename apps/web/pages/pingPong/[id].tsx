@@ -37,8 +37,7 @@ export default function PingPong(): JSX.Element {
   const [openUserList, setOpenUserList] = useState(false);
   const [indexOfUser, setIndexOfUser] = useState(-1);
   const prevIndexOfUserRef = useRef(-1);
-  const prevSetterUsermenuRef =
-    useRef<React.Dispatch<React.SetStateAction<boolean>>>();
+  const prevSetterUsermenuRef = useRef<React.Dispatch<React.SetStateAction<boolean>>>();
   /*===========================================================*/
 
   const UserState = useSelector(selectUserState);
@@ -103,7 +102,7 @@ export default function PingPong(): JSX.Element {
           : users.length - rectifiIndex;
       const tmp = [...MiniProfilArray];
       if (val === 0) {
-        console.log("chanhe life index :", index);
+        console.log("change life index :", index);
         if (intervalState) clearInterval(intervalState);
         const tempUsers = [...users];
         const newClassement = [
@@ -169,7 +168,6 @@ export default function PingPong(): JSX.Element {
           />
         );
         if (users.length === 2) {
-          console.log('hello');
           index = index ? 0 : 1;
           tmp[index] = (
             <MiniProfil
@@ -189,7 +187,7 @@ export default function PingPong(): JSX.Element {
         setMiniProfilArray(tmp);
       }
     },
-    [users]
+    [users, MiniProfilArray]
   );
 
   useEffect(() => {

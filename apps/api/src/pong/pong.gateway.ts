@@ -319,7 +319,7 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     const gameQueue = this.pongService.invite(host, target);
     if (gameQueue) {
-      this.logger.log(
+      this.logger.log(  
         `Invitation accepted, the game will start soon. Players:`,
       );
       gameQueue.forEach((user_loop) => {

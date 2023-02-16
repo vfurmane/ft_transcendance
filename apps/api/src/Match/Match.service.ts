@@ -53,7 +53,7 @@ export class MatchService {
       this.#getXp(winner, looser, score_winner, score_looser),
     );
 
-    this.achivementService.saveAchievement(winner_id, looser_id);
+    this.achivementService.saveAchievement(winner, looser, await this.getMatch(winner_id), await this.getMatch(looser_id));
 
   }
 

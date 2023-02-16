@@ -20,12 +20,15 @@ import {
     @Column("varchar", { length: 300 })
     description!: string;
 
+    @Column("varchar", { length: 30, unique: true })
+    logo!: string;
+
     /*@ManyToMany(() => User)
     @JoinTable()
     users!: User[]*/
 
     @ManyToOne(() => User, (user) => user.achievements)
-    user!: User;
+    user!: User | null;
   
     @CreateDateColumn()
     created_at!: Date;
