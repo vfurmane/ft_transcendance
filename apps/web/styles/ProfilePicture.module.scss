@@ -1,0 +1,28 @@
+@import "variables";
+
+.container {
+  position: relative;
+  display: inline-block;
+}
+
+.avatar {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+}
+
+.errorMessage {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+  padding: 10px;
+  background-color: $dark-system-red;
+  color: white;
+  border-radius: 5px;
+}
