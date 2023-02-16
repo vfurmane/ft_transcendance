@@ -213,17 +213,11 @@ class Game {
   }
 
   updatePlayer(player: PlayerInterface[], wall: Wall[]): Racket[] {
-    this.ballWidth = this.board.wallSize * 0.00625;
-    if (Game.isSolo) {
-      const wallDir = wall[0].point[0]
-      .vectorTo(wall[0].point[2])
-      .normalized();
+    const racket: Racket[] = [];
+    for (let i = 0; i < wall.length; i++) {
+      const wallDir = wall[i].point[0].vectorTo(wall[i].point[2]).normalized();
       const wallPerp = wallDir.perp().normalized();
-      const wallCenter = wall[0].center();
-      const racketCenter = new Point(
-        wallCenter.x + wallPerp.x * 10,
-        wallCenter.y + wallPerp.y * 10
-      );
+      const racketCenter = player[i].point;
       const p3 = new Point(
         racketCenter.x - wallDir.x * (this.board.wallSize * 0.05),
         racketCenter.y - wallDir.y * (this.board.wallSize * 0.05)
@@ -240,68 +234,25 @@ class Game {
         p3.x + wallPerp.x * this.ballWidth,
         p3.y + wallPerp.y * this.ballWidth
       );
-      return [new Racket(0, [p0, p1, p2, p3], this.color[0])];
-    } else {
-      const racket: Racket[] = [];
-      for (let i = 0; i < wall.length; i++) {
-        const wallDir = wall[i].point[0].vectorTo(wall[i].point[2]).normalized();
-        const wallPerp = wallDir.perp().normalized();
-        const racketCenter = player[i].point;
-        const p3 = new Point(
-          racketCenter.x - wallDir.x * (this.board.wallSize * 0.05),
-          racketCenter.y - wallDir.y * (this.board.wallSize * 0.05)
-        );
-        const p0 = new Point(
-          racketCenter.x + wallDir.x * (this.board.wallSize * 0.05),
-          racketCenter.y + wallDir.y * (this.board.wallSize * 0.05)
-        );
-        const p1 = new Point(
-          p0.x + wallPerp.x * this.ballWidth,
-          p0.y + wallPerp.y * this.ballWidth
-        );
-        const p2 = new Point(
-          p3.x + wallPerp.x * this.ballWidth,
-          p3.y + wallPerp.y * this.ballWidth
-        );
-        if (this.player === undefined)
-          racket.push(new Racket(i, [p0, p1, p2, p3], this.color[i]));
-        else racket.push(new Racket(i, [p0, p1, p2, p3], this.player[i].color));
-        Game.changeLife(i, player[i].hp);
-        racket[i].hp = player[i].hp;
-      }
-      return racket;
+      if (this.player === undefined)
+        racket.push(new Racket(i, [p0, p1, p2, p3], this.color[i]));
+      else racket.push(new Racket(i, [p0, p1, p2, p3], this.player[i].color));
+      Game.changeLife(i, player[i].hp);
+      racket[i].hp = player[i].hp;
     }
+    return racket;
   }
 
   createRacket(wall: Wall[]): Racket[] {
     this.ballWidth = this.board.wallSize * 0.00625;
     if (Game.isSolo) {
-      const wallDir = wall[0].point[0]
-      .vectorTo(wall[0].point[2])
-      .normalized();
-      const wallPerp = wallDir.perp().normalized();
-      const wallCenter = wall[0].center();
-      const racketCenter = new Point(
-        wallCenter.x + wallPerp.x * 10,
-        wallCenter.y + wallPerp.y * 10
-      );
-      const p3 = new Point(
-        racketCenter.x - wallDir.x * (this.board.wallSize * 0.05),
-        racketCenter.y - wallDir.y * (this.board.wallSize * 0.05)
-      );
-      const p0 = new Point(
-        racketCenter.x + wallDir.x * (this.board.wallSize * 0.05),
-        racketCenter.y + wallDir.y * (this.board.wallSize * 0.05)
-      );
-      const p1 = new Point(
-        p0.x + wallPerp.x * this.ballWidth,
-        p0.y + wallPerp.y * this.ballWidth
-      );
-      const p2 = new Point(
-        p3.x + wallPerp.x * this.ballWidth,
-        p3.y + wallPerp.y * this.ballWidth
-      );
-      return [new Racket(0, [p0, p1, p2, p3], this.color[0])];
+      return [
+        new Racket(
+          0,
+          this.createRect(10, this.boardCanvas.height / 2, 10, 80),
+          this.color[0]
+        ),
+      ];
     } else {
       const racket: Racket[] = [];
       for (let i = 0; i < wall.length; i++) {
@@ -400,43 +351,35 @@ class Game {
 
     window.addEventListener("keydown", function (e) {
       if (e.key === "ArrowUp") {
-        if (!Game.isSolo) {
-          if (Game.keyPressed.down === false) {
-            Game.socket.emit("pressUp");
-          } else {
-            Game.socket.emit("unpressDown");
-          }
+        if (Game.keyPressed.down === false) {
+          Game.socket.emit("pressUp");
+        } else {
+          Game.socket.emit("unpressDown");
         }
         Game.keyPressed.up = true;
       } else if (e.key === "ArrowDown") {
-        if (!Game.isSolo) {
         if (Game.keyPressed.up === false) {
           Game.socket.emit("pressDown");
         } else {
           Game.socket.emit("unpressUp");
         }
-      }
         Game.keyPressed.down = true;
       }
     });
     window.addEventListener("keyup", function (e) {
       if (e.key === "ArrowUp") {
-        if (!Game.isSolo) {
         if (Game.keyPressed.down === false) {
           Game.socket.emit("unpressUp");
         } else {
           Game.socket.emit("pressDown");
         }
-      }
         Game.keyPressed.up = false;
       } else if (e.key === "ArrowDown") {
-        if (!Game.isSolo) {
         if (Game.keyPressed.up === false) {
           Game.socket.emit("unpressDown");
         } else {
           Game.socket.emit("pressUp");
         }
-      }
         Game.keyPressed.down = false;
       }
     });
@@ -525,7 +468,6 @@ class Game {
 
     this.countUpdate++;
     const timeRatio = (Date.now() - this.start - this.lastUpdate) / 17;
-    if (Game.isSolo) this.ball.calcNextCollision(this.player, this.board.wall, null, null);
     this.ball.update(this.player, this.board.wall, this.board, timeRatio);
     this.player.forEach((player) => player.update(this.board.wall, timeRatio));
     if (Game.isSolo && this.cible)
@@ -802,14 +744,6 @@ class Ball extends Entity {
       this.moveTo(this.speed, timeRatio);
       this.moveTo(this.speed, timeRatio);
       const index = this.nextCollision.wallIndex;
-      if (Game.isSolo) {
-        if (index === 0) {
-          this.replaceTo(board.board.center());
-          this.goToRandomPlayer(rackets);
-          this.calcNextCollision(rackets, walls, null, null);
-        }
-        return ;
-      }
       if (rackets.length === 2) {
         if (index === 2) {
           console.log("LEFT PLAYER GOAL");
