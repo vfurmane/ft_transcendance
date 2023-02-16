@@ -11,7 +11,7 @@ interface MessageProps
 
 export default function Message ( props : MessageProps ) : JSX.Element {
     const userState = useSelector(selectUserState);
-    console.error("Message loaded")
+
     if (props.message.system_generated)
     {
         return (

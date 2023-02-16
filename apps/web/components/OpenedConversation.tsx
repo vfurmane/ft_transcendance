@@ -4,6 +4,9 @@ import Message from "./Message"
 import ConversationControls from "./ConversationControls"
 import { useWebsocketContext } from "./Websocket"
 import styles from "styles/openedConversation.module.scss";
+import ChatParams from "./ChatParams"
+import { useDispatch } from "react-redux"
+import { OpenConversation } from "../store/ConversationSlice"
 
 interface OpenedConversationProps
 {
@@ -22,6 +25,7 @@ export default function OpenedConversation( props : OpenedConversationProps ) : 
     const [ scroll, setScroll ] = useState<boolean>(true)
     const socketConnected = useRef<boolean>(false);
     const [ menuVisibility, setMenuVisibility ] = useState<boolean>(false)
+    const dispatch = useDispatch()
 
     const addNewMessage = (message : any) => {
         if (message.id === currentConversation?.id)
@@ -64,7 +68,6 @@ export default function OpenedConversation( props : OpenedConversationProps ) : 
             }
             else if (websockets.conversations?.disconnected)
             {
-                console.error("Socket connection error")
                 socketConnected.current = false
             }
         }
@@ -99,25 +102,23 @@ export default function OpenedConversation( props : OpenedConversationProps ) : 
             const message = (e.currentTarget.elements.namedItem("messageContent") as HTMLTextAreaElement).value
             console.error(message)
             if (!message || !message.length)
-            {
-                console.error("Nothing to see")
                 return
-            }
             if (!currentConversation)
             {
                 console.error("Creating new conversation")
                 let createdConversation !: ConversationEntity;
                 websockets.conversations?.emit("createConversation", { groupConversation: false, participants: [newConversation?.userId]}, (conversation : any) => {
-                    console.error(conversation)
                     createdConversation = conversation
-                    websockets.conversations?.emit('postMessage', { id : conversation.id, content :  message })
+                    setCurrentConversation(createdConversation)
+                    websockets.conversations?.emit('postMessage', { id : conversation.id, content :  message }, (message : MessageEntity) =>
+                    {
+                        setMessages((prev) => [...prev, message])
+                    })
+                    setNewConversation(null)
                 })
-                setCurrentConversation(createdConversation)
-                setNewConversation(null)
             }
             else
             {
-                console.error("I already exist")
                 websockets.conversations?.emit('postMessage', { id : currentConversation.id, content :  message }, (message : MessageEntity) => {
                     setMessages([...messages, message])
                     setScroll(true)
@@ -138,7 +139,7 @@ export default function OpenedConversation( props : OpenedConversationProps ) : 
         </section>
         </section>
         { menuVisibility && currentConversation ?
-            <section  className={ styles.chatParams }></section>
+            <section  className={ styles.chatParams }>< ChatParams currentConversation={ currentConversation } /></section>
             : <></>}
         </>
     )
