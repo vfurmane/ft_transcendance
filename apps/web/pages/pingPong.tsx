@@ -55,7 +55,7 @@ export default function PingPong(): JSX.Element {
   useEffect(() => {
     if (typeof router.query.listOfPlayers === "string") {
       setPrintButton(false);
-      let tmp = JSON.parse(router.query.listOfPlayers);
+      const tmp = JSON.parse(router.query.listOfPlayers);
       usersRef.current = JSON.parse(router.query.listOfPlayers);
 
       setUsers(tmp);
