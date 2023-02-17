@@ -101,10 +101,7 @@ export default function UserEntity(props: {
           }`}
         >
           <Link
-            href={{
-              pathname: "../profile",
-              query: { user: JSON.stringify(props.user) },
-            }}
+            href={`/profile/${props.user.name}`}
             className={styles.buttonEntity}
           >
             <h3 className={textStyles.laquer}>profil</h3>

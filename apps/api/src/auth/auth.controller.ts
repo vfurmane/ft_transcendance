@@ -6,7 +6,6 @@ import {
   Delete,
   Get,
   HttpCode,
-  InternalServerErrorException,
   Logger,
   Patch,
   Post,

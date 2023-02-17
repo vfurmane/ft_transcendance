@@ -1,0 +1,21 @@
+@import "../variables";
+
+.form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+p.error,
+p.success {
+  margin: 6px 0;
+}
+
+p.error {
+  color: $dark-system-red;
+}
+
+p.success {
+  color: $dark-system-green;
+}

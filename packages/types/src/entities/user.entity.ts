@@ -3,19 +3,20 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  JoinTable,
-  ManyToMany,
+  JoinColumn,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
-} from 'typeorm';
-import { Exclude, Expose } from 'class-transformer';
-import { Message } from './message.entity';
-import { ConversationRole } from './conversationRole.entity';
-import { Match } from './match.entity';
-import { Jwt } from './jwt.entity';
-import { JwtPayload } from '..';
-import {Opponent} from "./opponent.entity";
+} from "typeorm";
+import { Exclude, Expose } from "class-transformer";
+import { Message } from "./message.entity";
+import { ConversationRole } from "./conversationRole.entity";
+import { Match } from "./match.entity";
+import { Jwt } from "./jwt.entity";
+import { JwtPayload } from "..";
+import { Opponent } from "./opponent.entity";
+import { Profile } from './profile.entity';
 import { Achievements } from "./Achievements.entity";
 
 @Exclude()
@@ -83,4 +84,7 @@ export class User {
 
   @OneToMany(() => Achievements, (achievement) => achievement.user)
   achievements!: Achievements[];
+  @OneToOne(() => Profile, (profile) => profile.user)
+  @JoinColumn()
+  profile!: Profile;
 }

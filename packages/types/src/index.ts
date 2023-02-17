@@ -7,6 +7,7 @@ import { User } from "./entities";
 export interface FtUser {
   login: string;
   email: string;
+  image: { link: string };
 }
 
 export interface AccessTokenResponse {
