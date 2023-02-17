@@ -182,6 +182,7 @@ export class Game {
       this.ball.goToRandomPlayer(this.player, this);
       this.ball.calcNextCollision(this.player, this.board.wall, null, null);
     }
+    //  this.broadcaster.emit('refresh', this.getState(), Date.now()); // DEBUG ONLY
   }
 }
 
@@ -437,7 +438,7 @@ export class Ball extends Entity {
 }
 
 export class Racket extends Entity {
-  public defaultSpeed = 1;
+  public defaultSpeed = 2;
   public hp = 10;
   public dir!: Vector;
   public isMoving = false;

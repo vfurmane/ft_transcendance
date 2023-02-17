@@ -165,7 +165,7 @@ class Game {
       );
     }
     const speed = new Vector(state.ball.dir.x, state.ball.dir.y).normalized();
-    this.ball.defaultSpeed = 3 * (this.boardCanvas.width / ServerCanvas.width);
+    this.ball.defaultSpeed = 1.5 * (this.boardCanvas.width / ServerCanvas.width);
     this.ball.speed = new Vector(
       speed.x * this.ball.defaultSpeed,
       speed.y * this.ball.defaultSpeed
@@ -219,7 +219,7 @@ class Game {
     }
     const speed = new Vector(state.ball.dir.x, state.ball.dir.y).normalized();
     this.ball.defaultSpeed =
-      3 * ((window.innerWidth * 0.6) / ServerCanvas.width);
+      1.5 * ((window.innerWidth * 0.6) / ServerCanvas.width);
     this.ball.speed = new Vector(
       speed.x * this.ball.defaultSpeed,
       speed.y * this.ball.defaultSpeed
@@ -396,7 +396,7 @@ class Game {
         this.board.wall
       );
     }
-    this.ball.defaultSpeed = 3 * (this.boardCanvas.width / ServerCanvas.width);
+    this.ball.defaultSpeed = 1.5 * (this.boardCanvas.width / ServerCanvas.width);
     const exSpeed = this.ball.speed.normalized();
     this.ball.speed = new Vector(
       exSpeed.x * this.ball.defaultSpeed,
@@ -633,7 +633,7 @@ class Target extends Entity {
 }
 
 class Ball extends Entity {
-  public defaultSpeed = 3;
+  public defaultSpeed = 1.5;
   public nextCollision: {
     wall: number | null;
     wallIndex: number;
@@ -937,16 +937,13 @@ class Ball extends Entity {
 }
 
 class Racket extends Entity {
-  public defaultSpeed = 1.5;
+  public defaultSpeed = 2;
   public hp = 10;
   public dir!: Vector;
 
   constructor(public index: number, points: Point[], public color: string) {
     super(points);
     this.dir = this.point[2].vectorTo(this.point[1]).normalized();
-    if (Game.isSolo) {
-      this.defaultSpeed = 5;
-    }
     this.speed = new Vector(
       this.dir.x * this.defaultSpeed,
       this.dir.y * this.defaultSpeed
