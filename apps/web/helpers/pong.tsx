@@ -25,7 +25,7 @@ class Game {
   public static point = 0;
   public static live = 10;
   public ball!: Ball;
-  public saveBall: {ball : Ball, count : number};
+  public saveBall!: {ball : Ball, count : number};
   public player: Racket[] = [];
   public cible!: Target;
   public static keyPressed = { up: false, down: false };
@@ -44,7 +44,6 @@ class Game {
     position: number | undefined,
     changeLife: (index: number, val: number) => void
   ) {
-    console.log("IN GAME CONSTRUCTOR NB PLAYER IS ", number_player);
     if (number_player) {
       this.boardType = number_player;
     } else {
@@ -109,8 +108,6 @@ class Game {
     const ratiox = (window.innerWidth * 0.6) / this.boardCanvas!.width;
     const ratioy =
       (window.innerWidth * 0.6 * (1 / 2)) / this.boardCanvas!.height;
-    console.log("ratiox:", ratiox);
-    console.log("ratioy:", ratioy);
     const newState: GameState = {
       numberPlayer: state.numberPlayer,
       players: [],
@@ -232,11 +229,7 @@ class Game {
     if (Game.isSolo) {
       const wallDir = wall[0].point[0].vectorTo(wall[0].point[2]).normalized();
       const wallPerp = wallDir.perp().normalized();
-      const wallCenter = wall[0].center();
-      const racketCenter = new Point(
-        wallCenter.x + wallPerp.x * 10,
-        wallCenter.y + wallPerp.y * 10
-      );
+      const racketCenter = player[0].point;
       const p3 = new Point(
         racketCenter.x - wallDir.x * (this.board.wallSize * 0.05),
         racketCenter.y - wallDir.y * (this.board.wallSize * 0.05)
@@ -423,12 +416,10 @@ class Game {
 
     window.addEventListener("keydown", function (e) {
       if (e.key === "ArrowUp") {
-        if (!Game.isSolo) {
-          if (Game.keyPressed.down === false) {
-            Game.socket.emit("pressUp");
-          } else {
-            Game.socket.emit("unpressDown");
-          }
+        if (Game.keyPressed.down === false) {
+          Game.socket.emit("pressUp");
+        } else {
+          Game.socket.emit("unpressDown");
         }
         Game.keyPressed.up = true;
       } else if (e.key === "ArrowDown") {
@@ -442,6 +433,7 @@ class Game {
         Game.keyPressed.down = true;
       }
     });
+  
     window.addEventListener("keyup", function (e) {
       if (e.key === "ArrowUp") {
         if (!Game.isSolo) {
@@ -512,10 +504,8 @@ class Game {
       window.innerWidth * 0.6 * (1 / 2) * size
     );
     this.refreshClient(state);
-    console.log(this.boardCanvas.width);
     this.boardCanvas!.width = window.innerWidth * 0.6;
     this.boardCanvas!.height = window.innerWidth * 0.6 * (1 / 2);
-    console.log(this.boardCanvas.width);
     this.board = new Board(this.boardType, this.boardCanvas);
   }
 
@@ -526,7 +516,6 @@ class Game {
       this.boardCanvas!.width !== Math.round(window.innerWidth * 0.6) ||
       this.boardCanvas!.height !== Math.round(window.innerWidth * 0.6 * (1 / 2))
     ) {
-      console.log("RESCALE");
       this.rescale();
     }
     this.boardCanvas!.width = Math.round(window.innerWidth * 0.6);
@@ -578,6 +567,7 @@ class Game {
     this.countUpdate++;
     const timeRatio = (Date.now() - this.start - this.lastUpdate) / 17;
     this.player.forEach((player) => player.update(this.board.wall, timeRatio));
+    this.ball.update(this.player, this.board.wall, this.board, timeRatio);
     if (Game.isSolo)
       this.ball.calcNextCollision(this.player, this.board.wall, null, null);
     this.ball.update(this.player, this.board.wall, this.board, timeRatio);
@@ -658,7 +648,6 @@ class Ball extends Entity {
       dir.x * this.defaultSpeed,
       dir.y * this.defaultSpeed
     );
-    console.log(this.speed);
     this.calcNextCollision(player, walls, null, null);
   }
 
@@ -806,7 +795,6 @@ class Ball extends Entity {
       this.nextCollision.wall > this.nextCollision.racket.time) || !this.nextCollision.wall) &&
       this.nextCollision.racket.time <= 0.50
     ) {
-      console.log("HIT PLAYER");
       const racket = rackets[this.nextCollision.racket.index];
       let angle = 0;
       let face;
@@ -885,7 +873,6 @@ class Ball extends Entity {
         this.speed.y = -this.speed.y
       }
       const index = this.nextCollision.wallIndex;
-      console.log("Location", walls, this.point[0], this.nextCollision.wall, this.nextCollision.wallIndex)
       if (Game.isSolo) {
         if (index === 0) {
           this.replaceTo(board.board.center());
@@ -904,18 +891,15 @@ class Ball extends Entity {
             this.update(rackets, walls, board, 0)
           this.moveTo(this.speed, -prevTime);
         }
-        console.log("Next collision", this.nextCollision)
         return;
       }
       if (rackets.length === 2) {
         if (index === 2) {
-          console.log("LEFT PLAYER GOAL");
           rackets[1].hp--;
           this.replaceTo(board.board.center());
           this.goToRandomPlayer(rackets);
           this.calcNextCollision(rackets, walls, null, null);
         } else if (index === 0) {
-          console.log("RIGHT PLAYER GOAL");
           rackets[0].hp--;
           this.replaceTo(board.board.center());
           this.goToRandomPlayer(rackets);
