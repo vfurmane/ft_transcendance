@@ -108,6 +108,8 @@ class Game {
     const ratiox = (window.innerWidth * 0.6) / this.boardCanvas!.width;
     const ratioy =
       (window.innerWidth * 0.6 * (1 / 2)) / this.boardCanvas!.height;
+      console.log("ratiox:", ratiox);
+      console.log("ratioy:", ratioy)
     const newState: GameState = {
       numberPlayer: state.numberPlayer,
       players: [],
@@ -433,9 +435,16 @@ class Game {
 
   rescale() {
     const state = this.getState();
+    let size = 1;
+    if (this.boardType == Form.HEX || this.boardType == Form.PEN) {
+      size = 0.5;
+    }
+    this.board.wallSize = Math.min(window.innerWidth * 0.6 * size, (window.innerWidth * 0.6 * (1 / 2)) * size);
     this.refreshClient(state);
+    console.log(this.boardCanvas.width);
     this.boardCanvas!.width = window.innerWidth * 0.6;
     this.boardCanvas!.height = window.innerWidth * 0.6 * (1 / 2);
+    console.log(this.boardCanvas.width);
     this.board = new Board(this.boardType, this.boardCanvas);
   }
 
@@ -558,7 +567,7 @@ class Ball extends Entity {
     //   .midSegment(player[0].point[2])
     //   .vectorTo(player[0].point[0].midSegment(player[0].point[3]))
     //   .normalized();
-    const dir = (this.point[0].vectorTo(walls[2].point[0]));
+    const dir = (this.point[0].vectorTo(walls[2].point[0]).normalized());
     this.speed = new Vector(
       dir.x * this.defaultSpeed,
       dir.y * this.defaultSpeed
@@ -731,7 +740,7 @@ class Ball extends Entity {
       this.calcNextCollision(rackets, walls, null, index);
       return;
     }
-    if (this.nextCollision.wall <= 0) {
+    while (this.nextCollision.wall <= 0) {
       const newCoords = new Point(
         this.point[0].x - this.speed.x * this.nextCollision.wall,
         this.point[0].y - this.speed.y * this.nextCollision.wall
@@ -759,7 +768,6 @@ class Ball extends Entity {
       }
       this.speed = tmp;
       this.moveTo(this.speed, timeRatio);
-      this.moveTo(this.speed, timeRatio);
       const index = this.nextCollision.wallIndex;
       if (rackets.length === 2) {
         if (index === 2) {
@@ -780,7 +788,6 @@ class Ball extends Entity {
         this.goToRandomPlayer(rackets);
         this.calcNextCollision(rackets, walls, null, null);
       }
-      this.calcNextCollision(rackets, walls, null, null);
       return;
     }
     this.moveTo(this.speed, timeRatio);
