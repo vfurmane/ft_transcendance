@@ -190,6 +190,14 @@ class Game {
         this.player,
         this.board.wall
       );
+      if (Game.isSolo) {
+        this.cible = new Target(this.createRect(
+          this.cible.point[0].x * (window.innerWidth * 0.6) / this.boardCanvas!.width,
+          this.cible.point[0].y * (window.innerWidth * 0.6 * (1 / 2)) / this.boardCanvas!.height,
+          this.ballWidth * 5,
+          this.ballWidth * 5)
+        )
+      }
     } else {
       this.player = this.updatePlayer(state.players, this.board.wall);
       this.ball = new Ball(
@@ -339,13 +347,15 @@ class Game {
       );
     }
     this.ball.defaultSpeed = 3 * (this.boardCanvas.width / ServerCanvas.width);
+    const exSpeed = this.ball.speed.normalized();
+    this.ball.speed = new Vector(exSpeed.x * this.ball.defaultSpeed, exSpeed.y * this.ball.defaultSpeed);
     if (Game.isSolo)
       this.cible = new Target(
         this.createRect(
           this.boardCanvas.width * (2 / 3),
           this.boardCanvas.height / 2,
-          20,
-          20
+          this.ballWidth * 5,
+          this.ballWidth * 5
         )
       );
 
@@ -469,6 +479,11 @@ class Game {
     this.countUpdate++;
     const timeRatio = (Date.now() - this.start - this.lastUpdate) / 17;
     this.ball.update(this.player, this.board.wall, this.board, timeRatio);
+    if (!this.ball.sat(this.board.board)) {
+      this.ball.replaceTo(this.board.board.center());
+      this.ball.goToRandomPlayer(this.player);
+      this.ball.calcNextCollision(this.player, this.board.wall, null, null);
+    }
     this.player.forEach((player) => player.update(this.board.wall, timeRatio));
     if (Game.isSolo && this.cible)
       this.cible.update(this.ball, this.boardCanvas);
@@ -539,14 +554,16 @@ class Ball extends Entity {
 
   constructor(points: Point[], player: Racket[], walls: Wall[]) {
     super(points);
-    const dir = player[0].point[1]
-      .midSegment(player[0].point[2])
-      .vectorTo(player[0].point[0].midSegment(player[0].point[3]))
-      .normalized();
+    // const dir = player[0].point[1]
+    //   .midSegment(player[0].point[2])
+    //   .vectorTo(player[0].point[0].midSegment(player[0].point[3]))
+    //   .normalized();
+    const dir = (this.point[0].vectorTo(walls[2].point[0]));
     this.speed = new Vector(
       dir.x * this.defaultSpeed,
       dir.y * this.defaultSpeed
     );
+    console.log(this.speed)
     this.calcNextCollision(player, walls, null, null);
   }
 
@@ -763,6 +780,7 @@ class Ball extends Entity {
         this.goToRandomPlayer(rackets);
         this.calcNextCollision(rackets, walls, null, null);
       }
+      this.calcNextCollision(rackets, walls, null, null);
       return;
     }
     this.moveTo(this.speed, timeRatio);
@@ -777,6 +795,9 @@ class Racket extends Entity {
   constructor(public index: number, points: Point[], public color: string) {
     super(points);
     this.dir = this.point[2].vectorTo(this.point[1]).normalized();
+    if (Game.isSolo) {
+      this.defaultSpeed = 5;
+    }
     this.speed = new Vector(
       this.dir.x * this.defaultSpeed,
       this.dir.y * this.defaultSpeed
