@@ -487,15 +487,15 @@ class Game {
 
     this.countUpdate++;
     const timeRatio = (Date.now() - this.start - this.lastUpdate) / 17;
+    this.player.forEach((player) => player.update(this.board.wall, timeRatio));
+    if (Game.isSolo) this.ball.calcNextCollision(this.player, this.board.wall, null, null);
     this.ball.update(this.player, this.board.wall, this.board, timeRatio);
     if (!this.ball.sat(this.board.board)) {
       this.ball.replaceTo(this.board.board.center());
       this.ball.goToRandomPlayer(this.player);
       this.ball.calcNextCollision(this.player, this.board.wall, null, null);
     }
-    this.player.forEach((player) => player.update(this.board.wall, timeRatio));
-    if (Game.isSolo && this.cible)
-      this.cible.update(this.ball, this.boardCanvas);
+    if (Game.isSolo && this.cible) this.cible.update(this.ball, this.boardCanvas);
     this.board.wall.forEach((wall) => {
       wall.draw(this.boardContext, undefined);
     });
@@ -720,7 +720,7 @@ class Ball extends Entity {
         face = index === 1 ? this.getFace(2) : this.getFace(0);
       }
       let ratio = racket.point[2].intersect(
-        racket.point[1],
+                               racket.point[1],
         this.center(),
         face
       );
