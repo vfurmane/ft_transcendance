@@ -25,6 +25,7 @@ class Game {
   public static point = 0;
   public static live = 10;
   public ball!: Ball;
+  public saveBall: {ball : Ball, count : number};
   public player: Racket[] = [];
   public cible!: Target;
   public static keyPressed = { up: false, down: false };
@@ -401,7 +402,7 @@ class Game {
       exSpeed.x * this.ball.defaultSpeed,
       exSpeed.y * this.ball.defaultSpeed
     );
-    if (Game.isSolo)
+    if (Game.isSolo) {
       this.cible = new Target(
         this.createRect(
           this.boardCanvas.width * (2 / 3),
@@ -410,6 +411,11 @@ class Game {
           this.ballWidth * 5
         )
       );
+      this.saveBall = {
+        ball: new Ball(this.ball.point, this.player, this.board.wall),
+        count: 0
+      }
+    }
 
     window.addEventListener("keydown", function (e) {
       if (e.key === "ArrowUp") {
@@ -544,17 +550,31 @@ class Game {
       this.boardContext!.lineWidth = 1;
     }
 
+    if (Game.isSolo) {
+      if (this.ball.nextCollision.wall && this.ball.nextCollision.wall <= 2 && !this.saveBall.count) {
+        this.saveBall = {
+          ball: new Ball(this.ball.copy(), this.player, this.board.wall),
+          count: 1
+        }
+        this.saveBall.ball.speed = new Vector(-this.ball.speed.x, -this.ball.speed.y);
+      }
+      if (this.saveBall.count) {
+        this.saveBall.count++;
+      }
+      if (this.saveBall.count === 10) {
+        if (this.ball.point[0].x < 0 || this.ball.point[0].y < 0 || this.ball.point[0].x > this.board.wall[2].point[0].x || this.ball.point[0].y > this.board.wall[3].point[0].y) {
+          this.ball = this.saveBall.ball;
+        }
+        this.saveBall.count = 0;
+      }
+    }
+
     this.countUpdate++;
     const timeRatio = (Date.now() - this.start - this.lastUpdate) / 17;
     this.player.forEach((player) => player.update(this.board.wall, timeRatio));
     if (Game.isSolo)
       this.ball.calcNextCollision(this.player, this.board.wall, null, null);
     this.ball.update(this.player, this.board.wall, this.board, timeRatio);
-    // if (!this.ball.sat(this.board.board)) {
-    //   this.ball.replaceTo(this.board.board.center());
-    //   this.ball.goToRandomPlayer(this.player);
-    //   this.ball.calcNextCollision(this.player, this.board.wall, null, null);
-    // }
     if (Game.isSolo && this.cible)
       this.cible.update(this.ball, this.boardCanvas);
     this.board.wall.forEach((wall) => {
@@ -624,11 +644,10 @@ class Ball extends Entity {
 
   constructor(points: Point[], player: Racket[], walls: Wall[]) {
     super(points);
-    // const dir = player[0].point[1]
-    //   .midSegment(player[0].point[2])
-    //   .vectorTo(player[0].point[0].midSegment(player[0].point[3]))
-    //   .normalized();
-    const dir = this.point[0].vectorTo(walls[2].point[0]).normalized();
+    const dir = player[0].point[1]
+      .midSegment(player[0].point[2])
+      .vectorTo(player[0].point[0].midSegment(player[0].point[3]))
+      .normalized();
     this.speed = new Vector(
       dir.x * this.defaultSpeed,
       dir.y * this.defaultSpeed
@@ -744,6 +763,14 @@ class Ball extends Entity {
       return [this.point[n - 1], this.point[n]];
     }
     return [this.point[this.point.length - 1], this.point[0]];
+  }
+
+  copy() {
+    const lst = [];
+    for (const point of this.point) {
+      lst.push(new Point(point.x, point.y));
+    }
+    return lst;
   }
 
   goToRandomPlayer(player: Racket[]): void {
