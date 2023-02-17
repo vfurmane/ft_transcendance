@@ -25,7 +25,7 @@ class Game {
   public static point = 0;
   public static live = 10;
   public ball!: Ball;
-  public saveBall!: {ball : Ball, count : number};
+  public saveBall!: { ball: Ball; count: number };
   public player: Racket[] = [];
   public cible!: Target;
   public static keyPressed = { up: false, down: false };
@@ -162,7 +162,8 @@ class Game {
       );
     }
     const speed = new Vector(state.ball.dir.x, state.ball.dir.y).normalized();
-    this.ball.defaultSpeed = 1.5 * (this.boardCanvas.width / ServerCanvas.width);
+    this.ball.defaultSpeed =
+      1.5 * (this.boardCanvas.width / ServerCanvas.width);
     this.ball.speed = new Vector(
       speed.x * this.ball.defaultSpeed,
       speed.y * this.ball.defaultSpeed
@@ -393,7 +394,8 @@ class Game {
         this.board.wall
       );
     }
-    this.ball.defaultSpeed = 1.5 * (this.boardCanvas.width / ServerCanvas.width);
+    this.ball.defaultSpeed =
+      1.5 * (this.boardCanvas.width / ServerCanvas.width);
     const exSpeed = this.ball.speed.normalized();
     this.ball.speed = new Vector(
       exSpeed.x * this.ball.defaultSpeed,
@@ -410,19 +412,19 @@ class Game {
       );
       this.saveBall = {
         ball: new Ball(this.ball.point, this.player, this.board.wall),
-        count: 0
-      }
+        count: 0,
+      };
     }
 
     window.addEventListener("keydown", function (e) {
       if (e.key === "ArrowUp") {
         if (!Game.isSolo) {
-        if (Game.keyPressed.down === false) {
-          Game.socket.emit("pressUp");
-        } else {
-          Game.socket.emit("unpressDown");
+          if (Game.keyPressed.down === false) {
+            Game.socket.emit("pressUp");
+          } else {
+            Game.socket.emit("unpressDown");
+          }
         }
-      }
         Game.keyPressed.up = true;
       } else if (e.key === "ArrowDown") {
         if (!Game.isSolo) {
@@ -435,7 +437,7 @@ class Game {
         Game.keyPressed.down = true;
       }
     });
-  
+
     window.addEventListener("keyup", function (e) {
       if (e.key === "ArrowUp") {
         if (!Game.isSolo) {
@@ -548,18 +550,31 @@ class Game {
     }
 
     if (Game.isSolo) {
-      if (this.ball.nextCollision.wall && this.ball.nextCollision.wall <= 2 && this.saveBall && !this.saveBall.count) {
+      if (
+        this.ball.nextCollision.wall &&
+        this.ball.nextCollision.wall <= 2 &&
+        this.saveBall &&
+        !this.saveBall.count
+      ) {
         this.saveBall = {
           ball: new Ball(this.ball.copy(), this.player, this.board.wall),
-          count: 1
-        }
-        this.saveBall.ball.speed = new Vector(-this.ball.speed.x, -this.ball.speed.y);
+          count: 1,
+        };
+        this.saveBall.ball.speed = new Vector(
+          -this.ball.speed.x,
+          -this.ball.speed.y
+        );
       }
       if (this.saveBall && this.saveBall.count) {
         this.saveBall.count++;
       }
       if (this.saveBall && this.saveBall.count === 10) {
-        if (this.ball.point[0].x < 0 || this.ball.point[0].y < 0 || this.ball.point[0].x > this.board.wall[2].point[0].x || this.ball.point[0].y > this.board.wall[3].point[0].y) {
+        if (
+          this.ball.point[0].x < 0 ||
+          this.ball.point[0].y < 0 ||
+          this.ball.point[0].x > this.board.wall[2].point[0].x ||
+          this.ball.point[0].y > this.board.wall[3].point[0].y
+        ) {
           this.ball = this.saveBall.ball;
         }
         this.saveBall.count = 0;
@@ -739,7 +754,7 @@ class Ball extends Entity {
       }
     });
     if (minRatio) this.nextCollision.wall = minRatio;
-    else this.nextCollision.wall = null
+    else this.nextCollision.wall = null;
   }
 
   isParallel(from1: Point, to1: Point, from2: Point, to2: Point): number {
@@ -788,14 +803,15 @@ class Ball extends Entity {
     board: Board,
     timeRatio: number
   ): void {
-    if (this.nextCollision.wall)
-      this.nextCollision.wall -= 1 * timeRatio;
+    if (this.nextCollision.wall) this.nextCollision.wall -= 1 * timeRatio;
     if (this.nextCollision.racket)
       this.nextCollision.racket.time -= 1 * timeRatio;
     if (
-      this.nextCollision.racket && ((this.nextCollision.wall &&
-      this.nextCollision.wall > this.nextCollision.racket.time) || !this.nextCollision.wall) &&
-      this.nextCollision.racket.time <= 0.50
+      this.nextCollision.racket &&
+      ((this.nextCollision.wall &&
+        this.nextCollision.wall > this.nextCollision.racket.time) ||
+        !this.nextCollision.wall) &&
+      this.nextCollision.racket.time <= 0.5
     ) {
       const racket = rackets[this.nextCollision.racket.index];
       let angle = 0;
@@ -822,19 +838,21 @@ class Ball extends Entity {
         norm.x * this.defaultSpeed,
         norm.y * this.defaultSpeed
       );
-      const currentTime = this.nextCollision.racket.time
+      const currentTime = this.nextCollision.racket.time;
       this.calcNextCollision(rackets, walls, null, index);
       if (this.nextCollision.racket)
-        this.nextCollision.racket.time += currentTime
-      if (this.nextCollision.wall)
-        this.nextCollision.wall += currentTime
+        this.nextCollision.racket.time += currentTime;
+      if (this.nextCollision.wall) this.nextCollision.wall += currentTime;
       this.moveTo(this.speed, -currentTime);
-      if ((this.nextCollision.racket && this.nextCollision.racket.time <= 0) || (this.nextCollision.wall && this.nextCollision.wall <= 0))
-        this.update(rackets, walls, board, 0)
+      if (
+        (this.nextCollision.racket && this.nextCollision.racket.time <= 0) ||
+        (this.nextCollision.wall && this.nextCollision.wall <= 0)
+      )
+        this.update(rackets, walls, board, 0);
       return;
     }
-    if (this.nextCollision.wall && this.nextCollision.wall <= 0.50) {
-      const prevTime = this.nextCollision.wall
+    if (this.nextCollision.wall && this.nextCollision.wall <= 0.5) {
+      const prevTime = this.nextCollision.wall;
       const wall = walls[this.nextCollision.wallIndex];
       const wallVector = wall.point[0].vectorTo(wall.point[2]);
       const Norm = wallVector.norm() * this.speed.norm();
@@ -856,23 +874,21 @@ class Ball extends Entity {
           this.speed.x * cosA - this.speed.y * -sinA,
           this.speed.x * -sinA + this.speed.y * cosA,
         ];
-        if ((tmp2.x > 0 && this.point[2].x > walls[2].point[0].x)
-        || (tmp2.x < 0 && this.point[0].x < 0)
-        || (tmp2.y < 0 && this.point[0].y < 0)
-        || (tmp2.y > 0 && this.point[2].y > walls[3].point[0].y)
-        )
-        {
-          this.speed = tmp
-        }
-        else
-          this.speed = tmp2
-      }
-      else
-        this.speed = tmp;
-      if (Math.abs(prevSpeed.x - this.speed.x) < 0.001 && Math.abs(prevSpeed.y - this.speed.y) < 0.001)
-      {
-        this.speed.x = -this.speed.x
-        this.speed.y = -this.speed.y
+        if (
+          (tmp2.x > 0 && this.point[2].x > walls[2].point[0].x) ||
+          (tmp2.x < 0 && this.point[0].x < 0) ||
+          (tmp2.y < 0 && this.point[0].y < 0) ||
+          (tmp2.y > 0 && this.point[2].y > walls[3].point[0].y)
+        ) {
+          this.speed = tmp;
+        } else this.speed = tmp2;
+      } else this.speed = tmp;
+      if (
+        Math.abs(prevSpeed.x - this.speed.x) < 0.001 &&
+        Math.abs(prevSpeed.y - this.speed.y) < 0.001
+      ) {
+        this.speed.x = -this.speed.x;
+        this.speed.y = -this.speed.y;
       }
       const index = this.nextCollision.wallIndex;
       if (Game.isSolo) {
@@ -880,17 +896,18 @@ class Ball extends Entity {
           this.replaceTo(board.board.center());
           this.goToRandomPlayer(rackets);
           this.calcNextCollision(rackets, walls, null, null);
-        }
-        else
-        {
+        } else {
           this.calcNextCollision(rackets, walls, index, null);
           if (this.nextCollision.racket)
-            this.nextCollision.racket.time += prevTime
-          if (this.nextCollision.wall)
-            this.nextCollision.wall += prevTime
+            this.nextCollision.racket.time += prevTime;
+          if (this.nextCollision.wall) this.nextCollision.wall += prevTime;
           this.moveTo(this.speed, -prevTime);
-          if ((this.nextCollision.racket && this.nextCollision.racket.time <= 0.5) || (this.nextCollision.wall && this.nextCollision.wall <= 0.5))
-            this.update(rackets, walls, board, 0)
+          if (
+            (this.nextCollision.racket &&
+              this.nextCollision.racket.time <= 0.5) ||
+            (this.nextCollision.wall && this.nextCollision.wall <= 0.5)
+          )
+            this.update(rackets, walls, board, 0);
           this.moveTo(this.speed, -prevTime);
         }
         return;
@@ -906,16 +923,18 @@ class Ball extends Entity {
           this.replaceTo(board.board.center());
           this.goToRandomPlayer(rackets);
           this.calcNextCollision(rackets, walls, null, null);
-        } else
-        {
+        } else {
           this.calcNextCollision(rackets, walls, index, null);
           if (this.nextCollision.racket)
-            this.nextCollision.racket.time += prevTime
-          if (this.nextCollision.wall)
-            this.nextCollision.wall += prevTime
+            this.nextCollision.racket.time += prevTime;
+          if (this.nextCollision.wall) this.nextCollision.wall += prevTime;
           this.moveTo(this.speed, -prevTime);
-          if ((this.nextCollision.racket && this.nextCollision.racket.time <= 0.5) || (this.nextCollision.wall && this.nextCollision.wall <= 0.5))
-            this.update(rackets, walls, board, 0)
+          if (
+            (this.nextCollision.racket &&
+              this.nextCollision.racket.time <= 0.5) ||
+            (this.nextCollision.wall && this.nextCollision.wall <= 0.5)
+          )
+            this.update(rackets, walls, board, 0);
         }
       } else {
         rackets[index].hp--;
