@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { createRef, useCallback, useEffect, useRef, useState } from "react";
 import TopBar from "../components/TopBar";
 import PlayButton from "../components/HomePage/PlayButton";
 import List from "../components/HomePage/List";
@@ -14,10 +14,13 @@ import styles from "styles/home.module.scss";
 import { useWebsocketContext } from "../components/Websocket";
 import { WatchGame } from "../components/WatchGame";
 
+
+
 function Home(): JSX.Element {
   const friendListRef = useRef<JSX.Element[]>([]);
   const setterInit: React.Dispatch<React.SetStateAction<boolean>> = () => false;
   const websockets = useWebsocketContext();
+
 
   const [openPlayButton, setOpenPlayButton] = useState(false);
   const [openUserMenu, setOpenUserMenu] = useState(false);
@@ -45,6 +48,7 @@ function Home(): JSX.Element {
     setOpenUserList(e);
   }
   /*==========================================================*/
+ 
 
   function handleClickPlayButton(): void {
     setOpenPlayButton(!openPlayButton);
@@ -251,7 +255,7 @@ function Home(): JSX.Element {
             </h3>
           </div>
         </div>
-        <div className="row">
+        <div className="row" >
           <div className="col-10 offset-1" id="leaderboard">
             <ArrayDoubleColumn
               title="leaderboard"
