@@ -20,7 +20,7 @@ export default function PingPong(): JSX.Element {
   const [users, setUsers] = useState<User[]>([]);
   const usersRef = useRef<User[]>([]);
   const canvasRef = useRef(null);
-  const [intervalState, setIntervalState] = useState<NodeJS.Timer | null>(null);
+  const intervalRef = useRef<NodeJS.Timer | null>(null);
   const [MiniProfilArray, setMiniProfilArray] = useState<JSX.Element[]>([]);
   const [classement, setClassement] = useState<JSX.Element[]>([]);
   const [openPlayButton, setOpenPlayButton] = useState(false);
@@ -52,55 +52,12 @@ export default function PingPong(): JSX.Element {
     setEndGame(true);
   });
 
-  function rotate(user: User[]) {
-    const lastIndex = user.length - 1;
-    let angle = 0;
-    switch (user.length) {
-      case 2: {
-        angle = -180;
-        break;
-      }
-      case 3: {
-        angle = -120;
-        break;
-      }
-      case 4: {
-        angle = -90;
-        break;
-      }
-      case 5: {
-        angle = -72;
-        break;
-      }
-      case 6: {
-        angle = -60;
-        break;
-      }
-      default:
-        break;
-    }
-
-    const canvas = document.getElementById("canvas");
-    if (canvas)
-      canvas.style.transform = `rotate(${
-        angle * user.findIndex((e) => e.id === UserState.id)
-      }deg)`;
-    while (user.length && user[0].id !== UserState.id) {
-      const last = user[lastIndex];
-      user.unshift(last);
-      user.pop();
-    }
-    return user;
-  }
-
   useEffect(() => {
     if (typeof router.query.listOfPlayers === "string") {
       setPrintButton(false);
       let tmp = JSON.parse(router.query.listOfPlayers);
       usersRef.current = JSON.parse(router.query.listOfPlayers);
-      //tmp.push(initUser);
 
-      tmp = rotate(tmp);
       setUsers(tmp);
       setMiniProfilArray(
         tmp.forEach((e: User, i: number) => (
@@ -119,19 +76,21 @@ export default function PingPong(): JSX.Element {
         ))
       );
     } else setUsers([UserState]);
-    window.addEventListener(
-      "keydown",
-      function (e) {
-        if (
-          ["Space", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].indexOf(
-            e.code
-          ) > -1
-        ) {
-          e.preventDefault();
-        }
-      },
-      false
-    );
+
+    function catchKey(e: KeyboardEvent) {
+      if (
+        ["Space", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].indexOf(
+          e.code
+        ) > -1
+      ) {
+        e.preventDefault();
+      }
+    }
+
+    window.addEventListener("keydown", catchKey, false);
+    return () => {
+      window.removeEventListener("keydown", catchKey);
+    };
   }, []);
 
   let game = new Game(
@@ -145,10 +104,10 @@ export default function PingPong(): JSX.Element {
         game.setWebsocket(websockets.pong);
       if (!gameInit) game.init(canvasRef);
       setGameInit(true);
-      setIntervalState(setInterval(handleResize, 17, game));
+      intervalRef.current = setInterval(handleResize, 4, game);
     }
     return (): void => {
-      if (intervalState) clearInterval(intervalState);
+      if (intervalRef.current) clearInterval(intervalRef.current);
     };
   }, [users]);
 
@@ -235,7 +194,7 @@ export default function PingPong(): JSX.Element {
         : users.length - rectifiIndex;
     const tmp = [...MiniProfilArray];
     if (val === 0) {
-      if (intervalState) clearInterval(intervalState);
+      if (intervalRef.current) clearInterval(intervalRef.current);
       const tempUsers = [...users];
       const newClassement = [
         createTrClassement(tempUsers[index], classement),
