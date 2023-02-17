@@ -247,9 +247,6 @@ export default function Profil(): JSX.Element {
             <div className={styles.rank + " " + textStyles.saira}>
               {user.rank}
             </div>
-            <p className={textStyles.saira} style={{ color: "white" }}>
-              {user.status}
-            </p>
           </div>
           <div
             className={`col-10 offset-1  col-md-6 offset-lg-0  ${styles.profilMenuContainer}`}
