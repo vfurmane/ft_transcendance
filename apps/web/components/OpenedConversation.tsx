@@ -1,4 +1,4 @@
-import { useContext, useEffect, useRef, useState } from "react"
+import { Dispatch, SetStateAction, useContext, useEffect, useRef, useState } from "react"
 import { Conversation as ConversationEntity, Message as MessageEntity } from "types"
 import Message from "./Message"
 import ConversationControls from "./ConversationControls"
@@ -11,9 +11,9 @@ import { OpenConversation } from "../store/ConversationSlice"
 interface OpenedConversationProps
 {
     newConversation: {userId: string, userName: string} | null,
-    conversation: ConversationEntity | null
+    conversation: ConversationEntity | null,
+    selectConversation : Dispatch<SetStateAction<ConversationEntity | null>>
 }
-
 
 export default function OpenedConversation( props : OpenedConversationProps ) : JSX.Element {
     const [messages, setMessages] = useState<MessageEntity[]>([])
@@ -139,7 +139,7 @@ export default function OpenedConversation( props : OpenedConversationProps ) : 
         </section>
         </section>
         { menuVisibility && currentConversation ?
-            <section  className={ styles.chatParams }>< ChatParams currentConversation={ currentConversation } /></section>
+            <section  className={ styles.chatParams }>< ChatParams currentConversation={ currentConversation } selectConversation={ props.selectConversation } /></section>
             : <></>}
         </>
     )

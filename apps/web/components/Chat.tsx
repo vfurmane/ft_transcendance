@@ -117,7 +117,7 @@ export default function Chat( { conversation } : { conversation : {userId: strin
             <Image alt="back" src={back} />
             </article>
             <section className={styles.conversationsContainer}>
-                <OpenedConversation newConversation={newConversation.userId.length ? newConversation : null} conversation={newConversation.userId.length ? null : conversationSelected} />
+                <OpenedConversation newConversation={newConversation.userId.length ? newConversation : null} conversation={newConversation.userId.length ? null : conversationSelected} selectConversation={ selectConversation } />
             </section>
             </>
         )

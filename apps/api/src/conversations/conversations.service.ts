@@ -22,6 +22,7 @@ import { Message } from 'types';
 import * as bcrypt from 'bcrypt';
 import { conversationRestrictionEnum } from 'types';
 import { ConversationRestriction } from 'types';
+import { invitationDto } from './dtos/invitation.dto';
 
 @Injectable()
 export class ConversationsService {
@@ -581,6 +582,25 @@ export class ConversationsService {
     return conversation.conversationRoles;
   }
 
+  async inviteToConversation(currentUser : User, invitation : invitationDto) : { message: Message, conversation: Conversation | null } | null
+  {
+    const roles = await this.conversationRoleRepository.find({
+      relations:
+      {
+        conversation: true
+      },
+      where: {
+        conversation:
+        {
+          id: invitation.conversationID
+        }
+      }
+    })
+    if (roles.filter((role) => role.user.id).length !== 0)
+      return (null)
+    
+  }
+
   async leaveConversation(
     currentUser: User,
     conversationId: string,
@@ -605,6 +625,15 @@ export class ConversationsService {
       throw new ForbiddenException('Cannot leave direct message conversation');
     if (conversation.conversationRoles.length === 1) {
       await this.conversationRoleRepository.remove(userRole);
+      const messages = await this.messageRepository.find({
+        where: {
+          id: conversationId
+        }
+      })
+      if (messages)
+      {
+        messages.forEach(async (message)=> await this.messageRepository.remove(message))
+      }
       await this.conversationRepository.remove(conversation);
       return { userRole, leftMessage: null };
     }

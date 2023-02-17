@@ -31,6 +31,7 @@ import { Message } from 'types';
 import { ConversationRole } from 'types';
 import { UsersService } from '../users/users.service';
 import { instanceToPlain } from 'class-transformer';
+import { invitationDto } from './dtos/invitation.dto';
 
 @UseFilters(HttpExceptionTransformationFilter)
 @UsePipes(new ValidationPipe())
@@ -141,6 +142,14 @@ export class ConversationsGateway implements OnGatewayConnection {
         .to(`conversation_${id}`)
         .emit('newMessage', { id, message: instanceToPlain(ret) });
     return ret;
+  }
+
+  @SubscribeMessage('inviteToConversation')
+  async inviteToConversation(@ConnectedSocket() client : Socket, @MessageBody() invitation : invitationDto ): Promise<boolean>
+  {
+    if (!invitation.conversationID)
+      return false
+    const invitationMessage : Message | null = await this.conversationsService.inviteToConversation(client.data as User, invitation)
   }
 
   @SubscribeMessage('joinConversation')
