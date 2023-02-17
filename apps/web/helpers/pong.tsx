@@ -822,6 +822,7 @@ class Ball extends Entity {
       const outAngle = isAcute ? angle * 2 : (Math.PI - angle) * 2;
       const cosA = Math.cos(outAngle);
       const sinA = Math.sin(outAngle);
+      const prevSpeed = new Vector(this.speed.x, this.speed.y);
       [tmp.x, tmp.y] = [
         this.speed.x * cosA - this.speed.y * sinA,
         this.speed.x * sinA + this.speed.y * cosA,
@@ -845,6 +846,11 @@ class Ball extends Entity {
       }
       else
         this.speed = tmp;
+      if (Math.abs(prevSpeed.x - this.speed.x) < 0.001 && Math.abs(prevSpeed.y - this.speed.y) < 0.001)
+      {
+        this.speed.x = -this.speed.x
+        this.speed.y = -this.speed.y
+      }
       const index = this.nextCollision.wallIndex;
 
       if (Game.isSolo) {
