@@ -419,11 +419,13 @@ class Game {
 
     window.addEventListener("keydown", function (e) {
       if (e.key === "ArrowUp") {
+        if (!Game.isSolo) {
         if (Game.keyPressed.down === false) {
           Game.socket.emit("pressUp");
         } else {
           Game.socket.emit("unpressDown");
         }
+      }
         Game.keyPressed.up = true;
       } else if (e.key === "ArrowDown") {
         if (!Game.isSolo) {
@@ -551,17 +553,17 @@ class Game {
     }
 
     if (Game.isSolo) {
-      if (this.ball.nextCollision.wall && this.ball.nextCollision.wall <= 2 && !this.saveBall.count) {
+      if (this.ball.nextCollision.wall && this.ball.nextCollision.wall <= 2 && this.saveBall && !this.saveBall.count) {
         this.saveBall = {
           ball: new Ball(this.ball.copy(), this.player, this.board.wall),
           count: 1
         }
         this.saveBall.ball.speed = new Vector(-this.ball.speed.x, -this.ball.speed.y);
       }
-      if (this.saveBall.count) {
+      if (this.saveBall && this.saveBall.count) {
         this.saveBall.count++;
       }
-      if (this.saveBall.count === 10) {
+      if (this.saveBall && this.saveBall.count === 10) {
         if (this.ball.point[0].x < 0 || this.ball.point[0].y < 0 || this.ball.point[0].x > this.board.wall[2].point[0].x || this.ball.point[0].y > this.board.wall[3].point[0].y) {
           this.ball = this.saveBall.ball;
         }
