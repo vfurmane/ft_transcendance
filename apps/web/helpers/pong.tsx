@@ -108,8 +108,8 @@ class Game {
     const ratiox = (window.innerWidth * 0.6) / this.boardCanvas!.width;
     const ratioy =
       (window.innerWidth * 0.6 * (1 / 2)) / this.boardCanvas!.height;
-      console.log("ratiox:", ratiox);
-      console.log("ratioy:", ratioy)
+    console.log("ratiox:", ratiox);
+    console.log("ratioy:", ratioy);
     const newState: GameState = {
       numberPlayer: state.numberPlayer,
       players: [],
@@ -193,12 +193,16 @@ class Game {
         this.board.wall
       );
       if (Game.isSolo) {
-        this.cible = new Target(this.createRect(
-          this.cible.point[0].x * (window.innerWidth * 0.6) / this.boardCanvas!.width,
-          this.cible.point[0].y * (window.innerWidth * 0.6 * (1 / 2)) / this.boardCanvas!.height,
-          this.ballWidth * 5,
-          this.ballWidth * 5)
-        )
+        this.cible = new Target(
+          this.createRect(
+            (this.cible.point[0].x * (window.innerWidth * 0.6)) /
+              this.boardCanvas!.width,
+            (this.cible.point[0].y * (window.innerWidth * 0.6 * (1 / 2))) /
+              this.boardCanvas!.height,
+            this.ballWidth * 5,
+            this.ballWidth * 5
+          )
+        );
       }
     } else {
       this.player = this.updatePlayer(state.players, this.board.wall);
@@ -223,11 +227,11 @@ class Game {
   }
 
   updatePlayer(player: PlayerInterface[], wall: Wall[]): Racket[] {
-    const racket: Racket[] = [];
-    for (let i = 0; i < wall.length; i++) {
-      const wallDir = wall[i].point[0].vectorTo(wall[i].point[2]).normalized();
+    this.ballWidth = this.board.wallSize * 0.00625;
+    if (Game.isSolo) {
+      const wallDir = wall[0].point[0].vectorTo(wall[0].point[2]).normalized();
       const wallPerp = wallDir.perp().normalized();
-      const racketCenter = player[i].point;
+      const racketCenter = player[0].point;
       const p3 = new Point(
         racketCenter.x - wallDir.x * (this.board.wallSize * 0.05),
         racketCenter.y - wallDir.y * (this.board.wallSize * 0.05)
@@ -244,18 +248,45 @@ class Game {
         p3.x + wallPerp.x * this.ballWidth,
         p3.y + wallPerp.y * this.ballWidth
       );
-      if (this.player === undefined)
-        racket.push(new Racket(i, [p0, p1, p2, p3], this.color[i]));
-      else racket.push(new Racket(i, [p0, p1, p2, p3], this.player[i].color));
-      Game.changeLife(i, player[i].hp);
-      racket[i].hp = player[i].hp;
+      return [new Racket(0, [p0, p1, p2, p3], this.color[0])];
+    } else {
+      const racket: Racket[] = [];
+      for (let i = 0; i < wall.length; i++) {
+        const wallDir = wall[i].point[0]
+          .vectorTo(wall[i].point[2])
+          .normalized();
+        const wallPerp = wallDir.perp().normalized();
+        const racketCenter = player[i].point;
+        const p3 = new Point(
+          racketCenter.x - wallDir.x * (this.board.wallSize * 0.05),
+          racketCenter.y - wallDir.y * (this.board.wallSize * 0.05)
+        );
+        const p0 = new Point(
+          racketCenter.x + wallDir.x * (this.board.wallSize * 0.05),
+          racketCenter.y + wallDir.y * (this.board.wallSize * 0.05)
+        );
+        const p1 = new Point(
+          p0.x + wallPerp.x * this.ballWidth,
+          p0.y + wallPerp.y * this.ballWidth
+        );
+        const p2 = new Point(
+          p3.x + wallPerp.x * this.ballWidth,
+          p3.y + wallPerp.y * this.ballWidth
+        );
+        if (this.player === undefined)
+          racket.push(new Racket(i, [p0, p1, p2, p3], this.color[i]));
+        else racket.push(new Racket(i, [p0, p1, p2, p3], this.player[i].color));
+        Game.changeLife(i, player[i].hp);
+        racket[i].hp = player[i].hp;
+      }
+      return racket;
     }
-    return racket;
   }
 
   createRacket(wall: Wall[]): Racket[] {
     this.ballWidth = this.board.wallSize * 0.00625;
     if (Game.isSolo) {
+<<<<<<< HEAD
       return [
         new Racket(
           0,
@@ -263,6 +294,32 @@ class Game {
           this.color[0]
         ),
       ];
+=======
+      const wallDir = wall[0].point[0].vectorTo(wall[0].point[2]).normalized();
+      const wallPerp = wallDir.perp().normalized();
+      const wallCenter = wall[0].center();
+      const racketCenter = new Point(
+        wallCenter.x + wallPerp.x * 10,
+        wallCenter.y + wallPerp.y * 10
+      );
+      const p3 = new Point(
+        racketCenter.x - wallDir.x * (this.board.wallSize * 0.05),
+        racketCenter.y - wallDir.y * (this.board.wallSize * 0.05)
+      );
+      const p0 = new Point(
+        racketCenter.x + wallDir.x * (this.board.wallSize * 0.05),
+        racketCenter.y + wallDir.y * (this.board.wallSize * 0.05)
+      );
+      const p1 = new Point(
+        p0.x + wallPerp.x * this.ballWidth,
+        p0.y + wallPerp.y * this.ballWidth
+      );
+      const p2 = new Point(
+        p3.x + wallPerp.x * this.ballWidth,
+        p3.y + wallPerp.y * this.ballWidth
+      );
+      return [new Racket(0, [p0, p1, p2, p3], this.color[0])];
+>>>>>>> d219c4b (prettier)
     } else {
       const racket: Racket[] = [];
       for (let i = 0; i < wall.length; i++) {
@@ -350,7 +407,10 @@ class Game {
     }
     this.ball.defaultSpeed = 3 * (this.boardCanvas.width / ServerCanvas.width);
     const exSpeed = this.ball.speed.normalized();
-    this.ball.speed = new Vector(exSpeed.x * this.ball.defaultSpeed, exSpeed.y * this.ball.defaultSpeed);
+    this.ball.speed = new Vector(
+      exSpeed.x * this.ball.defaultSpeed,
+      exSpeed.y * this.ball.defaultSpeed
+    );
     if (Game.isSolo)
       this.cible = new Target(
         this.createRect(
@@ -370,16 +430,26 @@ class Game {
         }
         Game.keyPressed.up = true;
       } else if (e.key === "ArrowDown") {
+<<<<<<< HEAD
         if (Game.keyPressed.up === false) {
           Game.socket.emit("pressDown");
         } else {
           Game.socket.emit("unpressUp");
+=======
+        if (!Game.isSolo) {
+          if (Game.keyPressed.up === false) {
+            Game.socket.emit("pressDown");
+          } else {
+            Game.socket.emit("unpressUp");
+          }
+>>>>>>> d219c4b (prettier)
         }
         Game.keyPressed.down = true;
       }
     });
     window.addEventListener("keyup", function (e) {
       if (e.key === "ArrowUp") {
+<<<<<<< HEAD
         if (Game.keyPressed.down === false) {
           Game.socket.emit("unpressUp");
         } else {
@@ -391,6 +461,23 @@ class Game {
           Game.socket.emit("unpressDown");
         } else {
           Game.socket.emit("pressUp");
+=======
+        if (!Game.isSolo) {
+          if (Game.keyPressed.down === false) {
+            Game.socket.emit("unpressUp");
+          } else {
+            Game.socket.emit("pressDown");
+          }
+        }
+        Game.keyPressed.up = false;
+      } else if (e.key === "ArrowDown") {
+        if (!Game.isSolo) {
+          if (Game.keyPressed.up === false) {
+            Game.socket.emit("unpressDown");
+          } else {
+            Game.socket.emit("pressUp");
+          }
+>>>>>>> d219c4b (prettier)
         }
         Game.keyPressed.down = false;
       }
@@ -439,7 +526,10 @@ class Game {
     if (this.boardType == Form.HEX || this.boardType == Form.PEN) {
       size = 0.5;
     }
-    this.board.wallSize = Math.min(window.innerWidth * 0.6 * size, (window.innerWidth * 0.6 * (1 / 2)) * size);
+    this.board.wallSize = Math.min(
+      window.innerWidth * 0.6 * size,
+      window.innerWidth * 0.6 * (1 / 2) * size
+    );
     this.refreshClient(state);
     console.log(this.boardCanvas.width);
     this.boardCanvas!.width = window.innerWidth * 0.6;
@@ -488,14 +578,16 @@ class Game {
     this.countUpdate++;
     const timeRatio = (Date.now() - this.start - this.lastUpdate) / 17;
     this.player.forEach((player) => player.update(this.board.wall, timeRatio));
-    if (Game.isSolo) this.ball.calcNextCollision(this.player, this.board.wall, null, null);
+    if (Game.isSolo)
+      this.ball.calcNextCollision(this.player, this.board.wall, null, null);
     this.ball.update(this.player, this.board.wall, this.board, timeRatio);
     if (!this.ball.sat(this.board.board)) {
       this.ball.replaceTo(this.board.board.center());
       this.ball.goToRandomPlayer(this.player);
       this.ball.calcNextCollision(this.player, this.board.wall, null, null);
     }
-    if (Game.isSolo && this.cible) this.cible.update(this.ball, this.boardCanvas);
+    if (Game.isSolo && this.cible)
+      this.cible.update(this.ball, this.boardCanvas);
     this.board.wall.forEach((wall) => {
       wall.draw(this.boardContext, undefined);
     });
@@ -567,12 +659,12 @@ class Ball extends Entity {
     //   .midSegment(player[0].point[2])
     //   .vectorTo(player[0].point[0].midSegment(player[0].point[3]))
     //   .normalized();
-    const dir = (this.point[0].vectorTo(walls[2].point[0]).normalized());
+    const dir = this.point[0].vectorTo(walls[2].point[0]).normalized();
     this.speed = new Vector(
       dir.x * this.defaultSpeed,
       dir.y * this.defaultSpeed
     );
-    console.log(this.speed)
+    console.log(this.speed);
     this.calcNextCollision(player, walls, null, null);
   }
 
@@ -720,7 +812,7 @@ class Ball extends Entity {
         face = index === 1 ? this.getFace(2) : this.getFace(0);
       }
       let ratio = racket.point[2].intersect(
-                               racket.point[1],
+        racket.point[1],
         this.center(),
         face
       );
@@ -769,6 +861,17 @@ class Ball extends Entity {
       this.speed = tmp;
       this.moveTo(this.speed, timeRatio);
       const index = this.nextCollision.wallIndex;
+<<<<<<< HEAD
+=======
+      if (Game.isSolo) {
+        if (index === 0) {
+          this.replaceTo(board.board.center());
+          this.goToRandomPlayer(rackets);
+          this.calcNextCollision(rackets, walls, null, null);
+        }
+        return;
+      }
+>>>>>>> d219c4b (prettier)
       if (rackets.length === 2) {
         if (index === 2) {
           //rackets[1].hp--;
