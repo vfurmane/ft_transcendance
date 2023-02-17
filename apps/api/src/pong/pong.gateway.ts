@@ -50,37 +50,37 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   async handleConnection(client: Socket): Promise<void | string> {
     console.log('SOMEBODY IS TRYING TO CONNECT');
-    const currentUser = this.authService.verifyUserFromToken(
-      client.handshake.auth.token,
-    );
-    if (!currentUser) {
-      client.disconnect();
-      console.log('no Authorization');
-      return;
-    }
-    client.data = {
-      id: currentUser.sub,
-      name: currentUser.name,
-      room: undefined,
-      position: -1,
-    };
-    client.join(`user_${currentUser.sub}`);
-    console.log('NEW CONNECTION!');
-    console.log('YOU ARE ' + currentUser.name + ' OF ID ' + client.data.id);
-    if (this.pongService.games) {
-      this.pongService.games.forEach((value, key) => {
-        value[1].forEach((user) => {
-          if (user.id === client.data.id) {
-            client.data.room = key;
-            client.data.position = value[1].indexOf(user);
-            client.join(key);
-            console.log('Reconnected to the game !');
-            return 'Connection restored';
-          }
-        });
-      });
-    }
-    return 'Connection established';
+    // const currentUser = this.authService.verifyUserFromToken(
+    //   client.handshake.auth.token,
+    // );
+    // if (!currentUser) {
+    //   client.disconnect();
+    //   console.log('no Authorization');
+    //   return;
+    // }
+    // client.data = {
+    //   id: currentUser.sub,
+    //   name: currentUser.name,
+    //   room: undefined,
+    //   position: -1,
+    // };
+    // client.join(`user_${currentUser.sub}`);
+    // console.log('NEW CONNECTION!');
+    // console.log('YOU ARE ' + currentUser.name + ' OF ID ' + client.data.id);
+    // if (this.pongService.games) {
+    //   this.pongService.games.forEach((value, key) => {
+    //     value[1].forEach((user) => {
+    //       if (user.id === client.data.id) {
+    //         client.data.room = key;
+    //         client.data.position = value[1].indexOf(user);
+    //         client.join(key);
+    //         console.log('Reconnected to the game !');
+    //         return 'Connection restored';
+    //       }
+    //     });
+    //   });
+    // }
+    // return 'Connection established';
   }
 
   async handleDisconnect(client: Socket): Promise<void> {

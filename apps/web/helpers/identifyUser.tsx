@@ -5,14 +5,11 @@ import { refreshToken } from "./refreshTokens";
 
 async function fetchUser(): Promise<Response | null> {
   return await fetch("/api/user", {
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-    },
+    credentials: "same-origin"
   }).catch((error) => null);
 }
 
 export async function identifyUser(): Promise<null | Userfront> {
-  if (localStorage.getItem("access_token") === null) return null;
   let response = await fetchUser();
   if (!response || !response.ok) {
     if (await refreshToken()) {

@@ -9,6 +9,7 @@ import {
   Logger,
   Patch,
   Post,
+  Res,
   UnauthorizedException,
   UseGuards,
   UseInterceptors,
@@ -46,6 +47,7 @@ import { LocalAuthGuard } from './local-auth.guard';
 import { RegisterUserDto } from '../users/register-user.dto';
 import { JwtRefreshAuthGuard } from './jwt-refresh-auth.guard';
 import { ChangePasswordDto } from './change-password.dto';
+import { Response } from 'express';
 
 @ApiTags()
 @UseInterceptors(ClassSerializerInterceptor)
@@ -76,13 +78,25 @@ export class AuthController {
   async ftCallback(
     @User() user: UserEntity,
     @State() state: StateEntity,
-  ): Promise<AccessTokenResponse | TfaNeededResponse> {
+    @Res({ passthrough:true}) res : Response
+  ): Promise<void | TfaNeededResponse> {
     if (user.tfa_setup) {
       this.logger.log(`${user.name} logged in using OAuth2, but TFA is needed`);
       return { message: 'Authentication factor needed', route: 'tfa' };
     }
     this.logger.log(`${user.name} logged in using OAuth2`);
-    return this.authService.login(user, state);
+    const token = await this.authService.login(user, state);
+    res.cookie('access_token', token.access_token, {
+      expires: new Date(new Date().getTime() + (30 * 1000 * 60)),
+      sameSite: 'strict',
+      httpOnly: true
+    });
+    res.cookie('refresh_token', token.refresh_token, {
+      expires: new Date(new Date().getTime() + (1000 * 60 * 60 * 24 * 7)),
+      sameSite: 'strict',
+      httpOnly: true,
+      path: '/api/auth/refresh'
+    })
   }
 
   @Post('register')
@@ -98,7 +112,8 @@ export class AuthController {
   async login(
     @User() user: UserEntity,
     @State() state: StateEntity,
-  ): Promise<AccessTokenResponse | TfaNeededResponse> {
+    @Res({passthrough : true}) res : Response
+  ): Promise<void | TfaNeededResponse> {
     if (user.tfa_setup) {
       this.logger.log(
         `${user.name} logged in using username:password, but TFA is needed`,
@@ -106,7 +121,18 @@ export class AuthController {
       return { message: 'Authentication factor needed', route: 'tfa' };
     }
     this.logger.log(`${user.name} logged in using username:password`);
-    return this.authService.login(user, state);
+    const token = await this.authService.login(user, state);
+    res.cookie('access_token', token.access_token, {
+      expires: new Date(new Date().getTime() + (30 * 1000 * 60)),
+      sameSite: 'strict',
+      httpOnly: true
+    });
+    res.cookie('refresh_token', token.refresh_token, {
+      expires: new Date(new Date().getTime() + (1000 * 60 * 60 * 24 * 7)),
+      sameSite: 'strict',
+      httpOnly: true,
+      path: '/api/auth/refresh'
+    })
   }
 
   @Post('tfa')
@@ -188,18 +214,41 @@ export class AuthController {
   async loginWithTfa(
     @State() state: StateEntity,
     @Body() body: CheckTfaTokenStateDto,
-  ): Promise<AccessTokenResponse> {
+    @Res({ passthrough : true}) res: Response
+  ): Promise<void> {
     if (!state.user)
       throw new UnauthorizedException('Missing first factor authentication.');
     await this.authService.checkTfa(state.user, body.token);
     this.logger.log(`${state.user.name} validated TFA`);
-    return this.authService.login(state.user, state);
+    const token = await this.authService.login(state.user, state);
+    res.cookie('access_token', token.access_token, {
+      expires: new Date(new Date().getTime() + (30 * 1000 * 60)),
+      sameSite: 'strict',
+      httpOnly: true
+    });
+    res.cookie('refresh_token', token.refresh_token, {
+      expires: new Date(new Date().getTime() + (1000 * 60 * 60 * 24 * 7)),
+      sameSite: 'strict',
+      httpOnly: true,
+      path: '/api/auth/refresh'
+    })
   }
 
-  @Post('refresh')
+  @Get('refresh')
   @UseGuards(JwtRefreshAuthGuard)
-  refreshToken(@User() user: UserEntity): Promise<AccessTokenResponse> {
-    return this.authService.login(user);
+  async refreshToken(@User() user: UserEntity, @Res({ passthrough : true}) res: Response) : Promise<void> {
+    const token = await this.authService.login(user);
+    res.cookie('access_token', token.access_token, {
+      expires: new Date(new Date().getTime() + (30 * 1000 * 60)),
+      sameSite: 'strict',
+      httpOnly: true
+    });
+    res.cookie('refresh_token', token.refresh_token, {
+      expires: new Date(new Date().getTime() + (1000 * 60 * 60 * 24 * 7)),
+      sameSite: 'strict',
+      httpOnly: true,
+      path: '/api/auth/refresh'
+    })
   }
 
   @Patch('change_password')

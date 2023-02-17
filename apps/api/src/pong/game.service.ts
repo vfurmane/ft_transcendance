@@ -436,7 +436,7 @@ export class Ball extends Entity {
 }
 
 export class Racket extends Entity {
-  public defaultSpeed = 1;
+  public defaultSpeed = 2;
   public hp = 10;
   public dir!: Vector;
   public isMoving = false;

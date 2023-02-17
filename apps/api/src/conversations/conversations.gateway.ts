@@ -49,31 +49,25 @@ export class ConversationsGateway implements OnGatewayConnection {
 
   async handleConnection(client: Socket): Promise<string | void> {
     console.error('Someone is trying to connect');
-    if (!client.handshake.auth.token) {
-      client.disconnect();
-      return;
-    }
-    const currentUser = this.authService.verifyUserFromToken(
-      client.handshake.auth.token,
-    );
-    if (!currentUser) {
-      client.disconnect();
-      return;
-    }
-    client.data = { id: currentUser.sub, name: currentUser.name };
-    client.join(`user_${currentUser.sub}`);
-    const conversations = await this.conversationsService.getConversationsIds(
-      currentUser.sub,
-    );
-    conversations.forEach((el) => client.join(`conversation_${el}`));
-    return 'Connection established';
+    // if (!client.handshake.auth.token) {
+    //   client.disconnect();
+    //   return;
+    // }
+    // const currentUser = this.authService.verifyUserFromToken(
+    //   client.handshake.auth.token,
+    // );
+    // if (!currentUser) {
+    //   client.disconnect();
+    //   return;
+    // }
+    // client.data = { id: currentUser.sub, name: currentUser.name };
+    // client.join(`user_${currentUser.sub}`);
+    // const conversations = await this.conversationsService.getConversationsIds(
+    //   currentUser.sub,
+    // );
+    // conversations.forEach((el) => client.join(`conversation_${el}`));
+    // return 'Connection established';
   }
-
-  // handleDisconnect(client : any) {
-  // this.clients.get(client.data.id)?.delete(client.id)
-  // if (this.clients.get(client.data.id)?.size === 0) this.clients.delete(client.data.id)
-  // console.error("Removed socket", this.clients);
-  // }
 
   @SubscribeMessage('getConversations')
   getConversations(

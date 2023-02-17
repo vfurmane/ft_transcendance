@@ -31,22 +31,22 @@ export class AppGateway {
   ) {}
 
   async handleConnection(client: Socket): Promise<void> {
-    if (!client.handshake.auth.token)
-      throw new UnauthorizedException('No Authorization header found');
-    const currentUser = this.authService.verifyUserFromToken(
-      client.handshake.auth.token,
-    );
-    if (!currentUser) throw new UnauthorizedException('Invalid token');
-    client.data = { id: currentUser.sub, name: currentUser.name };
-    client.join(`user_${currentUser.sub}`);
-    this.server.to(`user_${currentUser.sub}`).emit('user_status_update', {
-      type: 'online',
-      userId: client.data.id,
-    });
-    this.cacheManager.set(`user:${currentUser.sub}`, currentUser, 0);
-    this.logger.log(
-      `'${currentUser.sub}' (${currentUser.name}) connected on socket '${client.id}'`,
-    );
+    // if (!client.handshake.auth.token)
+    //   throw new UnauthorizedException('No Authorization header found');
+    // const currentUser = this.authService.verifyUserFromToken(
+    //   client.handshake.auth.token,
+    // );
+    // if (!currentUser) throw new UnauthorizedException('Invalid token');
+    // client.data = { id: currentUser.sub, name: currentUser.name };
+    // client.join(`user_${currentUser.sub}`);
+    // this.server.to(`user_${currentUser.sub}`).emit('user_status_update', {
+    //   type: 'online',
+    //   userId: client.data.id,
+    // });
+    // this.cacheManager.set(`user:${currentUser.sub}`, currentUser, 0);
+    // this.logger.log(
+    //   `'${currentUser.sub}' (${currentUser.name}) connected on socket '${client.id}'`,
+    // );
   }
 
   async handleDisconnect(client: Socket): Promise<void> {
