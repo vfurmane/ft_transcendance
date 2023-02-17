@@ -13,7 +13,6 @@
     "format": "prettier --write \"**/*.{ts,tsx,md}\""
   },
   "devDependencies": {
-    "@types/object-hash": "^3.0.2",
     "eslint-config-custom": "*",
     "prettier": "2.8.3",
     "turbo": "latest"
@@ -21,8 +20,5 @@
   "engines": {
     "node": ">=14.0.0"
   },
-  "packageManager": "npm@8.19.2",
-  "dependencies": {
-    "object-hash": "^3.0.0"
-  }
+  "packageManager": "npm@8.19.2"
 }
