@@ -565,7 +565,7 @@ export class ConversationsService {
       );
     return conversation.conversationRoles;
   }
-
+  
   async leaveConversation(
     currentUser: User,
     conversationId: string,
