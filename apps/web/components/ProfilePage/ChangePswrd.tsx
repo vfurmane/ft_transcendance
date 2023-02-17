@@ -3,6 +3,10 @@ import { useForm } from "react-hook-form";
 import styles from "styles/ChangePswrd.module.scss";
 import { Input } from "../Input";
 import { useRouter } from "next/router";
+import { clearTokens } from "../../helpers/clearTokens";
+import { setUserState } from "../../store/UserSlice";
+import { initUser } from "../../initType/UserInit";
+import { useDispatch } from "react-redux";
 
 interface ChangePasswordFormData {
   old_password: string;
@@ -41,6 +45,7 @@ export default function ChangePswrd(): JSX.Element {
   const [formError, setFormError] = useState("");
   const [formSuccess, setFormSuccess] = useState("");
   const [loading, setLoading] = useState(false);
+  const dispatch = useDispatch();
   const {
     formState: { errors },
     handleSubmit,
@@ -58,8 +63,8 @@ export default function ChangePswrd(): JSX.Element {
           throw new Error("An unexpected error occured...");
         } else {
           setFormSuccess(response.message);
-          localStorage.removeItem("access_token");
-          router.push("/login");
+          clearTokens();
+          dispatch(setUserState(initUser));
         }
       })
       .catch((error) => {
