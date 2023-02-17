@@ -7,11 +7,12 @@ import textStyles from "styles/text.module.scss";
 export default function AchivementEntity(props: {
   achievement: Achievements;
   key: number;
+  className: string;
   handleClick: (e: { achievement: Achievements }) => void;
 }): JSX.Element {
   if (typeof props.achievement === "undefined") return <></>;
   return (
-    <div className={styles.shadowContainer}>
+    <div className={`${styles.shadowContainer} ${props.className}`}>
       <div
         className={`${styles.entityContainer} ${styles.entity}`}
         onClick={(): void =>

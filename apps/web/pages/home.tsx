@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { createRef, useCallback, useEffect, useRef, useState } from "react";
 import TopBar from "../components/TopBar";
 import PlayButton from "../components/HomePage/PlayButton";
 import List from "../components/HomePage/List";
@@ -11,11 +11,14 @@ import ChatBar from "../components/chatBar";
 import playButtonStyles from "styles/playButton.module.scss";
 import textStyles from "styles/text.module.scss";
 import styles from "styles/home.module.scss";
+import { create } from "domain";
+import { useRouter } from "next/router";
+
 
 function Home(): JSX.Element {
   const friendListRef = useRef<JSX.Element[]>([]);
   const setterInit: React.Dispatch<React.SetStateAction<boolean>> = () => false;
-
+  const leaderRef = createRef();
   const [openPlayButton, setOpenPlayButton] = useState(false);
   const [openUserMenu, setOpenUserMenu] = useState(false);
   const [indexOfUser, setIndexOfUser] = useState(-1);
@@ -41,6 +44,7 @@ function Home(): JSX.Element {
     setOpenUserList(e);
   }
   /*==========================================================*/
+ 
 
   function handleClickPlayButton(): void {
     setOpenPlayButton(!openPlayButton);
@@ -224,7 +228,7 @@ function Home(): JSX.Element {
             </h3>
           </div>
         </div>
-        <div className="row">
+        <div className="row" >
           <div className="col-10 offset-1" id="leaderboard">
             <ArrayDoubleColumn
               title="leaderboard"

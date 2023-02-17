@@ -379,7 +379,6 @@ export default function PingPong(): JSX.Element {
       ) : (
         <></>
       )}
-      <Link href={""} className={styles.link}>
         <PlayButton
           handleClick={handleClickPlayButton}
           open={openPlayButton}
@@ -389,7 +388,6 @@ export default function PingPong(): JSX.Element {
             color: true,
           }}
         />
-      </Link>
       {openPlayButton ? (
         <div
           className="col-10 offset-1 offset-xl-0 offset-lg-1 col-lg-3 offset-xl-1 "
