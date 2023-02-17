@@ -9,11 +9,11 @@ import PlayButton from "../components/HomePage/PlayButton";
 import Link from "next/link";
 import playButtonStyles from "styles/playButton.module.scss";
 import PlayMenu from "../components/HomePage/PlayMenu";
-import Image from "next/image";
 import styles from "styles/pingPong.module.scss";
 import { useSelector } from "react-redux";
 import { selectUserState } from "../store/UserSlice";
 import { useWebsocketContext } from "../components/Websocket";
+import ProfilePicture from "../components/ProfilePicture";
 
 export default function PingPong(): JSX.Element {
   const router = useRouter();
@@ -210,11 +210,11 @@ export default function PingPong(): JSX.Element {
         <td>
           <div style={{ display: "flex" }}>
             <div className="fill small">
-              <Image
-                alt="avatar"
-                src={`/avatar/avatar-${user.avatar_num}.png`}
+              <ProfilePicture
+                userId={user.id}
                 width={47}
                 height={47}
+                handleClick={undefined}
               />
             </div>
             {user.name}

@@ -15,6 +15,7 @@ import { Userfront as User } from "types";
 import { initUser } from "../initType/UserInit";
 import { clearTokens } from "../helpers/clearTokens";
 import { useRouter } from "next/router";
+import ProfilePicture from "./ProfilePicture";
 
 interface propsTopBar {
   openToggle: boolean;
@@ -158,12 +159,11 @@ function TopBar(props: propsTopBar): JSX.Element {
             />
           </div>
           <div className="fill small">
-            <Image
-              alt="avatar"
-              src={`/avatar/avatar-${UserState.avatar_num}.png`}
+            <ProfilePicture
+              userId={UserState.id}
               width={45}
               height={45}
-              onClick={clickProfil}
+              handleClick={clickProfil}
             />
           </div>
         </div>
@@ -209,12 +209,11 @@ function TopBar(props: propsTopBar): JSX.Element {
                 />
               </div>
               <div className="fill small">
-                <Image
-                  alt="avatar"
-                  src={`/avatar/avatar-${UserState.avatar_num}.png`}
+                <ProfilePicture
+                  userId={UserState.id}
                   width={42}
                   height={42}
-                  onClick={clickProfil}
+                  handleClick={clickProfil}
                 />
               </div>
             </div>

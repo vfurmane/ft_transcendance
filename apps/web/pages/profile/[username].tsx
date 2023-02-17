@@ -3,7 +3,7 @@ import TopBar from "../../components/TopBar";
 import { useRouter } from "next/router";
 import Image from "next/image";
 import MatchEntity from "../../components/HomePage/MatchEntity";
-import { selectUserState, setUserState } from "../../store/UserSlice";
+import { selectUserState } from "../../store/UserSlice";
 import { useSelector } from "react-redux";
 import { initUser } from "../../initType/UserInit";
 import AchivementEntity from "../../components/ProfilePage/achivementEntity";
@@ -16,6 +16,7 @@ import styles from "styles/profil.module.scss";
 import textStyles from "styles/text.module.scss";
 import { initMatch } from "../../initType/MatchInit";
 import ConfigTfa from "../../components/ProfilePage/ConfigTfa";
+import ProfilePicture from "../../components/ProfilePicture";
 
 export default function Profil(): JSX.Element {
   const UserState = useSelector(selectUserState);
@@ -237,11 +238,11 @@ export default function Profil(): JSX.Element {
             className={`col-10 offset-1 offset-md-0 offset-lg-1 col-md-2 ${styles.flexCenterColumn}`}
           >
             <div className="fill">
-              <Image
-                alt="avatar"
-                src={`/avatar/avatar-${user.avatar_num}.png`}
+              <ProfilePicture
+                userId={UserState.id}
                 width={200}
                 height={200}
+                handleClick={undefined}
               />
             </div>
             <div className={styles.rank + " " + textStyles.saira}>
