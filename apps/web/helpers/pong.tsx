@@ -21,6 +21,7 @@ class Game {
   public boardCanvas!: HTMLCanvasElement;
   public boardContext!: CanvasRenderingContext2D;
   public board!: Board;
+  public static ballSpeed = 3;
   public countUpdate = 0;
   public static point = 0;
   public static live = 10;
@@ -47,6 +48,7 @@ class Game {
     console.log("IN GAME CONSTRUCTOR NB PLAYER IS ", number_player);
     if (number_player) {
       this.boardType = number_player;
+      Game.isSolo = false;
     } else {
       this.boardType = Form.REC;
       Game.isSolo = true;
@@ -166,7 +168,7 @@ class Game {
     }
     const speed = new Vector(state.ball.dir.x, state.ball.dir.y).normalized();
     this.ball.defaultSpeed =
-      1.5 * (this.boardCanvas.width / ServerCanvas.width);
+      Game.ballSpeed * (this.boardCanvas.width / ServerCanvas.width);
     this.ball.speed = new Vector(
       speed.x * this.ball.defaultSpeed,
       speed.y * this.ball.defaultSpeed
@@ -220,7 +222,7 @@ class Game {
     }
     const speed = new Vector(state.ball.dir.x, state.ball.dir.y).normalized();
     this.ball.defaultSpeed =
-      1.5 * ((window.innerWidth * 0.6) / ServerCanvas.width);
+      Game.ballSpeed * ((window.innerWidth * 0.6) / ServerCanvas.width);
     this.ball.speed = new Vector(
       speed.x * this.ball.defaultSpeed,
       speed.y * this.ball.defaultSpeed
@@ -398,12 +400,7 @@ class Game {
       );
     }
     this.ball.defaultSpeed =
-      1.5 * (this.boardCanvas.width / ServerCanvas.width);
-    const exSpeed = this.ball.speed.normalized();
-    this.ball.speed = new Vector(
-      exSpeed.x * this.ball.defaultSpeed,
-      exSpeed.y * this.ball.defaultSpeed
-    );
+      Game.ballSpeed * (this.boardCanvas.width / ServerCanvas.width);
     if (Game.isSolo) {
       this.cible = new Target(
         this.createRect(
@@ -414,7 +411,7 @@ class Game {
         )
       );
       this.saveBall = {
-        ball: new Ball(this.ball.point, this.player, this.board.wall),
+        ball: new Ball(this.ball.copy(), this.player, this.board.wall),
         count: 0,
       };
     }
@@ -519,7 +516,6 @@ class Game {
 
   updateGame() {
     if (this.await) return;
-    const time = Math.round(Date.now() - this.start);
     if (
       this.boardCanvas!.width !== Math.round(window.innerWidth * 0.6) ||
       this.boardCanvas!.height !== Math.round(window.innerWidth * 0.6 * (1 / 2))
@@ -591,7 +587,6 @@ class Game {
     this.player.forEach((player) => player.update(this.board.wall, timeRatio));
     if (Game.isSolo)
       this.ball.calcNextCollision(this.player, this.board.wall, null, null);
-    this.ball.update(this.player, this.board.wall, this.board, timeRatio);
     if (Game.isSolo && this.cible)
       this.cible.update(this.ball, this.boardCanvas);
     this.board.wall.forEach((wall) => {
@@ -648,7 +643,7 @@ class Target extends Entity {
 }
 
 class Ball extends Entity {
-  public defaultSpeed = 1.5;
+  public defaultSpeed = Game.ballSpeed;
   public nextCollision: {
     wall: number | null;
     wallIndex: number;
@@ -864,38 +859,22 @@ class Ball extends Entity {
       const Norm = wallVector.norm() * this.speed.norm();
       const angle = Math.acos(wallVector.product(this.speed) / Norm);
       const tmp = new Vector(this.speed.x, this.speed.y);
-      const tmp2 = new Vector(this.speed.x, this.speed.y);
       const isAcute = angle <= Math.PI / 2;
       const outAngle = isAcute ? angle * 2 : (Math.PI - angle) * 2;
       const cosA = Math.cos(outAngle);
       const sinA = Math.sin(outAngle);
-      const prevSpeed = new Vector(this.speed.x, this.speed.y);
       [tmp.x, tmp.y] = [
         this.speed.x * cosA - this.speed.y * sinA,
         this.speed.x * sinA + this.speed.y * cosA,
       ];
       const angle2 = Math.acos(wallVector.product(tmp) / Norm);
       if (Math.abs(angle2 - angle) > 0.001) {
-        [tmp2.x, tmp2.y] = [
+        [tmp.x, tmp.y] = [
           this.speed.x * cosA - this.speed.y * -sinA,
           this.speed.x * -sinA + this.speed.y * cosA,
         ];
-        if (
-          (tmp2.x > 0 && this.point[2].x > walls[2].point[0].x) ||
-          (tmp2.x < 0 && this.point[0].x < 0) ||
-          (tmp2.y < 0 && this.point[0].y < 0) ||
-          (tmp2.y > 0 && this.point[2].y > walls[3].point[0].y)
-        ) {
-          this.speed = tmp;
-        } else this.speed = tmp2;
-      } else this.speed = tmp;
-      if (
-        Math.abs(prevSpeed.x - this.speed.x) < 0.001 &&
-        Math.abs(prevSpeed.y - this.speed.y) < 0.001
-      ) {
-        this.speed.x = -this.speed.x;
-        this.speed.y = -this.speed.y;
       }
+      this.speed = tmp;
       const index = this.nextCollision.wallIndex;
 
       if (Game.isSolo) {
@@ -915,7 +894,6 @@ class Ball extends Entity {
             (this.nextCollision.wall && this.nextCollision.wall <= 0.5)
           )
             this.update(rackets, walls, board, 0);
-          this.moveTo(this.speed, -prevTime);
         }
         console.log("Next collision", this.nextCollision)
         return;

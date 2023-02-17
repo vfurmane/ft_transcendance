@@ -20,7 +20,7 @@ export default function PingPong(): JSX.Element {
   const [users, setUsers] = useState<User[]>([]);
   const usersRef = useRef<User[]>([]);
   const canvasRef = useRef(null);
-  const [intervalState, setIntervalState] = useState<NodeJS.Timer | null>(null);
+  const intervalRef = useRef<NodeJS.Timer | null>(null);
   const [MiniProfilArray, setMiniProfilArray] = useState<JSX.Element[]>([]);
   const [classement, setClassement] = useState<JSX.Element[]>([]);
   const [openPlayButton, setOpenPlayButton] = useState(false);
@@ -72,10 +72,10 @@ export default function PingPong(): JSX.Element {
     if (canvasRef && users.length > 0) {
       if (!gameInit) game.init(canvasRef);
       setGameInit(true);
-      setIntervalState(setInterval(handleResize, 17, game));
+      intervalRef.current = setInterval(handleResize, 4, game);
     }
     return (): void => {
-      if (intervalState) clearInterval(intervalState);
+      if (intervalRef.current) clearInterval(intervalRef.current);
     };
   }, [users]);
 
@@ -162,7 +162,7 @@ export default function PingPong(): JSX.Element {
         : users.length - rectifiIndex;
     const tmp = [...MiniProfilArray];
     if (val === 0) {
-      if (intervalState) clearInterval(intervalState);
+      if (intervalRef.current) clearInterval(intervalRef.current);
       const tempUsers = [...users];
       const newClassement = [
         createTrClassement(tempUsers[index], classement),

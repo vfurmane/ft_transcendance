@@ -20,7 +20,7 @@ export default function PingPong(): JSX.Element {
   const [users, setUsers] = useState<User[]>([]);
   const usersRef = useRef<User[]>([]);
   const canvasRef = useRef(null);
-  const [intervalState, setIntervalState] = useState<NodeJS.Timer | null>(null);
+  const intervalRef = useRef<NodeJS.Timer | null>(null);
   const [MiniProfilArray, setMiniProfilArray] = useState<JSX.Element[]>([]);
   const [classement, setClassement] = useState<JSX.Element[]>([]);
   const [openPlayButton, setOpenPlayButton] = useState(false);
@@ -79,8 +79,8 @@ export default function PingPong(): JSX.Element {
           : users.length - rectifiIndex;
       const tmp = [...MiniProfilArray];
       if (val === 0) {
-        console.log("change life index :", index);
-        if (intervalState) clearInterval(intervalState);
+        console.log("chanhe life index :", index);
+        if (intervalRef.current) clearInterval(intervalRef.current);
         const tempUsers = [...users];
         const newClassement = [
           createTrClassement(tempUsers[index], classement),
@@ -163,11 +163,11 @@ export default function PingPong(): JSX.Element {
         setMiniProfilArray(tmp);
       }
     },
-    [users, MiniProfilArray, classement]
+    [users, MiniProfilArray]
   );
 
   useEffect(() => {
-    if (websockets.pong) {
+    if (websockets.pong?.connected) {
       websockets.pong.emit(
         "subscribe_game",
         { id: router.query.id },
@@ -200,26 +200,24 @@ export default function PingPong(): JSX.Element {
       );
     }
 
-    window.addEventListener(
-      "keydown",
-      function (e) {
-        if (
-          ["Space", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].indexOf(
-            e.code
-          ) > -1
-        ) {
-          e.preventDefault();
-        }
-      },
-      false
-    );
+    function catchKey(e: KeyboardEvent) {
+      if (
+        ["Space", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].indexOf(
+          e.code
+        ) > -1
+      ) {
+        e.preventDefault();
+      }
+    }
+    window.addEventListener("keydown", catchKey, false);
 
     return () => {
-      if (websockets.pong) {
+      if (websockets.pong?.connected) {
         websockets.pong.emit("unsubscribe_game");
       }
+      window.removeEventListener("keydown", catchKey);
     };
-  }, [websockets.pong, router.query.id]);
+  }, [websockets.pong?.connected, router.query.id]);
 
   useEffect(() => {
     console.log(users);
@@ -239,11 +237,11 @@ export default function PingPong(): JSX.Element {
       if (websockets.pong?.connected && users.length > 1 && game) {
         game?.setWebsocket(websockets.pong);
         game?.init(canvasRef);
-        if (game) setIntervalState(setInterval(handleResize, 17, game));
+        if (game) intervalRef.current = setInterval(handleResize, 4, game);
       }
     }
     return (): void => {
-      if (intervalState) clearInterval(intervalState);
+      if (intervalRef.current) clearInterval(intervalRef.current);
     };
   }, [game]);
 
