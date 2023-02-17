@@ -29,7 +29,7 @@ export class AchievementsService {
     for (let i = 1; i < 6; i++)
     {
         this.achivementsList.push({
-            title: titles[i],
+            title: titles[i - 1],
             description: `you have won ${i * 2} games in a row`,
             logo: i
         });

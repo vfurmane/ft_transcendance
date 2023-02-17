@@ -129,7 +129,7 @@ function TopBar(props: propsTopBar): JSX.Element {
     <div className={styles.containerTopBar}>
       <div className="d-none d-md-block">
         <div className={styles.elementTopBar}>
-          <Link href={"/home#top"}>
+          <Link href={"/home"} id={'top'}>
             <Image alt="logo" src={Logo} width={200} height={30} />
           </Link>
         </div>

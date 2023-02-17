@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import TopBar from "../../components/TopBar";
 import { useRouter } from "next/router";
 import Image from "next/image";
@@ -30,13 +30,13 @@ export default function Profil(): JSX.Element {
     null;
   };
 
-  const prevAchievementRef = useRef<Achievements>();
+  const prevAchievementRef = useRef<Achievements | null>(null);
   const router = useRouter();
   const [user, setUser] = useState(initUser);
   const [openAchivementList, setOpenAchivementList] = useState(false);
   const [openAchivement, setOpenAchivement] = useState(false);
   const [achievementsList, setAchievementsList] = useState<JSX.Element[]>([]);
-  const [achievementSelect, setAchievementSelect] = useState<Achievements>();
+  const [achievementSelect, setAchievementSelect] = useState<Achievements | null>(null);
   const [userProfil, setUserProfil] = useState(false);
   const [openConfigProfil, setOpenConfigProfil] = useState(false);
   const [configProfil, setConfigProfil] = useState(<></>);
@@ -165,6 +165,7 @@ export default function Profil(): JSX.Element {
               }}
               key={i}
               handleClick={achievementClick}
+              className={`achievement${i}`}
             />
           ));
         })
@@ -222,10 +223,11 @@ export default function Profil(): JSX.Element {
     setOpenAchivementList(true);
   }
 
-  function achievementClick(e: { achievement: Achievements }): void {
+  function achievementClick (e: { achievement: Achievements }): void {
     setOpenAchivement(true);
     setAchievementSelect(e.achievement);
-    prevAchievementRef.current = achievementSelect;
+    prevAchievementRef.current = e.achievement;
+    return;
   }
 
   function changeUsername(): void {
@@ -247,10 +249,14 @@ export default function Profil(): JSX.Element {
   }
 
   function close(): void {
-    if (openAchivementList && prevAchievementRef.current !== achievementSelect)
+    if (openAchivementList && prevAchievementRef.current === achievementSelect)
       setOpenAchivementList(false);
-    if (openAchivement && prevAchievementRef.current !== achievementSelect)
+    if (openAchivement && prevAchievementRef.current === achievementSelect)
+    {
       setOpenAchivement(false);
+      prevAchievementRef.current = null;
+      setAchievementSelect(null);
+    }
     if (openProfil) setOpenProfil(false);
     if (openUserList && indexOfUser === prevIndexOfUserRef.current) {
       setOpenUserList(false);
@@ -258,6 +264,7 @@ export default function Profil(): JSX.Element {
       setIndexOfUser(-1);
       prevIndexOfUserRef.current = -1;
     }
+    return;
   }
 
   function addFriend(): void {
@@ -505,18 +512,8 @@ export default function Profil(): JSX.Element {
                         className="card"
                         style={{ background: "rgba(0,0,0,0)" }}
                       >
-                        <h3 className={textStyles.laquer}>
-                          <Image
-                            alt="achivement"
-                            src={`/achivement.png`}
-                            width={32}
-                            height={32}
-                            onClick={achivementListClick}
-                          />
-                          {achievementSelect?.title}
-                        </h3>
                         <div className="cardList">
-                          <p className={textStyles.saira}>
+                          <p className={textStyles.saira} style={{marginTop: '120px'}}>
                             {achievementSelect?.description}
                           </p>
                         </div>
