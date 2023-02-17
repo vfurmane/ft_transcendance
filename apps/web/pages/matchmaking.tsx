@@ -8,12 +8,16 @@ import { QueueReconnectionPrompt } from "../components/QueueReconnectionPrompt";
 import { useWebsocketContext } from "../components/Websocket";
 import { selectMatchmakingState } from "../store/MatchmakingSlice";
 import { selectUserState } from "../store/UserSlice";
+import { setGameMode } from "../store/MatchmakingSlice";
+import { useDispatch } from "react-redux";
+import { GameMode } from "types";
 
 export default function Matchmaking(): ReactElement {
   const [hasLeftQueue, setHasLeftQueue] = useState(false);
   const [loading, setLoading] = useState(true);
   const websockets = useWebsocketContext();
   const router = useRouter();
+  const dispatch = useDispatch();
   const UserState = useSelector(selectUserState);
   const MatchmakingState = useSelector(selectMatchmakingState);
 
@@ -23,14 +27,15 @@ export default function Matchmaking(): ReactElement {
   }, [MatchmakingState.isInQueue, router]);
 
   useEffect(() => {
+    const mode = MatchmakingState.gameMode;
     if (websockets.pong) {
-      console.log("Im not yet ready for game_start at ", Date.now());
       websockets.pong.on("game_start", (data: GameStartPayload) => {
-        console.log("received a game_start from server");
         if (data.users.find((user) => user.id == UserState.id)) {
-          console.log("game_start was for me, im rerouting !");
           router.push(`/pingPong/${data.id}`);
         }
+      });
+      websockets.pong.emit("join_queue", {
+        game_mode: mode,
       });
     }
 
