@@ -1,14 +1,12 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import TopBar from "../components/TopBar";
-import { useRouter } from "next/router";
+import TopBar from "../../components/TopBar"; import { useRouter } from "next/router";
 import Image from "next/image";
 import MatchEntity from "../../components/HomePage/MatchEntity";
 import { selectUserState, setUserState } from "../../store/UserSlice";
 import { useSelector } from "react-redux";
 import { initUser } from "../../initType/UserInit";
 import AchivementEntity from "../../components/ProfilePage/achivementEntity";
-import { initAchivement } from "../../initType/AchivementInit";
-import { Achivement } from "types";
+import { Achievements } from "types";
 import ChangePswrd from "../../components/ProfilePage/ChangePswrd";
 import ChangeUsername from "../../components/ProfilePage/ChangeUsername";
 import ChatBar from "../../components/chatBar";
@@ -76,9 +74,8 @@ export default function Profil(): JSX.Element {
   
 
   useEffect((): void => {
-    if (typeof router.query.user === "string") {
-      const id = JSON.parse(router.query.user).id;
-      fetch(`/api/achievements/${id}`, {
+    if (typeof router.query.username === "string") {
+      fetch(`/api/achievements/${router.query.username}`, {
         headers: {
           "Content-Type": "application/json",
           Authorization: "Bearer " + localStorage.getItem("access_token"),
@@ -106,7 +103,8 @@ export default function Profil(): JSX.Element {
           console.error(`problem with fetch : ${error.message}`);
         });
       }
-    if (router.query.username !== UserState.name) {
+
+    //if (router.query.username !== UserState.name) {
       // if foreign user
       fetch(`/api/user/${router.query.username}`, {
         headers: {
@@ -126,16 +124,23 @@ export default function Profil(): JSX.Element {
         })
         .then((response) => {
           setUser(response);
-          setUserProfil(false);
         })
         .catch(() => {
           router.replace("/");
         });
+    if (router.query.username !== UserState.name) {
+      setUserProfil(false);
     } else {
       // if us
-      setUser(UserState);
       setUserProfil(true);
     }
+
+
+  }, []);
+
+  useEffect(() => {
+    if (user)
+    {
     fetch(`/api/match/${user.id}`, {
       headers: {
         "Content-Type": "application/json",
@@ -149,8 +154,8 @@ export default function Profil(): JSX.Element {
       .catch((error) => {
         console.error(`problem with fetch : ${error.message}`);
       });
-
-  }, [router.query, UserState, router, user.id]);
+    }
+  }, [user])
 
   useEffect(() => {
     const tmp: JSX.Element[] = [];

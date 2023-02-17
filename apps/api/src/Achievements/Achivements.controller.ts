@@ -17,8 +17,8 @@ export class AchievementsController {
 constructor(private readonly achievemtsService: AchievementsService) {}
 
 
-@Get('/:id')
-getAchievements(@Param() { id }: isUUIDDto): Promise<Achievements[]> {
-    return this.achievemtsService.getAchivements(id);
+@Get('/:username')
+getAchievements(@Param('username') username : string): Promise<Achievements[]> {
+    return this.achievemtsService.getAchivements(username);
 }
 }
