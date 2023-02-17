@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+git add import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { User, Achievements, Userfront, MatchFront, Achivement } from 'types';
@@ -49,26 +49,35 @@ export class AchievementsService {
 
   };
 
-  async getAchivements(user_id : string)
+  async getAchivements(username : string)
   {
     const res =  await this.userRepository.findOne({
       relations: {
         achievements: true, 
       },
       where: {
-        id: user_id,
+        name: username,
       },
     });
+    
     if (!res)
       throw new NotFoundException('user not found');
+    
     return res.achievements;
   }
 
 
   async helloAchievements(winner : {user: User, history: MatchFront[], achievements: Achievements[]}){
-    if (winner.history.length === 1)
+    let num_of_victory = 0;
+    let last = winner.history.length - 1;
+    while (last >=0 && !winner.history[last].winner)
     {
-      console.log(winner.history);
+      num_of_victory++;
+      last--;
+    }
+    
+    if (num_of_victory === 1)
+    {
       const newAchievements = new Achievements();
       newAchievements.title = this.achivementsList[0].title;
       newAchievements.description = this.achivementsList[0].description;
@@ -105,7 +114,6 @@ export class AchievementsService {
     let num_of_defeat = 0;
     let beforelast = winner.history.length - 2;
     if (beforelast < 0) return;
-    console.log('bbbeeeefffooorrreee : ', beforelast);
     while (beforelast >= 0 && !winner.history[beforelast].looser)
     {
       num_of_defeat++;
@@ -151,8 +159,8 @@ export class AchievementsService {
 
   async saveAchievement(winner : User, looser : User, winnerHistory: MatchFront[], looserHistory: MatchFront[]){
     
-    const winnerAchievements = await this.getAchivements(winner.id);
-    const looserAchievements = await this.getAchivements(looser.id);
+    const winnerAchievements = await this.getAchivements(winner.name);
+    const looserAchievements = await this.getAchivements(looser.name);
     
     this.helloAchievements({ user: winner, history : winnerHistory, achievements: winnerAchievements});
     this.gradeAchievements({ user: winner, history : winnerHistory, achievements: winnerAchievements});

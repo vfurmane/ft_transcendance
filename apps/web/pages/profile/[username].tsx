@@ -7,8 +7,7 @@ import { selectUserState } from "../../store/UserSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { initUser } from "../../initType/UserInit";
 import AchivementEntity from "../../components/ProfilePage/achivementEntity";
-import { initAchivement } from "../../initType/AchivementInit";
-import { Achievements} from "types";
+import { Achievements } from "types";
 import ChangePswrd from "../../components/ProfilePage/ChangePswrd";
 import ChangeUsername from "../../components/ProfilePage/ChangeUsername";
 import ChatBar from "../../components/chatBar";
@@ -143,9 +142,8 @@ export default function Profil(): JSX.Element {
       });
       setUserProfil(router.query.username === UserState.name);
 
-    if (typeof router.query.user === "string") {
-      const id = JSON.parse(router.query.user).id;
-      fetch(`/api/achievements/${id}`, {
+    if (typeof router.query.username === "string") {
+      fetch(`/api/achievements/${router.query.username}`, {
         headers: {
           "Content-Type": "application/json",
           Authorization: "Bearer " + localStorage.getItem("access_token"),
@@ -173,22 +171,26 @@ export default function Profil(): JSX.Element {
           console.error(`problem with fetch : ${error.message}`);
         });
       }
-      
-    if (user.id)
+  }, []);
+
+  useEffect(() => {
+    if (user)
+    {
       fetch(`/api/match/${user.id}`, {
         headers: {
           "Content-Type": "application/json",
           Authorization: "Bearer " + localStorage.getItem("access_token"),
         },
       })
-        .then((res) => res.json())
-        .then((data) => {
-          setMatchHistory(data);
-        })
-        .catch((error) => {
-          console.error(`problem with fetch : ${error.message}`);
-        });
-  }, [router.query, UserState, router, user.id]);
+      .then((res) => res.json())
+      .then((data) => {
+        setMatchHistory(data);
+      })
+      .catch((error) => {
+        console.error(`problem with fetch : ${error.message}`);
+      });
+    }
+  }, [user])
 
   useEffect(() => {
     const tmp: JSX.Element[] = [];
