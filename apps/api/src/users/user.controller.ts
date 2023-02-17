@@ -4,7 +4,6 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { Userfront, User } from 'types';
 import { User as CurrentUser } from '../common/decorators/user.decorator';
 import { ChangeNameDto } from './change-name.dto';
-import { isUUIDDto } from 'src/conversations/dtos/IsUUID.dto';
 
 @UseGuards(JwtAuthGuard)
 @Controller('user')
@@ -30,10 +29,5 @@ export class UserController {
   ): Promise<{ message: string }> {
     await this.usersService.updateName(user, changeNameDto.new_username);
     return { message: 'Successfully updated username' };
-  }
-  
-  @Get('/:id')
-  async getUserById(@Param() { id }: isUUIDDto){
-    return this.usersService.getUserById(id);
   }
 }
