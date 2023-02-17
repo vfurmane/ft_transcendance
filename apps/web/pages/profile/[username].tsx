@@ -16,7 +16,7 @@ import styles from "styles/profil.module.scss";
 import textStyles from "styles/text.module.scss";
 import { initMatch } from "../../initType/MatchInit";
 import ConfigTfa from "../../components/ProfilePage/ConfigTfa";
-import ProfilePicture from "../../components/ProfilePicture";
+import ProfilePictureUploader from "../../components/ProfilePictureUploader";
 
 export default function Profil(): JSX.Element {
   const UserState = useSelector(selectUserState);
@@ -238,11 +238,10 @@ export default function Profil(): JSX.Element {
             className={`col-10 offset-1 offset-md-0 offset-lg-1 col-md-2 ${styles.flexCenterColumn}`}
           >
             <div className="fill">
-              <ProfilePicture
+              <ProfilePictureUploader
                 userId={UserState.id}
                 width={200}
                 height={200}
-                handleClick={undefined}
               />
             </div>
             <div className={styles.rank + " " + textStyles.saira}>
