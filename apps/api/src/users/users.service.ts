@@ -163,7 +163,7 @@ export class UsersService {
     file: Express.Multer.File,
   ): Promise<UpdateResult | null> {
     try {
-      if (profile?.picture != null) {
+      if (profile?.picture !== null && fs.existsSync(profile?.picture)) {
         fs.unlinkSync(profile.picture);
       }
       return this.profileRepository.update(
