@@ -797,7 +797,7 @@ class Ball extends Entity {
       this.calcNextCollision(rackets, walls, null, index);
       return;
     }
-    while (this.nextCollision.wall <= 0) {
+    if (this.nextCollision.wall <= 0) {
       const newCoords = new Point(
         this.point[0].x - this.speed.x * this.nextCollision.wall,
         this.point[0].y - this.speed.y * this.nextCollision.wall
