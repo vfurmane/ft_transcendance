@@ -6,7 +6,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DMExists, User } from 'types';
+import { DMExists, InvitationEnum, User } from 'types';
 import { MoreThan, Not, Repository } from 'typeorm';
 import {
   ConversationsDetails,
@@ -582,7 +582,13 @@ export class ConversationsService {
     return conversation.conversationRoles;
   }
 
-  async inviteToConversation(currentUser : User, invitation : invitationDto) : { message: Message, conversation: Conversation | null } | null
+  async createInvitation(currentUser: User, invitation: invitationDto, type : InvitationEnum, conversation : Conversation, password_protected : boolean) : Promise<Message>
+  {
+    const newMessage =  this.messageRepository.create({ sender: currentUser, conversation: conversation, content: "invitation", system_generated: true, is_invitation: true, invitation_type: type, target: invitation.conversationID, has_password: password_protected })
+    return this.messageRepository.save(newMessage)
+  }
+
+  async inviteToConversation(currentUser : User, invitation : invitationDto) : Promise<{ message: Message, conversation: Conversation | null, prevConversation: string | null } | null>
   {
     const roles = await this.conversationRoleRepository.find({
       relations:
@@ -596,9 +602,31 @@ export class ConversationsService {
         }
       }
     })
-    if (roles.filter((role) => role.user.id).length !== 0)
+    const currentUserRole = roles.filter((role) => role.user.id === currentUser.id)
+    if (currentUserRole.length === 0)
       return (null)
-    
+    if (currentUserRole[0].restrictions.length)
+      return (null)
+    if (currentUserRole[0].role = ConversationRoleEnum.LEFT)
+      return (null)
+    if (roles.filter((role) => role.user.id === invitation.target).length !== 0)
+      return (null)
+    const targetConversation = await this.conversationRepository.findOne({
+        where: {
+          id: invitation.conversationID
+        }
+      })
+    if (!targetConversation)
+      return (null)
+    const conversationExists = await this.DMExists(currentUser, invitation.target)
+    if (conversationExists.conversationExists && conversationExists.conversation)
+    {
+      const message = await this.createInvitation(currentUser, invitation, InvitationEnum.CONVERSATION, conversationExists.conversation, targetConversation.password ? true : false )
+      return ( {message : message, conversation: null, prevConversation: conversationExists.conversation.id} )
+    }
+    const conversation = await this.createConversation({groupConversation : false, participants: [invitation.target]} as createConversationDto, currentUser)
+    const message = await this.createInvitation(currentUser, invitation, InvitationEnum.CONVERSATION, conversation.conversation, targetConversation.password ? true : false )
+    return ( {message : message, conversation: conversation.conversation, prevConversation: null} )
   }
 
   async leaveConversation(
@@ -631,9 +659,7 @@ export class ConversationsService {
         }
       })
       if (messages)
-      {
-        messages.forEach(async (message)=> await this.messageRepository.remove(message))
-      }
+        await this.messageRepository.remove(messages)
       await this.conversationRepository.remove(conversation);
       return { userRole, leftMessage: null };
     }

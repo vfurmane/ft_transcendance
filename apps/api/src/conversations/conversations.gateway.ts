@@ -147,9 +147,33 @@ export class ConversationsGateway implements OnGatewayConnection {
   @SubscribeMessage('inviteToConversation')
   async inviteToConversation(@ConnectedSocket() client : Socket, @MessageBody() invitation : invitationDto ): Promise<boolean>
   {
+    let DMId!: string;
     if (!invitation.conversationID)
-      return false
-    const invitationMessage : Message | null = await this.conversationsService.inviteToConversation(client.data as User, invitation)
+      return (false)
+    const invitationMessage = await this.conversationsService.inviteToConversation(client.data as User, invitation)
+    if (!invitationMessage)
+      return (false)
+    if (invitationMessage.conversation)
+    {
+      this.server
+        .in(`user_${client.data.id}`)
+        .socketsJoin(`conversation_${invitationMessage.conversation.id}`);
+      this.server
+        .in(`user_${invitation.target}`)
+        .socketsJoin(`conversation_${invitationMessage.conversation.id}`);
+      this.server
+        .in(`conversation_${invitationMessage.conversation.id}`)
+        .emit('newConversation', instanceToPlain(invitationMessage.conversation));
+      DMId = invitationMessage.conversation.id
+    }
+    else if (invitationMessage.prevConversation)
+      DMId = invitationMessage.prevConversation
+    else
+      DMId = ""
+    this.server
+      .in(`conversation_${DMId}`)
+      .emit('newMessage', { DMId, message: instanceToPlain(invitationMessage.message) });
+    return (true)
   }
 
   @SubscribeMessage('joinConversation')
