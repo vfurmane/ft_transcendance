@@ -26,7 +26,6 @@ export default function PingPong(): JSX.Element {
   const [openPlayButton, setOpenPlayButton] = useState(false);
   const openPlayMenuRef = useRef(openPlayButton);
   const [openOverlay, setOpenOverlay] = useState(false);
-  const [win, setWin] = useState(false);
   const [endGame, setEndGame] = useState(false);
   const [printButton, setPrintButton] = useState(true);
   const [game, setGame] = useState<Game | null>(null);
@@ -121,7 +120,6 @@ export default function PingPong(): JSX.Element {
           return;
         }
         if (tempUsers.length === 1) {
-          if (tempUsers[0].id === UserState.id) setWin(true);
           if (newClassement.length + 1 <= usersRef.current.length)
             setClassement([
               createTrClassement(tempUsers[0], newClassement),
@@ -468,9 +466,7 @@ export default function PingPong(): JSX.Element {
         </div>
       ) : (
         <div className={styles.afterGameContainer}>
-          <h1 className={textStyles.saira + " " + styles.title}>
-            You {win ? "Win" : "LOose"} !
-          </h1>
+          <h1 className={textStyles.saira + " " + styles.title}>Game Over</h1>
           <div className={styles.tableContainer}>
             <table>
               <thead>

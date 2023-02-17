@@ -200,10 +200,11 @@ export default function UserEntity(props: {
                       <div
                         className={styles.valideButton}
                         onClick={(): void => {
-                          props.delFriendClick({
-                            idToDelete: props.user.id,
-                            index: props.index,
-                          });
+                          if (props.delFriendClick)
+                            props.delFriendClick({
+                              idToDelete: props.user.id,
+                              index: props.index,
+                            });
                         }}
                       >
                         <Image
@@ -222,10 +223,11 @@ export default function UserEntity(props: {
               <div
                 className={styles.supr}
                 onClick={(): void => {
-                  props.delFriendClick({
-                    idToDelete: props.user.id,
-                    index: props.index,
-                  });
+                  if (props.delFriendClick)
+                    props.delFriendClick({
+                      idToDelete: props.user.id,
+                      index: props.index,
+                    });
                 }}
               ></div>
             )}
