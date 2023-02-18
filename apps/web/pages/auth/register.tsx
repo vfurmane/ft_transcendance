@@ -1,8 +1,8 @@
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import { Loading } from "../components/Loading";
-import { LoginForm } from "../components/LoginForm";
-import styles from "../styles/login-page.module.scss";
+import { Loading } from "../../components/Loading";
+import { RegisterForm } from "../../components/RegisterForm";
+import styles from "../../styles/register-page.module.scss";
 
 export default function Login(): JSX.Element {
   const router = useRouter();
@@ -21,7 +21,7 @@ export default function Login(): JSX.Element {
 
   return (
     <div className={styles.container}>
-      <LoginForm />
+      <RegisterForm />
     </div>
   );
 }

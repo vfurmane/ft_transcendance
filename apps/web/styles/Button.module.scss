@@ -39,6 +39,11 @@
   width: 100%;
 }
 
+.danger {
+  background-color: $dark-system-red;
+  color: $dark-neutral-white;
+}
+
 .primary {
   background-color: $dark-primary-yellow;
 }

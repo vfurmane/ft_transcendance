@@ -19,7 +19,7 @@ export default function Tfa(): JSX.Element {
 
     const localState = localStorage.getItem("state");
     if (localState === null) {
-      router.replace("/login");
+      router.replace("/auth/login");
       return;
     }
 

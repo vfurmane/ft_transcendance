@@ -15,6 +15,7 @@ build
 
 # nestjs
 dist
+uploads/
 
 # misc
 .DS_Store
