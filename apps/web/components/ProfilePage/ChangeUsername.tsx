@@ -71,7 +71,7 @@ export default function ChangeUsername(): JSX.Element {
   return (
     <div className={styles.container}>
       <form className={styles.form} onSubmit={handleSubmit(onSubmit)}>
-        <h3>Change password</h3>
+        <h3>Change username</h3>
         <Input
           {...register("new_username", {
             required: "'new username' is required",
