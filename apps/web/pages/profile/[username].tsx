@@ -106,19 +106,20 @@ export default function Profil(): JSX.Element {
       setUser(UserState);
       setUserProfil(true);
     }
-    fetch(`/api/match/${user.id}`, {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + localStorage.getItem("access_token"),
-      },
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        setMatchHistory(data);
+    if (user.id)
+      fetch(`/api/match/${user.id}`, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + localStorage.getItem("access_token"),
+        },
       })
-      .catch((error) => {
-        console.error(`problem with fetch : ${error.message}`);
-      });
+        .then((res) => res.json())
+        .then((data) => {
+          setMatchHistory(data);
+        })
+        .catch((error) => {
+          console.error(`problem with fetch : ${error.message}`);
+        });
   }, [router.query, UserState, router, user.id]);
 
   useEffect(() => {
