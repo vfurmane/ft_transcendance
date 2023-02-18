@@ -14,7 +14,7 @@ import {
     @PrimaryGeneratedColumn("uuid")
     id!: string;
     
-    @Column("varchar", { length: 30, unique: true })
+    @Column("varchar", { length: 30 })
     title!: string;
 
     @Column("varchar", { length: 300 })
@@ -27,7 +27,7 @@ import {
     users!: User[]*/
 
     @ManyToOne(() => User, (user) => user.achievements)
-    user!: User | null;
+    user!: User;
   
     @CreateDateColumn()
     created_at!: Date;
