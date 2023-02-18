@@ -3,10 +3,12 @@ import { UserSlice } from "./UserSlice";
 import { createWrapper } from "next-redux-wrapper";
 import { MatchmakingSlice } from "./MatchmakingSlice";
 import { BlockedUsersSlice } from "./BlockedUsersSlice";
+import { InvitationSlice } from "./InvitationSlice";
 
 const makeStore = () =>
   configureStore({
     reducer: {
+      [InvitationSlice.name]: InvitationSlice.reducer,
       [UserSlice.name]: UserSlice.reducer,
       [MatchmakingSlice.name]: MatchmakingSlice.reducer,
       [BlockedUsersSlice.name]: BlockedUsersSlice.reducer,

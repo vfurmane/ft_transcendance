@@ -9,10 +9,11 @@ import Message from "../../public/message.png";
 import valide from "../../public/valide.png";
 import refuse from "../../public/crossRed.png";
 import { useWebsocketContext } from "../Websocket";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { selectUserState } from "../../store/UserSlice";
 import { useRouter } from "next/router";
 import ProfilePicture from "../ProfilePicture";
+import { setInvitedUser } from "../../store/InvitationSlice";
 
 export default function UserEntity(props: {
   user: User;
@@ -31,6 +32,7 @@ export default function UserEntity(props: {
   const [accept, setAccept] = useState(props.option?.accept);
   const UserState = useSelector(selectUserState);
   const router = useRouter();
+  const dispatch = useDispatch();
   const websockets = useWebsocketContext();
 
   useEffect(() => {
@@ -121,6 +123,7 @@ export default function UserEntity(props: {
                     id: props.user.id,
                   },
                   () => {
+                    dispatch(setInvitedUser(props.user));
                     router.push("/invite");
                   }
                 );
