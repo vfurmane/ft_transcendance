@@ -4,7 +4,7 @@ import { useRouter } from "next/router";
 import Image from "next/image";
 import MatchEntity from "../../components/HomePage/MatchEntity";
 import { selectUserState } from "../../store/UserSlice";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { initUser } from "../../initType/UserInit";
 import AchivementEntity from "../../components/ProfilePage/achivementEntity";
 import { initAchivement } from "../../initType/AchivementInit";
@@ -18,6 +18,11 @@ import { initMatch } from "../../initType/MatchInit";
 import ConfigTfa from "../../components/ProfilePage/ConfigTfa";
 import ProfilePictureUploader from "../../components/ProfilePictureUploader";
 import { useWebsocketContext } from "../../components/Websocket";
+import {
+  blockUser,
+  selectBlockedUsersState,
+  unblockUser,
+} from "../../store/BlockedUsersSlice";
 
 export default function Profil(): JSX.Element {
   const UserState = useSelector(selectUserState);
@@ -36,7 +41,10 @@ export default function Profil(): JSX.Element {
   const [configProfil, setConfigProfil] = useState(<></>);
   const [matchHistory, setMatchHistory] = useState([initMatch]);
   const [listOfMatch, setListOfMatch] = useState<JSX.Element[]>([]);
+  const [isBlocked, setIsBlocked] = useState(false);
+  const dispatch = useDispatch();
   const websockets = useWebsocketContext();
+  const BlockedUsersState = useSelector(selectBlockedUsersState);
 
   /*======for close topBar component when click on screen====*/
   const [openToggle, setOpenToggle] = useState(false);
@@ -45,6 +53,36 @@ export default function Profil(): JSX.Element {
   const [indexOfUser, setIndexOfUser] = useState(-1);
   const prevIndexOfUserRef = useRef(-1);
   const prevSetterUsermenuRef = useRef(setterInit);
+
+  useEffect(() => {
+    if (BlockedUsersState.find((userId) => userId === user.id))
+      setIsBlocked(true);
+    else setIsBlocked(false);
+  }, [BlockedUsersState, user.id]);
+
+  function blockUserOnClick(): void {
+    if (websockets.conversations) {
+      websockets.conversations.emit(
+        "block_user",
+        { targetId: user.id },
+        ({ targetId }: { targetId: string | null }) => {
+          if (targetId) dispatch(blockUser(targetId));
+        }
+      );
+    }
+  }
+
+  function unblockUserOnClick(): void {
+    if (websockets.conversations) {
+      websockets.conversations.emit(
+        "unblock_user",
+        { targetId: user.id },
+        ({ targetId }: { targetId: string | null }) => {
+          if (targetId) dispatch(unblockUser(targetId));
+        }
+      );
+    }
+  }
 
   function clickTopBarToggle(): void {
     setOpenToggle(!openToggle);
@@ -410,12 +448,13 @@ export default function Profil(): JSX.Element {
                   <button
                     className={styles.buttonProfil}
                     style={{ backgroundColor: "#e22d44", width: "100px" }}
+                    onClick={isBlocked ? unblockUserOnClick : blockUserOnClick}
                   >
                     <h3
                       className={textStyles.laquer}
                       style={{ fontSize: "18px" }}
                     >
-                      block
+                      {isBlocked ? "unBlock" : "Block"}
                     </h3>
                   </button>
                 </div>

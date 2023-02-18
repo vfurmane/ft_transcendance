@@ -1,3 +1,4 @@
+export * from './block.entity'
 export * from "./conversation.entity";
 export * from "./conversationRestriction.entity";
 export * from "./conversationRole.entity";
