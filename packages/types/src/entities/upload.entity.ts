@@ -4,14 +4,14 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
-} from 'typeorm';
-import { Exclude, Expose } from 'class-transformer';
+} from "typeorm";
+import { Exclude, Expose } from "class-transformer";
 
 @Exclude()
 @Entity()
 export class Upload {
   @Expose()
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryGeneratedColumn("uuid")
   id!: string;
 
   @CreateDateColumn()
@@ -21,10 +21,10 @@ export class Upload {
   updated_at!: Date;
 
   @Expose()
-  @Column('varchar')
+  @Column("varchar")
   filename!: string;
 
   @Expose()
-  @Column('varchar')
+  @Column("varchar")
   path!: string;
 }
