@@ -20,7 +20,7 @@ import {
 import { AuthService } from 'src/auth/auth.service';
 import { Interval } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
-import { GameEntityFront, GameStartPayload, User, Userfront } from 'types';
+import { GameEntityFront, GameStartPayload, User, Userfront, GameMode } from 'types';
 import { Repository } from 'typeorm';
 import { TransformUserService } from 'src/TransformUser/TransformUser.service';
 import { SubscribedGameDto } from './subscribed-game.dto';
@@ -262,6 +262,25 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
     );
     client.join(`game_${subscribedGameDto.id}`);
     return this.pongService.getGame(subscribedGameDto.id);
+  }
+
+  @SubscribeMessage('launch')
+  async launch( @ConnectedSocket() client: Socket) {
+    console.log('receiving launch')
+    const user = await this.usersService.getById(client.data.id);
+    if (!user) return ;
+    const gameQueue = await this.pongService.getGameModeQueue(GameMode.BATTLE_ROYALE);
+    if (!gameQueue) return ;
+    if (gameQueue.length < 2) return ;
+    if (user.id !== gameQueue[0].id) return ;
+    console.log("should be launching the game")
+    const game = await this.pongService.startGame(gameQueue, this.server);
+
+    this.server.emit('game_start', instanceToPlain<GameStartPayload>({
+      id: game.id,
+      users: await Promise.all(gameQueue.map(e => this.transformUserService.transform(e))),
+    }),
+    );
   }
 
   @SubscribeMessage('join_queue')

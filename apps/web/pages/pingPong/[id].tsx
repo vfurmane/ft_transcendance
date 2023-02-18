@@ -53,15 +53,20 @@ export default function PingPong(): JSX.Element {
     setGame(null);
   });
 
-  function rotateInit(users: User[])  {
-    if (!users.find((user) => UserState.id === user.id)) return;
-    const angle = 360 / users.length;
+  function rotateInit(users: User[], index : number)  {
+    const size = usersGame[index].id === UserState.id? users.length - 1 : users.length;
+    const angle = 360 / size;
 
     const canvas = document.getElementById("canvasElem");
     if (canvas)
-      canvas.style.transform = `rotate(${
+    {
+      //canvas.style.transformOrigin = `${Math.floor(canvas.clientHeight / 2)}px ${Math.floor(canvas.clientHeight / 2)}px`
+       canvas.style.transform = `rotate(${
         angle * users.findIndex((e) => e.id === UserState.id)
       }deg)`;
+      
+    }
+     
   }
 
   function rotate(users: User[]): User[] {
@@ -71,9 +76,13 @@ export default function PingPong(): JSX.Element {
 
     const canvas = document.getElementById("canvasElem");
     if (canvas)
+    {
+      //canvas.style.transformOrigin = `${Math.floor(canvas.clientHeight / 2)}px ${Math.floor(canvas.clientHeight / 2)}px`
       canvas.style.transform = `rotate(${
         angle * users.findIndex((e) => e.id === UserState.id)
       }deg)`;
+     
+    }
 
     while (users.length && users[0].id !== UserState.id) {
       const last = users[lastIndex];
@@ -126,13 +135,13 @@ export default function PingPong(): JSX.Element {
       console.log(usersRotate);
       console.log(MiniProfilArray.map(e => e.props.life));
       
-      if (!users.length || endGame) return;
+      if (!users.length || endGame || index >= usersGame.length) return;
       const indexHurt = usersRotate.findIndex(e => e.id === usersGame[index].id);
       if (MiniProfilArray[indexHurt].props.life === val) return;
       if (val === 0)
       {
         console.log('----------------someone died');
-        rotateInit(usersGame);
+        rotateInit(usersGame, index);
         if (usersGame.length > 2 && usersGame[index].id === UserState.id)
           setOpenOverlay(true);
         let newClassement = [createTrClassement(usersGame[index], classement), ...classement];
@@ -152,7 +161,7 @@ export default function PingPong(): JSX.Element {
           return;
         }
         setClassement(newClassement);
-        setUsers(newUsersGame);
+        setUsersGame(newUsersGame);
         let rotateUsers = [...newUsersGame];
         rotateUsers = rotate(rotateUsers);
         setUsersRotate(rotateUsers);
@@ -535,9 +544,9 @@ export default function PingPong(): JSX.Element {
           <div
             style={{
               marginTop:
-                users.length > 2
+                usersGame.length > 2
                   ? "25vh"
-                  : users.length === 1
+                  : usersGame.length === 1
                   ? "20vh"
                   : "35vh",
               display: "flex",
@@ -550,8 +559,8 @@ export default function PingPong(): JSX.Element {
               id="canvasElem"
               ref={canvasRef}
               style={{
-                marginLeft: users.length > 2 ? "30vw" : "",
-                border: "1px solid white",
+                marginLeft: usersGame.length > 2 ? "30vw" : "",
+              //  border: "1px solid white", // NEED TO REMOVE FOR BATTLE ROYAL SINCE NON-RECTANGULAR BOARD DOESNT NOT FIT THE CANVAS
               }}
             ></canvas>
           </div>
