@@ -27,7 +27,7 @@ import { SubscribedGameDto } from './subscribed-game.dto';
 import { PongService } from './pong.service';
 import { JoinQueueDto } from './join-queue.dto';
 import { UsersService } from 'src/users/users.service';
-import { instanceToPlain } from 'class-transformer';
+import { instanceToPlain, TransformInstanceToPlain } from 'class-transformer';
 import { InviteUserDto } from './invite-user.dto';
 
 @UsePipes(new ValidationPipe())
@@ -271,25 +271,17 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
     );
     if (gameQueue !== null) {
       this.logger.log(`Queue is full, the game will start soon. Players:`);
+      const game = await this.pongService.startGame(gameQueue, this.server);
       gameQueue.forEach((user_loop) => {
         this.logger.log(`- ${user_loop.id} (${user_loop.name})`);
       });
-
-      setTimeout(async () => {
-        console.log('SENDING game_start at ', Date.now());
-        const game = await this.pongService.startGame(gameQueue, this.server);
-        this.server.emit(
-          'game_start',
-          instanceToPlain<GameStartPayload>({
-            id: game.id,
-            users: await Promise.all(
-              gameQueue.map((opponent) =>
-                this.transformUserService.transform(opponent),
-              ),
-            ),
-          }),
-        );
-      }, 2000);
+      this.server.emit(
+        'game_start',
+        instanceToPlain<GameStartPayload>({
+          id: game.id,
+          users: gameQueue,
+        }),
+      );
     }
   }
 

@@ -10,8 +10,8 @@ import { useWebsocketContext } from "../Websocket";
 
 export default function PlayMenu(props: { click?: () => void }): JSX.Element {
   const websockets = useWebsocketContext();
-  const dispatch = useDispatch();
   const router = useRouter();
+  const dispatch = useDispatch();
   const UserState = useSelector(selectUserState);
 
   const joinQueueOnClick = (
@@ -19,11 +19,8 @@ export default function PlayMenu(props: { click?: () => void }): JSX.Element {
   ): MouseEventHandler<HTMLDivElement> => {
     return () => {
       if (websockets.pong) {
-        websockets.pong.emit("join_queue", {
-          game_mode: mode,
-        });
         dispatch(setGameMode(mode));
-        router.push("/matchmaking");
+        router.replace("/matchmaking");
       }
     };
   };
