@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import TopBar from "../../components/TopBar"; import { useRouter } from "next/router";
 import Image from "next/image";
 import MatchEntity from "../../components/HomePage/MatchEntity";
-import { selectUserState, setUserState } from "../../store/UserSlice";
+import { selectUserState } from "../../store/UserSlice";
 import { useSelector } from "react-redux";
 import { initUser } from "../../initType/UserInit";
 import AchivementEntity from "../../components/ProfilePage/achivementEntity";
@@ -14,6 +14,8 @@ import styles from "styles/profil.module.scss";
 import textStyles from "styles/text.module.scss";
 import { initMatch } from "../../initType/MatchInit";
 import ConfigTfa from "../../components/ProfilePage/ConfigTfa";
+import ProfilePictureUploader from "../../components/ProfilePictureUploader";
+import { useWebsocketContext } from "../../components/Websocket";
 
 export default function Profil(): JSX.Element {
   const UserState = useSelector(selectUserState);
@@ -33,6 +35,7 @@ export default function Profil(): JSX.Element {
   const [configProfil, setConfigProfil] = useState(<></>);
   const [matchHistory, setMatchHistory] = useState([initMatch]);
   const [listOfMatch, setListOfMatch] = useState<JSX.Element[]>([]);
+  const websockets = useWebsocketContext();
 
   /*======for close topBar component when click on screen====*/
   const [openToggle, setOpenToggle] = useState(false);
@@ -74,6 +77,7 @@ export default function Profil(): JSX.Element {
   
 
   useEffect((): void => {
+    if (!localStorage.getItem("access_token")) return;
     if (typeof router.query.username === "string") {
       fetch(`/api/achievements/${router.query.username}`, {
         headers: {
@@ -81,53 +85,53 @@ export default function Profil(): JSX.Element {
           Authorization: "Bearer " + localStorage.getItem("access_token"),
         },
       })
-        .then((res) => res.json())
-        .then((data) => {
-          setAchievementsList(data.map((e: Achievements, i: number) => 
-            <AchivementEntity
-              achievement={{
-                id: e.id,
-                title: e.title,
-                description: e.description,
-                logo: e.logo,
-                created_at: e.created_at,
-                user: e.user
-              }}
-              key={i}
-              handleClick={achievementClick}
-              className={`achievement${i}`}
-            />
-          ));
-        })
-        .catch((error) => {
-          console.error(`problem with fetch : ${error.message}`);
-        });
-      }
+      .then((res) => res.json())
+      .then((data) => {
+        setAchievementsList(data.map((e: Achievements, i: number) => 
+          <AchivementEntity
+            achievement={{
+              id: e.id,
+              title: e.title,
+              description: e.description,
+              logo: e.logo,
+              created_at: e.created_at,
+              user: e.user
+            }}
+            key={i}
+            handleClick={achievementClick}
+            className={`achievement${i}`}
+          />
+        ));
+      })
+      .catch((error) => {
+        console.error(`problem with fetch : ${error.message}`);
+      });
+    }
 
-    //if (router.query.username !== UserState.name) {
+    
       // if foreign user
       fetch(`/api/user/${router.query.username}`, {
         headers: {
           Authorization: "Bearer " + localStorage.getItem("access_token"),
         },
       })
-        .then(async (response) => {
-          if (!response.ok) {
-            return response.json().then((error) => {
-              throw new Error(
-                error.message || "An unexpected error occured..."
-              );
-            });
-          } else {
-            return response.json();
-          }
-        })
-        .then((response) => {
-          setUser(response);
-        })
-        .catch(() => {
-          router.replace("/");
-        });
+      .then(async (response) => {
+        if (!response.ok) {
+          return response.json().then((error) => {
+            throw new Error(
+              error.message || "An unexpected error occured..."
+            );
+          });
+        } else {
+          return response.json();
+        }
+      })
+      .then((response) => {
+        setUser(response);
+      })
+      .catch(() => {
+        router.replace("/");
+      });
     if (router.query.username !== UserState.name) {
       setUserProfil(false);
     } else {
@@ -135,18 +139,13 @@ export default function Profil(): JSX.Element {
       setUserProfil(true);
     }
 
-
-  }, []);
-
-  useEffect(() => {
-    if (user)
-    {
-    fetch(`/api/match/${user.id}`, {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + localStorage.getItem("access_token"),
-      },
-    })
+    if (user.id)
+      fetch(`/api/match/${user.id}`, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + localStorage.getItem("access_token"),
+        },
+      })
       .then((res) => res.json())
       .then((data) => {
         setMatchHistory(data);
@@ -154,8 +153,7 @@ export default function Profil(): JSX.Element {
       .catch((error) => {
         console.error(`problem with fetch : ${error.message}`);
       });
-    }
-  }, [user])
+  }, [router.query, UserState, router, user.id]);
 
   useEffect(() => {
     const tmp: JSX.Element[] = [];
@@ -209,6 +207,8 @@ export default function Profil(): JSX.Element {
       elem[0]?.scrollIntoView(true);
     }
   }, [achievementSelect])*/
+
+
   function changeUsername(): void {
     setOpenConfigProfil(true);
     setOpenAchivementList(false);
@@ -277,9 +277,8 @@ export default function Profil(): JSX.Element {
             className={`col-10 offset-1 offset-md-0 offset-lg-1 col-md-2 ${styles.flexCenterColumn}`}
           >
             <div className="fill">
-              <Image
-                alt="avatar"
-                src={`/avatar/avatar-${user.avatar_num}.png`}
+              <ProfilePictureUploader
+                userId={UserState.id}
                 width={200}
                 height={200}
               />
@@ -287,9 +286,6 @@ export default function Profil(): JSX.Element {
             <div className={styles.rank + " " + textStyles.saira}>
               {user.rank}
             </div>
-            <p className={textStyles.saira} style={{ color: "white" }}>
-              {user.status}
-            </p>
           </div>
           <div
             className={`col-10 offset-1  col-md-6 offset-lg-0  ${styles.profilMenuContainer}`}
@@ -398,14 +394,6 @@ export default function Profil(): JSX.Element {
                       Configure TFA
                     </h3>
                   </button>
-                  <button className={styles.buttonProfil}>
-                    <h3
-                      className={textStyles.laquer}
-                      style={{ fontSize: "18px" }}
-                    >
-                      Delete account
-                    </h3>
-                  </button>
                 </div>
               ) : (
                 <div className={styles.buttonProfilContainer}>
@@ -435,6 +423,17 @@ export default function Profil(): JSX.Element {
                   <button
                     className={styles.buttonProfil}
                     style={{ width: "100px" }}
+                    onClick={(): void => {
+                      websockets.pong?.emit(
+                        "invite",
+                        {
+                          id: user.id,
+                        },
+                        () => {
+                          router.push("/invite");
+                        }
+                      );
+                    }}
                   >
                     <h3
                       className={textStyles.laquer}
@@ -475,13 +474,6 @@ export default function Profil(): JSX.Element {
                       style={{ background: "rgba(0,0,0,0)" }}
                     >
                       <h2 className={textStyles.pixel} style={{marginBottom:'20px'}}>
-                        <Image
-                          alt="achivement"
-                          src={`/achivement.png`}
-                          width={32}
-                          height={32}
-                          onClick={achivementListClick}
-                        />{" "}
                         Achivements
                       </h2>
                       <div className="cardList">{achievementsList}</div>

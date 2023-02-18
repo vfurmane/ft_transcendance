@@ -52,7 +52,6 @@ export class TransformUserService {
       return {
         id: '',
         name: '',
-        avatar_num: 1,
         status: 'offline',
         victory: 0,
         defeat: 0,
@@ -63,7 +62,6 @@ export class TransformUserService {
     return {
       id: userBack.id,
       name: userBack.name,
-      avatar_num: Math.floor(Math.random() * 19) + 1,
       status: 'offline',
       victory: await this.#getVictoryNumber(userBack.id),
       defeat: await this.#getDefeatNumber(userBack.id),

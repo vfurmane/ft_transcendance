@@ -34,14 +34,15 @@ export default function Matchmaking(): ReactElement {
   }, [MatchmakingState.isInQueue, router]);
 
   useEffect(() => {
+    const mode = MatchmakingState.gameMode;
     if (websockets.pong) {
-      console.log("Im not yet ready for game_start at ", Date.now());
       websockets.pong.on("game_start", (data: GameStartPayload) => {
-        console.log("received a game_start from server");
         if (data.users.find((user) => user.id == UserState.id)) {
-          console.log("game_start was for me, im rerouting !");
           router.push(`/pingPong/${data.id}`);
         }
+      });
+      websockets.pong.emit("join_queue", {
+        game_mode: mode,
       });
     }
 

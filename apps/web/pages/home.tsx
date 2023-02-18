@@ -1,28 +1,31 @@
-import React, { createRef, useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import TopBar from "../components/TopBar";
 import PlayButton from "../components/HomePage/PlayButton";
 import List from "../components/HomePage/List";
 import UserEntity from "../components/HomePage/UserEntity";
 import ArrayDoubleColumn from "../components/HomePage/ArrayDoubleColumn";
 import PlayMenu from "../components/HomePage/PlayMenu";
-import { Userfront as User } from "types";
+import { GameStartPayload, Userfront as User } from "types";
 import Link from "next/link";
 import ChatBar from "../components/chatBar";
 import playButtonStyles from "styles/playButton.module.scss";
 import textStyles from "styles/text.module.scss";
 import styles from "styles/home.module.scss";
-import { create } from "domain";
-import { useRouter } from "next/router";
 
+
+import { useWebsocketContext } from "../components/Websocket";
+import { WatchGame } from "../components/WatchGame";
 
 function Home(): JSX.Element {
   const friendListRef = useRef<JSX.Element[]>([]);
   const setterInit: React.Dispatch<React.SetStateAction<boolean>> = () => false;
-  const leaderRef = createRef();
+  const websockets = useWebsocketContext();
+
   const [openPlayButton, setOpenPlayButton] = useState(false);
   const [openUserMenu, setOpenUserMenu] = useState(false);
   const [indexOfUser, setIndexOfUser] = useState(-1);
   const [friendList, setFriendList] = useState<JSX.Element[]>([]);
+  const [featuringList, setFeaturingList] = useState<JSX.Element[]>([]);
 
   const prevIndexOfUserRef = useRef(-1);
   const prevSetterUsermenuRef = useRef(setterInit);
@@ -103,6 +106,29 @@ function Home(): JSX.Element {
     );
     setFriendList([...friendListRef.current]);
   }
+
+  useEffect(() => {
+    if (websockets.pong) {
+      websockets.pong.on("game_start", (gameStartPayload: GameStartPayload) => {
+        const elm = (
+          <WatchGame
+            gameId={gameStartPayload.id}
+            users={gameStartPayload.users}
+          />
+        );
+        setFeaturingList((f) => [elm, ...f]);
+      });
+
+      websockets.pong.emit("get_featuring", (data: GameStartPayload[]) => {
+        setFeaturingList((f) => [
+          ...data.map((game) => {
+            return <WatchGame gameId={game.id} users={game.users} />;
+          }),
+          ...f,
+        ]);
+      });
+    }
+  }, [websockets.pong]);
 
   //get the friend list of the user
   useEffect(() => {
@@ -216,7 +242,7 @@ function Home(): JSX.Element {
           </div>
           <div className="col-10 offset-1  offset-lg-0 col-lg-6">
             <div className="card">
-              <List title="featuring" list={[]} />
+              <List title="featuring" list={featuringList} />
             </div>
           </div>
         </div>

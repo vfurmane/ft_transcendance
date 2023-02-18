@@ -73,7 +73,7 @@ export class PongService {
     });
     await Promise.all(opponents);
     const room = `game_${gameEntity.id}`;
-    this.games.set(room, [
+    this.games.set(gameEntity.id, [
       new Game(users.length, server.in(room)),
       users.map((user) => ({ id: user.id, ready: false })),
     ]);

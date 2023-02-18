@@ -11,15 +11,9 @@ export default function Tfa(): JSX.Element {
   const [state, setState] = useState("");
 
   useEffect(() => {
-    if (accessToken) {
-      router.replace("/");
-      localStorage.removeItem("state");
-      return;
-    }
-
     const localState = localStorage.getItem("state");
     if (localState === null) {
-      router.replace("/auth/login");
+      if (!localStorage.getItem("access_token")) router.replace("/auth/login");
       return;
     }
 

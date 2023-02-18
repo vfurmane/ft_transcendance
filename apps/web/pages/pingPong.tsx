@@ -9,10 +9,10 @@ import PlayButton from "../components/HomePage/PlayButton";
 import Link from "next/link";
 import playButtonStyles from "styles/playButton.module.scss";
 import PlayMenu from "../components/HomePage/PlayMenu";
-import Image from "next/image";
 import styles from "styles/pingPong.module.scss";
 import { useSelector } from "react-redux";
 import { selectUserState } from "../store/UserSlice";
+import ProfilePicture from "../components/ProfilePicture";
 
 export default function PingPong(): JSX.Element {
   const router = useRouter();
@@ -118,18 +118,124 @@ export default function PingPong(): JSX.Element {
             setOpenOverlay(false);
     }
 
-
-  
-
-    function handleClickPlayButton(): void {
-        openPlayMenuRef.current = !openPlayButton;
-        setOpenPlayButton(!openPlayButton);
-      }
-
-
-
   function handleResize(game: Game) {
     game.updateGame();
+  }
+
+  function createTrClassement(user: User, classement: JSX.Element[]) {
+    if (!user) return <></>;
+    return (
+      <tr key={user.id}>
+        <td>
+          <div style={{ display: "flex" }}>
+            <div className="fill small">
+              <ProfilePicture
+                userId={user.id}
+                width={47}
+                height={47}
+                handleClick={undefined}
+              />
+            </div>
+            {user.name}
+          </div>
+        </td>
+        <td>{usersRef.current.length - classement.length}</td>
+      </tr>
+    );
+  }
+
+  function changeLife(index: number, val: number) {
+    const rectifiIndex = usersRef.current.findIndex(
+      (e) => e.id === UserState.id
+    );
+    index =
+      index - rectifiIndex >= 0
+        ? index - rectifiIndex
+        : users.length - rectifiIndex;
+    const tmp = [...MiniProfilArray];
+    if (val === 0) {
+      if (intervalState) clearInterval(intervalState);
+      const tempUsers = [...users];
+      const newClassement = [
+        createTrClassement(tempUsers[index], classement),
+        ...classement,
+      ];
+      if (newClassement.length <= usersRef.current.length)
+        setClassement(newClassement);
+      if (users.length > 2 && tempUsers[index].id === UserState.id)
+        setOpenOverlay(true);
+      tempUsers.splice(index, 1);
+      tmp.splice(index, 1);
+      if (tempUsers.length === 1) {
+        if (tempUsers[0].id === UserState.id) setWin(true);
+        if (newClassement.length + 1 <= usersRef.current.length)
+          setClassement([
+            createTrClassement(tempUsers[0], newClassement),
+            ...newClassement,
+          ]);
+        setPrintButton(true);
+        return;
+      }
+      tmp.forEach((e, i) => (
+        <MiniProfil
+          key={index}
+          left={i % 2 == 0 ? true : false}
+          user={{ user: tempUsers[i], index: i }}
+          life={tmp[i]?.props.life}
+          score={tmp[i]?.props.score}
+          game={{
+            life: Game.live,
+            score: Game.scoreMax,
+            numOfPlayers: tmp.length,
+          }}
+        />
+      ));
+      game = new Game(
+        tempUsers.length,
+        Number(router.query.position),
+        changeLife
+      );
+      setUsers(tempUsers);
+      setMiniProfilArray(tmp);
+    } else if (tmp[index]?.props.life !== val) {
+      tmp[index] = (
+        <MiniProfil
+          key={index}
+          left={index % 2 == 0 ? true : false}
+          user={{ user: users[index], index: index }}
+          life={val}
+          score={tmp[index]?.props.score}
+          game={{
+            life: Game.live,
+            score: Game.scoreMax,
+            numOfPlayers: tmp.length,
+          }}
+        />
+      );
+      if (users.length === 2) {
+        index = index ? 0 : 1;
+        tmp[index] = (
+          <MiniProfil
+            key={index}
+            left={index % 2 == 0 ? true : false}
+            user={{ user: users[index], index: index }}
+            life={tmp[index]?.props.life}
+            score={tmp[index]?.props.score + 1}
+            game={{
+              life: Game.live,
+              score: Game.scoreMax,
+              numOfPlayers: tmp.length,
+            }}
+          />
+        );
+      }
+      setMiniProfilArray(tmp);
+    }
+  }
+
+  function handleClickPlayButton(): void {
+    openPlayMenuRef.current = !openPlayButton;
+    setOpenPlayButton(!openPlayButton);
   }
 
   function newPartie() {

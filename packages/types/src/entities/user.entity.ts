@@ -84,7 +84,7 @@ export class User {
 
   @OneToMany(() => Achievements, (achievement) => achievement.user)
   achievements!: Achievements[];
-  
+
   @OneToOne(() => Profile, (profile) => profile.user)
   @JoinColumn()
   profile!: Profile;
