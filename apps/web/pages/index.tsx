@@ -13,7 +13,7 @@ export default function Web(): JSX.Element {
 
   return (
     <div>
-      <Home/>
+      <Home />
     </div>
   );
 }

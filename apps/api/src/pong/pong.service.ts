@@ -45,7 +45,7 @@ export class PongService {
     @InjectRepository(Opponent)
     private readonly opponentsRepository: Repository<Opponent>,
     private readonly transformUserService: TransformUserService,
-    private readonly matchService : MatchService,
+    private readonly matchService: MatchService,
   ) {
     this.games = new Map();
     for (const mode in GameMode) {
@@ -164,6 +164,16 @@ export class PongService {
     this.setGameModeQueue(new_queue, mode);
   }
 
+  saveGame(ids: string[], hps: number[], hpStart: number) {
+    let indexWin = hps.indexOf(Math.max(hps[0], hps[1]));
+    this.matchService.addMatch(
+      ids[indexWin],
+      ids[1 - indexWin],
+      hpStart - hps[1 - indexWin],
+      hpStart - hps[indexWin],
+    );
+  }
+
   invite(host: User, target: User): QueueList | null {
     this.logger.debug(
       `'${host.id}' (${host.name}) invites '${target.id}' (${target.name})`,
@@ -199,9 +209,4 @@ export class PongService {
     console.log(invitations);
       return invitations;
     }
-    
-    saveGame(ids : string[], hps : number[], hpStart : number){
-    let indexWin = hps.indexOf(Math.max(hps[0], hps[1]));
-    this.matchService.addMatch(ids[indexWin], ids[1 - indexWin], hpStart - hps[1 - indexWin], hpStart - hps[indexWin]);
-  }
 }

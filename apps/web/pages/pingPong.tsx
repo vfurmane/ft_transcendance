@@ -45,56 +45,9 @@ export default function PingPong(): JSX.Element {
   /*===========================================================*/
 
   const UserState = useSelector(selectUserState);
-  const websockets = useWebsocketContext();
-
-  websockets.pong?.on("endGame", () => {
-    //if (!Game.isSolo)
-    setEndGame(true);
-  });
-
-  function rotate(user: User[]) {
-    const lastIndex = user.length - 1;
-    let angle = -360 / users.length;
-
-    const canvas = document.getElementById("canvas");
-    if (canvas)
-      canvas.style.transform = `rotate(${
-        angle * user.findIndex((e) => e.id === UserState.id)
-      }deg)`;
-    while (user.length && user[0].id !== UserState.id) {
-      const last = user[lastIndex];
-      user.unshift(last);
-      user.pop();
-    }
-    return user;
-  }
 
   useEffect(() => {
-    if (typeof router.query.listOfPlayers === "string") {
-      setPrintButton(false);
-      let tmp = JSON.parse(router.query.listOfPlayers);
-      usersRef.current = JSON.parse(router.query.listOfPlayers);
-      //tmp.push(initUser);
-
-      tmp = rotate(tmp);
-      setUsers(tmp);
-      setMiniProfilArray(
-        tmp.forEach((e: User, i: number) => (
-          <MiniProfil
-            key={i}
-            left={i % 2 == 0 ? true : false}
-            user={{ user: e, index: i }}
-            life={Game.live}
-            score={0}
-            game={{
-              life: Game.live,
-              score: Game.scoreMax,
-              numOfPlayers: tmp.length,
-            }}
-          />
-        ))
-      );
-    } else setUsers([UserState]);
+    setUsers([UserState]);
     window.addEventListener(
       "keydown",
       function (e) {
@@ -117,8 +70,6 @@ export default function PingPong(): JSX.Element {
   );
   useEffect(() => {
     if (canvasRef && users.length > 0) {
-      if (websockets.pong?.connected && users.length > 1)
-        game.setWebsocket(websockets.pong);
       if (!gameInit) game.init(canvasRef);
       setGameInit(true);
       setIntervalState(setInterval(handleResize, 17, game));
