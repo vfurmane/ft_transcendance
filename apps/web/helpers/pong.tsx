@@ -164,7 +164,10 @@ class Game {
         this.board.wall
       );
     }
-    const exBallSpeed = new Vector(state.ball.dir.x, state.ball.dir.y).normalized();
+    const exBallSpeed = new Vector(
+      state.ball.dir.x,
+      state.ball.dir.y
+    ).normalized();
     this.ball.defaultSpeed =
       Game.ballSpeed * (this.boardCanvas.width / ServerCanvas.width);
     this.ball.speed = new Vector(
@@ -173,9 +176,13 @@ class Game {
     );
     this.player.forEach((p) => {
       const exPlayerSpeed = p.speed.normalized();
-      p.defaultSpeed = Game.racketSpeed * (this.boardCanvas.width / ServerCanvas.width)
-      p.speed = new Vector(exPlayerSpeed.x * p.defaultSpeed, exPlayerSpeed.y * p.defaultSpeed);
-    })
+      p.defaultSpeed =
+        Game.racketSpeed * (this.boardCanvas.width / ServerCanvas.width);
+      p.speed = new Vector(
+        exPlayerSpeed.x * p.defaultSpeed,
+        exPlayerSpeed.y * p.defaultSpeed
+      );
+    });
     this.ball.calcNextCollision(this.player, this.board.wall, null, null);
   }
 
@@ -232,9 +239,13 @@ class Game {
     );
     this.player.forEach((p) => {
       const exPlayerSpeed = p.speed.normalized();
-      p.defaultSpeed = Game.racketSpeed * (this.boardCanvas.width / ServerCanvas.width)
-      p.speed = new Vector(exPlayerSpeed.x * p.defaultSpeed, exPlayerSpeed.y * p.defaultSpeed);
-    })
+      p.defaultSpeed =
+        Game.racketSpeed * (this.boardCanvas.width / ServerCanvas.width);
+      p.speed = new Vector(
+        exPlayerSpeed.x * p.defaultSpeed,
+        exPlayerSpeed.y * p.defaultSpeed
+      );
+    });
     this.ball.calcNextCollision(this.player, this.board.wall, null, null);
   }
 
@@ -409,13 +420,20 @@ class Game {
     }
     this.ball.defaultSpeed =
       Game.ballSpeed * (this.boardCanvas.width / ServerCanvas.width);
-    const dir = this.ball.speed.normalized()
-    this.ball.speed = new Vector(dir.x * this.ball.defaultSpeed, dir.y * this.ball.defaultSpeed)
+    const dir = this.ball.speed.normalized();
+    this.ball.speed = new Vector(
+      dir.x * this.ball.defaultSpeed,
+      dir.y * this.ball.defaultSpeed
+    );
     this.player.forEach((p) => {
       const exPlayerSpeed = p.speed.normalized();
-      p.defaultSpeed = Game.racketSpeed * (this.boardCanvas.width / ServerCanvas.width)
-      p.speed = new Vector(exPlayerSpeed.x * p.defaultSpeed, exPlayerSpeed.y * p.defaultSpeed);
-    })
+      p.defaultSpeed =
+        Game.racketSpeed * (this.boardCanvas.width / ServerCanvas.width);
+      p.speed = new Vector(
+        exPlayerSpeed.x * p.defaultSpeed,
+        exPlayerSpeed.y * p.defaultSpeed
+      );
+    });
     if (Game.isSolo) {
       this.cible = new Target(
         this.createRect(
