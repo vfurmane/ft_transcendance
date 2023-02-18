@@ -16,7 +16,7 @@ import { Match } from "./match.entity";
 import { Jwt } from "./jwt.entity";
 import { JwtPayload } from "..";
 import { Opponent } from "./opponent.entity";
-import { Profile } from './profile.entity';
+import { Profile } from "./profile.entity";
 
 @Exclude()
 @Entity()
