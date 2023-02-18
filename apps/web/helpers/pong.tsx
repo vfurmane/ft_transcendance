@@ -22,6 +22,7 @@ class Game {
   public boardContext!: CanvasRenderingContext2D;
   public board!: Board;
   public static ballSpeed = 3;
+  public static racketSpeed = 2;
   public countUpdate = 0;
   public static point = 0;
   public static live = 10;
@@ -166,13 +167,18 @@ class Game {
         this.board.wall
       );
     }
-    const speed = new Vector(state.ball.dir.x, state.ball.dir.y).normalized();
+    const exBallSpeed = new Vector(state.ball.dir.x, state.ball.dir.y).normalized();
     this.ball.defaultSpeed =
       Game.ballSpeed * (this.boardCanvas.width / ServerCanvas.width);
     this.ball.speed = new Vector(
-      speed.x * this.ball.defaultSpeed,
-      speed.y * this.ball.defaultSpeed
+      exBallSpeed.x * this.ball.defaultSpeed,
+      exBallSpeed.y * this.ball.defaultSpeed
     );
+    this.player.forEach((p) => {
+      const exPlayerSpeed = p.speed.normalized();
+      p.defaultSpeed = Game.racketSpeed * (this.boardCanvas.width / ServerCanvas.width)
+      p.speed = new Vector(exPlayerSpeed.x * p.defaultSpeed, exPlayerSpeed.y * p.defaultSpeed);
+    })
     this.ball.calcNextCollision(this.player, this.board.wall, null, null);
   }
 
@@ -227,6 +233,11 @@ class Game {
       speed.x * this.ball.defaultSpeed,
       speed.y * this.ball.defaultSpeed
     );
+    this.player.forEach((p) => {
+      const exPlayerSpeed = p.speed.normalized();
+      p.defaultSpeed = Game.racketSpeed * (this.boardCanvas.width / ServerCanvas.width)
+      p.speed = new Vector(exPlayerSpeed.x * p.defaultSpeed, exPlayerSpeed.y * p.defaultSpeed);
+    })
     this.ball.calcNextCollision(this.player, this.board.wall, null, null);
   }
 
@@ -294,8 +305,8 @@ class Game {
       const wallPerp = wallDir.perp().normalized();
       const wallCenter = wall[0].center();
       const racketCenter = new Point(
-        wallCenter.x + wallPerp.x * 10,
-        wallCenter.y + wallPerp.y * 10
+        wallCenter.x + wallPerp.x * this.ballWidth * 3,
+        wallCenter.y + wallPerp.y * this.ballWidth * 3
       );
       const p3 = new Point(
         racketCenter.x - wallDir.x * (this.board.wallSize * 0.05),
@@ -323,8 +334,8 @@ class Game {
         const wallPerp = wallDir.perp().normalized();
         const wallCenter = wall[i].center();
         const racketCenter = new Point(
-          wallCenter.x + wallPerp.x * 10,
-          wallCenter.y + wallPerp.y * 10
+          wallCenter.x + wallPerp.x * this.ballWidth * 3,
+          wallCenter.y + wallPerp.y * this.ballWidth * 3
         );
         const p3 = new Point(
           racketCenter.x - wallDir.x * (this.board.wallSize * 0.05),
@@ -401,6 +412,13 @@ class Game {
     }
     this.ball.defaultSpeed =
       Game.ballSpeed * (this.boardCanvas.width / ServerCanvas.width);
+    const dir = this.ball.speed.normalized()
+    this.ball.speed = new Vector(dir.x * this.ball.defaultSpeed, dir.y * this.ball.defaultSpeed)
+    this.player.forEach((p) => {
+      const exPlayerSpeed = p.speed.normalized();
+      p.defaultSpeed = Game.racketSpeed * (this.boardCanvas.width / ServerCanvas.width)
+      p.speed = new Vector(exPlayerSpeed.x * p.defaultSpeed, exPlayerSpeed.y * p.defaultSpeed);
+    })
     if (Game.isSolo) {
       this.cible = new Target(
         this.createRect(
@@ -497,7 +515,6 @@ class Game {
   }
 
   rescale() {
-    const state = this.getState();
     let size = 1;
     if (this.boardType == Form.HEX || this.boardType == Form.PEN) {
       size = 0.5;
@@ -506,6 +523,7 @@ class Game {
       window.innerWidth * 0.6 * size,
       window.innerWidth * 0.6 * (1 / 2) * size
     );
+    const state = this.getState();
     this.refreshClient(state);
     console.log(this.boardCanvas.width);
     this.boardCanvas!.width = window.innerWidth * 0.6;
@@ -934,7 +952,7 @@ class Ball extends Entity {
 }
 
 class Racket extends Entity {
-  public defaultSpeed = 2;
+  public defaultSpeed = Game.racketSpeed;
   public hp = 10;
   public dir!: Vector;
 
