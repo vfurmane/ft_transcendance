@@ -23,7 +23,7 @@ export default function UserEntity(props: {
     openMenu: boolean;
     setOpenMenu: React.Dispatch<React.SetStateAction<boolean>>;
   }) => void;
-  delFriendClick: (e: { idToDelete: string; index: number }) => void;
+  delFriendClick?: (e: { idToDelete: string; index: number }) => void;
 }): JSX.Element {
   const [status, setStatus] = useState(props.user.status);
   const [openMenu, setOpenMenu] = useState(false);
@@ -196,23 +196,26 @@ export default function UserEntity(props: {
                         style={{ position: "relative", zIndex: "-1" }}
                       />
                     </div>
-                    <div
-                      className={styles.valideButton}
-                      onClick={(): void => {
-                        props.delFriendClick({
-                          idToDelete: props.user.id,
-                          index: props.index,
-                        });
-                      }}
-                    >
-                      <Image
-                        alt="valide"
-                        src={refuse}
-                        width={20}
-                        height={20}
-                        style={{ position: "relative", zIndex: "-1" }}
-                      />
-                    </div>
+                    {props.delFriendClick ? (
+                      <div
+                        className={styles.valideButton}
+                        onClick={(): void => {
+                          if (props.delFriendClick)
+                            props.delFriendClick({
+                              idToDelete: props.user.id,
+                              index: props.index,
+                            });
+                        }}
+                      >
+                        <Image
+                          alt="valide"
+                          src={refuse}
+                          width={20}
+                          height={20}
+                          style={{ position: "relative", zIndex: "-1" }}
+                        />
+                      </div>
+                    ) : null}
                   </div>
                 )}
               </div>
@@ -220,10 +223,11 @@ export default function UserEntity(props: {
               <div
                 className={styles.supr}
                 onClick={(): void => {
-                  props.delFriendClick({
-                    idToDelete: props.user.id,
-                    index: props.index,
-                  });
+                  if (props.delFriendClick)
+                    props.delFriendClick({
+                      idToDelete: props.user.id,
+                      index: props.index,
+                    });
                 }}
               ></div>
             )}
