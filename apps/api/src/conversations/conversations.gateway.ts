@@ -147,10 +147,12 @@ export class ConversationsGateway implements OnGatewayConnection {
   @SubscribeMessage('inviteToConversation')
   async inviteToConversation(@ConnectedSocket() client : Socket, @MessageBody() invitation : invitationDto ): Promise<boolean>
   {
+    console.error(invitation)
     let DMId!: string;
     if (!invitation.conversationID)
       return (false)
     const invitationMessage = await this.conversationsService.inviteToConversation(client.data as User, invitation)
+    console.error("invitationMessage: ", invitationMessage)
     if (!invitationMessage)
       return (false)
     if (invitationMessage.conversation)
@@ -176,6 +178,12 @@ export class ConversationsGateway implements OnGatewayConnection {
     return (true)
   }
 
+  @SubscribeMessage('canJoinConversation')
+  async canJoinConversation(@ConnectedSocket() client : Socket, @MessageBody() { id } : isUUIDDto)
+  {
+    return this.conversationsService.canJoinConversation(client.data as User, id);
+  }
+
   @SubscribeMessage('joinConversation')
   async joinConversation(
     @ConnectedSocket() client: Socket,
@@ -192,8 +200,8 @@ export class ConversationsGateway implements OnGatewayConnection {
       this.server
         .in(`user_${client.data.id}`)
         .socketsJoin(`conversation_${conversation.id}`);
-      client
-        .to(`user_${client.data.id}`)
+      this.server
+        .in(`user_${client.data.id}`)
         .emit('newConversation', instanceToPlain(conversation));
       this.server
         .in(`conversation_${conversation.id}`)
@@ -206,7 +214,6 @@ export class ConversationsGateway implements OnGatewayConnection {
         });
       this.server
         .in(`conversation_${conversation.id}`)
-        .except(`user_${client.data.id}`)
         .emit('newMessage', { id, message: instanceToPlain(joinMessage) });
     }
     return conversation;

@@ -53,7 +53,7 @@ export default function CreateConversation(  props : createConversationProps ) :
             }
             if (errors.length)
               return
-            if (websockets.conversations?.connected)
+            if (!websockets.conversations?.connected)
             {
               setErrors((prev) => [...prev, "Network error, please try again later"])
             }

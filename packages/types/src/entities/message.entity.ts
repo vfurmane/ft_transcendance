@@ -45,9 +45,6 @@ export class Message {
   @Column("uuid", { nullable: true, default: null})
   target!: string | null
 
-  @Column("boolean", { default: false })
-  has_password!: boolean
-
   @CreateDateColumn()
   created_at!: Date;
 

@@ -36,7 +36,7 @@ export default function ChatParams( props : chatParamsProps ) : JSX.Element
     
     return (
         <>
-            { props.currentConversation.groupConversation ? < ManageConversation selectConversation={ props.selectConversation } currentConversation={ props.currentConversation } self={self} /> : <></>}
+            { props.currentConversation.groupConversation ? < ManageConversation selectConversation={ props.selectConversation } currentConversation={ props.currentConversation } self={self} participants={ participants }/> : <></>}
             <section>
             { props.currentConversation.groupConversation ? <h4>Participants</h4> : <></> }
             { participants.map((participant) => 

@@ -582,14 +582,15 @@ export class ConversationsService {
     return conversation.conversationRoles;
   }
 
-  async createInvitation(currentUser: User, invitation: invitationDto, type : InvitationEnum, conversation : Conversation, password_protected : boolean) : Promise<Message>
+  async createInvitation(currentUser: User, invitation: invitationDto, type : InvitationEnum, conversation : Conversation, targetName: string) : Promise<Message>
   {
-    const newMessage =  this.messageRepository.create({ sender: currentUser, conversation: conversation, content: "invitation", system_generated: true, is_invitation: true, invitation_type: type, target: invitation.conversationID, has_password: password_protected })
+    const newMessage =  this.messageRepository.create({ sender: currentUser, conversation: conversation, content: targetName, system_generated: true, is_invitation: true, invitation_type: type, target: invitation.conversationID })
     return this.messageRepository.save(newMessage)
   }
 
   async inviteToConversation(currentUser : User, invitation : invitationDto) : Promise<{ message: Message, conversation: Conversation | null, prevConversation: string | null } | null>
   {
+    console.error("invitation: ", invitation)
     const roles = await this.conversationRoleRepository.find({
       relations:
       {
@@ -603,17 +604,26 @@ export class ConversationsService {
       }
     })
     const currentUserRole = roles.filter((role) => role.user.id === currentUser.id)
+    console.error("current role: ", currentUserRole)
     if (currentUserRole.length === 0)
+    {
+      console.error("Not in conversation")
       return (null)
+    }
     if (currentUserRole[0].restrictions.length)
+    {
+      console.error("Restricted")
       return (null)
-    if (currentUserRole[0].role = ConversationRoleEnum.LEFT)
+    }
+    if (currentUserRole[0].role === ConversationRoleEnum.LEFT)
       return (null)
+    console.error("A-OK")
     if (roles.filter((role) => role.user.id === invitation.target).length !== 0)
       return (null)
     const targetConversation = await this.conversationRepository.findOne({
         where: {
-          id: invitation.conversationID
+          id: invitation.conversationID,
+          groupConversation: true
         }
       })
     if (!targetConversation)
@@ -621,12 +631,45 @@ export class ConversationsService {
     const conversationExists = await this.DMExists(currentUser, invitation.target)
     if (conversationExists.conversationExists && conversationExists.conversation)
     {
-      const message = await this.createInvitation(currentUser, invitation, InvitationEnum.CONVERSATION, conversationExists.conversation, targetConversation.password ? true : false )
+      const message = await this.createInvitation(currentUser, invitation, InvitationEnum.CONVERSATION, conversationExists.conversation, targetConversation.name)
+      console.error("Message generated: ", message)
+      console.error("poset in", conversationExists.conversation)
       return ( {message : message, conversation: null, prevConversation: conversationExists.conversation.id} )
     }
     const conversation = await this.createConversation({groupConversation : false, participants: [invitation.target]} as createConversationDto, currentUser)
-    const message = await this.createInvitation(currentUser, invitation, InvitationEnum.CONVERSATION, conversation.conversation, targetConversation.password ? true : false )
+    const message = await this.createInvitation(currentUser, invitation, InvitationEnum.CONVERSATION, conversation.conversation, targetConversation.name)
+    console.error("Message generated: ", message)
+    console.error("poset in", conversationExists.conversation)
     return ( {message : message, conversation: conversation.conversation, prevConversation: null} )
+  }
+
+  async canJoinConversation(currentUser : User, conversationId : string)
+  {
+    const conversation = await this.conversationRepository.findOne({
+      relations:
+      {
+        conversationRoles: true
+      },
+      where:
+      {
+        id : conversationId
+      }
+    })
+    if (!conversation)
+      return {canJoin: false, password: false}
+    const userRole = conversation.conversationRoles.filter((e) => e.user.id === currentUser.id)
+    if (userRole.length !== 0)
+    {
+      if (userRole.length)
+      {
+        const currentRestrictions = await this.verifyRestrictionsOnUser(userRole[0].restrictions)
+        if (currentRestrictions.length)
+          return {canJoin: false, password: false}
+        else if (userRole[0].role !== ConversationRoleEnum.LEFT)
+          return {canJoin: false, password: false}
+      }
+    }
+    return (conversation.password ? { canJoin : true, password: true} : { canJoin : true, password: false})
   }
 
   async leaveConversation(

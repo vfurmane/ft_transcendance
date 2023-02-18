@@ -32,11 +32,18 @@ export class AppGateway {
 
   async handleConnection(client: Socket): Promise<void> {
     if (!client.handshake.auth.token)
-      throw new UnauthorizedException('No Authorization header found');
+    {
+      client.disconnect()
+      return
+    }
     const currentUser = this.authService.verifyUserFromToken(
       client.handshake.auth.token,
     );
-    if (!currentUser) throw new UnauthorizedException('Invalid token');
+    if (!currentUser)
+    {
+      client.disconnect();
+      return
+    }
     client.data = { id: currentUser.sub, name: currentUser.name };
     client.join(`user_${currentUser.sub}`);
     this.server.to(`user_${currentUser.sub}`).emit('user_status_update', {
