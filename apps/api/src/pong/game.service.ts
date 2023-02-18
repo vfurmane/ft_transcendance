@@ -78,8 +78,8 @@ export class Game {
       const wallPerp = wallDir.perp().normalized();
       const wallCenter = wall[i].center();
       const racketCenter = new Point(
-        wallCenter.x + wallPerp.x * 10,
-        wallCenter.y + wallPerp.y * 10,
+        wallCenter.x + wallPerp.x * this.ballWidth * 3,
+        wallCenter.y + wallPerp.y * this.ballWidth * 3,
       );
       const p3 = new Point(
         racketCenter.x - wallDir.x * (this.board.wallSize * 0.05),
