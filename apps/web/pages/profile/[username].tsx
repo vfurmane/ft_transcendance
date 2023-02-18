@@ -73,6 +73,7 @@ export default function Profil(): JSX.Element {
   /*==========================================================*/
 
   useEffect((): void => {
+    if (!localStorage.getItem("access_token")) return;
     if (router.query.username !== UserState.name) {
       // if foreign user
       fetch(`/api/user/${router.query.username}`, {
