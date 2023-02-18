@@ -103,7 +103,7 @@ export interface Matchmaking {
 
 export interface GameStartPayload {
   id: string;
-  users: User[];
+  users: Userfront[];
 }
 
 export interface GameEntityFront {

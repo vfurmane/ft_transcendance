@@ -14,7 +14,6 @@ import List from "./HomePage/List";
 import { Userfront as User } from "types";
 import { initUser } from "../initType/UserInit";
 import { clearTokens } from "../helpers/clearTokens";
-import { useRouter } from "next/router";
 import ProfilePicture from "./ProfilePicture";
 
 interface propsTopBar {
@@ -51,7 +50,6 @@ async function logout(): Promise<null> {
 }
 
 function TopBar(props: propsTopBar): JSX.Element {
-  const router = useRouter();
   const [value, setValue] = useState("");
   const [userList, setUserList] = useState([<></>]);
 
@@ -133,9 +131,6 @@ function TopBar(props: propsTopBar): JSX.Element {
         <div className={styles.elementTopBar}>
           <Link href={"/home#top"}>
             <Image alt="logo" src={Logo} width={200} height={30} />
-          </Link>
-          <Link className={styles.leaderBoardLink} href="/home#leaderboard">
-            Leaderboard
           </Link>
         </div>
       </div>

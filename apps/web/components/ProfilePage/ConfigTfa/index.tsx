@@ -5,7 +5,6 @@ import { selectUserState, toggleTfa } from "../../../store/UserSlice";
 import { ManageTfa } from "./ManageTfa";
 import { SetupTfa } from "./SetupTfa";
 import { CheckTfaToken } from "./CheckTfaToken";
-import { useWebsocketContext } from "../../Websocket";
 
 export default function ConfigTfa(): JSX.Element {
   const userState = useSelector(selectUserState);
@@ -14,10 +13,8 @@ export default function ConfigTfa(): JSX.Element {
   const [layout, setLayout] = useState(
     <SetupTfa setOtpauthUrl={setOtpauthUrl} />
   );
-  const websocket = useWebsocketContext();
 
   useEffect(() => {
-    console.log(userState);
     if (userState.tfaSetup) {
       setLayout(
         <ManageTfa
@@ -38,14 +35,6 @@ export default function ConfigTfa(): JSX.Element {
       );
     } else setLayout(<SetupTfa setOtpauthUrl={setOtpauthUrl} />);
   }, [otpAuthUrl, userState, dispatch]);
-
-  useEffect(() => {
-    if (websocket.general) {
-      websocket.general.on("settings_changed", () => {
-        console.log("new settings");
-      });
-    }
-  }, []);
 
   return (
     <div className={styles.container}>
