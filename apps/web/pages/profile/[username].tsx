@@ -16,6 +16,7 @@ import styles from "styles/profil.module.scss";
 import textStyles from "styles/text.module.scss";
 import { initMatch } from "../../initType/MatchInit";
 import ConfigTfa from "../../components/ProfilePage/ConfigTfa";
+import { useWebsocketContext } from "../../components/Websocket";
 
 export default function Profil(): JSX.Element {
   const UserState = useSelector(selectUserState);
@@ -34,6 +35,7 @@ export default function Profil(): JSX.Element {
   const [configProfil, setConfigProfil] = useState(<></>);
   const [matchHistory, setMatchHistory] = useState([initMatch]);
   const [listOfMatch, setListOfMatch] = useState<JSX.Element[]>([]);
+  const websockets = useWebsocketContext();
 
   /*======for close topBar component when click on screen====*/
   const [openToggle, setOpenToggle] = useState(false);
@@ -385,6 +387,17 @@ export default function Profil(): JSX.Element {
                   <button
                     className={styles.buttonProfil}
                     style={{ width: "100px" }}
+                    onClick={(): void => {
+                      websockets.pong?.emit(
+                        "invite",
+                        {
+                          id: user.id,
+                        },
+                        () => {
+                          router.push("/invite");
+                        }
+                      );
+                    }}
                   >
                     <h3
                       className={textStyles.laquer}
