@@ -12,6 +12,7 @@ import { useWebsocketContext } from "../Websocket";
 import { useSelector } from "react-redux";
 import { selectUserState } from "../../store/UserSlice";
 import { useRouter } from "next/router";
+import ProfilePicture from "../ProfilePicture";
 
 export default function UserEntity(props: {
   user: User;
@@ -156,11 +157,11 @@ export default function UserEntity(props: {
           }
         >
           <div className="fill small">
-            <Image
-              alt="avatar"
-              src={`/avatar/avatar-${props.user.avatar_num}.png`}
+            <ProfilePicture
+              userId={props.user.id}
               width={47}
               height={47}
+              handleClick={undefined}
             />
           </div>
           {status === "online" ? (

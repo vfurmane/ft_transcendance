@@ -279,7 +279,11 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
         'game_start',
         instanceToPlain<GameStartPayload>({
           id: game.id,
-          users: gameQueue,
+          users: await Promise.all(
+            gameQueue.map((opponent) =>
+              this.transformUserService.transform(opponent),
+            ),
+          ),
         }),
       );
     }
@@ -312,22 +316,18 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
       gameQueue.forEach((user_loop) => {
         this.logger.log(`- ${user_loop.id} (${user_loop.name})`);
       });
-
-      setTimeout(async () => {
-        console.log('SENDING game_start at ', Date.now());
-        const game = await this.pongService.startGame(gameQueue, this.server);
-        this.server.emit(
-          'game_start',
-          instanceToPlain<GameStartPayload>({
-            id: game.id,
-            users: await Promise.all(
-              gameQueue.map((opponent) =>
-                this.transformUserService.transform(opponent),
-              ),
+      const game = await this.pongService.startGame(gameQueue, this.server);
+      this.server.emit(
+        'game_start',
+        instanceToPlain<GameStartPayload>({
+          id: game.id,
+          users: await Promise.all(
+            gameQueue.map((opponent) =>
+              this.transformUserService.transform(opponent),
             ),
-          }),
-        );
-      }, 2000);
+          ),
+        }),
+      );
     }
 
     return { message: 'Waiting for approval' };
