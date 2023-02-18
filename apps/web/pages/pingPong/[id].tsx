@@ -41,57 +41,213 @@ export default function PingPong(): JSX.Element {
     useRef<React.Dispatch<React.SetStateAction<boolean>>>();
   /*===========================================================*/
 
+  const [usersGame, setUsersGame] = useState<User[]>([]);
+  const [usersRotate, setUsersRotate] = useState<User[]>([]);
+  const usersStart = useRef<User[]>([]);
+  const usersRotateRef = useRef<User[]>([]);
+  const classementRef = useRef<JSX.Element[]>([]);
+  const miniProfilArrayRef = useRef<JSX.Element[]>([]);
+
   const UserState = useSelector(selectUserState);
   const websockets = useWebsocketContext();
   websockets.pong?.on("endGame", () => {
-    //if (!Game.isSolo)
     setEndGame(true);
     setGame(null);
+    setPrintButton(true);
   });
+  
 
-  function rotate(user: User[]): User[] {
-    const lastIndex = user.length - 1;
-    let angle = 0;
-    switch (user.length) {
-      case 2: {
-        angle = -180;
-        break;
-      }
-      case 3: {
-        angle = -120;
-        break;
-      }
-      case 4: {
-        angle = -90;
-        break;
-      }
-      case 5: {
-        angle = -72;
-        break;
-      }
-      case 6: {
-        angle = -60;
-        break;
-      }
-      default:
-        break;
+  useEffect(() => {
+    if (websockets.pong) {
+      websockets.pong.emit(
+        "subscribe_game",
+        { id: router.query.id },
+        (game: GameEntityFront) => {
+          setPrintButton(false);
+          //let tmp = game.opponents.map((opponent) => opponent.user);
+          usersStart.current = game.opponents.map((opponent) => opponent.user);
+          setUsersGame(() => usersStart.current);
+          /*tmp = rotate(tmp);
+          setUsers(tmp);
+          setMiniProfilArray(
+            tmp.map((e: User, i: number) => (
+              <MiniProfil
+                key={i}
+                left={i % 2 == 0 ? true : false}
+                user={{ user: e, index: i }}
+                life={Game.live}
+                score={0}
+                game={{
+                  life: Game.live,
+                  score: Game.scoreMax,
+                  numOfPlayers: tmp.length,
+                }}
+              />
+            ))
+          );*/
+        }
+      );
     }
+
+    window.addEventListener(
+      "keydown",
+      function (e) {
+        if (
+          ["Space", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].indexOf(
+            e.code
+          ) > -1
+        ) {
+          e.preventDefault();
+        }
+      },
+      false
+    );
+
+    return () => {
+      if (websockets.pong) {
+        websockets.pong.emit("unsubscribe_game");
+      }
+    };
+  }, [websockets.pong, router.query.id]);
+
+
+  function rotateInit(users : User[])
+  {
+    let angle = 360 / users.length;
 
     const canvas = document.getElementById("canvasElem");
     if (canvas)
       canvas.style.transform = `rotate(${
-        angle * user.findIndex((e) => e.id === UserState.id)
-      }deg)`;
-
-    while (user.length && user[0].id !== UserState.id) {
-      const last = user[lastIndex];
-      user.unshift(last);
-      user.pop();
-    }
-    return user;
+        angle * users.findIndex((e) => e.id === UserState.id)
+    }deg)`;
   }
 
-  const changeLife = useCallback(
+  function rotate(users: User[]): User[] {
+    const lastIndex = users.length - 1;
+    let angle = -360 / users.length;
+
+    const canvas = document.getElementById("canvasElem");
+    if (canvas)
+      canvas.style.transform = `rotate(${
+        angle * users.findIndex((e) => e.id === UserState.id)
+      }deg)`;
+
+    while (users.length && users[0].id !== UserState.id) {
+      const last = users[lastIndex];
+      users.unshift(last);
+      users.pop();
+    }
+    return users;
+  }
+
+  function changeScoreOrLife(index : number, life : number, score : number){
+    return (
+      <MiniProfil
+        key={index}
+        left={index % 2 == 0 ? true : false}
+        user={{ user: users[index], index: index }}
+        life={life}
+        score={score}
+        game={{
+          life: Game.live,
+          score: Game.scoreMax,
+          numOfPlayers: usersGame.length,
+        }}
+      />
+    );
+  }
+
+  function  changeLife (index: number, val: number) {
+    if (!usersGame.length || !usersRotateRef.current.length) return;
+    if (val)
+    {
+      const indexHit = usersRotateRef.current.findIndex(e => e.id === usersGame[index].id);
+      const newMiniProfilArray = [...miniProfilArrayRef.current];
+      if (newMiniProfilArray[indexHit].props.life === val) return;
+      newMiniProfilArray[indexHit] = changeScoreOrLife(indexHit, val, miniProfilArrayRef.current[indexHit].props.score);
+      if (usersGame.length === 2)
+      {
+        const indexWin = indexHit? 0 : 1;
+        const life = Number(miniProfilArrayRef.current[indexWin].props.life);
+        const score = Number(miniProfilArrayRef.current[indexWin].props.score) + 1;
+        newMiniProfilArray[indexWin] = changeScoreOrLife(indexWin, life, score);
+      }
+      setMiniProfilArray(() => [...newMiniProfilArray]);
+      miniProfilArrayRef.current = newMiniProfilArray;
+    }
+    else
+    {
+      rotateInit(usersGame);
+      if (usersGame.length > 2 &&  usersGame[index].id === UserState.id)
+        setOpenOverlay(true);
+      let newClassement = [createTrClassement(usersGame[index], classementRef.current), ...classementRef.current];
+      const newUsersGame = [...usersGame];
+      newUsersGame.splice(index, 1);
+      if (newUsersGame.length === 1)
+      {
+        newClassement = [createTrClassement(newUsersGame[0], newClassement), ...newClassement];
+        setClassement(() => newClassement);
+        classementRef.current = newClassement;
+        return ;
+      }
+      setClassement(() => newClassement);
+      classementRef.current = newClassement;
+      setUsersGame(() => newUsersGame);
+    }
+  }
+
+ 
+
+
+  useEffect(() => {
+    if (usersGame.length < 2) return;
+    const rotateUsers = rotate([...usersGame]);
+    setUsersRotate(() => [...rotateUsers]);
+    usersRotateRef.current = rotateUsers;
+    const newMiniProfilArray = rotateUsers.map((e, i) => {
+      const life = MiniProfilArray.length === 0? Game.live : MiniProfilArray[i].props.life;
+      const score = MiniProfilArray.length === 0? 0: MiniProfilArray[i].props.score;
+      return (<MiniProfil
+        key={i}
+        left={i % 2 == 0 ? true : false}
+        user={{ user: e, index: i }}
+        life={life}
+        score={score}
+        game={{
+          life: Game.live,
+          score: Game.scoreMax,
+          numOfPlayers: usersGame.length,
+        }}
+      />);
+    })
+    setMiniProfilArray(() => newMiniProfilArray);
+    miniProfilArrayRef.current = newMiniProfilArray;
+
+    setGame(
+      new Game(
+        usersGame.length,
+        usersGame.findIndex((user) => user.id === UserState.id),
+        changeLife
+      )
+    );
+
+  }, [usersGame]);
+
+  useEffect(() => {
+    if (canvasRef && usersGame.length > 1) {
+      if (websockets.pong?.connected && usersGame.length > 1 && game) {
+        game?.setWebsocket(websockets.pong);
+        game?.init(canvasRef);
+        if (game) setIntervalState(setInterval(handleResize, 17, game));
+      }
+    }
+    return (): void => {
+      if (intervalState) clearInterval(intervalState);
+    };
+  }, [game]);
+
+
+  /*const changeLife = useCallback(
     (index: number, val: number) => {
       if (!users.length) return;
       const rectifiIndex = usersRef.current.findIndex(
@@ -103,9 +259,7 @@ export default function PingPong(): JSX.Element {
           : users.length - rectifiIndex;
       const tmp = [...MiniProfilArray];
       if (val === 0) {
-        console.log("change life index :", index);
-        if (intervalState) clearInterval(intervalState);
-        const tempUsers = [...users];
+        const tempUsers = rotateInit([...users]);
         const newClassement = [
           createTrClassement(tempUsers[index], classement),
           ...classement,
@@ -151,7 +305,9 @@ export default function PingPong(): JSX.Element {
             changeLife
           )
         );
-        setUsers(tempUsers);
+        
+        const rotUser = rotateInit([...users]).splice(index, 1);
+        setUsers(rotate(rotUser));
         setMiniProfilArray(tmp);
       } else if (tmp[index]?.props.life !== val) {
         tmp[index] = (
@@ -188,85 +344,10 @@ export default function PingPong(): JSX.Element {
         setMiniProfilArray(tmp);
       }
     },
-    [users]
-  );
+    [users, classement]
+  );*/
 
-  useEffect(() => {
-    if (websockets.pong) {
-      websockets.pong.emit(
-        "subscribe_game",
-        { id: router.query.id },
-        (game: GameEntityFront) => {
-          setPrintButton(false);
-          let tmp = game.opponents.map((opponent) => opponent.user);
-          usersRef.current = game.opponents.map((opponent) => opponent.user);
-          tmp = rotate(tmp);
-          setUsers(tmp);
-          setMiniProfilArray(
-            tmp.map((e: User, i: number) => (
-              <MiniProfil
-                key={i}
-                left={i % 2 == 0 ? true : false}
-                user={{ user: e, index: i }}
-                life={Game.live}
-                score={0}
-                game={{
-                  life: Game.live,
-                  score: Game.scoreMax,
-                  numOfPlayers: tmp.length,
-                }}
-              />
-            ))
-          );
-        }
-      );
-    }
-
-    window.addEventListener(
-      "keydown",
-      function (e) {
-        if (
-          ["Space", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].indexOf(
-            e.code
-          ) > -1
-        ) {
-          e.preventDefault();
-        }
-      },
-      false
-    );
-
-    return () => {
-      if (websockets.pong) {
-        websockets.pong.emit("unsubscribe_game");
-      }
-    };
-  }, [websockets.pong, router.query.id]);
-
-  useEffect(() => {
-    if (users.length === 0) return;
-    console.log("in setGame");
-    setGame(
-      new Game(
-        users.length,
-        usersRef.current.findIndex((user) => user.id === UserState.id),
-        changeLife
-      )
-    );
-  }, [UserState.id, users, changeLife]);
-
-  useEffect(() => {
-    if (canvasRef && users.length > 1) {
-      if (websockets.pong?.connected && users.length > 1 && game) {
-        game?.setWebsocket(websockets.pong);
-        game?.init(canvasRef);
-        if (game) setIntervalState(setInterval(handleResize, 17, game));
-      }
-    }
-    return (): void => {
-      if (intervalState) clearInterval(intervalState);
-    };
-  }, [game]);
+ 
 
   /*======for close topBar component when click on screen====*/
   function clickTopBarToggle(): void {
@@ -336,7 +417,7 @@ export default function PingPong(): JSX.Element {
             {user.name}
           </div>
         </td>
-        <td>{usersRef.current.length - classement.length}</td>
+        <td>{usersStart.current.length - classement.length}</td>
       </tr>
     );
   }
@@ -347,8 +428,7 @@ export default function PingPong(): JSX.Element {
   }
 
   function newPartie() {
-    console.log("click");
-    setUsers([UserState]);
+    setUsersGame([]);
     setEndGame(false);
     setMiniProfilArray([]);
     setPrintButton(true);
