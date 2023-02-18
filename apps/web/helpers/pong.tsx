@@ -237,7 +237,7 @@ class Game {
       if (this.player === undefined)
         racket.push(new Racket(i, [p0, p1, p2, p3], this.color[i]));
       else racket.push(new Racket(i, [p0, p1, p2, p3], this.player[i].color));
-      Game.changeLife(i, player[i].hp);
+      //Game.changeLife(i, player[i].hp);
       racket[i].hp = player[i].hp;
     }
     return racket;
@@ -748,18 +748,21 @@ class Ball extends Entity {
         if (index === 2) {
           console.log("LEFT PLAYER GOAL");
           rackets[1].hp--;
+          Game.changeLife(1, rackets[1].hp);
           this.replaceTo(board.board.center());
           this.goToRandomPlayer(rackets);
           this.calcNextCollision(rackets, walls, null, null);
         } else if (index === 0) {
           console.log("RIGHT PLAYER GOAL");
           rackets[0].hp--;
+          Game.changeLife(0, rackets[0].hp);
           this.replaceTo(board.board.center());
           this.goToRandomPlayer(rackets);
           this.calcNextCollision(rackets, walls, null, null);
         } else this.calcNextCollision(rackets, walls, index, null);
       } else {
         rackets[index].hp--;
+        Game.changeLife(index, rackets[index].hp);
         this.replaceTo(board.board.center());
         this.goToRandomPlayer(rackets);
         this.calcNextCollision(rackets, walls, null, null);

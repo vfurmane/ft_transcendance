@@ -183,10 +183,7 @@ export default function MiniProfil(props: {
               <p
                 className={textStyles.laquer + " " + styles.score}
                 style={{
-                  fontSize: `${
-                    20 *
-                    (1 + ((props.score * 100) / props.game.score / 100) * 2)
-                  }px`,
+                  fontSize: '30px',
                 }}
               >
                 {props.score}
@@ -201,10 +198,7 @@ export default function MiniProfil(props: {
               <p
                 className={textStyles.laquer + " " + styles.score}
                 style={{
-                  fontSize: `${
-                    20 *
-                    (1 + ((props.score * 100) / props.game.score / 100) * 2)
-                  }px`,
+                  fontSize: '30px',
                 }}
               >
                 {props.score}
