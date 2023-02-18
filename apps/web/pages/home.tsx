@@ -48,7 +48,6 @@ function Home(): JSX.Element {
     setOpenUserList(e);
   }
   /*==========================================================*/
- 
 
   function handleClickPlayButton(): void {
     setOpenPlayButton(!openPlayButton);
@@ -255,7 +254,7 @@ function Home(): JSX.Element {
             </h3>
           </div>
         </div>
-        <div className="row" >
+        <div className="row">
           <div className="col-10 offset-1" id="leaderboard">
             <ArrayDoubleColumn
               title="leaderboard"

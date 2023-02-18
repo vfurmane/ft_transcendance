@@ -35,7 +35,8 @@ export default function Profil(): JSX.Element {
   const [openAchivementList, setOpenAchivementList] = useState(false);
   const [openAchivement, setOpenAchivement] = useState(false);
   const [achievementsList, setAchievementsList] = useState<JSX.Element[]>([]);
-  const [achievementSelect, setAchievementSelect] = useState<Achievements | null>(null);
+  const [achievementSelect, setAchievementSelect] =
+    useState<Achievements | null>(null);
   const [userProfil, setUserProfil] = useState(false);
   const [openConfigProfil, setOpenConfigProfil] = useState(false);
   const [configProfil, setConfigProfil] = useState(<></>);
@@ -113,8 +114,6 @@ export default function Profil(): JSX.Element {
   }
   /*==========================================================*/
 
-  
-
   useEffect((): void => {
     if (!localStorage.getItem("access_token")) return;
     // if foreign user
@@ -126,9 +125,7 @@ export default function Profil(): JSX.Element {
       .then(async (response) => {
         if (!response.ok) {
           return response.json().then((error) => {
-            throw new Error(
-              error.message || "An unexpected error occured..."
-            );
+            throw new Error(error.message || "An unexpected error occured...");
           });
         } else {
           return response.json();
@@ -171,7 +168,7 @@ export default function Profil(): JSX.Element {
           console.error(`problem with fetch : ${error.message}`);
         });
       }
-  }, []);
+  }, [router.query, UserState, router, user.id]);
 
   useEffect(() => {
     if (user)
@@ -225,7 +222,7 @@ export default function Profil(): JSX.Element {
     setOpenAchivementList(true);
   }
 
-  function achievementClick (e: { achievement: Achievements }): void {
+  function achievementClick(e: { achievement: Achievements }): void {
     setOpenAchivement(true);
     setAchievementSelect(e.achievement);
     prevAchievementRef.current = e.achievement;
@@ -253,8 +250,7 @@ export default function Profil(): JSX.Element {
   function close(): void {
     if (openAchivementList && prevAchievementRef.current === achievementSelect)
       setOpenAchivementList(false);
-    if (openAchivement && prevAchievementRef.current === achievementSelect)
-    {
+    if (openAchivement && prevAchievementRef.current === achievementSelect) {
       setOpenAchivement(false);
       prevAchievementRef.current = null;
       setAchievementSelect(null);
@@ -497,14 +493,10 @@ export default function Profil(): JSX.Element {
                       className="card"
                       style={{ background: "rgba(0,0,0,0)" }}
                     >
-                      <h2 className={textStyles.pixel} style={{marginBottom:'20px'}}>
-                        <Image
-                          alt="achivement"
-                          src={`/achivement.png`}
-                          width={32}
-                          height={32}
-                          onClick={achivementListClick}
-                        />{" "}
+                      <h2
+                        className={textStyles.pixel}
+                        style={{ marginBottom: "20px" }}
+                      >
                         Achivements
                       </h2>
                       <div className="cardList">{achievementsList}</div>
@@ -515,7 +507,10 @@ export default function Profil(): JSX.Element {
                         style={{ background: "rgba(0,0,0,0)" }}
                       >
                         <div className="cardList">
-                          <p className={textStyles.saira} style={{marginTop: '120px'}}>
+                          <p
+                            className={textStyles.saira}
+                            style={{ marginTop: "120px" }}
+                          >
                             {achievementSelect?.description}
                           </p>
                         </div>

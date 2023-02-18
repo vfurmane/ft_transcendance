@@ -115,7 +115,11 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
           socket.data.room = undefined;
         });
         if (key[1].length === 2)
-          this.pongService.saveGame(key[1].map(e => e.id), key[0].player.map(e => e.hp), key[0].live);
+          this.pongService.saveGame(
+            key[1].map((e) => e.id),
+            key[0].player.map((e) => e.hp),
+            key[0].live,
+          );
         this.pongService.games.delete(room);
       }
     });
@@ -312,7 +316,7 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     const gameQueue = this.pongService.invite(host, target);
     if (gameQueue) {
-      this.logger.log(  
+      this.logger.log(
         `Invitation accepted, the game will start soon. Players:`,
       );
       gameQueue.forEach((user_loop) => {
