@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ReactElement, useCallback, useRef, useState } from "react";
-import { Userfront  } from "types";
+import { Userfront } from "types";
 import UserEntity from "./HomePage/UserEntity";
 
 export interface WatchGameProps {

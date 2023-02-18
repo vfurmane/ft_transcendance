@@ -43,80 +43,87 @@ export default function PingPong(): JSX.Element {
   });
   /*===========================================================*/
 
-    const UserState = useSelector(selectUserState);
+  const UserState = useSelector(selectUserState);
 
-    useEffect(() => {
-   
-        setUsers([UserState]);
-        window.addEventListener("keydown", function(e) {
-            if(["Space","ArrowUp","ArrowDown","ArrowLeft","ArrowRight"].indexOf(e.code) > -1) {
-                e.preventDefault();
-            }
-        }, false);
-
-    }, []);
-
-
-    let game = new Game(Number(router.query.number_player), Number(router.query.position), ()=>{});
-    useEffect(() => {
-        if (canvasRef && users.length > 0) {
-            if (!gameInit)
-                game.init(canvasRef);
-            setGameInit(true);
-            setIntervalState(setInterval(handleResize, 17, game));
-        }
-        return (() : void => {
-            if (intervalState)
-                clearInterval(intervalState);
-        });  
-    }, [users]);
-
-
-    /*======for close topBar component when click on screen====*/
-    function clickTopBarToggle(): void {
-        setOpenToggle(!openToggle);
-    }
-
-    function clickTopBarProfil(): void {
-        setOpenProfil(!openProfil);
-    }
-
-    function writeSearchTopBar(e: boolean): void {
-        setOpenUserList(e);
-    }
-
-    function handleClickUserMenu(e: {
-        index: number;
-        openMenu: boolean;
-        setOpenMenu: React.Dispatch<React.SetStateAction<boolean>>;
-    }): void {
-        e.setOpenMenu(true);
+  useEffect(() => {
+    setUsers([UserState]);
+    window.addEventListener(
+      "keydown",
+      function (e) {
         if (
-            prevSetterUsermenuRef.current !== (()=>{}) &&
-            prevSetterUsermenuRef.current !== e.setOpenMenu
-        )
-            prevSetterUsermenuRef.current(false);
-        prevSetterUsermenuRef.current = e.setOpenMenu;
-        setIndexOfUser(e.index);
-        prevIndexOfUserRef.current = e.index;
-    }
-    /*==========================================================*/
-
-
-    function close(): void {
-        if (openProfil) setOpenProfil(false);
-        if (openUserList && indexOfUser === prevIndexOfUserRef.current) {
-            setOpenUserList(false);
-            prevSetterUsermenuRef.current(false);
-            setIndexOfUser(-1);
-            prevIndexOfUserRef.current = -1;
+          ["Space", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].indexOf(
+            e.code
+          ) > -1
+        ) {
+          e.preventDefault();
         }
-        if (openPlayButton)
-            setOpenPlayButton(false);
+      },
+      false
+    );
+  }, []);
 
-        if (openOverlay && openPlayMenuRef.current === openPlayButton)
-            setOpenOverlay(false);
+  let game = new Game(
+    Number(router.query.number_player),
+    Number(router.query.position),
+    changeLife
+  );
+  useEffect(() => {
+    if (canvasRef && users.length > 0) {
+      if (!gameInit) game.init(canvasRef);
+      setGameInit(true);
+      setIntervalState(setInterval(handleResize, 17, game));
     }
+    return (): void => {
+      if (intervalState) clearInterval(intervalState);
+    };
+  }, [users]);
+
+  /*======for close topBar component when click on screen====*/
+  function clickTopBarToggle(): void {
+    setOpenToggle(!openToggle);
+  }
+
+  function clickTopBarProfil(): void {
+    setOpenProfil(!openProfil);
+  }
+
+  function writeSearchTopBar(e: boolean): void {
+    setOpenUserList(e);
+  }
+
+  function handleClickUserMenu(e: {
+    index: number;
+    openMenu: boolean;
+    setOpenMenu: React.Dispatch<React.SetStateAction<boolean>>;
+  }): void {
+    e.setOpenMenu(true);
+    if (
+      prevSetterUsermenuRef.current !==
+        (() => {
+          null;
+        }) &&
+      prevSetterUsermenuRef.current !== e.setOpenMenu
+    )
+      prevSetterUsermenuRef.current(false);
+    prevSetterUsermenuRef.current = e.setOpenMenu;
+    setIndexOfUser(e.index);
+    prevIndexOfUserRef.current = e.index;
+  }
+  /*==========================================================*/
+
+  function close(): void {
+    if (openProfil) setOpenProfil(false);
+    if (openUserList && indexOfUser === prevIndexOfUserRef.current) {
+      setOpenUserList(false);
+      prevSetterUsermenuRef.current(false);
+      setIndexOfUser(-1);
+      prevIndexOfUserRef.current = -1;
+    }
+    if (openPlayButton) setOpenPlayButton(false);
+
+    if (openOverlay && openPlayMenuRef.current === openPlayButton)
+      setOpenOverlay(false);
+  }
 
   function handleResize(game: Game) {
     game.updateGame();

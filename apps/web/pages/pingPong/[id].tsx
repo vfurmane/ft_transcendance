@@ -36,7 +36,8 @@ export default function PingPong(): JSX.Element {
   const [openUserList, setOpenUserList] = useState(false);
   const [indexOfUser, setIndexOfUser] = useState(-1);
   const prevIndexOfUserRef = useRef(-1);
-  const prevSetterUsermenuRef = useRef<React.Dispatch<React.SetStateAction<boolean>>>();
+  const prevSetterUsermenuRef =
+    useRef<React.Dispatch<React.SetStateAction<boolean>>>();
   /*===========================================================*/
 
   const UserState = useSelector(selectUserState);
@@ -50,31 +51,7 @@ export default function PingPong(): JSX.Element {
   function rotate(users: User[]): User[] {
     if (!users.find((user) => UserState.id === user.id)) return users;
     const lastIndex = users.length - 1;
-    let angle = 0;
-    switch (users.length) {
-      case 2: {
-        angle = -180;
-        break;
-      }
-      case 3: {
-        angle = -120;
-        break;
-      }
-      case 4: {
-        angle = -90;
-        break;
-      }
-      case 5: {
-        angle = -72;
-        break;
-      }
-      case 6: {
-        angle = -60;
-        break;
-      }
-      default:
-        break;
-    }
+    const angle = -360 / users.length;
 
     const canvas = document.getElementById("canvasElem");
     if (canvas)
@@ -186,7 +163,7 @@ export default function PingPong(): JSX.Element {
         setMiniProfilArray(tmp);
       }
     },
-    [users, MiniProfilArray]
+    [users, MiniProfilArray, classement]
   );
 
   useEffect(() => {
@@ -382,15 +359,15 @@ export default function PingPong(): JSX.Element {
       ) : (
         <></>
       )}
-        <PlayButton
-          handleClick={handleClickPlayButton}
-          open={openPlayButton}
-          style={{
-            text: openPlayButton ? "" : "PLAY AGAIN",
-            small: true,
-            color: true,
-          }}
-        />
+      <PlayButton
+        handleClick={handleClickPlayButton}
+        open={openPlayButton}
+        style={{
+          text: openPlayButton ? "" : "PLAY AGAIN",
+          small: true,
+          color: true,
+        }}
+      />
       {openPlayButton ? (
         <div
           className="col-10 offset-1 offset-xl-0 offset-lg-1 col-lg-3 offset-xl-1 "
@@ -450,7 +427,9 @@ export default function PingPong(): JSX.Element {
               display: "flex",
               justifyContent: "center",
             }}
-          >  let index = 0;
+          >
+            {" "}
+            let index = 0;
             <canvas
               id="canvasElem"
               ref={canvasRef}

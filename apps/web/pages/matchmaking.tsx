@@ -10,7 +10,6 @@ import { selectMatchmakingState } from "../store/MatchmakingSlice";
 import { selectUserState } from "../store/UserSlice";
 import TopBar from "../components/TopBar";
 
-
 export default function Matchmaking(): ReactElement {
   const [hasLeftQueue, setHasLeftQueue] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -19,14 +18,15 @@ export default function Matchmaking(): ReactElement {
   const UserState = useSelector(selectUserState);
   const MatchmakingState = useSelector(selectMatchmakingState);
 
-   /*======for close topBar component when click on screen====*/
-   const [openToggle, setOpenToggle] = useState(false);
-   const [openProfil, setOpenProfil] = useState(false);
-   const [openUserList, setOpenUserList] = useState(false);
-   const [indexOfUser, setIndexOfUser] = useState(-1);
-   const prevIndexOfUserRef = useRef(-1);
-   const prevSetterUsermenuRef = useRef<React.Dispatch<React.SetStateAction<boolean>>>();
-   /*===========================================================*/
+  /*======for close topBar component when click on screen====*/
+  const [openToggle, setOpenToggle] = useState(false);
+  const [openProfil, setOpenProfil] = useState(false);
+  const [openUserList, setOpenUserList] = useState(false);
+  const [indexOfUser, setIndexOfUser] = useState(-1);
+  const prevIndexOfUserRef = useRef(-1);
+  const prevSetterUsermenuRef =
+    useRef<React.Dispatch<React.SetStateAction<boolean>>>();
+  /*===========================================================*/
 
   useEffect(() => {
     if (!MatchmakingState.isInQueue) router.push("/");
@@ -55,8 +55,8 @@ export default function Matchmaking(): ReactElement {
     };
   }, [websockets.pong, UserState.id, router]);
 
-   /*======for close topBar component when click on screen====*/
-   function clickTopBarToggle(): void {
+  /*======for close topBar component when click on screen====*/
+  function clickTopBarToggle(): void {
     setOpenToggle(!openToggle);
   }
 
@@ -84,7 +84,6 @@ export default function Matchmaking(): ReactElement {
     prevIndexOfUserRef.current = e.index;
   }
 
-
   function close(): void {
     if (openProfil) setOpenProfil(false);
     if (openUserList && indexOfUser === prevIndexOfUserRef.current) {
@@ -103,7 +102,7 @@ export default function Matchmaking(): ReactElement {
 
   return (
     <div onClick={close}>
-       <TopBar
+      <TopBar
         openProfil={openProfil}
         openToggle={openToggle}
         openUserList={openUserList}
@@ -123,6 +122,5 @@ export default function Matchmaking(): ReactElement {
         ) : null}
       </div>
     </div>
-    
   );
 }

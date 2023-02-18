@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import TopBar from "../../components/TopBar"; import { useRouter } from "next/router";
+import TopBar from "../../components/TopBar";
+import { useRouter } from "next/router";
 import Image from "next/image";
 import MatchEntity from "../../components/HomePage/MatchEntity";
 import { selectUserState } from "../../store/UserSlice";
@@ -29,7 +30,8 @@ export default function Profil(): JSX.Element {
   const [openAchivementList, setOpenAchivementList] = useState(false);
   const [openAchivement, setOpenAchivement] = useState(false);
   const [achievementsList, setAchievementsList] = useState<JSX.Element[]>([]);
-  const [achievementSelect, setAchievementSelect] = useState<Achievements | null>(null);
+  const [achievementSelect, setAchievementSelect] =
+    useState<Achievements | null>(null);
   const [userProfil, setUserProfil] = useState(false);
   const [openConfigProfil, setOpenConfigProfil] = useState(false);
   const [configProfil, setConfigProfil] = useState(<></>);
@@ -74,8 +76,6 @@ export default function Profil(): JSX.Element {
   }
   /*==========================================================*/
 
-  
-
   useEffect((): void => {
     if (!localStorage.getItem("access_token")) return;
     if (typeof router.query.username === "string") {
@@ -85,42 +85,41 @@ export default function Profil(): JSX.Element {
           Authorization: "Bearer " + localStorage.getItem("access_token"),
         },
       })
-      .then((res) => res.json())
-      .then((data) => {
-        setAchievementsList(data.map((e: Achievements, i: number) => 
-          <AchivementEntity
-            achievement={{
-              id: e.id,
-              title: e.title,
-              description: e.description,
-              logo: e.logo,
-              created_at: e.created_at,
-              user: e.user
-            }}
-            key={i}
-            handleClick={achievementClick}
-            className={`achievement${i}`}
-          />
-        ));
-      })
-      .catch((error) => {
-        console.error(`problem with fetch : ${error.message}`);
-      });
+        .then((res) => res.json())
+        .then((data) => {
+          setAchievementsList(
+            data.map((e: Achievements, i: number) => (
+              <AchivementEntity
+                achievement={{
+                  id: e.id,
+                  title: e.title,
+                  description: e.description,
+                  logo: e.logo,
+                  created_at: e.created_at,
+                  user: e.user,
+                }}
+                key={i}
+                handleClick={achievementClick}
+                className={`achievement${i}`}
+              />
+            ))
+          );
+        })
+        .catch((error) => {
+          console.error(`problem with fetch : ${error.message}`);
+        });
     }
 
-    
-      // if foreign user
-      fetch(`/api/user/${router.query.username}`, {
-        headers: {
-          Authorization: "Bearer " + localStorage.getItem("access_token"),
-        },
-      })
+    // if foreign user
+    fetch(`/api/user/${router.query.username}`, {
+      headers: {
+        Authorization: "Bearer " + localStorage.getItem("access_token"),
+      },
+    })
       .then(async (response) => {
         if (!response.ok) {
           return response.json().then((error) => {
-            throw new Error(
-              error.message || "An unexpected error occured..."
-            );
+            throw new Error(error.message || "An unexpected error occured...");
           });
         } else {
           return response.json();
@@ -146,13 +145,13 @@ export default function Profil(): JSX.Element {
           Authorization: "Bearer " + localStorage.getItem("access_token"),
         },
       })
-      .then((res) => res.json())
-      .then((data) => {
-        setMatchHistory(data);
-      })
-      .catch((error) => {
-        console.error(`problem with fetch : ${error.message}`);
-      });
+        .then((res) => res.json())
+        .then((data) => {
+          setMatchHistory(data);
+        })
+        .catch((error) => {
+          console.error(`problem with fetch : ${error.message}`);
+        });
   }, [router.query, UserState, router, user.id]);
 
   useEffect(() => {
@@ -188,7 +187,7 @@ export default function Profil(): JSX.Element {
     setOpenAchivementList(true);
   }
 
-  function achievementClick (e: { achievement: Achievements }): void {
+  function achievementClick(e: { achievement: Achievements }): void {
     setOpenAchivement(true);
     setAchievementSelect(e.achievement);
     prevAchievementRef.current = e.achievement;
@@ -207,7 +206,6 @@ export default function Profil(): JSX.Element {
       elem[0]?.scrollIntoView(true);
     }
   }, [achievementSelect])*/
-
 
   function changeUsername(): void {
     setOpenConfigProfil(true);
@@ -230,8 +228,7 @@ export default function Profil(): JSX.Element {
   function close(): void {
     if (openAchivementList && prevAchievementRef.current === achievementSelect)
       setOpenAchivementList(false);
-    if (openAchivement && prevAchievementRef.current === achievementSelect)
-    {
+    if (openAchivement && prevAchievementRef.current === achievementSelect) {
       setOpenAchivement(false);
       prevAchievementRef.current = null;
       setAchievementSelect(null);
@@ -473,7 +470,10 @@ export default function Profil(): JSX.Element {
                       className="card"
                       style={{ background: "rgba(0,0,0,0)" }}
                     >
-                      <h2 className={textStyles.pixel} style={{marginBottom:'20px'}}>
+                      <h2
+                        className={textStyles.pixel}
+                        style={{ marginBottom: "20px" }}
+                      >
                         Achivements
                       </h2>
                       <div className="cardList">{achievementsList}</div>
@@ -484,7 +484,10 @@ export default function Profil(): JSX.Element {
                         style={{ background: "rgba(0,0,0,0)" }}
                       >
                         <div className="cardList">
-                          <p className={textStyles.saira} style={{marginTop: '120px'}}>
+                          <p
+                            className={textStyles.saira}
+                            style={{ marginTop: "120px" }}
+                          >
                             {achievementSelect?.description}
                           </p>
                         </div>
