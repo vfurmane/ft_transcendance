@@ -297,7 +297,7 @@ export default function Profil(): JSX.Element {
           >
             <div className="fill">
               <ProfilePictureUploader
-                userId={UserState.id}
+                userId={user.id}
                 width={200}
                 height={200}
               />
