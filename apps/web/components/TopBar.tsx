@@ -51,7 +51,7 @@ async function logout(): Promise<null> {
 
 function TopBar(props: propsTopBar): JSX.Element {
   const [value, setValue] = useState("");
-  const [userList, setUserList] = useState([<></>]);
+  const [userList, setUserList] = useState<JSX.Element[]>([]);
 
   const UserState = useSelector(selectUserState);
   const dispatch = useDispatch();
