@@ -81,7 +81,7 @@ export class UsersController {
           fileType: 'jpeg',
         })
         .addMaxSizeValidator({
-          maxSize: 100000,
+          maxSize: 5000000,
         })
         .build({
           errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,
