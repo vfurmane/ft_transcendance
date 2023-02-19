@@ -191,7 +191,7 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage('pressUp')
-  async pressUp(@ConnectedSocket() client: Socket): Promise<void | string> {
+  async pressUp(@ConnectedSocket() client: Socket, position : number): Promise<void | string> {
     const room = client.data.room;
     if (!this.checkUser(client, room)) {
       return 'You are not allowed to send this kind of message !';
@@ -200,6 +200,7 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
     if (!game) {
       return 'Game not launched';
     }
+    client.data.position = position;
     game.movePlayer(client.data.position, true, true);
     this.server.in(`game_${room}`).emit('refresh', game.getState(), Date.now());
     return 'You pressed up';
@@ -215,13 +216,14 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
     if (!game) {
       return 'Game not launched';
     }
+   
     game.movePlayer(client.data.position, true, false);
     this.server.in(`game_${room}`).emit('refresh', game.getState(), Date.now());
     return 'You moved up';
   }
 
   @SubscribeMessage('pressDown')
-  async pressDown(@ConnectedSocket() client: Socket): Promise<void | string> {
+  async pressDown(@ConnectedSocket() client: Socket, position: number): Promise<void | string> {
     const room = client.data.room;
     if (!this.checkUser(client, room)) {
       return 'You are not allowed to send this kind of message !';
@@ -230,6 +232,7 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
     if (!game) {
       return 'Game not launched';
     }
+    client.data.position = position;
     game.movePlayer(client.data.position, false, true);
     this.server.in(`game_${room}`).emit('refresh', game.getState(), Date.now());
     return 'You moved down ';

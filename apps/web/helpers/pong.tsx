@@ -33,7 +33,7 @@ class Game {
   public color: string[] = ["blue", "red", "orange", "white", "pink", "black"];
   public static position: number;
   public static scoreMax = 10;
-  public static changeLife: (index: number, val: number) => void;
+  public static changeLife: (index: number, val: number, length: number) => void;
   public static socket: Socket<DefaultEventsMap, DefaultEventsMap>;
   public static count: number;
   public await = true;
@@ -41,7 +41,7 @@ class Game {
   constructor(
     number_player: number | undefined,
     position: number | undefined,
-    changeLife: (index: number, val: number) => void
+    changeLife: (index: number, val: number, length: number) => void
   ) {
     console.log("IN GAME CONSTRUCTOR NB PLAYER IS ", number_player);
     if (number_player) {
@@ -242,7 +242,7 @@ class Game {
       if (this.player === undefined)
         racket.push(new Racket(i, [p0, p1, p2, p3], this.color[i]));
       else racket.push(new Racket(i, [p0, p1, p2, p3], this.player[i].color));
-      Game.changeLife(i, player[i].hp);
+      Game.changeLife(i, player[i].hp, wall.length);
       racket[i].hp = player[i].hp;
     }
     return racket;
@@ -354,40 +354,49 @@ class Game {
         )
       );
 
+
     window.addEventListener("keydown", function (e) {
+    if (Game.position >= 0)
+    {
       if (e.key === "ArrowUp") {
         if (Game.keyPressed.down === false) {
-          Game.socket.emit("pressUp");
+          Game.socket.emit("pressUp", Game.position);
         } else {
           Game.socket.emit("unpressDown");
         }
         Game.keyPressed.up = true;
       } else if (e.key === "ArrowDown") {
         if (Game.keyPressed.up === false) {
-          Game.socket.emit("pressDown");
+          Game.socket.emit("pressDown", Game.position);
         } else {
           Game.socket.emit("unpressUp");
         }
         Game.keyPressed.down = true;
       }
+    }
     });
     window.addEventListener("keyup", function (e) {
+    if (Game.position >= 0)
+    { 
+      console.error(Game.position);
       if (e.key === "ArrowUp") {
         if (Game.keyPressed.down === false) {
           Game.socket.emit("unpressUp");
         } else {
-          Game.socket.emit("pressDown");
+          Game.socket.emit("pressDown", Game.position);
         }
         Game.keyPressed.up = false;
       } else if (e.key === "ArrowDown") {
         if (Game.keyPressed.up === false) {
           Game.socket.emit("unpressDown");
         } else {
-          Game.socket.emit("pressUp");
+          Game.socket.emit("pressUp", Game.position);
         }
         Game.keyPressed.down = false;
       }
+    }
     });
+
     if (!Game.isSolo) {
       Game.socket.on("refresh", (state: GameState, time: number) => {
         this.await = false;
