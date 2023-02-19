@@ -335,7 +335,7 @@ export default function PingPong(): JSX.Element {
 
   const buttons = (
     <div className={styles.buttons}>
-      <Link href={"/home"} className={styles.link}>
+      <Link href={"/"} className={styles.link}>
         <PlayButton
           open={false}
           style={{
