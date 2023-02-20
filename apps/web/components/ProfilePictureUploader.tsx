@@ -24,10 +24,9 @@ const ProfilePictureUploader = (props: {
   userId: string;
   width: number;
   height: number;
+  setFileHash: (hash: string) => void;
+  fileHash: string | null;
 }): JSX.Element => {
-  const [fileHash, setFileHash] = useState<string | null | undefined>(
-    undefined
-  );
   const hiddenFileInput = React.useRef<HTMLInputElement>(null);
   const [errorMessage, _setErrorMessage] = useState<string>("");
 
@@ -48,11 +47,11 @@ const ProfilePictureUploader = (props: {
     if (uploadedFile?.type != "image/jpeg") {
       return setErrorMessage("Wrong extension, please use jpeg");
     }
-    if (uploadedFile.size > 2000000) {
-      return setErrorMessage("File size exceeds 2MB");
+    if (uploadedFile.size > 5000000) {
+      return setErrorMessage("File size exceeds 5MB");
     }
     if ((await handleFileUpload(props.userId, uploadedFile)) === true) {
-      setFileHash(hash(uploadedFile));
+      props.setFileHash(hash(uploadedFile));
     } else {
       return setErrorMessage("Unexpected error, please try again");
     }
@@ -65,7 +64,7 @@ const ProfilePictureUploader = (props: {
           userId={props.userId}
           width={props.width}
           height={props.height}
-          fileHash={fileHash}
+          fileHash={props.fileHash}
           handleClick={undefined}
         />
 

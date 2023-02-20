@@ -12,7 +12,6 @@ import PlayMenu from "../components/HomePage/PlayMenu";
 import styles from "styles/pingPong.module.scss";
 import { useSelector } from "react-redux";
 import { selectUserState } from "../store/UserSlice";
-import { useWebsocketContext } from "../components/Websocket";
 import ProfilePicture from "../components/ProfilePicture";
 
 export default function PingPong(): JSX.Element {
@@ -45,52 +44,22 @@ export default function PingPong(): JSX.Element {
   /*===========================================================*/
 
   const UserState = useSelector(selectUserState);
-  const websockets = useWebsocketContext();
-
-  websockets.pong?.on("endGame", () => {
-    //if (!Game.isSolo)
-    setEndGame(true);
-  });
 
   useEffect(() => {
-    if (typeof router.query.listOfPlayers === "string") {
-      setPrintButton(false);
-      const tmp = JSON.parse(router.query.listOfPlayers);
-      usersRef.current = JSON.parse(router.query.listOfPlayers);
-
-      setUsers(tmp);
-      setMiniProfilArray(
-        tmp.forEach((e: User, i: number) => (
-          <MiniProfil
-            key={i}
-            left={i % 2 == 0 ? true : false}
-            user={{ user: e, index: i }}
-            life={Game.live}
-            score={0}
-            game={{
-              life: Game.live,
-              score: Game.scoreMax,
-              numOfPlayers: tmp.length,
-            }}
-          />
-        ))
-      );
-    } else setUsers([UserState]);
-
-    function catchKey(e: KeyboardEvent) {
-      if (
-        ["Space", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].indexOf(
-          e.code
-        ) > -1
-      ) {
-        e.preventDefault();
-      }
-    }
-
-    window.addEventListener("keydown", catchKey, false);
-    return () => {
-      window.removeEventListener("keydown", catchKey);
-    };
+    setUsers([UserState]);
+    window.addEventListener(
+      "keydown",
+      function (e) {
+        if (
+          ["Space", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].indexOf(
+            e.code
+          ) > -1
+        ) {
+          e.preventDefault();
+        }
+      },
+      false
+    );
   }, []);
 
   let game = new Game(
@@ -100,8 +69,6 @@ export default function PingPong(): JSX.Element {
   );
   useEffect(() => {
     if (canvasRef && users.length > 0) {
-      if (websockets.pong?.connected && users.length > 1)
-        game.setWebsocket(websockets.pong);
       if (!gameInit) game.init(canvasRef);
       setGameInit(true);
       intervalRef.current = setInterval(handleResize, 4, game);
@@ -288,7 +255,7 @@ export default function PingPong(): JSX.Element {
 
   const buttons = (
     <div className={styles.buttons}>
-      <Link href={"/home"} className={styles.link}>
+      <Link href={"/"} className={styles.link}>
         <PlayButton
           handleClick={() => {
             null;

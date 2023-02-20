@@ -35,8 +35,12 @@ class Game {
   public lastUpdate = 0;
   public color: string[] = ["blue", "red", "orange", "white", "pink", "black"];
   public static position: number;
-  public static scoreMax = 1;
-  public static changeLife: (index: number, val: number) => void;
+  public static scoreMax = 10;
+  public static changeLife: (
+    index: number,
+    val: number,
+    length: number
+  ) => void;
   public static socket: Socket<DefaultEventsMap, DefaultEventsMap>;
   public static count: number;
   public await = true;
@@ -44,7 +48,7 @@ class Game {
   constructor(
     number_player: number | undefined,
     position: number | undefined,
-    changeLife: (index: number, val: number) => void
+    changeLife: (index: number, val: number, length: number) => void
   ) {
     if (number_player) {
       this.boardType = number_player;
@@ -135,6 +139,11 @@ class Game {
   refreshServer(state: GameState): void {
     if (!this.boardType) {
       return;
+    }
+    if (state.numberPlayer !== this.boardType) {
+      this.boardType = state.numberPlayer;
+      this.player = [];
+      this.init(this.boardCanvasRef);
     }
     state = this.convertStateServer(state);
     if (this.boardType == Form.REC) {
@@ -299,7 +308,7 @@ class Game {
         if (this.player === undefined)
           racket.push(new Racket(i, [p0, p1, p2, p3], this.color[i]));
         else racket.push(new Racket(i, [p0, p1, p2, p3], this.player[i].color));
-        Game.changeLife(i, player[i].hp);
+        Game.changeLife(i, player[i].hp, wall.length);
         racket[i].hp = player[i].hp;
       }
       return racket;
@@ -492,6 +501,7 @@ class Game {
         Game.keyPressed.down = false;
       }
     });
+
     if (!Game.isSolo) {
       Game.socket.on("refresh", (state: GameState, time: number) => {
         this.await = false;
@@ -631,7 +641,7 @@ class Game {
     if (Game.isSolo && this.cible) this.cible.draw(this.boardContext);
     if (Game.live === 0) {
       Game.point = 0;
-      Game.live = 1;
+      Game.live = 11;
       this.start = Date.now();
     }
     this.lastUpdate = Date.now() - this.start;
@@ -929,11 +939,13 @@ class Ball extends Entity {
       if (rackets.length === 2) {
         if (index === 2) {
           rackets[1].hp--;
+          //Game.changeLife(1, rackets[1].hp);
           this.replaceTo(board.board.center());
           this.goToRandomPlayer(rackets);
           this.calcNextCollision(rackets, walls, null, null);
         } else if (index === 0) {
           rackets[0].hp--;
+          //Game.changeLife(0, rackets[0].hp);
           this.replaceTo(board.board.center());
           this.goToRandomPlayer(rackets);
           this.calcNextCollision(rackets, walls, null, null);
@@ -952,6 +964,7 @@ class Ball extends Entity {
         }
       } else {
         rackets[index].hp--;
+        //Game.changeLife(index, rackets[index].hp);
         this.replaceTo(board.board.center());
         this.goToRandomPlayer(rackets);
         this.calcNextCollision(rackets, walls, null, null);

@@ -16,7 +16,9 @@ import { Match } from "./match.entity";
 import { Jwt } from "./jwt.entity";
 import { JwtPayload } from "..";
 import { Opponent } from "./opponent.entity";
-import { Profile } from "./profile.entity";
+import { Profile } from './profile.entity';
+import { Block } from "./block.entity";
+import { Achievements } from "./Achievements.entity";
 
 @Exclude()
 @Entity()
@@ -72,6 +74,7 @@ export class User {
 
   @Column("smallint", { default: 0 })
   level!: number;
+  
   @OneToMany(() => Jwt, (jwt) => jwt.user)
   jwts!: Jwt[];
 
@@ -80,7 +83,18 @@ export class User {
 
   currentJwt!: JwtPayload;
 
+  @OneToMany(() => Achievements, (achievement) => achievement.user)
+  achievements!: Achievements[];
+
   @OneToOne(() => Profile, (profile) => profile.user)
   @JoinColumn()
   profile!: Profile;
+
+  newlyCreated?: boolean;
+
+  @OneToMany(() => Block, (block) => block.source)
+  blocks!: Block[];
+
+  @OneToMany(() => Block, (block) => block.target)
+  beenBlocked!: Block[];
 }

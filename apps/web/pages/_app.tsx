@@ -1,4 +1,5 @@
 import "../styles/global.css";
+import Head from "next/head";
 import Script from "next/script";
 import { AppProps } from "next/app";
 import { wrapper } from "../store/store";
@@ -12,6 +13,9 @@ function App({ Component, ...rest }: AppProps): JSX.Element {
   const { pageProps } = props;
   return (
     <>
+      <Head>
+        <title>Transcendence</title>
+      </Head>
       <Provider store={store}>
         <Auth>
           <Websocket>
