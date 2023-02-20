@@ -8,6 +8,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Server } from 'socket.io';
 import { DefaultEventsMap } from 'socket.io/dist/typed-events';
+import { MatchService } from 'src/Match/Match.service';
 import { TransformUserService } from 'src/TransformUser/TransformUser.service';
 import { Repository } from 'typeorm';
 import {
@@ -44,6 +45,7 @@ export class PongService {
     @InjectRepository(Opponent)
     private readonly opponentsRepository: Repository<Opponent>,
     private readonly transformUserService: TransformUserService,
+    private readonly matchService: MatchService,
   ) {
     this.games = new Map();
     for (const mode in GameMode) {
@@ -71,7 +73,7 @@ export class PongService {
     });
     await Promise.all(opponents);
     const room = `game_${gameEntity.id}`;
-    this.games.set(room, [
+    this.games.set(gameEntity.id, [
       new Game(users.length, server.in(room)),
       users.map((user) => ({ id: user.id, ready: false })),
     ]);
@@ -160,6 +162,16 @@ export class PongService {
       (e) => e.id !== user.id,
     );
     this.setGameModeQueue(new_queue, mode);
+  }
+
+  saveGame(ids: string[], hps: number[], hpStart: number) {
+    let indexWin = hps.indexOf(Math.max(hps[0], hps[1]));
+    this.matchService.addMatch(
+      ids[indexWin],
+      ids[1 - indexWin],
+      hpStart - hps[1 - indexWin],
+      hpStart - hps[indexWin],
+    );
   }
 
   invite(host: User, target: User): QueueList | null {

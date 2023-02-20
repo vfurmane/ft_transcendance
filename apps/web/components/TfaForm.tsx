@@ -66,8 +66,6 @@ export function TfaForm(props: TfaFormProps): ReactElement {
           localStorage.removeItem("state");
           const user = await identifyUser(false);
           if (user) dispatch(setUserState(user));
-          localStorage.removeItem("state");
-          return;
         }
       })
       .catch((error) => {

@@ -12,6 +12,7 @@ import {
   BadRequestException,
   ClassSerializerInterceptor,
   Logger,
+  NotFoundException,
   UseInterceptors,
   UsePipes,
   ValidationPipe,
@@ -19,14 +20,20 @@ import {
 import { AuthService } from 'src/auth/auth.service';
 import { Interval } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
-import { GameEntityFront, GameStartPayload, User } from 'types';
+import {
+  GameEntityFront,
+  GameStartPayload,
+  User,
+  Userfront,
+  GameMode,
+} from 'types';
 import { Repository } from 'typeorm';
 import { TransformUserService } from 'src/TransformUser/TransformUser.service';
 import { SubscribedGameDto } from './subscribed-game.dto';
 import { PongService } from './pong.service';
 import { JoinQueueDto } from './join-queue.dto';
 import { UsersService } from 'src/users/users.service';
-import { instanceToPlain } from 'class-transformer';
+import { instanceToPlain, TransformInstanceToPlain } from 'class-transformer';
 import { InviteUserDto } from './invite-user.dto';
 
 @UsePipes(new ValidationPipe())
@@ -94,17 +101,6 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
       return;
     }
     client.leave(client.data.room);
-    console.log(client.data.name + ' LEFT WAITING ROOM');
-    const socketWaiting = await this.server.in(client.data.room).fetchSockets();
-    if (socketWaiting.length === 0) {
-      this.room_id.splice(this.room_id.indexOf(client.data.room), 1);
-      console.log('REMOVED THE ROOM');
-      console.log(this.room_id);
-    } else {
-      let i = 0;
-      socketWaiting.forEach((socket) => (socket.data.position = i++));
-    }
-    console.log(client.data.name + ' DISCONNECTED');
   }
 
   @Interval(17) // THIS FUNCTION CALLS UPDATE FOR EVERY CURRENT GAME
@@ -115,15 +111,33 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.pongService.games.forEach(async (key, room) => {
       const game = key[0];
       if (game.boardType !== 0) {
-        game.updateGame();
+        let pos: number;
+        if ((pos = game.updateGame()) !== -1) {
+          const sockets = await this.server.in(`game_${room}`).fetchSockets();
+          key[1].splice(pos, 1);
+          sockets.forEach((socket) => {
+            if (socket.data.position === pos) {
+              socket.data.position = -1;
+            } else if (socket.data.position > pos) {
+              socket.data.position--;
+            }
+          });
+          console.log('REMOVED PLAYER ', pos);
+        }
       } else {
         console.log('GAME ENDED');
-        const sockets = await this.server.in(room).fetchSockets();
-        this.server.in(room).emit('endGame');
+        const sockets = await this.server.in(`game_${room}`).fetchSockets();
+        this.server.in(`game_${room}`).emit('endGame');
         sockets.forEach((socket) => {
-          socket.leave(room);
+          socket.leave(`game_${room}`);
           socket.data.room = undefined;
         });
+        if (key[1].length === 2)
+          this.pongService.saveGame(
+            key[1].map((e) => e.id),
+            key[0].player.map((e) => e.hp),
+            key[0].live,
+          );
         this.pongService.games.delete(room);
       }
     });
@@ -159,7 +173,9 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
         console.log('LAUNCHING GAME AT ', Date.now());
         game[0].init();
         game[0].await = false;
-        this.server.in(room).emit('refresh', game[0].getState(), Date.now());
+        this.server
+          .in(`game_${room}`)
+          .emit('refresh', game[0].getState(), Date.now());
       }
     });
   }
@@ -203,7 +219,7 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
       return 'Game not launched';
     }
     game.movePlayer(client.data.position, true, true);
-    this.server.in(room).emit('refresh', game.getState(), Date.now());
+    this.server.in(`game_${room}`).emit('refresh', game.getState(), Date.now());
     return 'You pressed up';
   }
 
@@ -217,8 +233,9 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
     if (!game) {
       return 'Game not launched';
     }
+
     game.movePlayer(client.data.position, true, false);
-    this.server.in(room).emit('refresh', game.getState(), Date.now());
+    this.server.in(`game_${room}`).emit('refresh', game.getState(), Date.now());
     return 'You moved up';
   }
 
@@ -233,7 +250,7 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
       return 'Game not launched';
     }
     game.movePlayer(client.data.position, false, true);
-    this.server.in(room).emit('refresh', game.getState(), Date.now());
+    this.server.in(`game_${room}`).emit('refresh', game.getState(), Date.now());
     return 'You moved down ';
   }
 
@@ -248,7 +265,7 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
       return 'Game not launched';
     }
     game.movePlayer(client.data.position, false, false);
-    this.server.in(room).emit('refresh', game.getState(), Date.now());
+    this.server.in(`game_${room}`).emit('refresh', game.getState(), Date.now());
     return 'You moved down ';
   }
 
@@ -257,13 +274,38 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @ConnectedSocket() client: Socket,
     @MessageBody() subscribedGameDto: SubscribedGameDto,
   ): Promise<GameEntityFront> {
-    client.data.room = `game_${subscribedGameDto.id}`;
+    client.data.room = subscribedGameDto.id;
     const game = await this.pongService.getGame(subscribedGameDto.id);
     client.data.position = game.opponents.findIndex(
       (opponent) => opponent.user.id === client.data.id,
     );
     client.join(`game_${subscribedGameDto.id}`);
     return this.pongService.getGame(subscribedGameDto.id);
+  }
+
+  @SubscribeMessage('launch')
+  async launch(@ConnectedSocket() client: Socket) {
+    console.log('receiving launch');
+    const user = await this.usersService.getById(client.data.id);
+    if (!user) return;
+    const gameQueue = await this.pongService.getGameModeQueue(
+      GameMode.BATTLE_ROYALE,
+    );
+    if (!gameQueue) return;
+    if (gameQueue.length < 2) return;
+    if (user.id !== gameQueue[0].id) return;
+    console.log('should be launching the game');
+    const game = await this.pongService.startGame(gameQueue, this.server);
+
+    this.server.emit(
+      'game_start',
+      instanceToPlain<GameStartPayload>({
+        id: game.id,
+        users: await Promise.all(
+          gameQueue.map((e) => this.transformUserService.transform(e)),
+        ),
+      }),
+    );
   }
 
   @SubscribeMessage('join_queue')
@@ -279,21 +321,21 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
     );
     if (gameQueue !== null) {
       this.logger.log(`Queue is full, the game will start soon. Players:`);
+      const game = await this.pongService.startGame(gameQueue, this.server);
       gameQueue.forEach((user_loop) => {
         this.logger.log(`- ${user_loop.id} (${user_loop.name})`);
       });
-
-      setTimeout(async () => {
-        console.log('SENDING game_start at ', Date.now());
-        const game = await this.pongService.startGame(gameQueue, this.server);
-        this.server.emit(
-          'game_start',
-          instanceToPlain<GameStartPayload>({
-            id: game.id,
-            users: gameQueue,
-          }),
-        );
-      }, 2000);
+      this.server.emit(
+        'game_start',
+        instanceToPlain<GameStartPayload>({
+          id: game.id,
+          users: await Promise.all(
+            gameQueue.map((opponent) =>
+              this.transformUserService.transform(opponent),
+            ),
+          ),
+        }),
+      );
     }
   }
 
@@ -310,6 +352,7 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @ConnectedSocket() client: Socket,
     @MessageBody() inviteUserDto: InviteUserDto,
   ): Promise<{ message: string }> {
+    this.logger.debug('invite');
     const host = await this.usersService.getById(client.data.id);
     const target = await this.usersService.getById(inviteUserDto.id);
     if (!host || !target)
@@ -323,18 +366,18 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
       gameQueue.forEach((user_loop) => {
         this.logger.log(`- ${user_loop.id} (${user_loop.name})`);
       });
-
-      setTimeout(async () => {
-        console.log('SENDING game_start at ', Date.now());
-        const game = await this.pongService.startGame(gameQueue, this.server);
-        this.server.emit(
-          'game_start',
-          instanceToPlain<GameStartPayload>({
-            id: game.id,
-            users: gameQueue,
-          }),
-        );
-      }, 2000);
+      const game = await this.pongService.startGame(gameQueue, this.server);
+      this.server.emit(
+        'game_start',
+        instanceToPlain<GameStartPayload>({
+          id: game.id,
+          users: await Promise.all(
+            gameQueue.map((opponent) =>
+              this.transformUserService.transform(opponent),
+            ),
+          ),
+        }),
+      );
     }
 
     return { message: 'Waiting for approval' };
@@ -348,5 +391,22 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
     if (!host) throw new BadRequestException('`host` not found');
     this.pongService.discardInvitations(host);
     return { message: 'Invitations discarded' };
+  }
+
+  @SubscribeMessage('get_featuring')
+  async getFeaturing(): Promise<GameStartPayload[]> {
+    const games: GameStartPayload[] = [];
+    for (const [gameId, game] of this.pongService.games) {
+      games.push({
+        id: gameId,
+        users: await Promise.all(
+          game[1].map(async (opponent): Promise<Userfront> => {
+            const user = await this.usersService.getById(opponent.id);
+            return this.transformUserService.transform(user);
+          }),
+        ),
+      });
+    }
+    return games;
   }
 }

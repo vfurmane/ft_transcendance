@@ -1,16 +1,19 @@
 import {
-  BadRequestException,
-  forwardRef,
-  Inject,
   Injectable,
+  Logger,
   NotFoundException,
+  BadRequestException,
 } from '@nestjs/common';
-import { In, Repository, UpdateResult } from 'typeorm';
+import { Repository, UpdateResult } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User, Userfront } from 'types';
+import { User, Userfront, Upload, Profile } from 'types';
 import * as speakeasy from 'speakeasy';
 import { SpeakeasyGeneratedSecretDto } from '../auth/speakeasy-generated-secret.dto';
 import { TransformUserService } from 'src/TransformUser/TransformUser.service';
+import * as fs from 'fs';
+import path from 'path';
+import { HttpService } from '@nestjs/axios';
+import { firstValueFrom } from 'rxjs';
 
 export interface AddUserData {
   name: string;
@@ -23,13 +26,26 @@ export class UsersService {
   constructor(
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
+    @InjectRepository(Upload)
+    private readonly uploadRepository: Repository<Upload>,
+    @InjectRepository(Profile)
+    private readonly profileRepository: Repository<Profile>,
     private readonly transformUserService: TransformUserService,
+    private readonly httpService: HttpService,
+    private readonly logger: Logger,
   ) {}
 
   async getById(id: string): Promise<User | null> {
     return this.usersRepository.findOneBy({
       id,
     });
+  }
+
+  async getUserById(id: string): Promise<Userfront | null> {
+    const user = await this.usersRepository.findOneBy({
+      id,
+    });
+    return await this.transformUserService.transform(user);
   }
 
   async getByUsername(username: string): Promise<User | null> {
@@ -57,10 +73,13 @@ export class UsersService {
   }
 
   async addUser(user: AddUserData): Promise<User> {
+    const userProfile = new Profile();
+    await this.profileRepository.save(userProfile);
     const userEntity = new User();
     userEntity.email = user.email;
     userEntity.name = user.name;
     if (user.password) userEntity.password = user.password;
+    userEntity.profile = userProfile;
     return this.usersRepository.save(userEntity);
   }
 
@@ -95,6 +114,18 @@ export class UsersService {
     return this.transformUserService.transform(user);
   }
 
+  async getProfile(userId: string): Promise<Profile | null> {
+    return new Promise((resolve, reject) => {
+      this.profileRepository
+        .findOne({
+          where: { user: { id: userId } },
+          relations: ['user'],
+        })
+        .then((profile) => resolve(profile))
+        .catch((error) => reject(error));
+    });
+  }
+
   async updateLevel(user_id: string, xp: number): Promise<number> {
     const user = await this.usersRepository.findOneBy({ id: user_id });
     const level = user?.level;
@@ -114,5 +145,56 @@ export class UsersService {
     if (usernameTaken)
       throw new BadRequestException('`username` is already in use');
     return this.usersRepository.update({ id: user.id }, { name: new_username });
+  }
+
+  async fetchAndStoreProfilePicture(
+    user: User,
+    profilePictureUrl: string,
+  ): Promise<void> {
+    const response = await firstValueFrom(
+      this.httpService.get(profilePictureUrl, {
+        responseType: 'stream',
+      }),
+    );
+    const filepath = `./uploads/profile_pictures/${user.id}${
+      path.parse(profilePictureUrl).ext
+    }`;
+    response.data.pipe(fs.createWriteStream(filepath));
+    this.getProfile(user.id).then((profile) => {
+      this.profileRepository.update({ id: profile?.id }, { picture: filepath });
+    });
+  }
+
+  async updateProfilePicture(
+    profile: Profile,
+    file: Express.Multer.File,
+  ): Promise<UpdateResult | null> {
+    try {
+      if (profile?.picture !== null && fs.existsSync(profile?.picture)) {
+        fs.unlinkSync(profile.picture);
+      }
+      return this.profileRepository.update(
+        { id: profile?.id },
+        { picture: file.path },
+      );
+    } catch (error) {
+      this.logger.error(error);
+      return null;
+    }
+  }
+
+  async deleteProfilePicture(profile: Profile): Promise<UpdateResult | null> {
+    try {
+      if (profile?.picture != null) {
+        fs.unlinkSync(profile.picture);
+      }
+      return this.profileRepository.update(
+        { id: profile?.id },
+        { picture: null },
+      );
+    } catch (error) {
+      this.logger.error(error);
+      return null;
+    }
   }
 }

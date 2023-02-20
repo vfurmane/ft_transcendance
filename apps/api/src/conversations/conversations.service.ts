@@ -6,8 +6,8 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DMExists, InvitationEnum, User } from 'types';
-import { MoreThan, Not, Repository } from 'typeorm';
+import { DMExists, InvitationEnum, User, Block } from 'types';
+import { MoreThan, Not, Repository, DeleteResult } from 'typeorm';
 import {
   ConversationsDetails,
   ConversationWithUnread,
@@ -28,6 +28,8 @@ import { muteUserDto } from './dtos/muteUser.dto';
 @Injectable()
 export class ConversationsService {
   constructor(
+    @InjectRepository(Block)
+    private readonly blocksRepository: Repository<Block>,
     @InjectRepository(Conversation)
     private readonly conversationRepository: Repository<Conversation>,
     @InjectRepository(ConversationRole)
@@ -344,10 +346,12 @@ export class ConversationsService {
         currentConversationWithUnread.numberOfUnreadMessages;
       conversationsDetails.conversations.push(currentConversationWithUnread);
     }
-    console.error(conversationsDetails)
-    conversationsDetails.conversations.sort((a, b) => b.lastMessage.getTime() - a.lastMessage.getTime())
-    console.error("post sort")
-    console.error(conversationsDetails)
+    console.error(conversationsDetails);
+    conversationsDetails.conversations.sort(
+      (a, b) => b.lastMessage.getTime() - a.lastMessage.getTime(),
+    );
+    console.error('post sort');
+    console.error(conversationsDetails);
     return conversationsDetails;
   }
 
@@ -995,26 +999,52 @@ export class ConversationsService {
     return true;
   }
 
-  async readMessage(currentUser : User, conversationId : string) : Promise<boolean>
-  {
+  async readMessage(
+    currentUser: User,
+    conversationId: string,
+  ): Promise<boolean> {
     const conversationRole = await this.conversationRoleRepository.findOne({
       relations: {
-        conversation: true
+        conversation: true,
       },
-      where:
-      {
+      where: {
         user: {
-          id: currentUser.id
+          id: currentUser.id,
         },
         conversation: {
-          id: conversationId
-        }
-      }
-    })
-    if (!conversationRole)
-      throw new NotFoundException()
-    conversationRole.lastRead = new Date()
-    this.conversationRoleRepository.save(conversationRole)
-    return (true)
+          id: conversationId,
+        },
+      },
+    });
+    if (!conversationRole) throw new NotFoundException();
+    conversationRole.lastRead = new Date();
+    this.conversationRoleRepository.save(conversationRole);
+    return true;
+  }
+  async blockExists(sourceId: string, targetId: string): Promise<boolean> {
+    return (
+      (await this.blocksRepository.findOneBy({
+        source: { id: sourceId },
+        target: { id: targetId },
+      })) !== null
+    );
+  }
+
+  async getBlockedUsers(sourceId: string): Promise<Block[]> {
+    return this.blocksRepository.findBy({ source: { id: sourceId } });
+  }
+
+  async blockUser(source: User, target: User): Promise<Block> {
+    const block = new Block();
+    block.source = source;
+    block.target = target;
+    return this.blocksRepository.save(block);
+  }
+
+  async unblockUser(sourceId: string, targetId: string): Promise<DeleteResult> {
+    return this.blocksRepository.delete({
+      source: { id: sourceId },
+      target: { id: targetId },
+    });
   }
 }

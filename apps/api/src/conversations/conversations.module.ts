@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Conversation } from 'types';
+import { Block, Conversation } from 'types';
 import { Message } from 'types';
 import { ConversationsController } from './conversations.controller';
 import { ConversationsService } from './conversations.service';
@@ -13,6 +13,7 @@ import { ConversationRestriction } from 'types';
 @Module({
   imports: [
     TypeOrmModule.forFeature([
+      Block,
       Message,
       Conversation,
       ConversationRole,

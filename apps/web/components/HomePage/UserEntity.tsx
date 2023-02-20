@@ -14,6 +14,8 @@ import { OpenConversation } from "../../store/ConversationSlice";
 import { useSelector } from "react-redux";
 import { selectUserState } from "../../store/UserSlice";
 import { useRouter } from "next/router";
+import ProfilePicture from "../ProfilePicture";
+import { setInvitedUser } from "../../store/InvitationSlice";
 
 export default function UserEntity(props: {
   user: User;
@@ -25,15 +27,16 @@ export default function UserEntity(props: {
     openMenu: boolean;
     setOpenMenu: React.Dispatch<React.SetStateAction<boolean>>;
   }) => void;
-  delFriendClick: (e: { idToDelete: string; index: number }) => void;
+  delFriendClick?: (e: { idToDelete: string; index: number }) => void;
+  avatarHash?: string | null;
 }): JSX.Element {
   const [status, setStatus] = useState(props.user.status);
   const [openMenu, setOpenMenu] = useState(false);
   const [accept, setAccept] = useState(props.option?.accept);
   const UserState = useSelector(selectUserState);
   const router = useRouter();
-  const websockets = useWebsocketContext();
   const dispatch = useDispatch();
+  const websockets = useWebsocketContext();
 
   useEffect(() => {
     const onUserStatusUpdate = (
@@ -134,6 +137,7 @@ export default function UserEntity(props: {
                     id: props.user.id,
                   },
                   () => {
+                    dispatch(setInvitedUser(props.user));
                     router.push("/invite");
                   }
                 );
@@ -170,11 +174,12 @@ export default function UserEntity(props: {
           }
         >
           <div className="fill small">
-            <Image
-              alt="avatar"
-              src={`/avatar/avatar-${props.user.avatar_num}.png`}
+            <ProfilePicture
+              userId={props.user.id}
               width={47}
               height={47}
+              handleClick={undefined}
+              fileHash={props.avatarHash}
             />
           </div>
           {status === "online" ? (
@@ -210,23 +215,26 @@ export default function UserEntity(props: {
                         style={{ position: "relative", zIndex: "-1" }}
                       />
                     </div>
-                    <div
-                      className={styles.valideButton}
-                      onClick={(): void => {
-                        props.delFriendClick({
-                          idToDelete: props.user.id,
-                          index: props.index,
-                        });
-                      }}
-                    >
-                      <Image
-                        alt="valide"
-                        src={refuse}
-                        width={20}
-                        height={20}
-                        style={{ position: "relative", zIndex: "-1" }}
-                      />
-                    </div>
+                    {props.delFriendClick ? (
+                      <div
+                        className={styles.valideButton}
+                        onClick={(): void => {
+                          if (props.delFriendClick)
+                            props.delFriendClick({
+                              idToDelete: props.user.id,
+                              index: props.index,
+                            });
+                        }}
+                      >
+                        <Image
+                          alt="valide"
+                          src={refuse}
+                          width={20}
+                          height={20}
+                          style={{ position: "relative", zIndex: "-1" }}
+                        />
+                      </div>
+                    ) : null}
                   </div>
                 )}
               </div>
@@ -234,10 +242,11 @@ export default function UserEntity(props: {
               <div
                 className={styles.supr}
                 onClick={(): void => {
-                  props.delFriendClick({
-                    idToDelete: props.user.id,
-                    index: props.index,
-                  });
+                  if (props.delFriendClick)
+                    props.delFriendClick({
+                      idToDelete: props.user.id,
+                      index: props.index,
+                    });
                 }}
               ></div>
             )}

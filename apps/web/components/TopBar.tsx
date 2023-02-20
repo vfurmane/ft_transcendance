@@ -14,7 +14,7 @@ import List from "./HomePage/List";
 import { Userfront as User } from "types";
 import { initUser } from "../initType/UserInit";
 import { clearTokens } from "../helpers/clearTokens";
-import { useRouter } from "next/router";
+import ProfilePicture from "./ProfilePicture";
 
 interface propsTopBar {
   openToggle: boolean;
@@ -28,6 +28,7 @@ interface propsTopBar {
     openMenu: boolean;
     setOpenMenu: React.Dispatch<React.SetStateAction<boolean>>;
   }): void;
+  avatarHash?: string | null;
 }
 
 async function logout(): Promise<null> {
@@ -50,9 +51,8 @@ async function logout(): Promise<null> {
 }
 
 function TopBar(props: propsTopBar): JSX.Element {
-  const router = useRouter();
   const [value, setValue] = useState("");
-  const [userList, setUserList] = useState([<></>]);
+  const [userList, setUserList] = useState<JSX.Element[]>([]);
 
   const UserState = useSelector(selectUserState);
   const dispatch = useDispatch();
@@ -111,6 +111,7 @@ function TopBar(props: propsTopBar): JSX.Element {
                   delFriendClick={(): void => {
                     null;
                   }}
+                  avatarHash={props.avatarHash}
                 />
               );
               userListTmp.push(userEntity);
@@ -130,11 +131,8 @@ function TopBar(props: propsTopBar): JSX.Element {
     <div className={styles.containerTopBar}>
       <div className="d-none d-md-block">
         <div className={styles.elementTopBar}>
-          <Link href={"/home#top"}>
+          <Link href={"/"}>
             <Image alt="logo" src={Logo} width={200} height={30} />
-          </Link>
-          <Link className={styles.leaderBoardLink} href="/home#leaderboard">
-            Leaderboard
           </Link>
         </div>
       </div>
@@ -158,19 +156,19 @@ function TopBar(props: propsTopBar): JSX.Element {
             />
           </div>
           <div className="fill small">
-            <Image
-              alt="avatar"
-              src={`/avatar/avatar-${UserState.avatar_num}.png`}
+            <ProfilePicture
+              userId={UserState.id}
               width={45}
               height={45}
-              onClick={clickProfil}
+              handleClick={clickProfil}
+              fileHash={props.avatarHash}
             />
           </div>
         </div>
       </div>
       <div className="d-md-none">
         <div className={styles.elementTopBar}>
-          <Link href={"/home"}>
+          <Link href={"/"}>
             <Image alt="logo" src={Logo} width={170} height={20} />
           </Link>
         </div>
@@ -209,12 +207,12 @@ function TopBar(props: propsTopBar): JSX.Element {
                 />
               </div>
               <div className="fill small">
-                <Image
-                  alt="avatar"
-                  src={`/avatar/avatar-${UserState.avatar_num}.png`}
+                <ProfilePicture
+                  userId={UserState.id}
                   width={42}
                   height={42}
-                  onClick={clickProfil}
+                  handleClick={clickProfil}
+                  fileHash={props.avatarHash}
                 />
               </div>
             </div>

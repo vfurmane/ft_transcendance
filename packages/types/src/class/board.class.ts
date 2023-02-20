@@ -17,6 +17,8 @@ export class Board {
       size = 0.5;
     }
     this.wallSize = Math.min(canvas!.width * size, canvas!.height * size);
+    console.error("-------------in board");
+    console.error(this.wallSize);
     if (boardType != Form.REC)
       this.board = new Entity(
         this.createRegularPolygon(

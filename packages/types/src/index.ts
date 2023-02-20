@@ -7,11 +7,13 @@ import { User } from "./entities";
 export interface FtUser {
   login: string;
   email: string;
+  image: { link: string };
 }
 
 export interface AccessTokenResponse {
   access_token: string;
   refresh_token: string;
+  username?: string;
 }
 
 export interface TfaNeededResponse {
@@ -67,7 +69,6 @@ export interface GameState {
 export interface Userfront {
   id: string;
   name: string;
-  avatar_num: number;
   status: string;
   victory: number;
   defeat: number;
@@ -108,7 +109,7 @@ export interface Matchmaking {
 
 export interface GameStartPayload {
   id: string;
-  users: User[];
+  users: Userfront[];
 }
 
 export interface GameEntityFront {

@@ -6,7 +6,6 @@ import {
   Delete,
   Get,
   HttpCode,
-  InternalServerErrorException,
   Logger,
   Patch,
   Post,
@@ -83,7 +82,10 @@ export class AuthController {
       return { message: 'Authentication factor needed', route: 'tfa' };
     }
     this.logger.log(`${user.name} logged in using OAuth2`);
-    return this.authService.login(user, state);
+    return this.authService.login(user, state).then((response) => ({
+      ...response,
+      username: user.newlyCreated ? user.name : undefined,
+    }));
   }
 
   @Post('register')

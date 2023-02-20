@@ -4,6 +4,7 @@ import { TransformUserService } from 'src/TransformUser/TransformUser.service';
 import { Repository } from 'typeorm';
 import { Match, User, MatchFront } from 'types';
 import { UsersService } from '../users/users.service';
+import { AchievementsService } from 'src/Achievements/Achievements.service';
 
 @Injectable()
 export class MatchService {
@@ -14,6 +15,7 @@ export class MatchService {
     private readonly userRepository: Repository<User>,
     private readonly userService: UsersService,
     private readonly transformUserService: TransformUserService,
+    private readonly achivementService: AchievementsService,
   ) {}
 
   #getXp(
@@ -50,6 +52,13 @@ export class MatchService {
       winner_id,
       this.#getXp(winner, looser, score_winner, score_looser),
     );
+
+    this.achivementService.saveAchievement(
+      winner,
+      looser,
+      await this.getMatch(winner_id),
+      await this.getMatch(looser_id),
+    );
   }
 
   async getMatch(Id: string): Promise<MatchFront[]> {
@@ -73,6 +82,7 @@ export class MatchService {
         score_looser: el.score_looser,
         looser: await this.transformUserService.transform(el.looser_id),
         winner: null,
+        date: el.created_at.getTime(),
       };
     });
 
@@ -83,9 +93,14 @@ export class MatchService {
         score_looser: el.score_looser,
         winner: await this.transformUserService.transform(el.winner_id),
         looser: null,
+        date: el.created_at.getTime(),
       };
     });
 
-    return Promise.all([...winArray, ...looseArray]);
+    const res = await Promise.all([...winArray, ...looseArray]);
+
+    return res.sort(function (a, b) {
+      return a.date - b.date;
+    });
   }
 }

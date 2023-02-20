@@ -1,8 +1,8 @@
-import Image from "next/image";
 import textStyles from "styles/text.module.scss";
 import stylesProfil from "styles/profil.module.scss";
 import { Userfront as User } from "types";
 import styles from "styles/miniProfil.module.scss";
+import ProfilePicture from "./ProfilePicture";
 
 export default function MiniProfil(props: {
   left: boolean;
@@ -94,11 +94,11 @@ export default function MiniProfil(props: {
       <div className={styles.bandeauSuperior}>
         {props.left ? (
           <div className="fill small">
-            <Image
-              alt="avatar"
-              src={`/avatar/avatar-${props.user.user.avatar_num}.png`}
+            <ProfilePicture
+              userId={props.user.user.id}
               width={42}
               height={42}
+              handleClick={undefined}
             />
           </div>
         ) : (
@@ -121,11 +121,11 @@ export default function MiniProfil(props: {
           </p>
         ) : (
           <div className="fill small">
-            <Image
-              alt="avatar"
-              src={`/avatar/avatar-${props.user.user.avatar_num}.png`}
+            <ProfilePicture
+              userId={props.user.user.id}
               width={42}
               height={42}
+              handleClick={undefined}
             />
           </div>
         )}
@@ -183,10 +183,7 @@ export default function MiniProfil(props: {
               <p
                 className={textStyles.laquer + " " + styles.score}
                 style={{
-                  fontSize: `${
-                    20 *
-                    (1 + ((props.score * 100) / props.game.score / 100) * 2)
-                  }px`,
+                  fontSize: "30px",
                 }}
               >
                 {props.score}
@@ -201,10 +198,7 @@ export default function MiniProfil(props: {
               <p
                 className={textStyles.laquer + " " + styles.score}
                 style={{
-                  fontSize: `${
-                    20 *
-                    (1 + ((props.score * 100) / props.game.score / 100) * 2)
-                  }px`,
+                  fontSize: "30px",
                 }}
               >
                 {props.score}
