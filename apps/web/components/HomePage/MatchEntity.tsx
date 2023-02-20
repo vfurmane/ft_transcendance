@@ -7,6 +7,7 @@ import ProfilePicture from "../ProfilePicture";
 export default function MatchEntity(props: {
   match: Match;
   user: User;
+  avatarHash: string | null;
 }): JSX.Element {
   if (!props || !props.match) return <></>;
 
@@ -24,6 +25,7 @@ export default function MatchEntity(props: {
               width={47}
               height={47}
               handleClick={undefined}
+              fileHash={props.avatarHash}
             />
           </div>
           <div className={styles.entityText}>
@@ -55,6 +57,7 @@ export default function MatchEntity(props: {
               width={47}
               height={47}
               handleClick={undefined}
+              fileHash={props.avatarHash}
             />
           </div>
         </div>

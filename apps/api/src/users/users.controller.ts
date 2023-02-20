@@ -50,7 +50,7 @@ export class UsersController {
     if (profile === null) {
       throw new NotFoundException(`User: ${id} not found`);
     }
-    const file = profile.picture
+    const file = profile.picture && fs.existsSync(profile.picture)
       ? fs.createReadStream(profile.picture)
       : fs.createReadStream('./assets/default_avatar.jpg');
     return new StreamableFile(file);
@@ -81,7 +81,7 @@ export class UsersController {
           fileType: 'jpeg',
         })
         .addMaxSizeValidator({
-          maxSize: 100000,
+          maxSize: 5000000,
         })
         .build({
           errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,

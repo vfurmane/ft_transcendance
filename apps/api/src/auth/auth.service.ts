@@ -123,18 +123,15 @@ export class AuthService {
     return jwt.user;
   }
 
-  async createJwtEntity(
+  createJwtEntity(
     user: User,
     token_type: TokenTypeEnum = TokenTypeEnum.ACCESS_TOKEN,
     originToken: Jwt | null = null,
-  ): Promise<Jwt> {
+  ): Jwt {
     const jwtEntity = new Jwt();
     jwtEntity.user = user;
     jwtEntity.token_type = token_type;
     jwtEntity.originToken = originToken;
-    await this.jwtsRepository.save(jwtEntity).then((jwt) => {
-      jwtEntity.id = jwt.id;
-    });
     return jwtEntity;
   }
 
@@ -143,12 +140,18 @@ export class AuthService {
   }
 
   async createTokensPair(user: User): Promise<string[]> {
-    const accessTokenEntity = await this.createJwtEntity(user);
-    const refreshTokenEntity = await this.createJwtEntity(
+    const accessTokenEntity = this.createJwtEntity(user);
+    const refreshTokenEntity = this.createJwtEntity(
       user,
       TokenTypeEnum.REFRESH_TOKEN,
       accessTokenEntity,
     );
+    await this.jwtsRepository
+      .save([accessTokenEntity, refreshTokenEntity])
+      .then(([_accessTokenEntity, _refreshTokenEntity]) => {
+        accessTokenEntity.id = _accessTokenEntity.id;
+        refreshTokenEntity.id = _refreshTokenEntity.id;
+      });
 
     return Promise.all([
       this.jwtService.sign(

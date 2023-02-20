@@ -9,10 +9,11 @@ import Message from "../../public/message.png";
 import valide from "../../public/valide.png";
 import refuse from "../../public/crossRed.png";
 import { useWebsocketContext } from "../Websocket";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { selectUserState } from "../../store/UserSlice";
 import { useRouter } from "next/router";
 import ProfilePicture from "../ProfilePicture";
+import { setInvitedUser } from "../../store/InvitationSlice";
 
 export default function UserEntity(props: {
   user: User;
@@ -25,12 +26,14 @@ export default function UserEntity(props: {
     setOpenMenu: React.Dispatch<React.SetStateAction<boolean>>;
   }) => void;
   delFriendClick?: (e: { idToDelete: string; index: number }) => void;
+  avatarHash?: string | null;
 }): JSX.Element {
   const [status, setStatus] = useState(props.user.status);
   const [openMenu, setOpenMenu] = useState(false);
   const [accept, setAccept] = useState(props.option?.accept);
   const UserState = useSelector(selectUserState);
   const router = useRouter();
+  const dispatch = useDispatch();
   const websockets = useWebsocketContext();
 
   useEffect(() => {
@@ -121,6 +124,7 @@ export default function UserEntity(props: {
                     id: props.user.id,
                   },
                   () => {
+                    dispatch(setInvitedUser(props.user));
                     router.push("/invite");
                   }
                 );
@@ -162,6 +166,7 @@ export default function UserEntity(props: {
               width={47}
               height={47}
               handleClick={undefined}
+              fileHash={props.avatarHash}
             />
           </div>
           {status === "online" ? (

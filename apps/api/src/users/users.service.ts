@@ -41,6 +41,13 @@ export class UsersService {
     });
   }
 
+  async getUserById(id: string): Promise<Userfront | null> {
+    const user = await this.usersRepository.findOneBy({
+      id,
+    });
+    return await this.transformUserService.transform(user);
+  }
+
   async getByUsername(username: string): Promise<User | null> {
     return this.usersRepository.findOneBy({
       name: username,
@@ -163,7 +170,7 @@ export class UsersService {
     file: Express.Multer.File,
   ): Promise<UpdateResult | null> {
     try {
-      if (profile?.picture != null) {
+      if (profile?.picture !== null && fs.existsSync(profile?.picture)) {
         fs.unlinkSync(profile.picture);
       }
       return this.profileRepository.update(

@@ -1,23 +1,26 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import TopBar from "../../components/TopBar";
 import { useRouter } from "next/router";
 import Image from "next/image";
 import MatchEntity from "../../components/HomePage/MatchEntity";
 import { selectUserState } from "../../store/UserSlice";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { initUser } from "../../initType/UserInit";
 import AchivementEntity from "../../components/ProfilePage/achivementEntity";
-import { initAchivement } from "../../initType/AchivementInit";
-import { Achivement } from "types";
+import { Achievements, MatchFront } from "types";
 import ChangePswrd from "../../components/ProfilePage/ChangePswrd";
 import ChangeUsername from "../../components/ProfilePage/ChangeUsername";
 import ChatBar from "../../components/chatBar";
 import styles from "styles/profil.module.scss";
 import textStyles from "styles/text.module.scss";
-import { initMatch } from "../../initType/MatchInit";
 import ConfigTfa from "../../components/ProfilePage/ConfigTfa";
 import ProfilePictureUploader from "../../components/ProfilePictureUploader";
 import { useWebsocketContext } from "../../components/Websocket";
+import {
+  blockUser,
+  selectBlockedUsersState,
+  unblockUser,
+} from "../../store/BlockedUsersSlice";
 
 export default function Profil(): JSX.Element {
   const UserState = useSelector(selectUserState);
@@ -25,18 +28,24 @@ export default function Profil(): JSX.Element {
     null;
   };
 
-  const prevAchivementRef = useRef({ name: "", status: "", description: "" });
+  const prevAchievementRef = useRef<Achievements | null>(null);
   const router = useRouter();
   const [user, setUser] = useState(initUser);
   const [openAchivementList, setOpenAchivementList] = useState(false);
   const [openAchivement, setOpenAchivement] = useState(false);
-  const [achivementSelect, setAchivementSelect] = useState(initAchivement);
+  const [achievementsList, setAchievementsList] = useState<JSX.Element[]>([]);
+  const [achievementSelect, setAchievementSelect] =
+    useState<Achievements | null>(null);
   const [userProfil, setUserProfil] = useState(false);
   const [openConfigProfil, setOpenConfigProfil] = useState(false);
   const [configProfil, setConfigProfil] = useState(<></>);
-  const [matchHistory, setMatchHistory] = useState([initMatch]);
+  const [matchHistory, setMatchHistory] = useState<MatchFront[]>([]);
   const [listOfMatch, setListOfMatch] = useState<JSX.Element[]>([]);
+  const [isBlocked, setIsBlocked] = useState(false);
+  const dispatch = useDispatch();
+  const [avatarHash, setAvatarHash] = useState<string | null>(null);
   const websockets = useWebsocketContext();
+  const BlockedUsersState = useSelector(selectBlockedUsersState);
 
   /*======for close topBar component when click on screen====*/
   const [openToggle, setOpenToggle] = useState(false);
@@ -45,6 +54,36 @@ export default function Profil(): JSX.Element {
   const [indexOfUser, setIndexOfUser] = useState(-1);
   const prevIndexOfUserRef = useRef(-1);
   const prevSetterUsermenuRef = useRef(setterInit);
+
+  useEffect(() => {
+    if (BlockedUsersState.find((userId) => userId === user.id))
+      setIsBlocked(true);
+    else setIsBlocked(false);
+  }, [BlockedUsersState, user.id]);
+
+  function blockUserOnClick(): void {
+    if (websockets.conversations) {
+      websockets.conversations.emit(
+        "block_user",
+        { targetId: user.id },
+        ({ targetId }: { targetId: string | null }) => {
+          if (targetId) dispatch(blockUser(targetId));
+        }
+      );
+    }
+  }
+
+  function unblockUserOnClick(): void {
+    if (websockets.conversations) {
+      websockets.conversations.emit(
+        "unblock_user",
+        { targetId: user.id },
+        ({ targetId }: { targetId: string | null }) => {
+          if (targetId) dispatch(unblockUser(targetId));
+        }
+      );
+    }
+  }
 
   function clickTopBarToggle(): void {
     setOpenToggle(!openToggle);
@@ -79,32 +118,61 @@ export default function Profil(): JSX.Element {
     if (router.query.username !== UserState.name) {
       // if foreign user
       fetch(`/api/user/${router.query.username}`, {
-        credentials: "same-origin",
+        credentials: "same-origin",}
+        )
+      .then(async (response) => {
+        if (!response.ok) {
+          return response.json().then((error) => {
+            throw new Error(error.message || "An unexpected error occured...");
+          });
+        } else {
+          return response.json();
+        }
       })
-        .then(async (response) => {
-          if (!response.ok) {
-            return response.json().then((error) => {
-              throw new Error(
-                error.message || "An unexpected error occured..."
-              );
-            });
-          } else {
-            return response.json();
-          }
-        })
-        .then((response) => {
-          setUser(response);
-          setUserProfil(false);
-        })
-        .catch(() => {
-          router.replace("/");
-        });
-    } else {
-      // if us
-      setUser(UserState);
-      setUserProfil(true);
+      .then((response) => {
+        setUser(response);
+      })
+      .catch(() => {
+        router.replace("/");
+      });
+    setUserProfil(router.query.username === UserState.name);
     }
-    if (user.id)
+    
+    if (typeof router.query.username === "string") {
+      fetch(`/api/achievements/${router.query.username}`, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + localStorage.getItem("access_token"),
+        },
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          setAchievementsList(
+            data.map((e: Achievements, i: number) => (
+              <AchivementEntity
+                achievement={{
+                  id: e.id,
+                  title: e.title,
+                  description: e.description,
+                  logo: e.logo,
+                  created_at: e.created_at,
+                  user: e.user,
+                }}
+                key={i}
+                handleClick={achievementClick}
+                className={`achievement${i}`}
+              />
+            ))
+          );
+        })
+        .catch((error) => {
+          console.error(`problem with fetch : ${error.message}`);
+        });
+    }
+  }, [router.query, UserState, router, user.id]);
+
+  useEffect(() => {
+    if (user) {
       fetch(`/api/match/${user.id}`, {
         headers: {
           "Content-Type": "application/json",
@@ -118,7 +186,8 @@ export default function Profil(): JSX.Element {
         .catch((error) => {
           console.error(`problem with fetch : ${error.message}`);
         });
-  }, [router.query, UserState, router, user.id]);
+    }
+  }, [user]);
 
   useEffect(() => {
     const tmp: JSX.Element[] = [];
@@ -128,6 +197,7 @@ export default function Profil(): JSX.Element {
           match={matchHistory[i]}
           user={user}
           key={matchHistory[i].id}
+          avatarHash={avatarHash}
         />
       );
     }
@@ -153,11 +223,25 @@ export default function Profil(): JSX.Element {
     setOpenAchivementList(true);
   }
 
-  function achivementClick(e: { achivement: Achivement }): void {
+  function achievementClick(e: { achievement: Achievements }): void {
     setOpenAchivement(true);
-    setAchivementSelect(e.achivement);
-    prevAchivementRef.current = achivementSelect;
+    setAchievementSelect(e.achievement);
+    prevAchievementRef.current = e.achievement;
+    return;
   }
+
+  /*useEffect(() => {
+    if (achievementSelect)
+    {
+      const index = achievementsList.findIndex(e => e.props.achievement.id === achievementSelect.id);
+      if (index === -1) return;
+      const className = achievementsList[index].props.className;
+      console.log(className);
+      const elem = document.getElementsByClassName(className);
+      console.log(elem);
+      elem[0]?.scrollIntoView(true);
+    }
+  }, [achievementSelect])*/
 
   function changeUsername(): void {
     setOpenConfigProfil(true);
@@ -178,10 +262,13 @@ export default function Profil(): JSX.Element {
   }
 
   function close(): void {
-    if (openAchivementList && prevAchivementRef.current !== achivementSelect)
+    if (openAchivementList && prevAchievementRef.current === achievementSelect)
       setOpenAchivementList(false);
-    if (openAchivement && prevAchivementRef.current !== achivementSelect)
+    if (openAchivement && prevAchievementRef.current === achievementSelect) {
       setOpenAchivement(false);
+      prevAchievementRef.current = null;
+      setAchievementSelect(null);
+    }
     if (openProfil) setOpenProfil(false);
     if (openUserList && indexOfUser === prevIndexOfUserRef.current) {
       setOpenUserList(false);
@@ -189,6 +276,7 @@ export default function Profil(): JSX.Element {
       setIndexOfUser(-1);
       prevIndexOfUserRef.current = -1;
     }
+    return;
   }
 
   function addFriend(): void {
@@ -205,23 +293,6 @@ export default function Profil(): JSX.Element {
     });
   }
 
-  //temporary before get the real data
-  const achivementList: JSX.Element[] = [];
-  for (let i = 0; i < 22; i++) {
-    achivementList.push(
-      <AchivementEntity
-        achivement={{
-          name: "achivement" + (i + 1).toString(),
-          status: "done",
-          description:
-            "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Leo duis ut diam quam nulla. Et ligula ullamcorper malesuada proin libero nunc consequat. Tincidunt eget nullam non nisi est sit amet facilisis magna. Eu turpis egestas pretium aenean. Nunc consequat interdum varius sit amet. Cras adipiscing enim eu turpis egestas pretium. Integer eget aliquet nibh praesent. Ut sem viverra aliquet eget sit amet. Auctor augue mauris augue neque gravida in. Ut eu sem integer vitae. Viverra accumsan in nisl nisi scelerisque eu ultrices vitae auctor. Orci ac auctor augue mauris. Tempor id eu nisl nunc mi ipsum faucibus vitae.",
-        }}
-        key={i}
-        handleClick={achivementClick}
-      />
-    );
-  }
-
   return (
     <div onClick={close} style={{ width: "100vw", height: "100vh" }}>
       <TopBar
@@ -232,6 +303,7 @@ export default function Profil(): JSX.Element {
         clickTopBarToggle={clickTopBarToggle}
         writeSearchTopBar={writeSearchTopBar}
         handleClickUserMenu={handleClickUserMenu}
+        avatarHash={avatarHash}
       />
       <div className="container" style={{ marginTop: "150px" }}>
         <div className="row">
@@ -240,9 +312,11 @@ export default function Profil(): JSX.Element {
           >
             <div className="fill">
               <ProfilePictureUploader
-                userId={UserState.id}
+                userId={user.id}
                 width={200}
                 height={200}
+                setFileHash={setAvatarHash}
+                fileHash={avatarHash}
               />
             </div>
             <div className={styles.rank + " " + textStyles.saira}>
@@ -323,7 +397,7 @@ export default function Profil(): JSX.Element {
                     className={textStyles.laquer}
                     style={{ marginLeft: "10px" }}
                   >
-                    10
+                    {achievementsList.length}
                   </h3>
                 </div>
               </div>
@@ -407,12 +481,13 @@ export default function Profil(): JSX.Element {
                   <button
                     className={styles.buttonProfil}
                     style={{ backgroundColor: "#e22d44", width: "100px" }}
+                    onClick={isBlocked ? unblockUserOnClick : blockUserOnClick}
                   >
                     <h3
                       className={textStyles.laquer}
                       style={{ fontSize: "18px" }}
                     >
-                      block
+                      {isBlocked ? "unBlock" : "Block"}
                     </h3>
                   </button>
                 </div>
@@ -435,36 +510,25 @@ export default function Profil(): JSX.Element {
                       className="card"
                       style={{ background: "rgba(0,0,0,0)" }}
                     >
-                      <h2 className={textStyles.pixel}>
-                        <Image
-                          alt="achivement"
-                          src={`/achivement.png`}
-                          width={32}
-                          height={32}
-                          onClick={achivementListClick}
-                        />{" "}
-                        Achivement
+                      <h2
+                        className={textStyles.pixel}
+                        style={{ marginBottom: "20px" }}
+                      >
+                        Achivements
                       </h2>
-                      <div className="cardList">{achivementList}</div>
+                      <div className="cardList">{achievementsList}</div>
                     </div>
                     {openAchivement ? (
                       <div
                         className="card"
                         style={{ background: "rgba(0,0,0,0)" }}
                       >
-                        <h3 className={textStyles.laquer}>
-                          <Image
-                            alt="achivement"
-                            src={`/achivement.png`}
-                            width={32}
-                            height={32}
-                            onClick={achivementListClick}
-                          />
-                          {achivementSelect.name}
-                        </h3>
                         <div className="cardList">
-                          <p className={textStyles.saira}>
-                            {achivementSelect.description}
+                          <p
+                            className={textStyles.saira}
+                            style={{ marginTop: "120px" }}
+                          >
+                            {achievementSelect?.description}
                           </p>
                         </div>
                       </div>

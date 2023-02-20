@@ -21,10 +21,13 @@ class Game {
   public boardCanvas!: HTMLCanvasElement;
   public boardContext!: CanvasRenderingContext2D;
   public board!: Board;
+  public static ballSpeed = 3;
+  public static racketSpeed = 2;
   public countUpdate = 0;
   public static point = 0;
   public static live = 10;
   public ball!: Ball;
+  public saveBall!: { ball: Ball; count: number };
   public player: Racket[] = [];
   public cible!: Target;
   public static keyPressed = { up: false, down: false };
@@ -32,8 +35,12 @@ class Game {
   public lastUpdate = 0;
   public color: string[] = ["blue", "red", "orange", "white", "pink", "black"];
   public static position: number;
-  public static scoreMax = 1;
-  public static changeLife: (index: number, val: number) => void;
+  public static scoreMax = 10;
+  public static changeLife: (
+    index: number,
+    val: number,
+    length: number
+  ) => void;
   public static socket: Socket<DefaultEventsMap, DefaultEventsMap>;
   public static count: number;
   public await = true;
@@ -41,11 +48,11 @@ class Game {
   constructor(
     number_player: number | undefined,
     position: number | undefined,
-    changeLife: (index: number, val: number) => void
+    changeLife: (index: number, val: number, length: number) => void
   ) {
-    console.log("IN GAME CONSTRUCTOR NB PLAYER IS ", number_player);
     if (number_player) {
       this.boardType = number_player;
+      Game.isSolo = false;
     } else {
       this.boardType = Form.REC;
       Game.isSolo = true;
@@ -133,6 +140,11 @@ class Game {
     if (!this.boardType) {
       return;
     }
+    if (state.numberPlayer !== this.boardType) {
+      this.boardType = state.numberPlayer;
+      this.player = [];
+      this.init(this.boardCanvasRef);
+    }
     state = this.convertStateServer(state);
     if (this.boardType == Form.REC) {
       this.player = this.updatePlayer(state.players, [
@@ -161,12 +173,25 @@ class Game {
         this.board.wall
       );
     }
-    const speed = new Vector(state.ball.dir.x, state.ball.dir.y).normalized();
-    this.ball.defaultSpeed = 3 * (this.boardCanvas.width / ServerCanvas.width);
+    const exBallSpeed = new Vector(
+      state.ball.dir.x,
+      state.ball.dir.y
+    ).normalized();
+    this.ball.defaultSpeed =
+      Game.ballSpeed * (this.boardCanvas.width / ServerCanvas.width);
     this.ball.speed = new Vector(
-      speed.x * this.ball.defaultSpeed,
-      speed.y * this.ball.defaultSpeed
+      exBallSpeed.x * this.ball.defaultSpeed,
+      exBallSpeed.y * this.ball.defaultSpeed
     );
+    this.player.forEach((p) => {
+      const exPlayerSpeed = p.speed.normalized();
+      p.defaultSpeed =
+        Game.racketSpeed * (this.boardCanvas.width / ServerCanvas.width);
+      p.speed = new Vector(
+        exPlayerSpeed.x * p.defaultSpeed,
+        exPlayerSpeed.y * p.defaultSpeed
+      );
+    });
     this.ball.calcNextCollision(this.player, this.board.wall, null, null);
   }
 
@@ -190,6 +215,18 @@ class Game {
         this.player,
         this.board.wall
       );
+      if (Game.isSolo) {
+        this.cible = new Target(
+          this.createRect(
+            (this.cible.point[0].x * (window.innerWidth * 0.6)) /
+              this.boardCanvas!.width,
+            (this.cible.point[0].y * (window.innerWidth * 0.6 * (1 / 2))) /
+              this.boardCanvas!.height,
+            this.ballWidth * 5,
+            this.ballWidth * 5
+          )
+        );
+      }
     } else {
       this.player = this.updatePlayer(state.players, this.board.wall);
       this.ball = new Ball(
@@ -204,20 +241,29 @@ class Game {
     }
     const speed = new Vector(state.ball.dir.x, state.ball.dir.y).normalized();
     this.ball.defaultSpeed =
-      3 * ((window.innerWidth * 0.6) / ServerCanvas.width);
+      Game.ballSpeed * ((window.innerWidth * 0.6) / ServerCanvas.width);
     this.ball.speed = new Vector(
       speed.x * this.ball.defaultSpeed,
       speed.y * this.ball.defaultSpeed
     );
+    this.player.forEach((p) => {
+      const exPlayerSpeed = p.speed.normalized();
+      p.defaultSpeed =
+        Game.racketSpeed * (this.boardCanvas.width / ServerCanvas.width);
+      p.speed = new Vector(
+        exPlayerSpeed.x * p.defaultSpeed,
+        exPlayerSpeed.y * p.defaultSpeed
+      );
+    });
     this.ball.calcNextCollision(this.player, this.board.wall, null, null);
   }
 
   updatePlayer(player: PlayerInterface[], wall: Wall[]): Racket[] {
-    const racket: Racket[] = [];
-    for (let i = 0; i < wall.length; i++) {
-      const wallDir = wall[i].point[0].vectorTo(wall[i].point[2]).normalized();
+    this.ballWidth = this.board.wallSize * 0.00625;
+    if (Game.isSolo) {
+      const wallDir = wall[0].point[0].vectorTo(wall[0].point[2]).normalized();
       const wallPerp = wallDir.perp().normalized();
-      const racketCenter = player[i].point;
+      const racketCenter = player[0].point;
       const p3 = new Point(
         racketCenter.x - wallDir.x * (this.board.wallSize * 0.05),
         racketCenter.y - wallDir.y * (this.board.wallSize * 0.05)
@@ -234,25 +280,68 @@ class Game {
         p3.x + wallPerp.x * this.ballWidth,
         p3.y + wallPerp.y * this.ballWidth
       );
-      if (this.player === undefined)
-        racket.push(new Racket(i, [p0, p1, p2, p3], this.color[i]));
-      else racket.push(new Racket(i, [p0, p1, p2, p3], this.player[i].color));
-      Game.changeLife(i, player[i].hp);
-      racket[i].hp = player[i].hp;
+      return [new Racket(0, [p0, p1, p2, p3], this.color[0])];
+    } else {
+      const racket: Racket[] = [];
+      for (let i = 0; i < wall.length; i++) {
+        const wallDir = wall[i].point[0]
+          .vectorTo(wall[i].point[2])
+          .normalized();
+        const wallPerp = wallDir.perp().normalized();
+        const racketCenter = player[i].point;
+        const p3 = new Point(
+          racketCenter.x - wallDir.x * (this.board.wallSize * 0.05),
+          racketCenter.y - wallDir.y * (this.board.wallSize * 0.05)
+        );
+        const p0 = new Point(
+          racketCenter.x + wallDir.x * (this.board.wallSize * 0.05),
+          racketCenter.y + wallDir.y * (this.board.wallSize * 0.05)
+        );
+        const p1 = new Point(
+          p0.x + wallPerp.x * this.ballWidth,
+          p0.y + wallPerp.y * this.ballWidth
+        );
+        const p2 = new Point(
+          p3.x + wallPerp.x * this.ballWidth,
+          p3.y + wallPerp.y * this.ballWidth
+        );
+        if (this.player === undefined)
+          racket.push(new Racket(i, [p0, p1, p2, p3], this.color[i]));
+        else racket.push(new Racket(i, [p0, p1, p2, p3], this.player[i].color));
+        Game.changeLife(i, player[i].hp, wall.length);
+        racket[i].hp = player[i].hp;
+      }
+      return racket;
     }
-    return racket;
   }
 
   createRacket(wall: Wall[]): Racket[] {
     this.ballWidth = this.board.wallSize * 0.00625;
     if (Game.isSolo) {
-      return [
-        new Racket(
-          0,
-          this.createRect(10, this.boardCanvas.height / 2, 10, 80),
-          this.color[0]
-        ),
-      ];
+      const wallDir = wall[0].point[0].vectorTo(wall[0].point[2]).normalized();
+      const wallPerp = wallDir.perp().normalized();
+      const wallCenter = wall[0].center();
+      const racketCenter = new Point(
+        wallCenter.x + wallPerp.x * this.ballWidth * 3,
+        wallCenter.y + wallPerp.y * this.ballWidth * 3
+      );
+      const p3 = new Point(
+        racketCenter.x - wallDir.x * (this.board.wallSize * 0.05),
+        racketCenter.y - wallDir.y * (this.board.wallSize * 0.05)
+      );
+      const p0 = new Point(
+        racketCenter.x + wallDir.x * (this.board.wallSize * 0.05),
+        racketCenter.y + wallDir.y * (this.board.wallSize * 0.05)
+      );
+      const p1 = new Point(
+        p0.x + wallPerp.x * this.ballWidth,
+        p0.y + wallPerp.y * this.ballWidth
+      );
+      const p2 = new Point(
+        p3.x + wallPerp.x * this.ballWidth,
+        p3.y + wallPerp.y * this.ballWidth
+      );
+      return [new Racket(0, [p0, p1, p2, p3], this.color[0])];
     } else {
       const racket: Racket[] = [];
       for (let i = 0; i < wall.length; i++) {
@@ -262,8 +351,8 @@ class Game {
         const wallPerp = wallDir.perp().normalized();
         const wallCenter = wall[i].center();
         const racketCenter = new Point(
-          wallCenter.x + wallPerp.x * 10,
-          wallCenter.y + wallPerp.y * 10
+          wallCenter.x + wallPerp.x * this.ballWidth * 3,
+          wallCenter.y + wallPerp.y * this.ballWidth * 3
         );
         const p3 = new Point(
           racketCenter.x - wallDir.x * (this.board.wallSize * 0.05),
@@ -338,51 +427,81 @@ class Game {
         this.board.wall
       );
     }
-    this.ball.defaultSpeed = 3 * (this.boardCanvas.width / ServerCanvas.width);
-    if (Game.isSolo)
+    this.ball.defaultSpeed =
+      Game.ballSpeed * (this.boardCanvas.width / ServerCanvas.width);
+    const dir = this.ball.speed.normalized();
+    this.ball.speed = new Vector(
+      dir.x * this.ball.defaultSpeed,
+      dir.y * this.ball.defaultSpeed
+    );
+    this.player.forEach((p) => {
+      const exPlayerSpeed = p.speed.normalized();
+      p.defaultSpeed =
+        Game.racketSpeed * (this.boardCanvas.width / ServerCanvas.width);
+      p.speed = new Vector(
+        exPlayerSpeed.x * p.defaultSpeed,
+        exPlayerSpeed.y * p.defaultSpeed
+      );
+    });
+    if (Game.isSolo) {
       this.cible = new Target(
         this.createRect(
           this.boardCanvas.width * (2 / 3),
           this.boardCanvas.height / 2,
-          20,
-          20
+          this.ballWidth * 5,
+          this.ballWidth * 5
         )
       );
+      this.saveBall = {
+        ball: new Ball(this.ball.copy(), this.player, this.board.wall),
+        count: 0,
+      };
+    }
 
     window.addEventListener("keydown", function (e) {
       if (e.key === "ArrowUp") {
-        if (Game.keyPressed.down === false) {
-          Game.socket.emit("pressUp");
-        } else {
-          Game.socket.emit("unpressDown");
+        if (!Game.isSolo) {
+          if (Game.keyPressed.down === false) {
+            Game.socket.emit("pressUp");
+          } else {
+            Game.socket.emit("unpressDown");
+          }
         }
         Game.keyPressed.up = true;
       } else if (e.key === "ArrowDown") {
-        if (Game.keyPressed.up === false) {
-          Game.socket.emit("pressDown");
-        } else {
-          Game.socket.emit("unpressUp");
+        if (!Game.isSolo) {
+          if (Game.keyPressed.up === false) {
+            Game.socket.emit("pressDown");
+          } else {
+            Game.socket.emit("unpressUp");
+          }
         }
         Game.keyPressed.down = true;
       }
     });
+
     window.addEventListener("keyup", function (e) {
       if (e.key === "ArrowUp") {
-        if (Game.keyPressed.down === false) {
-          Game.socket.emit("unpressUp");
-        } else {
-          Game.socket.emit("pressDown");
+        if (!Game.isSolo) {
+          if (Game.keyPressed.down === false) {
+            Game.socket.emit("unpressUp");
+          } else {
+            Game.socket.emit("pressDown");
+          }
         }
         Game.keyPressed.up = false;
       } else if (e.key === "ArrowDown") {
-        if (Game.keyPressed.up === false) {
-          Game.socket.emit("unpressDown");
-        } else {
-          Game.socket.emit("pressUp");
+        if (!Game.isSolo) {
+          if (Game.keyPressed.up === false) {
+            Game.socket.emit("unpressDown");
+          } else {
+            Game.socket.emit("pressUp");
+          }
         }
         Game.keyPressed.down = false;
       }
     });
+
     if (!Game.isSolo) {
       Game.socket.on("refresh", (state: GameState, time: number) => {
         this.await = false;
@@ -422,6 +541,14 @@ class Game {
   }
 
   rescale() {
+    let size = 1;
+    if (this.boardType == Form.HEX || this.boardType == Form.PEN) {
+      size = 0.5;
+    }
+    this.board.wallSize = Math.min(
+      window.innerWidth * 0.6 * size,
+      window.innerWidth * 0.6 * (1 / 2) * size
+    );
     const state = this.getState();
     this.refreshClient(state);
     this.boardCanvas!.width = window.innerWidth * 0.6;
@@ -431,12 +558,10 @@ class Game {
 
   updateGame() {
     if (this.await) return;
-    const time = Math.round(Date.now() - this.start);
     if (
       this.boardCanvas!.width !== Math.round(window.innerWidth * 0.6) ||
       this.boardCanvas!.height !== Math.round(window.innerWidth * 0.6 * (1 / 2))
     ) {
-      console.log("RESCALE");
       this.rescale();
     }
     this.boardCanvas!.width = Math.round(window.innerWidth * 0.6);
@@ -466,10 +591,44 @@ class Game {
       this.boardContext!.lineWidth = 1;
     }
 
+    if (Game.isSolo) {
+      if (
+        this.ball.nextCollision.wall &&
+        this.ball.nextCollision.wall <= 2 &&
+        this.saveBall &&
+        !this.saveBall.count
+      ) {
+        this.saveBall = {
+          ball: new Ball(this.ball.copy(), this.player, this.board.wall),
+          count: 1,
+        };
+        this.saveBall.ball.speed = new Vector(
+          -this.ball.speed.x,
+          -this.ball.speed.y
+        );
+      }
+      if (this.saveBall && this.saveBall.count) {
+        this.saveBall.count++;
+      }
+      if (this.saveBall && this.saveBall.count === 10) {
+        if (
+          this.ball.point[0].x < 0 ||
+          this.ball.point[0].y < 0 ||
+          this.ball.point[0].x > this.board.wall[2].point[0].x ||
+          this.ball.point[0].y > this.board.wall[3].point[0].y
+        ) {
+          this.ball = this.saveBall.ball;
+        }
+        this.saveBall.count = 0;
+      }
+    }
+
     this.countUpdate++;
     const timeRatio = (Date.now() - this.start - this.lastUpdate) / 17;
-    this.ball.update(this.player, this.board.wall, this.board, timeRatio);
     this.player.forEach((player) => player.update(this.board.wall, timeRatio));
+    this.ball.update(this.player, this.board.wall, this.board, timeRatio);
+    if (Game.isSolo)
+      this.ball.calcNextCollision(this.player, this.board.wall, null, null);
     if (Game.isSolo && this.cible)
       this.cible.update(this.ball, this.boardCanvas);
     this.board.wall.forEach((wall) => {
@@ -482,7 +641,7 @@ class Game {
     if (Game.isSolo && this.cible) this.cible.draw(this.boardContext);
     if (Game.live === 0) {
       Game.point = 0;
-      Game.live = 1;
+      Game.live = 11;
       this.start = Date.now();
     }
     this.lastUpdate = Date.now() - this.start;
@@ -526,9 +685,9 @@ class Target extends Entity {
 }
 
 class Ball extends Entity {
-  public defaultSpeed = 3;
+  public defaultSpeed = Game.ballSpeed;
   public nextCollision: {
-    wall: number;
+    wall: number | null;
     wallIndex: number;
     racket: { index: number; time: number } | null;
   } = {
@@ -636,6 +795,7 @@ class Ball extends Entity {
       }
     });
     if (minRatio) this.nextCollision.wall = minRatio;
+    else this.nextCollision.wall = null;
   }
 
   isParallel(from1: Point, to1: Point, from2: Point, to2: Point): number {
@@ -658,6 +818,14 @@ class Ball extends Entity {
     return [this.point[this.point.length - 1], this.point[0]];
   }
 
+  copy() {
+    const lst = [];
+    for (const point of this.point) {
+      lst.push(new Point(point.x, point.y));
+    }
+    return lst;
+  }
+
   goToRandomPlayer(player: Racket[]): void {
     const random = Math.floor(Math.random() * 10000) % player.length;
     const dir = player[random].point[1]
@@ -676,15 +844,16 @@ class Ball extends Entity {
     board: Board,
     timeRatio: number
   ): void {
-    this.nextCollision.wall -= 1 * timeRatio;
+    if (this.nextCollision.wall) this.nextCollision.wall -= 1 * timeRatio;
     if (this.nextCollision.racket)
       this.nextCollision.racket.time -= 1 * timeRatio;
     if (
       this.nextCollision.racket &&
-      this.nextCollision.wall > this.nextCollision.racket.time &&
-      this.nextCollision.racket.time <= 0
+      ((this.nextCollision.wall &&
+        this.nextCollision.wall > this.nextCollision.racket.time) ||
+        !this.nextCollision.wall) &&
+      this.nextCollision.racket.time <= 0.5
     ) {
-      console.log("HIT PLAYER");
       const racket = rackets[this.nextCollision.racket.index];
       let angle = 0;
       let face;
@@ -710,16 +879,21 @@ class Ball extends Entity {
         norm.x * this.defaultSpeed,
         norm.y * this.defaultSpeed
       );
-      this.moveTo(this.speed, timeRatio);
+      const currentTime = this.nextCollision.racket.time;
       this.calcNextCollision(rackets, walls, null, index);
+      if (this.nextCollision.racket)
+        this.nextCollision.racket.time += currentTime;
+      if (this.nextCollision.wall) this.nextCollision.wall += currentTime;
+      this.moveTo(this.speed, -currentTime);
+      if (
+        (this.nextCollision.racket && this.nextCollision.racket.time <= 0) ||
+        (this.nextCollision.wall && this.nextCollision.wall <= 0)
+      )
+        this.update(rackets, walls, board, 0);
       return;
     }
-    if (this.nextCollision.wall <= 0) {
-      const newCoords = new Point(
-        this.point[0].x - this.speed.x * this.nextCollision.wall,
-        this.point[0].y - this.speed.y * this.nextCollision.wall
-      );
-      this.replaceTo(newCoords);
+    if (this.nextCollision.wall && this.nextCollision.wall <= 0.5) {
+      const prevTime = this.nextCollision.wall;
       const wall = walls[this.nextCollision.wallIndex];
       const wallVector = wall.point[0].vectorTo(wall.point[2]);
       const Norm = wallVector.norm() * this.speed.norm();
@@ -741,25 +915,56 @@ class Ball extends Entity {
         ];
       }
       this.speed = tmp;
-      this.moveTo(this.speed, timeRatio);
-      this.moveTo(this.speed, timeRatio);
       const index = this.nextCollision.wallIndex;
+      if (Game.isSolo) {
+        if (index === 0) {
+          this.replaceTo(board.board.center());
+          this.goToRandomPlayer(rackets);
+          this.calcNextCollision(rackets, walls, null, null);
+        } else {
+          this.calcNextCollision(rackets, walls, index, null);
+          if (this.nextCollision.racket)
+            this.nextCollision.racket.time += prevTime;
+          if (this.nextCollision.wall) this.nextCollision.wall += prevTime;
+          this.moveTo(this.speed, -prevTime);
+          if (
+            (this.nextCollision.racket &&
+              this.nextCollision.racket.time <= 0.5) ||
+            (this.nextCollision.wall && this.nextCollision.wall <= 0.5)
+          )
+            this.update(rackets, walls, board, 0);
+        }
+        return;
+      }
       if (rackets.length === 2) {
         if (index === 2) {
-          console.log("LEFT PLAYER GOAL");
           rackets[1].hp--;
+          //Game.changeLife(1, rackets[1].hp);
           this.replaceTo(board.board.center());
           this.goToRandomPlayer(rackets);
           this.calcNextCollision(rackets, walls, null, null);
         } else if (index === 0) {
-          console.log("RIGHT PLAYER GOAL");
           rackets[0].hp--;
+          //Game.changeLife(0, rackets[0].hp);
           this.replaceTo(board.board.center());
           this.goToRandomPlayer(rackets);
           this.calcNextCollision(rackets, walls, null, null);
-        } else this.calcNextCollision(rackets, walls, index, null);
+        } else {
+          this.calcNextCollision(rackets, walls, index, null);
+          if (this.nextCollision.racket)
+            this.nextCollision.racket.time += prevTime;
+          if (this.nextCollision.wall) this.nextCollision.wall += prevTime;
+          this.moveTo(this.speed, -prevTime);
+          if (
+            (this.nextCollision.racket &&
+              this.nextCollision.racket.time <= 0.5) ||
+            (this.nextCollision.wall && this.nextCollision.wall <= 0.5)
+          )
+            this.update(rackets, walls, board, 0);
+        }
       } else {
         rackets[index].hp--;
+        //Game.changeLife(index, rackets[index].hp);
         this.replaceTo(board.board.center());
         this.goToRandomPlayer(rackets);
         this.calcNextCollision(rackets, walls, null, null);
@@ -771,7 +976,7 @@ class Ball extends Entity {
 }
 
 class Racket extends Entity {
-  public defaultSpeed = 2;
+  public defaultSpeed = Game.racketSpeed;
   public hp = 10;
   public dir!: Vector;
 

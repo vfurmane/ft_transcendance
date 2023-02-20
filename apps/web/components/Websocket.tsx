@@ -5,9 +5,11 @@ import {
   useEffect,
   useState,
 } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { io, Socket } from "socket.io-client";
 import { DefaultEventsMap } from "socket.io/dist/typed-events";
+import { Block } from "types";
+import { setBlockedUsers } from "../store/BlockedUsersSlice";
 import { selectUserState } from "../store/UserSlice";
 
 interface WebsocketProps {
@@ -58,6 +60,7 @@ export default function Websocket({ children }: WebsocketProps): JSX.Element {
     conversations: null,
     pong: null,
   });
+  const dispatch = useDispatch();
   const userState = useSelector(selectUserState);
 
   useEffect((): (() => void) => {
@@ -69,6 +72,16 @@ export default function Websocket({ children }: WebsocketProps): JSX.Element {
         general: general,
         conversations: conversations,
         pong: pong,
+      });
+
+      conversations.emit("get_blocked_users", (blocks: Block[]) => {
+        dispatch(
+          setBlockedUsers(
+            blocks.map((block) => {
+              return block.target.id;
+            })
+          )
+        );
       });
     } else {
       closeOpenSockets(socketInstances);
@@ -88,7 +101,7 @@ export default function Websocket({ children }: WebsocketProps): JSX.Element {
         });
       }
     };
-  }, [userState.id]);
+  }, [userState.id, dispatch]);
   return (
     <WebsocketContext.Provider value={socketInstances}>
       {children}

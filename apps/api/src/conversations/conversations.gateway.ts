@@ -19,7 +19,7 @@ import { ConversationsService } from './conversations.service';
 import { sendMessageDto } from './dtos/sendMessage.dto';
 import { isUUIDDto } from './dtos/IsUUID.dto';
 import { HttpExceptionTransformationFilter } from '../common/filters/HttpExceptionFilter.filter';
-import { User } from 'types';
+import { Block, User } from 'types';
 import { createConversationDto } from './dtos/createConversation.dto';
 import { updateRoleDto } from './dtos/updateRole.dto';
 import { Conversation } from 'types';
@@ -31,6 +31,7 @@ import { Message } from 'types';
 import { ConversationRole } from 'types';
 import { UsersService } from '../users/users.service';
 import { instanceToPlain } from 'class-transformer';
+import { BlockUserDto } from './block-user.dto';
 
 @UseFilters(HttpExceptionTransformationFilter)
 @UsePipes(new ValidationPipe())
@@ -281,5 +282,40 @@ export class ConversationsGateway implements OnGatewayConnection {
       .emit('bannedUser', instanceToPlain(restriction));
     this.server.in(`user_${id}`).socketsLeave(`conversation_${id}`);
     return restriction;
+  }
+
+  @SubscribeMessage('get_blocked_users')
+  async getBlockedUsers(@ConnectedSocket() client: Socket): Promise<Block[]> {
+    return this.conversationsService.getBlockedUsers(client.data.id);
+  }
+
+  @SubscribeMessage('block_user')
+  async blockUser(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() { targetId }: BlockUserDto,
+  ): Promise<{ targetId: string | null }> {
+    if (
+      client.data.id === targetId ||
+      (await this.conversationsService.blockExists(client.data.id, targetId))
+    ) {
+      return { targetId: null };
+    }
+    const source = await this.usersService.getById(client.data.id);
+    const target = await this.usersService.getById(targetId);
+    if (!source || !target) {
+      return { targetId: null };
+    }
+    await this.conversationsService.blockUser(source, target);
+    return { targetId };
+  }
+
+  @SubscribeMessage('unblock_user')
+  async unblockUser(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() { targetId }: BlockUserDto,
+  ): Promise<{ targetId: string | null }> {
+    if (client.data.id === targetId) return { targetId: null };
+    await this.conversationsService.unblockUser(client.data.id, targetId);
+    return { targetId };
   }
 }
