@@ -55,7 +55,7 @@ export default function PingPong(): JSX.Element {
 
   function rotateInit(users: User[])  {
     const size = users.findIndex(e => e.id === UserState.id) === -1 ? users.length : users.length + 1;
-    console.log('-----------------in rotateInit');
+    //console.log('-----------------in rotateInit');
     const angle = 360 / size;
 
     let ratio = 1;
@@ -69,14 +69,14 @@ export default function PingPong(): JSX.Element {
     const canvas = document.getElementById("canvasElem");
     if (canvas && game)
     {
-      const wallSize = Math.min(Math.round(width * ratio), Math.round(height * ratio));
+      const wallSize = Math.min(Math.round(width ), Math.round(height));
       let centerAxeX : number = 0;
-      if (users.length === 2) centerAxeX = Math.round(wallSize);
-      else if (users.length === 3) centerAxeX = Math.round(Math.round((1/3) * (Math.sqrt(3)/2) * wallSize));
-      else if (users.length === 4) centerAxeX = Math.round(wallSize / 2);
-      else if (users.length > 4) centerAxeX =  Math.round((Math.round(wallSize) / Math.round(2 * Math.round(Math.tan(Math.round(180 / users.length))))));
+      if (users.length === 2) centerAxeX = wallSize * ratio;
+      else if (users.length === 3) centerAxeX = (((1/3) * (Math.sqrt(3)/2) * (wallSize * ratio)));
+      else if (users.length === 4) centerAxeX = (wallSize * ratio) / 2;
+      else if (users.length > 4) centerAxeX = (wallSize * ratio) / (2 * (Math.tan((Math.PI / size))));
       
-      canvas.style.transformOrigin = `${centerAxeX}px ${Math.floor(Math.min(Math.round(width), Math.round(height)))}px`;
+      canvas.style.transformOrigin = `${centerAxeX}px ${wallSize / 2}px`;
       canvas.style.transform = `rotate(${
         angle * users.findIndex((e) => e.id === UserState.id)
       }deg)`;
@@ -100,15 +100,15 @@ export default function PingPong(): JSX.Element {
     if (canvas)
     {
 
-      console.error('-----------------in Rotate');
-      const wallSize = Math.min(Math.round(width * ratio), Math.round(height * ratio));
+      //console.error('-----------------in Rotate');
+      const wallSize = Math.min(Math.round(width ), Math.round(height));
       let centerAxeX : number = 0;
-      if (users.length === 2) centerAxeX = Math.round(wallSize);
-      else if (users.length === 3) centerAxeX = Math.round(Math.sqrt(3)/2 * wallSize) * (1/3);
-      else if (users.length === 4) centerAxeX = Math.round(wallSize / 2);
-      else if (users.length > 4) centerAxeX =  Math.round((Math.round(wallSize) / Math.round(2 * Math.round(Math.tan(Math.round(180 / users.length))))));
+      if (users.length === 2) centerAxeX = wallSize * ratio;
+      else if (users.length === 3) centerAxeX = (((1/3) * (Math.sqrt(3)/2) * (wallSize * ratio)));
+      else if (users.length === 4) centerAxeX = (wallSize * ratio) / 2;
+      else if (users.length > 4) centerAxeX =  (wallSize * ratio) / (2 * (Math.tan((Math.PI / users.length))));
       
-      canvas.style.transformOrigin = `${centerAxeX}px ${Math.floor(wallSize / 2)}px`;
+      canvas.style.transformOrigin = `${centerAxeX}px ${wallSize / 2}px`;
       
       canvas.style.transform = `rotate(${
         angle * users.findIndex((e) => e.id === UserState.id)
@@ -159,34 +159,25 @@ export default function PingPong(): JSX.Element {
 
   const changeLife = useCallback(
     (index: number, val: number, length : number) => {
-      console.log('----------------in changelife');
-      /*console.log(users);
-      console.log(usersGame);
-      console.log(usersRotate);
-      console.log(MiniProfilArray.map(e => e.props.life));*/
-      
+      //console.log('----------------in changelife');      
       if (!usersGame.length || endGame || index >= usersGame.length || length != usersGame.length) return;
       const indexHurt = usersRotate.findIndex(e => e.id === usersGame[index].id);
       if (MiniProfilArray[indexHurt].props.life === val) return;
-      //if (usersGame.findIndex(e => e.id === UserState.id) === -1) return;
       if (val === 0)
       {
-        console.log('----------------someone died');
-        
+        //console.log('----------------someone died');
         if (usersGame.length > 2 && usersGame[index].id === UserState.id)
         {
-          console.log('-------------open overlay');
+          //console.log('-------------open overlay');
           setOpenOverlay(true);
-          //setPrintButton(true);
         }
         let newClassement = [createTrClassement(usersGame[index], classement), ...classement];
         const newUsersGame = [...usersGame];
         newUsersGame.splice(index, 1);
         rotateInit(newUsersGame);
-        //console.log(newClassement);
         if (newUsersGame.length === 1)
         {
-          console.log('----------------end game');
+          //console.log('----------------end game');
           if (newUsersGame[0].id === UserState.id)
             setWin(true);
           newClassement = [createTrClassement(newUsersGame[0], newClassement), ...newClassement];
@@ -202,19 +193,14 @@ export default function PingPong(): JSX.Element {
         rotateUsers = rotate(rotateUsers);
         setUsersRotate(rotateUsers);
         setMiniProfilArray(createMiniProfilArray(rotateUsers));
-        //console.log(newUsersGame);
-        //console.log(rotateUsers);
-        //console.log(createMiniProfilArray(rotateUsers));
-        console.log('----------------end died');
+        //console.log('----------------end died');
       } else  {
-        console.log('----------------someone loose life');
+        //console.log('----------------someone loose life');
         let newMiniProfilArray = [...MiniProfilArray];
         newMiniProfilArray[indexHurt] = changeScoreOrLife(indexHurt, val, MiniProfilArray[indexHurt].props.score);
-        //console.log(val);
-        //console.log(newMiniProfilArray.map(e => e.props.life));
         if (usersGame.length === 2)
         {
-          console.log('----------------someone mark point');
+          //console.log('----------------someone mark point');
           const indexWin = indexHurt !== 0? 0 : 1;
           const life = Number(newMiniProfilArray[indexWin].props.life);
           const score = Number(newMiniProfilArray[indexWin].props.score) + 1;
@@ -236,29 +222,12 @@ export default function PingPong(): JSX.Element {
           setPrintButton(false);
           let tmp = game.opponents.map((opponent) => opponent.user);
           usersRef.current = game.opponents.map((opponent) => opponent.user);;
-          console.log('----------------in first useEffect');
-         
+          //console.log('----------------in first useEffect');
           setUsersGame(usersRef.current);
-          console.log(usersRef.current);
           tmp = rotate(tmp);
           setUsers(tmp);
           setUsersRotate(tmp);
-          console.log(tmp);
           setMiniProfilArray(createMiniProfilArray(tmp));
-          console.log(tmp.map((e: User, i: number) => (
-            <MiniProfil
-              key={i}
-              left={i % 2 == 0 ? true : false}
-              user={{ user: e, index: i }}
-              life={Game.live}
-              score={0}
-              game={{
-                life: Game.live,
-                score: Game.scoreMax,
-                numOfPlayers: tmp.length,
-              }}
-            />
-          )));
         }
       );
     }
@@ -285,20 +254,17 @@ export default function PingPong(): JSX.Element {
   }, [websockets.pong, router.query.id]);
 
   useEffect(() => {
-    console.log('----------------in UseEffect');
-    /*console.log(users);
-    console.log(usersGame);
-    console.log(usersRotate);
-    console.log(MiniProfilArray.map(e => e.props.life));*/
+    //console.log('----------------in UseEffect');
+
     if (usersGame.length === 0) return;
     if(game)
     {
-      console.log("-----------------set Game.changeLife");
+      //console.log("-----------------set Game.changeLife");
       Game.changeLife = changeLife;
     }
     if (usersGame.length !== usersGameRef.current.length && !endGame)
     {
-      console.log("-----------------setGame");
+      //console.log("-----------------setGame");
       if (usersGame.findIndex((user) => user.id === UserState.id) === -1)
       {
         window.addEventListener(
@@ -421,7 +387,6 @@ export default function PingPong(): JSX.Element {
   }
 
   function newPartie() {
-    console.log("click");
     setUsers([UserState]);
     setEndGame(false);
     setMiniProfilArray([]);

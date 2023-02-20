@@ -43,7 +43,7 @@ class Game {
     position: number | undefined,
     changeLife: (index: number, val: number, length: number) => void
   ) {
-    console.log("IN GAME CONSTRUCTOR NB PLAYER IS ", number_player);
+    //console.log("IN GAME CONSTRUCTOR NB PLAYER IS ", number_player);
     if (number_player) {
       this.boardType = number_player;
     } else {
@@ -378,7 +378,6 @@ class Game {
     window.addEventListener("keyup", function (e) {
     if (Game.position >= 0)
     { 
-      console.error(Game.position);
       if (e.key === "ArrowUp") {
         if (Game.keyPressed.down === false) {
           Game.socket.emit("unpressUp");
@@ -450,7 +449,7 @@ class Game {
       this.boardCanvas!.width !== Math.round(window.innerWidth * 0.6) ||
       this.boardCanvas!.height !== Math.round(window.innerWidth * 0.6 * (1 / 2))
     ) {
-      console.log("RESCALE");
+      //.log("RESCALE");
       this.rescale();
     }
     this.boardCanvas!.width = Math.round(window.innerWidth * 0.6);
@@ -698,7 +697,7 @@ class Ball extends Entity {
       this.nextCollision.wall > this.nextCollision.racket.time &&
       this.nextCollision.racket.time <= 0
     ) {
-      console.log("HIT PLAYER");
+      //console.log("HIT PLAYER");
       const racket = rackets[this.nextCollision.racket.index];
       let angle = 0;
       let face;
@@ -760,14 +759,14 @@ class Ball extends Entity {
       const index = this.nextCollision.wallIndex;
       if (rackets.length === 2) {
         if (index === 2) {
-          console.log("LEFT PLAYER GOAL");
+          //console.log("LEFT PLAYER GOAL");
           rackets[1].hp--;
           //Game.changeLife(1, rackets[1].hp);
           this.replaceTo(board.board.center());
           this.goToRandomPlayer(rackets);
           this.calcNextCollision(rackets, walls, null, null);
         } else if (index === 0) {
-          console.log("RIGHT PLAYER GOAL");
+          //console.log("RIGHT PLAYER GOAL");
           rackets[0].hp--;
           //Game.changeLife(0, rackets[0].hp);
           this.replaceTo(board.board.center());
