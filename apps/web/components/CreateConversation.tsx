@@ -115,7 +115,7 @@ export default function CreateConversation(
               return;
             }
             fetch(`/api/search?letters=${e.target.value}`, {
-              credentials:'same-origin'
+              credentials: "same-origin",
             })
               .then((response) => {
                 if (!response.ok) return;

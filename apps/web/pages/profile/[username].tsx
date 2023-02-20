@@ -142,7 +142,7 @@ export default function Profil(): JSX.Element {
 
     if (typeof router.query.username === "string") {
       fetch(`/api/achievements/${router.query.username}`, {
-        credentials:'same-origin'
+        credentials: "same-origin",
       })
         .then((res) => res.json())
         .then((data) => {
