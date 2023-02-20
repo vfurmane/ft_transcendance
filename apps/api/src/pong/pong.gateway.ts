@@ -105,7 +105,19 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.pongService.games.forEach(async (key, room) => {
       const game = key[0];
       if (game.boardType !== 0) {
-        game.updateGame();
+        let pos : number;
+        if ((pos = game.updateGame()) !== -1) {
+          const sockets = await this.server.in(`game_${room}`).fetchSockets();
+          key[1].splice(pos, 1);
+          sockets.forEach((socket) => {
+            if (socket.data.position === pos) {
+              socket.data.position = -1;
+            } else if (socket.data.position > pos) {
+              socket.data.position--;
+            }
+          })
+          console.log("REMOVED PLAYER ", pos);
+        }
       } else {
         console.log('GAME ENDED');
         const sockets = await this.server.in(`game_${room}`).fetchSockets();
@@ -191,7 +203,7 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage('pressUp')
-  async pressUp(@ConnectedSocket() client: Socket, position : number): Promise<void | string> {
+  async pressUp(@ConnectedSocket() client: Socket): Promise<void | string> {
     const room = client.data.room;
     if (!this.checkUser(client, room)) {
       return 'You are not allowed to send this kind of message !';
@@ -200,7 +212,6 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
     if (!game) {
       return 'Game not launched';
     }
-    client.data.position = position;
     game.movePlayer(client.data.position, true, true);
     this.server.in(`game_${room}`).emit('refresh', game.getState(), Date.now());
     return 'You pressed up';
@@ -223,7 +234,7 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage('pressDown')
-  async pressDown(@ConnectedSocket() client: Socket, position: number): Promise<void | string> {
+  async pressDown(@ConnectedSocket() client: Socket): Promise<void | string> {
     const room = client.data.room;
     if (!this.checkUser(client, room)) {
       return 'You are not allowed to send this kind of message !';
@@ -232,7 +243,6 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
     if (!game) {
       return 'Game not launched';
     }
-    client.data.position = position;
     game.movePlayer(client.data.position, false, true);
     this.server.in(`game_${room}`).emit('refresh', game.getState(), Date.now());
     return 'You moved down ';

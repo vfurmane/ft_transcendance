@@ -360,14 +360,14 @@ class Game {
     {
       if (e.key === "ArrowUp") {
         if (Game.keyPressed.down === false) {
-          Game.socket.emit("pressUp", Game.position);
+          Game.socket.emit("pressUp");
         } else {
           Game.socket.emit("unpressDown");
         }
         Game.keyPressed.up = true;
       } else if (e.key === "ArrowDown") {
         if (Game.keyPressed.up === false) {
-          Game.socket.emit("pressDown", Game.position);
+          Game.socket.emit("pressDown");
         } else {
           Game.socket.emit("unpressUp");
         }
@@ -383,14 +383,14 @@ class Game {
         if (Game.keyPressed.down === false) {
           Game.socket.emit("unpressUp");
         } else {
-          Game.socket.emit("pressDown", Game.position);
+          Game.socket.emit("pressDown");
         }
         Game.keyPressed.up = false;
       } else if (e.key === "ArrowDown") {
         if (Game.keyPressed.up === false) {
           Game.socket.emit("unpressDown");
         } else {
-          Game.socket.emit("pressUp", Game.position);
+          Game.socket.emit("pressUp");
         }
         Game.keyPressed.down = false;
       }
