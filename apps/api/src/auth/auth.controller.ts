@@ -87,12 +87,12 @@ export class AuthController {
     this.logger.log(`${user.name} logged in using OAuth2`);
     const token = await this.authService.login(user, state);
     res.cookie('access_token', token.access_token, {
-      expires: new Date(new Date().getTime() + (30 * 1000 * 60)),
+      maxAge: (60 * 5),
       sameSite: 'strict',
       httpOnly: true
     });
     res.cookie('refresh_token', token.refresh_token, {
-      expires: new Date(new Date().getTime() + (1000 * 60 * 60 * 24 * 7)),
+      maxAge: (60 * 60 * 24 * 7),
       sameSite: 'strict',
       httpOnly: true,
       path: '/api/auth/refresh'
@@ -222,12 +222,12 @@ export class AuthController {
     this.logger.log(`${state.user.name} validated TFA`);
     const token = await this.authService.login(state.user, state);
     res.cookie('access_token', token.access_token, {
-      expires: new Date(new Date().getTime() + (30 * 1000 * 60)),
+      maxAge: (5 * 60),
       sameSite: 'strict',
       httpOnly: true
     });
     res.cookie('refresh_token', token.refresh_token, {
-      expires: new Date(new Date().getTime() + (1000 * 60 * 60 * 24 * 7)),
+      maxAge: (60 * 60 * 24 * 7),
       sameSite: 'strict',
       httpOnly: true,
       path: '/api/auth/refresh'

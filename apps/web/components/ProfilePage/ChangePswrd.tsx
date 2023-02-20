@@ -3,7 +3,6 @@ import { useForm } from "react-hook-form";
 import styles from "styles/ChangePswrd.module.scss";
 import { Input } from "../Input";
 import { useRouter } from "next/router";
-import { clearTokens } from "../../helpers/clearTokens";
 import { setUserState } from "../../store/UserSlice";
 import { initUser } from "../../initType/UserInit";
 import { useDispatch } from "react-redux";
@@ -22,9 +21,9 @@ async function changePassword(
     {
       method: "PATCH",
       headers: {
-        Authorization: `Bearer ${localStorage.getItem("access_token")}`,
         "Content-Type": "application/json",
       },
+      credentials:"same-origin",
       body: JSON.stringify(data),
     }
   ).then(async (response) => {
@@ -63,7 +62,6 @@ export default function ChangePswrd(): JSX.Element {
           throw new Error("An unexpected error occured...");
         } else {
           setFormSuccess(response.message);
-          clearTokens();
           dispatch(setUserState(initUser));
         }
       })

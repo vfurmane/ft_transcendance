@@ -24,8 +24,8 @@ export default function ArrayDoubleColumn(props: {
     fetch(`/api/leaderBoard`, {
       headers: {
         "Content-Type": "application/json",
-        Authorization: "Bearer " + localStorage.getItem("access_token"),
       },
+      credentials:"same-origin",
     })
       .then((res) => res.json())
       .then((data: User[]) => {

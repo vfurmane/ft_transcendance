@@ -7,9 +7,9 @@ async function setupTfa(): Promise<{ otpauth_url: string } | null> {
     {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${localStorage.getItem("access_token")}`,
         "Content-Type": "application/json",
       },
+      credentials:"same-origin",
     }
   ).then(async (response) => {
     if (!response.ok) {

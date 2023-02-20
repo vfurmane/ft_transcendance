@@ -19,7 +19,7 @@ export interface TfaFormData {
 async function checkTfa(
   data: TfaFormData,
   state: string
-): Promise<AccessTokenResponse | null> {
+): Promise<boolean | null> {
   const response = await fetch(`/api/auth/login/tfa`, {
     method: "POST",
     headers: {
@@ -31,11 +31,14 @@ async function checkTfa(
       return response.json().then((error) => {
         throw new Error(error.message || "An unexpected error occured...");
       });
-    } else {
-      return response.json();
+    } else if (response.status < 400) {
+      return await response.text().then((data) => {
+        return (data ? JSON.parse(data) : {}) 
+      })
     }
   });
-  if (!response) return null;
+  if (!response) return false;
+  else if (!Object.keys(response).length) return true
   return response;
 }
 
@@ -56,14 +59,10 @@ export function TfaForm(props: TfaFormProps): ReactElement {
 
     await checkTfa(data, props.state)
       .then(async (response) => {
-        if (response === null) {
+        if (response === false) {
           throw new Error("An unexpected error occured...");
-        } else {
+        } else if (response === true) {
           setFormSuccess("Success! Redirecting...");
-          props.setAccessToken(response.access_token);
-          localStorage.setItem("access_token", response.access_token);
-          localStorage.setItem("refresh_token", response.refresh_token);
-          localStorage.removeItem("state");
           localStorage.removeItem("state");
           const user = await identifyUser();
           if (user) dispatch(setUserState(user));

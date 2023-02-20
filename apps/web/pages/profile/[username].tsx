@@ -76,13 +76,10 @@ export default function Profil(): JSX.Element {
   /*==========================================================*/
 
   useEffect((): void => {
-    if (!localStorage.getItem("access_token")) return;
     if (router.query.username !== UserState.name) {
       // if foreign user
       fetch(`/api/user/${router.query.username}`, {
-        headers: {
-          Authorization: "Bearer " + localStorage.getItem("access_token"),
-        },
+        credentials:"same-origin",
       })
         .then(async (response) => {
           if (!response.ok) {
@@ -111,8 +108,8 @@ export default function Profil(): JSX.Element {
       fetch(`/api/match/${user.id}`, {
         headers: {
           "Content-Type": "application/json",
-          Authorization: "Bearer " + localStorage.getItem("access_token"),
         },
+        credentials:"same-origin",
       })
         .then((res) => res.json())
         .then((data) => {
@@ -199,8 +196,8 @@ export default function Profil(): JSX.Element {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
-        Authorization: "Bearer " + localStorage.getItem("access_token"),
       },
+      credentials:"same-origin",
     }).catch(function (error) {
       console.error(
         "Il y a eu un problème avec l'opération fetch : " + error.message

@@ -74,8 +74,8 @@ export default function UserEntity(props: {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
-        Authorization: "Bearer " + localStorage.getItem("access_token"),
       },
+      credentials:"same-origin",
     })
       .then(function (response) {
         response.json().then((res) => {
