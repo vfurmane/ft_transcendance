@@ -852,7 +852,7 @@ class Ball extends Entity {
       ((this.nextCollision.wall &&
         this.nextCollision.wall > this.nextCollision.racket.time) ||
         !this.nextCollision.wall) &&
-      this.nextCollision.racket.time <= 0.5
+      this.nextCollision.racket.time <= 0
     ) {
       const racket = rackets[this.nextCollision.racket.index];
       let angle = 0;
@@ -892,7 +892,7 @@ class Ball extends Entity {
         this.update(rackets, walls, board, 0);
       return;
     }
-    if (this.nextCollision.wall && this.nextCollision.wall <= 0.5) {
+    if (this.nextCollision.wall && this.nextCollision.wall <= 0) {
       const prevTime = this.nextCollision.wall;
       const wall = walls[this.nextCollision.wallIndex];
       const wallVector = wall.point[0].vectorTo(wall.point[2]);
@@ -929,8 +929,8 @@ class Ball extends Entity {
           this.moveTo(this.speed, -prevTime);
           if (
             (this.nextCollision.racket &&
-              this.nextCollision.racket.time <= 0.5) ||
-            (this.nextCollision.wall && this.nextCollision.wall <= 0.5)
+              this.nextCollision.racket.time <= 0) ||
+            (this.nextCollision.wall && this.nextCollision.wall <= 0)
           )
             this.update(rackets, walls, board, 0);
         }
@@ -957,8 +957,8 @@ class Ball extends Entity {
           this.moveTo(this.speed, -prevTime);
           if (
             (this.nextCollision.racket &&
-              this.nextCollision.racket.time <= 0.5) ||
-            (this.nextCollision.wall && this.nextCollision.wall <= 0.5)
+              this.nextCollision.racket.time <= 0) ||
+            (this.nextCollision.wall && this.nextCollision.wall <= 0)
           )
             this.update(rackets, walls, board, 0);
         }
