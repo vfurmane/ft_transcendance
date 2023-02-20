@@ -44,7 +44,6 @@ DATABASE_PORT=5432
 
 # globals
 FRONTEND_BASE_URL=http://localhost:8080
-BACKEND_BASE_URL=/api
 
 FT_OAUTH2_CLIENT_ID=
 
@@ -53,6 +52,14 @@ FT_OAUTH2_CLIENT_SECRET=
 FT_OAUTH2_CLIENT_ID=
 
 JWT_SECRET=
+```
+
+You must also configure the NextJS environment file. The template file is at `apps/web/.env.template` but you must rename it as `apps/web/.env.local`
+
+```
+NEXT_PUBLIC_BASE_URL=http://localhost:8080
+NEXT_PUBLIC_API_BASE_URL=/api
+NEXT_PUBLIC_FT_OAUTH2_CLIENT_ID=
 ```
 
 ### Running the server

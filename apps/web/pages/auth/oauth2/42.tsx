@@ -56,7 +56,6 @@ export default function FtOauth2(): JSX.Element {
             localStorage.removeItem("state");
             const user = await identifyUser();
             if (user) dispatch(setUserState(user));
-            router.replace("/");
           } else if (
             "message" in response &&
             response.message === "Authentication factor needed"

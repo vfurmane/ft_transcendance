@@ -1,8 +1,8 @@
 import React from "react";
-import Image from "next/image";
 import textStyle from "styles/text.module.scss";
 import styles from "styles/entity.module.scss";
 import { Userfront as User, MatchFront as Match } from "types";
+import ProfilePicture from "../ProfilePicture";
 
 export default function MatchEntity(props: {
   match: Match;
@@ -17,15 +17,13 @@ export default function MatchEntity(props: {
       >
         <div className={`${styles.entityContainer} ${styles.start}`}>
           <div className="fill small">
-            <Image
-              alt="avatar"
-              src={`/avatar/avatar-${
-                props.match.winner
-                  ? props.match.winner.avatar_num
-                  : props.user.avatar_num
-              }.png`}
+            <ProfilePicture
+              userId={
+                props.match.winner ? props.match.winner.id : props.user.id
+              }
               width={47}
               height={47}
+              handleClick={undefined}
             />
           </div>
           <div className={styles.entityText}>
@@ -50,15 +48,13 @@ export default function MatchEntity(props: {
             </p>
           </div>
           <div className="fill small">
-            <Image
-              alt="avatar"
-              src={`/avatar/avatar-${
-                props.match.looser
-                  ? props.match.looser.avatar_num
-                  : props.user.avatar_num
-              }.png`}
+            <ProfilePicture
+              userId={
+                props.match.looser ? props.match.looser.id : props.user.id
+              }
               width={47}
               height={47}
+              handleClick={undefined}
             />
           </div>
         </div>

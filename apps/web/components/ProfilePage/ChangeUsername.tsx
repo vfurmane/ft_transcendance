@@ -3,6 +3,8 @@ import { useForm } from "react-hook-form";
 import styles from "styles/ChangeUsername.module.scss";
 import { Input } from "../Input";
 import { useRouter } from "next/router";
+import { setUserName } from "../../store/UserSlice";
+import { useDispatch } from "react-redux";
 
 interface ChangeUsernameFormData {
   new_username: string;
@@ -39,6 +41,7 @@ export default function ChangeUsername(): JSX.Element {
   const [formError, setFormError] = useState("");
   const [formSuccess, setFormSuccess] = useState("");
   const [loading, setLoading] = useState(false);
+  const dispatch = useDispatch();
   const {
     formState: { errors },
     handleSubmit,
@@ -56,7 +59,7 @@ export default function ChangeUsername(): JSX.Element {
           throw new Error("An unexpected error occured...");
         } else {
           setFormSuccess(response.message);
-          router.reload();
+          dispatch(setUserName(data.new_username));
         }
       })
       .catch((error) => {
@@ -68,7 +71,7 @@ export default function ChangeUsername(): JSX.Element {
   return (
     <div className={styles.container}>
       <form className={styles.form} onSubmit={handleSubmit(onSubmit)}>
-        <h3>Change password</h3>
+        <h3>Change username</h3>
         <Input
           {...register("new_username", {
             required: "'new username' is required",
