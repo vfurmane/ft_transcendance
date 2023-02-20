@@ -123,12 +123,12 @@ export class AuthController {
     this.logger.log(`${user.name} logged in using username:password`);
     const token = await this.authService.login(user, state);
     res.cookie('access_token', token.access_token, {
-      expires: new Date(new Date().getTime() + (30 * 1000 * 60)),
+      maxAge: (60 * 5),
       sameSite: 'strict',
       httpOnly: true
     });
     res.cookie('refresh_token', token.refresh_token, {
-      expires: new Date(new Date().getTime() + (1000 * 60 * 60 * 24 * 7)),
+      maxAge: (60 * 60 * 24 * 7),
       sameSite: 'strict',
       httpOnly: true,
       path: '/api/auth/refresh'
@@ -234,7 +234,7 @@ export class AuthController {
     })
   }
 
-  @Get('refresh')
+  @Post('refresh')
   @UseGuards(JwtRefreshAuthGuard)
   async refreshToken(@User() user: UserEntity, @Res({ passthrough : true}) res: Response) : Promise<void> {
     const token = await this.authService.login(user);
