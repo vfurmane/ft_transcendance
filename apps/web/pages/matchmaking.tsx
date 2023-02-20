@@ -101,8 +101,8 @@ export default function Matchmaking(): ReactElement {
   if (loading) return <Loading></Loading>;
 
   function launch() {
-    console.log('sending launch')
-    websockets.pong?.emit('launch')
+    console.log("sending launch");
+    websockets.pong?.emit("launch");
   }
 
   return (

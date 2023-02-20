@@ -159,10 +159,10 @@ export class Game {
               this.player[i].index--;
             }
           }
-          console.log("SOMEBODY LOST")
+          console.log('SOMEBODY LOST');
           this.boardType--;
           this.init();
-          return (p.index);
+          return p.index;
         }
       }
     }

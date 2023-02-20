@@ -33,7 +33,11 @@ class Game {
   public color: string[] = ["blue", "red", "orange", "white", "pink", "black"];
   public static position: number;
   public static scoreMax = 10;
-  public static changeLife: (index: number, val: number, length: number) => void;
+  public static changeLife: (
+    index: number,
+    val: number,
+    length: number
+  ) => void;
   public static socket: Socket<DefaultEventsMap, DefaultEventsMap>;
   public static count: number;
   public await = true;
@@ -354,46 +358,43 @@ class Game {
         )
       );
 
-
     window.addEventListener("keydown", function (e) {
-    if (Game.position >= 0)
-    {
-      if (e.key === "ArrowUp") {
-        if (Game.keyPressed.down === false) {
-          Game.socket.emit("pressUp");
-        } else {
-          Game.socket.emit("unpressDown");
+      if (Game.position >= 0) {
+        if (e.key === "ArrowUp") {
+          if (Game.keyPressed.down === false) {
+            Game.socket.emit("pressUp");
+          } else {
+            Game.socket.emit("unpressDown");
+          }
+          Game.keyPressed.up = true;
+        } else if (e.key === "ArrowDown") {
+          if (Game.keyPressed.up === false) {
+            Game.socket.emit("pressDown");
+          } else {
+            Game.socket.emit("unpressUp");
+          }
+          Game.keyPressed.down = true;
         }
-        Game.keyPressed.up = true;
-      } else if (e.key === "ArrowDown") {
-        if (Game.keyPressed.up === false) {
-          Game.socket.emit("pressDown");
-        } else {
-          Game.socket.emit("unpressUp");
-        }
-        Game.keyPressed.down = true;
       }
-    }
     });
     window.addEventListener("keyup", function (e) {
-    if (Game.position >= 0)
-    { 
-      if (e.key === "ArrowUp") {
-        if (Game.keyPressed.down === false) {
-          Game.socket.emit("unpressUp");
-        } else {
-          Game.socket.emit("pressDown");
+      if (Game.position >= 0) {
+        if (e.key === "ArrowUp") {
+          if (Game.keyPressed.down === false) {
+            Game.socket.emit("unpressUp");
+          } else {
+            Game.socket.emit("pressDown");
+          }
+          Game.keyPressed.up = false;
+        } else if (e.key === "ArrowDown") {
+          if (Game.keyPressed.up === false) {
+            Game.socket.emit("unpressDown");
+          } else {
+            Game.socket.emit("pressUp");
+          }
+          Game.keyPressed.down = false;
         }
-        Game.keyPressed.up = false;
-      } else if (e.key === "ArrowDown") {
-        if (Game.keyPressed.up === false) {
-          Game.socket.emit("unpressDown");
-        } else {
-          Game.socket.emit("pressUp");
-        }
-        Game.keyPressed.down = false;
       }
-    }
     });
 
     if (!Game.isSolo) {

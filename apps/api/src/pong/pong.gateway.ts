@@ -20,7 +20,13 @@ import {
 import { AuthService } from 'src/auth/auth.service';
 import { Interval } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
-import { GameEntityFront, GameStartPayload, User, Userfront, GameMode } from 'types';
+import {
+  GameEntityFront,
+  GameStartPayload,
+  User,
+  Userfront,
+  GameMode,
+} from 'types';
 import { Repository } from 'typeorm';
 import { TransformUserService } from 'src/TransformUser/TransformUser.service';
 import { SubscribedGameDto } from './subscribed-game.dto';
@@ -105,7 +111,7 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.pongService.games.forEach(async (key, room) => {
       const game = key[0];
       if (game.boardType !== 0) {
-        let pos : number;
+        let pos: number;
         if ((pos = game.updateGame()) !== -1) {
           const sockets = await this.server.in(`game_${room}`).fetchSockets();
           key[1].splice(pos, 1);
@@ -115,8 +121,8 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
             } else if (socket.data.position > pos) {
               socket.data.position--;
             }
-          })
-          console.log("REMOVED PLAYER ", pos);
+          });
+          console.log('REMOVED PLAYER ', pos);
         }
       } else {
         console.log('GAME ENDED');
@@ -227,7 +233,7 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
     if (!game) {
       return 'Game not launched';
     }
-   
+
     game.movePlayer(client.data.position, true, false);
     this.server.in(`game_${room}`).emit('refresh', game.getState(), Date.now());
     return 'You moved up';
@@ -278,21 +284,27 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage('launch')
-  async launch( @ConnectedSocket() client: Socket) {
-    console.log('receiving launch')
+  async launch(@ConnectedSocket() client: Socket) {
+    console.log('receiving launch');
     const user = await this.usersService.getById(client.data.id);
-    if (!user) return ;
-    const gameQueue = await this.pongService.getGameModeQueue(GameMode.BATTLE_ROYALE);
-    if (!gameQueue) return ;
-    if (gameQueue.length < 2) return ;
-    if (user.id !== gameQueue[0].id) return ;
-    console.log("should be launching the game")
+    if (!user) return;
+    const gameQueue = await this.pongService.getGameModeQueue(
+      GameMode.BATTLE_ROYALE,
+    );
+    if (!gameQueue) return;
+    if (gameQueue.length < 2) return;
+    if (user.id !== gameQueue[0].id) return;
+    console.log('should be launching the game');
     const game = await this.pongService.startGame(gameQueue, this.server);
 
-    this.server.emit('game_start', instanceToPlain<GameStartPayload>({
-      id: game.id,
-      users: await Promise.all(gameQueue.map(e => this.transformUserService.transform(e))),
-    }),
+    this.server.emit(
+      'game_start',
+      instanceToPlain<GameStartPayload>({
+        id: game.id,
+        users: await Promise.all(
+          gameQueue.map((e) => this.transformUserService.transform(e)),
+        ),
+      }),
     );
   }
 
