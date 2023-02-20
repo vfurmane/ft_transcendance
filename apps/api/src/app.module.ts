@@ -15,7 +15,6 @@ import { PongModule } from './pong/pong.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { AchievementsModule } from './Achievements/Achievements.module';
 import { AppGateway } from './app.gateway';
-import { AchievementsModule } from './Achievements/Achievements.module';
 
 @Module({
   imports: [

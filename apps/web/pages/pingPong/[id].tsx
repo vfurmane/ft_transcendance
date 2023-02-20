@@ -53,7 +53,6 @@ export default function PingPong(): JSX.Element {
     setGame(null);
   });
 
-<<<<<<< HEAD
   function rotateInit(users: User[]) {
     const size =
       users.findIndex((e) => e.id === UserState.id) === -1
@@ -68,12 +67,6 @@ export default function PingPong(): JSX.Element {
     }
     const width = Math.round(window.innerWidth * 0.6);
     const height = Math.round(window.innerWidth * 0.6 * (1 / 2));
-=======
-  function rotate(users: User[]): User[] {
-    if (!users.find((user) => UserState.id === user.id)) return users;
-    const lastIndex = users.length - 1;
-    const angle = -360 / users.length;
->>>>>>> origin
 
     const canvas = document.getElementById("canvasElem");
     if (canvas && game) {
@@ -183,7 +176,6 @@ export default function PingPong(): JSX.Element {
       );
       if (MiniProfilArray[indexHurt].props.life === val) return;
       if (val === 0) {
-<<<<<<< HEAD
         //console.log('----------------someone died');
         if (usersGame.length > 2 && usersGame[index].id === UserState.id) {
           //console.log('-------------open overlay');
@@ -191,13 +183,6 @@ export default function PingPong(): JSX.Element {
         }
         let newClassement = [
           createTrClassement(usersGame[index], classement),
-=======
-        console.log("change life index :", index);
-        if (intervalState) clearInterval(intervalState);
-        const tempUsers = [...users];
-        const newClassement = [
-          createTrClassement(tempUsers[index], classement),
->>>>>>> origin
           ...classement,
         ];
         const newUsersGame = [...usersGame];
@@ -246,11 +231,7 @@ export default function PingPong(): JSX.Element {
         setMiniProfilArray(newMiniProfilArray);
       }
     },
-<<<<<<< HEAD
     [users, usersGame, usersRotate, MiniProfilArray, classement, endGame, win]
-=======
-    [users, MiniProfilArray, classement]
->>>>>>> origin
   );
 
   useEffect(() => {
@@ -528,10 +509,6 @@ export default function PingPong(): JSX.Element {
             }}
           >
             {" "}
-<<<<<<< HEAD
-=======
-            let index = 0;
->>>>>>> origin
             <canvas
               id="canvasElem"
               ref={canvasRef}

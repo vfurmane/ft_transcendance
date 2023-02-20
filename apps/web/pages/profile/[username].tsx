@@ -7,11 +7,7 @@ import { selectUserState } from "../../store/UserSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { initUser } from "../../initType/UserInit";
 import AchivementEntity from "../../components/ProfilePage/achivementEntity";
-<<<<<<< HEAD
-import { Achievements } from "types";
-=======
 import { Achievements, MatchFront } from "types";
->>>>>>> origin
 import ChangePswrd from "../../components/ProfilePage/ChangePswrd";
 import ChangeUsername from "../../components/ProfilePage/ChangeUsername";
 import ChatBar from "../../components/chatBar";
@@ -119,8 +115,6 @@ export default function Profil(): JSX.Element {
 
   useEffect((): void => {
     if (!localStorage.getItem("access_token")) return;
-<<<<<<< HEAD
-=======
     // if foreign user
     fetch(`/api/user/${router.query.username}`, {
       headers: {
@@ -144,7 +138,6 @@ export default function Profil(): JSX.Element {
       });
     setUserProfil(router.query.username === UserState.name);
 
->>>>>>> origin
     if (typeof router.query.username === "string") {
       fetch(`/api/achievements/${router.query.username}`, {
         headers: {
@@ -175,45 +168,11 @@ export default function Profil(): JSX.Element {
         .catch((error) => {
           console.error(`problem with fetch : ${error.message}`);
         });
-<<<<<<< HEAD
-    }
-
-    // if foreign user
-    fetch(`/api/user/${router.query.username}`, {
-      headers: {
-        Authorization: "Bearer " + localStorage.getItem("access_token"),
-      },
-    })
-      .then(async (response) => {
-        if (!response.ok) {
-          return response.json().then((error) => {
-            throw new Error(error.message || "An unexpected error occured...");
-          });
-        } else {
-          return response.json();
-        }
-      })
-      .then((response) => {
-        setUser(response);
-      })
-      .catch(() => {
-        router.replace("/");
-      });
-    if (router.query.username !== UserState.name) {
-      setUserProfil(false);
-    } else {
-      // if us
-      setUserProfil(true);
-    }
-
-    if (user.id)
-=======
     }
   }, [router.query, UserState, router, user.id]);
 
   useEffect(() => {
     if (user) {
->>>>>>> origin
       fetch(`/api/match/${user.id}`, {
         headers: {
           "Content-Type": "application/json",
