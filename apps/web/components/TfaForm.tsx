@@ -25,6 +25,7 @@ async function checkTfa(
     headers: {
       "Content-Type": "application/json",
     },
+    credentials: "same-origin",
     body: JSON.stringify({ ...data, state }),
   }).then(async (response) => {
     if (!response.ok) {

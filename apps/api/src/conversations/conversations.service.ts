@@ -948,7 +948,7 @@ export class ConversationsService {
       },
     });
     if (!targetUser) throw new NotFoundException();
-    let banRestrictions: ConversationRestriction[] = [];
+    const banRestrictions: ConversationRestriction[] = [];
     targetUser.restrictions.forEach((restriction) => {
       if (restriction.status === conversationRestrictionEnum.BAN)
         banRestrictions.push(restriction);
@@ -988,7 +988,7 @@ export class ConversationsService {
       },
     });
     if (!targetUser) throw new NotFoundException();
-    let banRestrictions: ConversationRestriction[] = [];
+    const banRestrictions: ConversationRestriction[] = [];
     targetUser.restrictions.forEach((restriction) => {
       if (restriction.status === conversationRestrictionEnum.MUTE)
         banRestrictions.push(restriction);

@@ -115,30 +115,27 @@ export default function Profil(): JSX.Element {
   /*==========================================================*/
 
   useEffect((): void => {
-    if (router.query.username !== UserState.name) {
-      // if foreign user
-      fetch(`/api/user/${router.query.username}`, {
-        credentials: "same-origin",
+    // if (router.query.username !== UserState.name) {
+    // if foreign user
+    fetch(`/api/user/${router.query.username}`, {
+      credentials: "same-origin",
+    })
+      .then(async (response) => {
+        if (!response.ok) {
+          return response.json().then((error) => {
+            throw new Error(error.message || "An unexpected error occured...");
+          });
+        } else {
+          return response.json();
+        }
       })
-        .then(async (response) => {
-          if (!response.ok) {
-            return response.json().then((error) => {
-              throw new Error(
-                error.message || "An unexpected error occured..."
-              );
-            });
-          } else {
-            return response.json();
-          }
-        })
-        .then((response) => {
-          setUser(response);
-        })
-        .catch(() => {
-          router.replace("/");
-        });
-      setUserProfil(router.query.username === UserState.name);
-    }
+      .then((response) => {
+        setUser(response);
+      })
+      .catch(() => {
+        router.replace("/");
+      });
+    setUserProfil(router.query.username === UserState.name);
 
     if (typeof router.query.username === "string") {
       fetch(`/api/achievements/${router.query.username}`, {

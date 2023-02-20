@@ -34,6 +34,7 @@ async function login(
     headers: {
       "Content-Type": "application/json",
     },
+    credentials: "same-origin",
     body: JSON.stringify({ ...data, state }),
   }).then(async (response) => {
     console.error("Response: ", response);
