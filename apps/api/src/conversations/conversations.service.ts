@@ -344,6 +344,10 @@ export class ConversationsService {
         currentConversationWithUnread.numberOfUnreadMessages;
       conversationsDetails.conversations.push(currentConversationWithUnread);
     }
+    console.error(conversationsDetails)
+    conversationsDetails.conversations.sort((a, b) => b.lastMessage.getTime() - a.lastMessage.getTime())
+    console.error("post sort")
+    console.error(conversationsDetails)
     return conversationsDetails;
   }
 
@@ -989,5 +993,28 @@ export class ConversationsService {
       await this.conversationRestrictionRepository.remove(banRestrictions);
     }
     return true;
+  }
+
+  async readMessage(currentUser : User, conversationId : string) : Promise<boolean>
+  {
+    const conversationRole = await this.conversationRoleRepository.findOne({
+      relations: {
+        conversation: true
+      },
+      where:
+      {
+        user: {
+          id: currentUser.id
+        },
+        conversation: {
+          id: conversationId
+        }
+      }
+    })
+    if (!conversationRole)
+      throw new NotFoundException()
+    conversationRole.lastRead = new Date()
+    this.conversationRoleRepository.save(conversationRole)
+    return (true)
   }
 }

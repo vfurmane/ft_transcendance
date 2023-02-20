@@ -88,7 +88,6 @@ export class ConversationsGateway implements OnGatewayConnection {
     @ConnectedSocket() client: Socket,
     @MessageBody() newConversation: createConversationDto,
   ): Promise<Conversation> {
-    console.log('newConversation');
     const { conversation, newConversationMessage } =
       await this.conversationsService.createConversation(
         newConversation,
@@ -142,6 +141,12 @@ export class ConversationsGateway implements OnGatewayConnection {
         .to(`conversation_${id}`)
         .emit('newMessage', { id, message: instanceToPlain(ret) });
     return ret;
+  }
+
+  @SubscribeMessage('read')
+  async readMessage(@ConnectedSocket() client: Socket,@MessageBody() { id } : isUUIDDto)
+  {
+    return this.conversationsService.readMessage(client.data as User, id)
   }
 
   @SubscribeMessage('inviteToConversation')
