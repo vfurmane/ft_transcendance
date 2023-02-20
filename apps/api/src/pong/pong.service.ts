@@ -165,7 +165,7 @@ export class PongService {
   }
 
   saveGame(ids: string[], hps: number[], hpStart: number) {
-    let indexWin = hps.indexOf(Math.max(hps[0], hps[1]));
+    const indexWin = hps.indexOf(Math.max(hps[0], hps[1]));
     this.matchService.addMatch(
       ids[indexWin],
       ids[1 - indexWin],
