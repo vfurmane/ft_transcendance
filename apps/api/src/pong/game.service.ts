@@ -98,9 +98,7 @@ export class Game {
         p3.x + wallPerp.x * this.ballWidth,
         p3.y + wallPerp.y * this.ballWidth,
       );
-      if (this.player.length === 0)
-        racket.push(new Racket(i, [p0, p1, p2, p3], this.color[i]));
-      else racket.push(new Racket(i, [p0, p1, p2, p3], this.player[i].color));
+      racket.push(new Racket(i, [p0, p1, p2, p3], this.color[i]));
     }
     return racket;
   }
@@ -142,18 +140,18 @@ export class Game {
     }
   }
 
-  updateGame(): void {
+  updateGame(): number {
     if (this.await) {
-      return;
+      return -1;
     }
     if (!this.boardType) {
-      return;
+      return -1;
     }
     for (const p of this.player) {
       if (p.hp == 0) {
         if (this.boardType === Form.REC) {
           this.boardType = 0;
-          return;
+          return -1;
         } else {
           this.player.splice(p.index, 1);
           for (let i = 0; i < this.player.length; i++) {
@@ -164,6 +162,7 @@ export class Game {
           console.log("SOMEBODY LOST")
           this.boardType--;
           this.init();
+          return (p.index);
         }
       }
     }
@@ -183,6 +182,7 @@ export class Game {
       this.ball.goToRandomPlayer(this.player, this);
       this.ball.calcNextCollision(this.player, this.board.wall, null, null);
     }
+    return -1;
   }
 }
 
