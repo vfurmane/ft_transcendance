@@ -33,12 +33,12 @@ async function checkTfa(
       });
     } else if (response.status < 400) {
       return await response.text().then((data) => {
-        return (data ? JSON.parse(data) : {}) 
-      })
+        return data ? JSON.parse(data) : {};
+      });
     }
   });
   if (!response) return false;
-  else if (!Object.keys(response).length) return true
+  else if (!Object.keys(response).length) return true;
   return response;
 }
 

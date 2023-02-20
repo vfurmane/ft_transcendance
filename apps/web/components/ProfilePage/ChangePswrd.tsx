@@ -23,7 +23,7 @@ async function changePassword(
       headers: {
         "Content-Type": "application/json",
       },
-      credentials:"same-origin",
+      credentials: "same-origin",
       body: JSON.stringify(data),
     }
   ).then(async (response) => {

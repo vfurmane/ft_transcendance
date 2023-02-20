@@ -9,7 +9,7 @@ async function setupTfa(): Promise<{ otpauth_url: string } | null> {
       headers: {
         "Content-Type": "application/json",
       },
-      credentials:"same-origin",
+      credentials: "same-origin",
     }
   ).then(async (response) => {
     if (!response.ok) {

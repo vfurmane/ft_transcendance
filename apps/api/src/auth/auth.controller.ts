@@ -78,7 +78,7 @@ export class AuthController {
   async ftCallback(
     @User() user: UserEntity,
     @State() state: StateEntity,
-    @Res({ passthrough:true}) res : Response
+    @Res({ passthrough: true }) res: Response,
   ): Promise<void | TfaNeededResponse> {
     if (user.tfa_setup) {
       this.logger.log(`${user.name} logged in using OAuth2, but TFA is needed`);
@@ -87,16 +87,16 @@ export class AuthController {
     this.logger.log(`${user.name} logged in using OAuth2`);
     const token = await this.authService.login(user, state);
     res.cookie('access_token', token.access_token, {
-      maxAge: (60 * 5),
-      sameSite: 'strict',
-      httpOnly: true
-    });
-    res.cookie('refresh_token', token.refresh_token, {
-      maxAge: (60 * 60 * 24 * 7),
+      maxAge: 60 * 5,
       sameSite: 'strict',
       httpOnly: true,
-      path: '/api/auth/refresh'
-    })
+    });
+    res.cookie('refresh_token', token.refresh_token, {
+      maxAge: 60 * 60 * 24 * 7,
+      sameSite: 'strict',
+      httpOnly: true,
+      path: '/api/auth/refresh',
+    });
   }
 
   @Post('register')
@@ -112,7 +112,7 @@ export class AuthController {
   async login(
     @User() user: UserEntity,
     @State() state: StateEntity,
-    @Res({passthrough : true}) res : Response
+    @Res({ passthrough: true }) res: Response,
   ): Promise<void | TfaNeededResponse> {
     if (user.tfa_setup) {
       this.logger.log(
@@ -123,16 +123,16 @@ export class AuthController {
     this.logger.log(`${user.name} logged in using username:password`);
     const token = await this.authService.login(user, state);
     res.cookie('access_token', token.access_token, {
-      maxAge: (60 * 5),
-      sameSite: 'strict',
-      httpOnly: true
-    });
-    res.cookie('refresh_token', token.refresh_token, {
-      maxAge: (60 * 60 * 24 * 7),
+      maxAge: 60 * 5,
       sameSite: 'strict',
       httpOnly: true,
-      path: '/api/auth/refresh'
-    })
+    });
+    res.cookie('refresh_token', token.refresh_token, {
+      maxAge: 60 * 60 * 24 * 7,
+      sameSite: 'strict',
+      httpOnly: true,
+      path: '/api/auth/refresh',
+    });
   }
 
   @Post('tfa')
@@ -214,7 +214,7 @@ export class AuthController {
   async loginWithTfa(
     @State() state: StateEntity,
     @Body() body: CheckTfaTokenStateDto,
-    @Res({ passthrough : true}) res: Response
+    @Res({ passthrough: true }) res: Response,
   ): Promise<void> {
     if (!state.user)
       throw new UnauthorizedException('Missing first factor authentication.');
@@ -222,33 +222,36 @@ export class AuthController {
     this.logger.log(`${state.user.name} validated TFA`);
     const token = await this.authService.login(state.user, state);
     res.cookie('access_token', token.access_token, {
-      maxAge: (5 * 60),
-      sameSite: 'strict',
-      httpOnly: true
-    });
-    res.cookie('refresh_token', token.refresh_token, {
-      maxAge: (60 * 60 * 24 * 7),
+      maxAge: 5 * 60,
       sameSite: 'strict',
       httpOnly: true,
-      path: '/api/auth/refresh'
-    })
+    });
+    res.cookie('refresh_token', token.refresh_token, {
+      maxAge: 60 * 60 * 24 * 7,
+      sameSite: 'strict',
+      httpOnly: true,
+      path: '/api/auth/refresh',
+    });
   }
 
   @Post('refresh')
   @UseGuards(JwtRefreshAuthGuard)
-  async refreshToken(@User() user: UserEntity, @Res({ passthrough : true}) res: Response) : Promise<void> {
+  async refreshToken(
+    @User() user: UserEntity,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<void> {
     const token = await this.authService.login(user);
     res.cookie('access_token', token.access_token, {
-      expires: new Date(new Date().getTime() + (30 * 1000 * 60)),
-      sameSite: 'strict',
-      httpOnly: true
-    });
-    res.cookie('refresh_token', token.refresh_token, {
-      expires: new Date(new Date().getTime() + (1000 * 60 * 60 * 24 * 7)),
+      expires: new Date(new Date().getTime() + 30 * 1000 * 60),
       sameSite: 'strict',
       httpOnly: true,
-      path: '/api/auth/refresh'
-    })
+    });
+    res.cookie('refresh_token', token.refresh_token, {
+      expires: new Date(new Date().getTime() + 1000 * 60 * 60 * 24 * 7),
+      sameSite: 'strict',
+      httpOnly: true,
+      path: '/api/auth/refresh',
+    });
   }
 
   @Patch('change_password')

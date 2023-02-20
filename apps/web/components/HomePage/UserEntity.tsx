@@ -75,7 +75,7 @@ export default function UserEntity(props: {
       headers: {
         "Content-Type": "application/json",
       },
-      credentials:"same-origin",
+      credentials: "same-origin",
     })
       .then(function (response) {
         response.json().then((res) => {

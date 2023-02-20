@@ -8,7 +8,6 @@ import { JwtPayload } from 'types';
 import { AuthService } from './auth.service';
 import { Request } from 'express';
 
-
 @Injectable()
 export class JwtRefreshStrategy extends PassportStrategy(
   Strategy,
@@ -20,17 +19,22 @@ export class JwtRefreshStrategy extends PassportStrategy(
     private readonly authService: AuthService,
   ) {
     super({
-      jwtFromRequest: ExtractJwt.fromExtractors([JwtRefreshStrategy.extractJWT]),
+      jwtFromRequest: ExtractJwt.fromExtractors([
+        JwtRefreshStrategy.extractJWT,
+      ]),
       ignoreExpiration: false,
       secretOrKey: configService.get('JWT_SECRET'),
     });
   }
 
-  private static extractJWT(req: Request) : string | null
-  {
-    if (req.cookies && 'refresh_token' in req.cookies && req.cookies.refresh_token.length > 0)
-      return req.cookies.refresh_token
-    return null
+  private static extractJWT(req: Request): string | null {
+    if (
+      req.cookies &&
+      'refresh_token' in req.cookies &&
+      req.cookies.refresh_token.length > 0
+    )
+      return req.cookies.refresh_token;
+    return null;
   }
 
   async validate(payload: JwtPayload): Promise<User | null> {

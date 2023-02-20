@@ -79,7 +79,7 @@ export default function Profil(): JSX.Element {
     if (router.query.username !== UserState.name) {
       // if foreign user
       fetch(`/api/user/${router.query.username}`, {
-        credentials:"same-origin",
+        credentials: "same-origin",
       })
         .then(async (response) => {
           if (!response.ok) {
@@ -109,7 +109,7 @@ export default function Profil(): JSX.Element {
         headers: {
           "Content-Type": "application/json",
         },
-        credentials:"same-origin",
+        credentials: "same-origin",
       })
         .then((res) => res.json())
         .then((data) => {
@@ -197,7 +197,7 @@ export default function Profil(): JSX.Element {
       headers: {
         "Content-Type": "application/json",
       },
-      credentials:"same-origin",
+      credentials: "same-origin",
     }).catch(function (error) {
       console.error(
         "Il y a eu un problème avec l'opération fetch : " + error.message

@@ -25,7 +25,7 @@ export default function ArrayDoubleColumn(props: {
       headers: {
         "Content-Type": "application/json",
       },
-      credentials:"same-origin",
+      credentials: "same-origin",
     })
       .then((res) => res.json())
       .then((data: User[]) => {

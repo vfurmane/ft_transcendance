@@ -27,11 +27,14 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  private static extractJWT(req: Request) : string | null
-  {
-    if (req.cookies && 'access_token' in req.cookies && req.cookies.access_token.length > 0)
-      return req.cookies.access_token
-    return null
+  private static extractJWT(req: Request): string | null {
+    if (
+      req.cookies &&
+      'access_token' in req.cookies &&
+      req.cookies.access_token.length > 0
+    )
+      return req.cookies.access_token;
+    return null;
   }
 
   async validate(payload: JwtPayload): Promise<User | null> {

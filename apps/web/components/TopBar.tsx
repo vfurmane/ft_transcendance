@@ -32,7 +32,7 @@ interface propsTopBar {
 async function logout(): Promise<null> {
   const response = await fetch(`/api/auth/logout`, {
     method: "POST",
-    credentials:"same-origin",
+    credentials: "same-origin",
   }).then(async (response) => {
     if (!response.ok) {
       return response.json().then((error) => {
@@ -88,7 +88,7 @@ function TopBar(props: propsTopBar): JSX.Element {
         headers: {
           "Content-Type": "application/json",
         },
-        credentials:"same-origin",
+        credentials: "same-origin",
       })
         .then(function (response) {
           response.json().then(function (data) {

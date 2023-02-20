@@ -91,7 +91,7 @@ function Home(): JSX.Element {
       headers: {
         "Content-Type": "application/json",
       },
-      credentials:"same-origin",
+      credentials: "same-origin",
     }).catch(function (error) {
       console.error(
         "Il y a eu un problème avec l'opération fetch : " + error.message
@@ -133,7 +133,7 @@ function Home(): JSX.Element {
       headers: {
         "Content-Type": "application/json",
       },
-      credentials:"same-origin",
+      credentials: "same-origin",
     })
       .then(function (response) {
         if (response.ok) {

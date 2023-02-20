@@ -22,12 +22,12 @@ async function exchangeCodeForToken(
       });
     } else if (response.status < 400) {
       return await response.text().then((data) => {
-        return (data ? JSON.parse(data) : {}) 
-      })
+        return data ? JSON.parse(data) : {};
+      });
     }
   });
   if (!response) return false;
-  else if (!Object.keys(response).length) return true
+  else if (!Object.keys(response).length) return true;
   return response;
 }
 
@@ -49,21 +49,21 @@ export default function FtOauth2(): JSX.Element {
     }
     exchangeCodeForToken(code, state)
       .then(async (response) => {
-        console.log(response)
+        console.log(response);
         if (response === false) {
           throw new Error("An unexpected error occured...");
         } else if (response === true) {
-            setMessage("Success! Redirecting...");
-            localStorage.removeItem("state");
-            const user = await identifyUser();
-            if (user) dispatch(setUserState(user));
-            router.replace('/')
+          setMessage("Success! Redirecting...");
+          localStorage.removeItem("state");
+          const user = await identifyUser();
+          if (user) dispatch(setUserState(user));
+          router.replace("/");
         } else if (
-            "message" in response &&
-            response.message === "Authentication factor needed"
-          ) {
-            router.replace(`/auth/${response.route}`);
-          }
+          "message" in response &&
+          response.message === "Authentication factor needed"
+        ) {
+          router.replace(`/auth/${response.route}`);
+        }
       })
       .catch((error) => {
         setMessage(error?.message || "An unexpected error occured...");

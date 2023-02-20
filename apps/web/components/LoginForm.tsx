@@ -36,20 +36,20 @@ async function login(
     },
     body: JSON.stringify({ ...data, state }),
   }).then(async (response) => {
-    console.error("Response: ", response)
+    console.error("Response: ", response);
     if (!response.ok) {
       return response.json().then((error) => {
         throw new Error(error.message || "An unexpected error occured...");
       });
     } else {
       return await response.text().then((data) => {
-        return (data ? JSON.parse(data) : {}) 
-      })
+        return data ? JSON.parse(data) : {};
+      });
     }
   });
-  console.log("Parsed Response: ", response)
+  console.log("Parsed Response: ", response);
   if (!response) return false;
-  else if (!Object.keys(response).length) return true
+  else if (!Object.keys(response).length) return true;
   return response;
 }
 
@@ -73,21 +73,20 @@ export function LoginForm(): ReactElement {
 
     await login(data, state)
       .then(async (response) => {
-        if (response === false) 
+        if (response === false)
           throw new Error("An unexpected error occured...");
-        else if (response === true)
-        {
+        else if (response === true) {
           setFormSuccess("Success! Redirecting...");
           localStorage.removeItem("state");
           const user = await identifyUser();
           if (user) dispatch(setUserState(user));
           router.replace("/");
+        } else if (
+          "message" in response &&
+          response.message === "Authentication factor needed"
+        ) {
+          router.replace(`/auth/${response.route}`);
         }
-        else if ("message" in response &&
-            response.message === "Authentication factor needed"
-          ) {
-            router.replace(`/auth/${response.route}`);
-          }
       })
       .catch((error) => {
         setFormError(error?.message || "An unexpected error occured...");

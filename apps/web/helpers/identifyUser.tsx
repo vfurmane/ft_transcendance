@@ -5,7 +5,7 @@ import { refreshToken } from "./refreshTokens";
 
 async function fetchUser(): Promise<Response | null> {
   return await fetch("/api/user", {
-    credentials: "same-origin"
+    credentials: "same-origin",
   }).catch((error) => null);
 }
 

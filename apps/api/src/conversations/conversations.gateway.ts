@@ -49,24 +49,25 @@ export class ConversationsGateway implements OnGatewayConnection {
 
   async handleConnection(client: Socket): Promise<string | void> {
     console.error('Someone is trying to connect');
-    // if (!client.handshake.auth.token) {
-    //   client.disconnect();
-    //   return;
-    // }
-    // const currentUser = this.authService.verifyUserFromToken(
-    //   client.handshake.auth.token,
-    // );
-    // if (!currentUser) {
-    //   client.disconnect();
-    //   return;
-    // }
-    // client.data = { id: currentUser.sub, name: currentUser.name };
-    // client.join(`user_${currentUser.sub}`);
-    // const conversations = await this.conversationsService.getConversationsIds(
-    //   currentUser.sub,
-    // );
-    // conversations.forEach((el) => client.join(`conversation_${el}`));
-    // return 'Connection established';
+    const token = client.handshake.headers.cookie?.split('=')[1];
+    if (!token) {
+      client.disconnect();
+      console.log('No Authorization cookie found');
+      return;
+    }
+    const currentUser = this.authService.verifyUserFromToken(token);
+    if (!currentUser) {
+      client.disconnect();
+      console.log('invalid Token');
+      return;
+    }
+    client.data = { id: currentUser.sub, name: currentUser.name };
+    client.join(`user_${currentUser.sub}`);
+    const conversations = await this.conversationsService.getConversationsIds(
+      currentUser.sub,
+    );
+    conversations.forEach((el) => client.join(`conversation_${el}`));
+    return 'Connection established';
   }
 
   @SubscribeMessage('getConversations')

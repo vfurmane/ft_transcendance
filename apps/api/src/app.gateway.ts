@@ -18,6 +18,7 @@ import { AuthService } from './auth/auth.service';
 import { HttpExceptionTransformationFilter } from './common/filters/HttpExceptionFilter.filter';
 import { SpiedUserDto } from './spied-user.dto';
 import { User, UserStatusUpdatePayload } from 'types';
+import { nextTick } from 'process';
 
 @WebSocketGateway()
 @UseFilters(HttpExceptionTransformationFilter)
@@ -31,22 +32,21 @@ export class AppGateway {
   ) {}
 
   async handleConnection(client: Socket): Promise<void> {
-    // if (!client.handshake.auth.token)
-    //   throw new UnauthorizedException('No Authorization header found');
-    // const currentUser = this.authService.verifyUserFromToken(
-    //   client.handshake.auth.token,
-    // );
-    // if (!currentUser) throw new UnauthorizedException('Invalid token');
-    // client.data = { id: currentUser.sub, name: currentUser.name };
-    // client.join(`user_${currentUser.sub}`);
-    // this.server.to(`user_${currentUser.sub}`).emit('user_status_update', {
-    //   type: 'online',
-    //   userId: client.data.id,
-    // });
-    // this.cacheManager.set(`user:${currentUser.sub}`, currentUser, 0);
-    // this.logger.log(
-    //   `'${currentUser.sub}' (${currentUser.name}) connected on socket '${client.id}'`,
-    // );
+    const token = client.handshake.headers.cookie?.split('=')[1];
+    if (!token)
+      throw new UnauthorizedException('No Authorization cookie found');
+    const currentUser = this.authService.verifyUserFromToken(token);
+    if (!currentUser) throw new UnauthorizedException('Invalid token');
+    client.data = { id: currentUser.sub, name: currentUser.name };
+    client.join(`user_${currentUser.sub}`);
+    this.server.to(`user_${currentUser.sub}`).emit('user_status_update', {
+      type: 'online',
+      userId: client.data.id,
+    });
+    this.cacheManager.set(`user:${currentUser.sub}`, currentUser, 0);
+    this.logger.log(
+      `'${currentUser.sub}' (${currentUser.name}) connected on socket '${client.id}'`,
+    );
   }
 
   async handleDisconnect(client: Socket): Promise<void> {
