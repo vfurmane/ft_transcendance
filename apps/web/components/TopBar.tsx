@@ -28,6 +28,7 @@ interface propsTopBar {
     openMenu: boolean;
     setOpenMenu: React.Dispatch<React.SetStateAction<boolean>>;
   }): void;
+  avatarHash?: string | null;
 }
 
 async function logout(): Promise<null> {
@@ -110,6 +111,7 @@ function TopBar(props: propsTopBar): JSX.Element {
                   delFriendClick={(): void => {
                     null;
                   }}
+                  avatarHash={props.avatarHash}
                 />
               );
               userListTmp.push(userEntity);
@@ -159,6 +161,7 @@ function TopBar(props: propsTopBar): JSX.Element {
               width={45}
               height={45}
               handleClick={clickProfil}
+              fileHash={props.avatarHash}
             />
           </div>
         </div>
@@ -209,6 +212,7 @@ function TopBar(props: propsTopBar): JSX.Element {
                   width={42}
                   height={42}
                   handleClick={clickProfil}
+                  fileHash={props.avatarHash}
                 />
               </div>
             </div>

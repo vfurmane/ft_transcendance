@@ -43,6 +43,7 @@ export default function Profil(): JSX.Element {
   const [listOfMatch, setListOfMatch] = useState<JSX.Element[]>([]);
   const [isBlocked, setIsBlocked] = useState(false);
   const dispatch = useDispatch();
+  const [avatarHash, setAvatarHash] = useState<string | null>(null);
   const websockets = useWebsocketContext();
   const BlockedUsersState = useSelector(selectBlockedUsersState);
 
@@ -197,6 +198,7 @@ export default function Profil(): JSX.Element {
           match={matchHistory[i]}
           user={user}
           key={matchHistory[i].id}
+          avatarHash={avatarHash}
         />
       );
     }
@@ -289,6 +291,7 @@ export default function Profil(): JSX.Element {
         clickTopBarToggle={clickTopBarToggle}
         writeSearchTopBar={writeSearchTopBar}
         handleClickUserMenu={handleClickUserMenu}
+        avatarHash={avatarHash}
       />
       <div className="container" style={{ marginTop: "150px" }}>
         <div className="row">
@@ -300,6 +303,8 @@ export default function Profil(): JSX.Element {
                 userId={user.id}
                 width={200}
                 height={200}
+                setFileHash={setAvatarHash}
+                fileHash={avatarHash}
               />
             </div>
             <div className={styles.rank + " " + textStyles.saira}>
