@@ -3,6 +3,7 @@ import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react"
 import { useSelector } from "react-redux"
 import { Conversation as ConversationEntity, conversationRestrictionEnum, ConversationRole } from "types"
 import { selectUserState } from "../store/UserSlice"
+import ConversationParticipant from "./ConversationParticipant"
 import ManageConversation from "./manageConversation"
 import { useWebsocketContext } from "./Websocket"
 
@@ -33,7 +34,10 @@ export default function ChatParams( props : chatParamsProps ) : JSX.Element
             )
         }
     }, [ participants ])
-    
+    if (!self)
+        return <></>
+    else
+    {
     return (
         <>
             { props.currentConversation.groupConversation ? < ManageConversation selectConversation={ props.selectConversation } currentConversation={ props.currentConversation } self={self} participants={ participants }/> : <></>}
@@ -43,16 +47,11 @@ export default function ChatParams( props : chatParamsProps ) : JSX.Element
             {
                 if (participant.user.id === userState.id)
                     return <></>
-                if (!props.currentConversation.groupConversation)
-                {
-                    return <article><Link href={`/profile/${participant.user.name}`}>{ participant.user.name }</Link></article>
-                }
-                else if (! participant.restrictions.length)
-                    return <><article>{ participant.user.name }</article><article>{ participant.role }</article></>
-                return <><article>{ participant.user.name }</article><article>{ participant.role }</article>{ participant.restrictions.filter((e) => e.status === conversationRestrictionEnum.BAN).length ? "BANNED" : "MUTED" }</>
+                return < ConversationParticipant participant={participant}  self={self.current} conversation={ props.currentConversation }/>
             })
             }
             </section>
         </>
     )
+        }
 }

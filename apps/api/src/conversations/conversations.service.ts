@@ -23,6 +23,7 @@ import * as bcrypt from 'bcrypt';
 import { conversationRestrictionEnum } from 'types';
 import { ConversationRestriction } from 'types';
 import { invitationDto } from './dtos/invitation.dto';
+import { muteUserDto } from './dtos/muteUser.dto';
 
 @Injectable()
 export class ConversationsService {
@@ -866,5 +867,107 @@ export class ConversationsService {
     return `User ${
       restrictionType === conversationRestrictionEnum.BAN ? 'banned' : 'muted'
     } until ${until ? until : 'the end of times'}`;
+  }
+
+  async unbanUser(currentUser : User, target: muteUserDto)
+  {
+    await this.clearRestrictions(target.id)
+    const currentConversation = await this.conversationRepository.findOne({
+      relations:{
+        conversationRoles: true,
+      },
+      where:
+      {
+        conversationRoles:
+        {
+          user:
+          {
+            id: currentUser.id
+          }
+        }
+      }
+    })
+    if (!currentConversation)
+      throw new NotFoundException()
+    const targetUser = await this.conversationRoleRepository.findOne({
+      relations:
+      {
+        conversation: true
+      },
+      where:
+      {
+        user:
+        {
+          name: target.username
+        },
+        conversation:
+        {
+          id: target.id
+        }
+      }
+    })
+    if (!targetUser)
+      throw new NotFoundException()
+    let banRestrictions : ConversationRestriction[] = []
+    targetUser.restrictions.forEach((restriction) => {
+      if (restriction.status === conversationRestrictionEnum.BAN)
+        banRestrictions.push(restriction)
+    })
+    if (banRestrictions.length)
+    {
+      await this.conversationRestrictionRepository.remove(banRestrictions)
+    }
+    return (true)
+  }
+
+  async unmuteUser(currentUser : User, target: muteUserDto)
+  {
+    await this.clearRestrictions(target.id)
+    const currentConversation = await this.conversationRepository.findOne({
+      relations:{
+        conversationRoles: true,
+      },
+      where:
+      {
+        conversationRoles:
+        {
+          user:
+          {
+            id: currentUser.id
+          }
+        }
+      }
+    })
+    if (!currentConversation)
+      throw new NotFoundException()
+    const targetUser = await this.conversationRoleRepository.findOne({
+      relations:
+      {
+        conversation: true
+      },
+      where:
+      {
+        user:
+        {
+          name: target.username
+        },
+        conversation:
+        {
+          id: target.id
+        }
+      }
+    })
+    if (!targetUser)
+      throw new NotFoundException()
+    let banRestrictions : ConversationRestriction[] = []
+    targetUser.restrictions.forEach((restriction) => {
+      if (restriction.status === conversationRestrictionEnum.MUTE)
+        banRestrictions.push(restriction)
+    })
+    if (banRestrictions.length)
+    {
+      await this.conversationRestrictionRepository.remove(banRestrictions)
+    }
+    return (true)
   }
 }

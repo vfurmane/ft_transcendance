@@ -337,4 +337,16 @@ export class ConversationsGateway implements OnGatewayConnection {
     this.server.in(`user_${id}`).socketsLeave(`conversation_${id}`);
     return restriction;
   }
+
+  @SubscribeMessage('unbanUser')
+  async unbanUser(@ConnectedSocket() client: Socket, @MessageBody() {id, username} : muteUserDto)
+  {
+    return this.conversationsService.unbanUser(client.data as User, {id, username} )
+  }
+
+  @SubscribeMessage('unmuteUser')
+  async unmuteUser(@ConnectedSocket() client: Socket, @MessageBody() {id, username} : muteUserDto)
+  {
+    return this.conversationsService.unmuteUser(client.data as User, {id, username} )
+  }
 }
