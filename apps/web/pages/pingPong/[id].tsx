@@ -53,6 +53,16 @@ export default function PingPong(): JSX.Element {
     setGame(null);
   });
 
+  useEffect(() => {
+    return (() => {
+      const canvas = document.getElementById("canvasElem");
+      if (canvas)
+      {
+        canvas.style.transformOrigin = `0px 0px`;
+      }
+    });
+  }, [])
+
   function rotateInit(users: User[]) {
     const size =
       users.findIndex((e) => e.id === UserState.id) === -1
@@ -144,18 +154,19 @@ export default function PingPong(): JSX.Element {
     });
   }
 
-  function changeScoreOrLife(index: number, life: number, score: number) {
+  function changeScoreOrLife( index: number, life: number, score: number) {
+    const user = MiniProfilArray[index].props.user.user;
     return (
       <MiniProfil
         key={index}
         left={index % 2 == 0 ? true : false}
-        user={{ user: usersGame[index], index: index }}
+        user={{ user: user, index: index }}
         life={life}
         score={score}
         game={{
           life: Game.live,
           score: Game.scoreMax,
-          numOfPlayers: usersGame.length,
+          numOfPlayers: users.length,
         }}
       />
     );
