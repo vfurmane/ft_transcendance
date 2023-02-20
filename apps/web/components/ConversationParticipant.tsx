@@ -32,30 +32,28 @@ export default function ConversationParticipant(
       setError("Temporary network error, please try again later");
       return;
     }
-    websockets.conversations
-      .timeout(1000)
-      .emit(
-        "updateRole",
-        {
-          id: props.conversation.id,
-          userId: props.participant.user.id,
-          newRole: newRole,
-        },
-        (err: any, answer: string) => {
-          if (err) {
-            if (promote)
-              setError(
-                `Failed to promote ${props.participant.user.name} as ${newRole}`
-              );
-            else
-              setError(
-                `Failed to demote ${props.participant.user.name} as ${newRole}`
-              );
-            return;
-          }
-          setSuccess(answer);
+    websockets.conversations.timeout(1000).emit(
+      "updateRole",
+      {
+        id: props.conversation.id,
+        userId: props.participant.user.id,
+        newRole: newRole,
+      },
+      (err: any, answer: string) => {
+        if (err) {
+          if (promote)
+            setError(
+              `Failed to promote ${props.participant.user.name} as ${newRole}`
+            );
+          else
+            setError(
+              `Failed to demote ${props.participant.user.name} as ${newRole}`
+            );
+          return;
         }
-      );
+        setSuccess(answer);
+      }
+    );
   };
 
   if (!props.conversation.groupConversation)
@@ -120,23 +118,21 @@ export default function ConversationParticipant(
                 setError("Temporary network error, please try again later");
                 return;
               }
-              websockets.conversations
-                .timeout(1000)
-                .emit(
-                  "muteUser",
-                  {
-                    id: props.conversation.id,
-                    username: props.participant.user.name,
-                    date: new Date(new Date().getTime() + 24 * 60 * 60 * 1000),
-                  },
-                  (err: any, answer: string) => {
-                    if (err) {
-                      setError("Failed to mute user");
-                      return;
-                    }
-                    setSuccess(answer);
+              websockets.conversations.timeout(1000).emit(
+                "muteUser",
+                {
+                  id: props.conversation.id,
+                  username: props.participant.user.name,
+                  date: new Date(new Date().getTime() + 24 * 60 * 60 * 1000),
+                },
+                (err: any, answer: string) => {
+                  if (err) {
+                    setError("Failed to mute user");
+                    return;
                   }
-                );
+                  setSuccess(answer);
+                }
+              );
             }}
           >
             Mute for 24h
@@ -150,24 +146,22 @@ export default function ConversationParticipant(
                 setError("Temporary network error, please try again later");
                 return;
               }
-              websockets.conversations
-                .timeout(1000)
-                .emit(
-                  "unmuteUser",
-                  {
-                    id: props.conversation.id,
-                    username: props.participant.user.name,
-                  },
-                  (err: any, answer: string) => {
-                    if (err) {
-                      setError("Failed to unmute user");
-                      return;
-                    }
-                    setSuccess(
-                      `Sucessfully unmuted ${props.participant.user.name}`
-                    );
+              websockets.conversations.timeout(1000).emit(
+                "unmuteUser",
+                {
+                  id: props.conversation.id,
+                  username: props.participant.user.name,
+                },
+                (err: any, answer: string) => {
+                  if (err) {
+                    setError("Failed to unmute user");
+                    return;
                   }
-                );
+                  setSuccess(
+                    `Sucessfully unmuted ${props.participant.user.name}`
+                  );
+                }
+              );
             }}
           >
             Unmute
@@ -185,25 +179,21 @@ export default function ConversationParticipant(
                   setError("Temporary network error, please try again later");
                   return;
                 }
-                websockets.conversations
-                  .timeout(1000)
-                  .emit(
-                    "banUser",
-                    {
-                      id: props.conversation.id,
-                      username: props.participant.user.name,
-                      date: new Date(
-                        new Date().getTime() + 24 * 60 * 60 * 1000
-                      ),
-                    },
-                    (err: any, answer: string) => {
-                      if (err) {
-                        setError("Failed to ban user");
-                        return;
-                      }
-                      setSuccess(answer);
+                websockets.conversations.timeout(1000).emit(
+                  "banUser",
+                  {
+                    id: props.conversation.id,
+                    username: props.participant.user.name,
+                    date: new Date(new Date().getTime() + 24 * 60 * 60 * 1000),
+                  },
+                  (err: any, answer: string) => {
+                    if (err) {
+                      setError("Failed to ban user");
+                      return;
                     }
-                  );
+                    setSuccess(answer);
+                  }
+                );
               }}
             >
               Ban for 24h
@@ -216,22 +206,20 @@ export default function ConversationParticipant(
                   setError("Temporary network error, please try again later");
                   return;
                 }
-                websockets.conversations
-                  .timeout(1000)
-                  .emit(
-                    "banUserIndefinitely",
-                    {
-                      id: props.conversation.id,
-                      username: props.participant.user.name,
-                    },
-                    (err: any, answer: string) => {
-                      if (err) {
-                        setError("Failed to ban user");
-                        return;
-                      }
-                      setSuccess(answer);
+                websockets.conversations.timeout(1000).emit(
+                  "banUserIndefinitely",
+                  {
+                    id: props.conversation.id,
+                    username: props.participant.user.name,
+                  },
+                  (err: any, answer: string) => {
+                    if (err) {
+                      setError("Failed to ban user");
+                      return;
                     }
-                  );
+                    setSuccess(answer);
+                  }
+                );
               }}
             >
               Ban indefinitely
@@ -246,24 +234,22 @@ export default function ConversationParticipant(
                 setError("Temporary network error, please try again later");
                 return;
               }
-              websockets.conversations
-                .timeout(1000)
-                .emit(
-                  "unbanUser",
-                  {
-                    id: props.conversation.id,
-                    username: props.participant.user.name,
-                  },
-                  (err: any, answer: string) => {
-                    if (err) {
-                      setError("Failed to unban user");
-                      return;
-                    }
-                    setSuccess(
-                      `Sucessfully unbanned ${props.participant.user.name}`
-                    );
+              websockets.conversations.timeout(1000).emit(
+                "unbanUser",
+                {
+                  id: props.conversation.id,
+                  username: props.participant.user.name,
+                },
+                (err: any, answer: string) => {
+                  if (err) {
+                    setError("Failed to unban user");
+                    return;
                   }
-                );
+                  setSuccess(
+                    `Sucessfully unbanned ${props.participant.user.name}`
+                  );
+                }
+              );
             }}
           >
             Unban

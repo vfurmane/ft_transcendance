@@ -94,25 +94,21 @@ export default function Message(props: MessageProps): JSX.Element {
                   setError("Connection error, please try again later");
                   return;
                 }
-                websockets.conversations
-                  .timeout(1000)
-                  .emit(
-                    "joinConversation",
-                    {
-                      id: props.message.target,
-                      password: passwordRef.current?.value,
-                    },
-                    (err: any, conversation: Conversation) => {
-                      if (err) {
-                        setError("Could not join conversation, check password");
-                        return;
-                      }
-                      setSuccess(
-                        `Successfully joined ${props.message.content}`
-                      );
-                      setRequirePassword(false);
+                websockets.conversations.timeout(1000).emit(
+                  "joinConversation",
+                  {
+                    id: props.message.target,
+                    password: passwordRef.current?.value,
+                  },
+                  (err: any, conversation: Conversation) => {
+                    if (err) {
+                      setError("Could not join conversation, check password");
+                      return;
                     }
-                  );
+                    setSuccess(`Successfully joined ${props.message.content}`);
+                    setRequirePassword(false);
+                  }
+                );
               }}
             >
               <input

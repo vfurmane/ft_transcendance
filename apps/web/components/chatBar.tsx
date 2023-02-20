@@ -19,7 +19,7 @@ export default function ChatBar(): JSX.Element {
   const websockets = useWebsocketContext();
   const conversationToOpen = useSelector(selectConversationsState);
   const dispatch = useDispatch();
-  let [conversationIdProp, setConversationIdProp] = useState<{
+  const [conversationIdProp, setConversationIdProp] = useState<{
     userId: string;
     userName: string;
   }>({ userId: "", userName: "" });
