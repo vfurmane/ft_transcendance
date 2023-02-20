@@ -29,7 +29,7 @@ const WebsocketContext = createContext<OpenedSockets>({
 const deregisterSocket = (
   socket: Socket<DefaultEventsMap, DefaultEventsMap>
 ): void => {
-  console.error("disconnecting socket")
+  console.error("disconnecting socket");
   socket.disconnect();
   socket.off("connect");
   socket.off("connect_error");
@@ -37,7 +37,7 @@ const deregisterSocket = (
 };
 
 const closeOpenSockets = (sockets: OpenedSockets): void => {
-  console.error("Closing sockets")
+  console.error("Closing sockets");
   if (sockets.general) deregisterSocket(sockets.general);
   if (sockets.conversations) deregisterSocket(sockets.conversations);
   if (sockets.pong) deregisterSocket(sockets.pong);
@@ -64,11 +64,20 @@ export default function Websocket({ children }: WebsocketProps): JSX.Element {
   });
   const userState = useSelector(selectUserState);
 
-  useEffect((): () => void => {
+  useEffect((): (() => void) => {
     if (userState.id) {
-      const general = socketInstances.general?.connected !== true ? OpenSocket("/") : socketInstances.general;
-      const conversations = socketInstances.conversations?.connected !== true ? OpenSocket("/conversations") : socketInstances.conversations;
-      const pong = socketInstances.pong?.connected !== true ? OpenSocket("/pong") : socketInstances.pong;
+      const general =
+        socketInstances.general?.connected !== true
+          ? OpenSocket("/")
+          : socketInstances.general;
+      const conversations =
+        socketInstances.conversations?.connected !== true
+          ? OpenSocket("/conversations")
+          : socketInstances.conversations;
+      const pong =
+        socketInstances.pong?.connected !== true
+          ? OpenSocket("/pong")
+          : socketInstances.pong;
       setSocketInstances({
         general: general,
         conversations: conversations,
@@ -83,13 +92,13 @@ export default function Websocket({ children }: WebsocketProps): JSX.Element {
       });
     }
     return (): void => {
-        console.error("returning to close sockets")
-        closeOpenSockets(socketInstances);
-        setSocketInstances({
-          general: null,
-          conversations: null,
-          pong: null,
-        });
+      console.error("returning to close sockets");
+      closeOpenSockets(socketInstances);
+      setSocketInstances({
+        general: null,
+        conversations: null,
+        pong: null,
+      });
     };
   }, [userState.id]);
   return (

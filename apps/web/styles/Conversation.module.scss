@@ -1,10 +1,8 @@
-.containerConversation
-{
-    display: grid;
-    grid-template-columns: 3fr 1fr;
-    h4
-    {
-        text-align: left;
-        padding-left: 15px;
-    }
+.containerConversation {
+  display: grid;
+  grid-template-columns: 3fr 1fr;
+  h4 {
+    text-align: left;
+    padding-left: 15px;
+  }
 }

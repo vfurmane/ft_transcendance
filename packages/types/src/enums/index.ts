@@ -3,4 +3,4 @@ export * from "./conversationRole.enum";
 export * from "./game-mode.enum";
 export * from "./token-type.enum";
 export * from "./pong.enums";
-export * from "./invitation.enum"
+export * from "./invitation.enum";

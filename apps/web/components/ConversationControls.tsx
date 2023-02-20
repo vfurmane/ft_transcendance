@@ -6,41 +6,56 @@ import styles from "styles/conversationControls.module.scss";
 import Image from "next/image";
 import ToggleBar from "../public/toggleBar.png";
 
-interface conversationControlsProps
-{
-    newConversation: {userId: string, userName: string} | null,
-    conversation: ConversationEntity | null,
-    visibility: boolean,
-    setVisibility: Dispatch<SetStateAction<boolean>>
-
+interface conversationControlsProps {
+  newConversation: { userId: string; userName: string } | null;
+  conversation: ConversationEntity | null;
+  visibility: boolean;
+  setVisibility: Dispatch<SetStateAction<boolean>>;
 }
 
-export default function ConversationControls( props : conversationControlsProps ) : JSX.Element
-{
-    
-    const userState = useSelector(selectUserState);
+export default function ConversationControls(
+  props: conversationControlsProps
+): JSX.Element {
+  const userState = useSelector(selectUserState);
 
-    if (!props.visibility)
-    {
-        return (
-            <>
-            <p className={ styles.conversationName }>
-                { props.conversation ? props.conversation.name.replace(userState.name, '').replace(' - ', '') : props.newConversation?.userName }
-            </p>
-            <section className={ styles.conversationMenu } onClick={ () => {props.setVisibility(true)} }>
-                < Image src={ ToggleBar } alt="toggle bar" />
-            </section>
-            </ >
-        )
-    }
+  if (!props.visibility) {
     return (
-        <>
-        <p className={ styles.conversationName }>
-            { props.conversation ? props.conversation.name.replace(userState.name, '').replace(' - ', '') : props.newConversation?.userName }
+      <>
+        <p className={styles.conversationName}>
+          {props.conversation
+            ? props.conversation.name
+                .replace(userState.name, "")
+                .replace(" - ", "")
+            : props.newConversation?.userName}
         </p>
-        <section className={ styles.conversationMenu } onClick={ () => {props.setVisibility(false)} }>
-            < Image src={ ToggleBar } alt="toggle bar" />
+        <section
+          className={styles.conversationMenu}
+          onClick={() => {
+            props.setVisibility(true);
+          }}
+        >
+          <Image src={ToggleBar} alt="toggle bar" />
         </section>
-        </ >
-    )
+      </>
+    );
+  }
+  return (
+    <>
+      <p className={styles.conversationName}>
+        {props.conversation
+          ? props.conversation.name
+              .replace(userState.name, "")
+              .replace(" - ", "")
+          : props.newConversation?.userName}
+      </p>
+      <section
+        className={styles.conversationMenu}
+        onClick={() => {
+          props.setVisibility(false);
+        }}
+      >
+        <Image src={ToggleBar} alt="toggle bar" />
+      </section>
+    </>
+  );
 }

@@ -31,18 +31,16 @@ export class AppGateway {
   ) {}
 
   async handleConnection(client: Socket): Promise<void> {
-    if (!client.handshake.auth.token)
-    {
-      client.disconnect()
-      return
+    if (!client.handshake.auth.token) {
+      client.disconnect();
+      return;
     }
     const currentUser = this.authService.verifyUserFromToken(
       client.handshake.auth.token,
     );
-    if (!currentUser)
-    {
+    if (!currentUser) {
       client.disconnect();
-      return
+      return;
     }
     client.data = { id: currentUser.sub, name: currentUser.name };
     client.join(`user_${currentUser.sub}`);

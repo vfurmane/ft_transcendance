@@ -11,8 +11,7 @@ async function fetchUser(): Promise<Response | null> {
   }).catch((error) => null);
 }
 
-async function refreshUser() : Promise<Response | null>
-{
+async function refreshUser(): Promise<Response | null> {
   let response: Response | null;
   if (await refreshToken()) {
     response = await fetchUser();
@@ -21,18 +20,17 @@ async function refreshUser() : Promise<Response | null>
   return response;
 }
 
-export async function identifyUser(loading : boolean): Promise<null | Userfront> {
+export async function identifyUser(
+  loading: boolean
+): Promise<null | Userfront> {
   let response: Response | null;
-  if (loading)
-  {
-    response = await refreshUser()
-  }
-  else
-  {
+  if (loading) {
+    response = await refreshUser();
+  } else {
     response = await fetchUser();
     if (!response || !response.ok) {
       response = await refreshUser();
     }
   }
-  return response !== null ? response.json() as Promise<Userfront> : null;
+  return response !== null ? (response.json() as Promise<Userfront>) : null;
 }

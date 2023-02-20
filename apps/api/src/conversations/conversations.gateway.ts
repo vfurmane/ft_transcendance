@@ -67,11 +67,11 @@ export class ConversationsGateway implements OnGatewayConnection {
       currentUser.sub,
     );
     conversations.forEach((el) => client.join(`conversation_${el}`));
-    console.error(`new socket id: ${client.id}`)
+    console.error(`new socket id: ${client.id}`);
     return 'Connection established';
   }
 
-  handleDisconnect(client : any) {
+  handleDisconnect(client: any) {
     console.error(`Closed socket: ${client.id}`);
   }
 
@@ -79,7 +79,7 @@ export class ConversationsGateway implements OnGatewayConnection {
   getConversations(
     @ConnectedSocket() client: Socket,
   ): Promise<ConversationsDetails> {
-    console.error("Getting conversations")
+    console.error('Getting conversations');
     return this.conversationsService.getConversations(client.data as User);
   }
 
@@ -88,7 +88,7 @@ export class ConversationsGateway implements OnGatewayConnection {
     @ConnectedSocket() client: Socket,
     @MessageBody() newConversation: createConversationDto,
   ): Promise<Conversation> {
-    console.log("newConversation")
+    console.log('newConversation');
     const { conversation, newConversationMessage } =
       await this.conversationsService.createConversation(
         newConversation,
@@ -122,7 +122,7 @@ export class ConversationsGateway implements OnGatewayConnection {
     @ConnectedSocket() client: Socket,
     @MessageBody() { id }: isUUIDDto,
   ): Promise<Message[]> {
-    console.error("Fetching message")
+    console.error('Fetching message');
     return this.conversationsService.getMessages(client.data as User, id);
   }
 
@@ -145,18 +145,21 @@ export class ConversationsGateway implements OnGatewayConnection {
   }
 
   @SubscribeMessage('inviteToConversation')
-  async inviteToConversation(@ConnectedSocket() client : Socket, @MessageBody() invitation : invitationDto ): Promise<boolean>
-  {
-    console.error(invitation)
+  async inviteToConversation(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() invitation: invitationDto,
+  ): Promise<boolean> {
+    console.error(invitation);
     let DMId!: string;
-    if (!invitation.conversationID)
-      return (false)
-    const invitationMessage = await this.conversationsService.inviteToConversation(client.data as User, invitation)
-    console.error("invitationMessage: ", invitationMessage)
-    if (!invitationMessage)
-      return (false)
-    if (invitationMessage.conversation)
-    {
+    if (!invitation.conversationID) return false;
+    const invitationMessage =
+      await this.conversationsService.inviteToConversation(
+        client.data as User,
+        invitation,
+      );
+    console.error('invitationMessage: ', invitationMessage);
+    if (!invitationMessage) return false;
+    if (invitationMessage.conversation) {
       this.server
         .in(`user_${client.data.id}`)
         .socketsJoin(`conversation_${invitationMessage.conversation.id}`);
@@ -165,23 +168,32 @@ export class ConversationsGateway implements OnGatewayConnection {
         .socketsJoin(`conversation_${invitationMessage.conversation.id}`);
       this.server
         .in(`conversation_${invitationMessage.conversation.id}`)
-        .emit('newConversation', instanceToPlain(invitationMessage.conversation));
-      DMId = invitationMessage.conversation.id
-    }
-    else if (invitationMessage.prevConversation)
-      DMId = invitationMessage.prevConversation
-    else
-      DMId = ""
+        .emit(
+          'newConversation',
+          instanceToPlain(invitationMessage.conversation),
+        );
+      DMId = invitationMessage.conversation.id;
+    } else if (invitationMessage.prevConversation)
+      DMId = invitationMessage.prevConversation;
+    else DMId = '';
     this.server
       .in(`conversation_${DMId}`)
-      .emit('newMessage', { DMId, message: instanceToPlain(invitationMessage.message) });
-    return (true)
+      .emit('newMessage', {
+        DMId,
+        message: instanceToPlain(invitationMessage.message),
+      });
+    return true;
   }
 
   @SubscribeMessage('canJoinConversation')
-  async canJoinConversation(@ConnectedSocket() client : Socket, @MessageBody() { id } : isUUIDDto)
-  {
-    return this.conversationsService.canJoinConversation(client.data as User, id);
+  async canJoinConversation(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() { id }: isUUIDDto,
+  ) {
+    return this.conversationsService.canJoinConversation(
+      client.data as User,
+      id,
+    );
   }
 
   @SubscribeMessage('joinConversation')
@@ -247,12 +259,14 @@ export class ConversationsGateway implements OnGatewayConnection {
     return newRole;
   }
 
-  @SubscribeMessage("DMExists")
-  async DMExists(@ConnectedSocket() client : Socket, @MessageBody() { id }: isUUIDDto)
-  {
+  @SubscribeMessage('DMExists')
+  async DMExists(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() { id }: isUUIDDto,
+  ) {
     if (client.data.id === id)
-      return ({conversationExists: false, conversation: null})
-    return this.conversationsService.DMExists(client.data as User, id)
+      return { conversationExists: false, conversation: null };
+    return this.conversationsService.DMExists(client.data as User, id);
   }
 
   @SubscribeMessage('leaveConversation')
@@ -339,14 +353,24 @@ export class ConversationsGateway implements OnGatewayConnection {
   }
 
   @SubscribeMessage('unbanUser')
-  async unbanUser(@ConnectedSocket() client: Socket, @MessageBody() {id, username} : muteUserDto)
-  {
-    return this.conversationsService.unbanUser(client.data as User, {id, username} )
+  async unbanUser(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() { id, username }: muteUserDto,
+  ) {
+    return this.conversationsService.unbanUser(client.data as User, {
+      id,
+      username,
+    });
   }
 
   @SubscribeMessage('unmuteUser')
-  async unmuteUser(@ConnectedSocket() client: Socket, @MessageBody() {id, username} : muteUserDto)
-  {
-    return this.conversationsService.unmuteUser(client.data as User, {id, username} )
+  async unmuteUser(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() { id, username }: muteUserDto,
+  ) {
+    return this.conversationsService.unmuteUser(client.data as User, {
+      id,
+      username,
+    });
   }
 }

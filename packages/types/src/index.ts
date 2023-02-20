@@ -97,8 +97,8 @@ export interface Achivement {
 }
 
 export interface DMExists {
-  conversationExists: boolean,
-  conversation: Conversation | null
+  conversationExists: boolean;
+  conversation: Conversation | null;
 }
 
 export interface Matchmaking {

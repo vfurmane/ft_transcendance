@@ -1,11 +1,11 @@
-import { IsEnum, IsNotEmpty, IsOptional, IsUUID } from "class-validator";
+import { IsEnum, IsNotEmpty, IsOptional, IsUUID } from 'class-validator';
 
 export class invitationDto {
-    @IsNotEmpty()
-    @IsUUID()
-    target!: string;
+  @IsNotEmpty()
+  @IsUUID()
+  target!: string;
 
-    @IsOptional()
-    @IsUUID()
-    conversationID!: string
+  @IsOptional()
+  @IsUUID()
+  conversationID!: string;
 }

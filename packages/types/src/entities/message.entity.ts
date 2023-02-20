@@ -32,18 +32,18 @@ export class Message {
   @Column("boolean", { default: false })
   system_generated!: boolean;
 
-  @Column("boolean", { default: false} )
-  is_invitation!: boolean
+  @Column("boolean", { default: false })
+  is_invitation!: boolean;
 
   @Column({
     type: "enum",
     enum: InvitationEnum,
-    default: InvitationEnum.CONVERSATION
+    default: InvitationEnum.CONVERSATION,
   })
-  invitation_type!: InvitationEnum
+  invitation_type!: InvitationEnum;
 
-  @Column("uuid", { nullable: true, default: null})
-  target!: string | null
+  @Column("uuid", { nullable: true, default: null })
+  target!: string | null;
 
   @CreateDateColumn()
   created_at!: Date;

@@ -29,8 +29,7 @@ export default function Auth({ children }: AuthProps): JSX.Element {
         dispatch(setUserState(user));
         refreshInterval.current = setInterval(async () => {
           if (!(await refreshToken()) && refreshInterval) {
-            if (refreshInterval.current)
-              clearInterval(refreshInterval.current);
+            if (refreshInterval.current) clearInterval(refreshInterval.current);
             refreshInterval.current = null;
             dispatch(setUserState(initUser));
             router.push("/auth/login");
@@ -44,7 +43,7 @@ export default function Auth({ children }: AuthProps): JSX.Element {
     fetchUser();
     return (): void => {
       if (refreshInterval.current) clearInterval(refreshInterval.current);
-      refreshInterval.current  = null;
+      refreshInterval.current = null;
     };
   }, [userState.id]);
   if (loading) return <Loading></Loading>;

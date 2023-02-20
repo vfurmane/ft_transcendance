@@ -33,7 +33,7 @@ export default function UserEntity(props: {
   const UserState = useSelector(selectUserState);
   const router = useRouter();
   const websockets = useWebsocketContext();
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const onUserStatusUpdate = (
@@ -109,14 +109,20 @@ export default function UserEntity(props: {
           >
             <h3 className={textStyles.laquer}>profil</h3>
           </Link>
-          <article className={styles.buttonEntity} onClick={
-            () => {
-              console.error("Clicked new conversation button")
-              dispatch(OpenConversation({userId : props.user.id, userName: props.user.name}))
-            }
-          }>
+          <article
+            className={styles.buttonEntity}
+            onClick={() => {
+              console.error("Clicked new conversation button");
+              dispatch(
+                OpenConversation({
+                  userId: props.user.id,
+                  userName: props.user.name,
+                })
+              );
+            }}
+          >
             <Image alt="message" src={Message} width={30} height={30} />
-            </article>
+          </article>
           {UserState.id !== props.user.id ? (
             <Link
               href={""}
