@@ -8,6 +8,12 @@ import { QueueReconnectionPrompt } from "../components/QueueReconnectionPrompt";
 import { useWebsocketContext } from "../components/Websocket";
 import { selectMatchmakingState } from "../store/MatchmakingSlice";
 import { selectUserState } from "../store/UserSlice";
+<<<<<<< HEAD
+=======
+import { setGameMode } from "../store/MatchmakingSlice";
+import { useDispatch } from "react-redux";
+import { GameMode } from "types";
+>>>>>>> origin
 import TopBar from "../components/TopBar";
 
 export default function Matchmaking(): ReactElement {
@@ -118,7 +124,10 @@ export default function Matchmaking(): ReactElement {
       />
       <div className={styles.container}>
         <h1>Waiting for an opponent...</h1>
+<<<<<<< HEAD
         <button onClick={launch}>LAUNCH</button>
+=======
+>>>>>>> origin
         {hasLeftQueue ? (
           <QueueReconnectionPrompt
             onReconnection={(): void => {

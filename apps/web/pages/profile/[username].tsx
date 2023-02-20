@@ -4,19 +4,27 @@ import { useRouter } from "next/router";
 import Image from "next/image";
 import MatchEntity from "../../components/HomePage/MatchEntity";
 import { selectUserState } from "../../store/UserSlice";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { initUser } from "../../initType/UserInit";
 import AchivementEntity from "../../components/ProfilePage/achivementEntity";
+<<<<<<< HEAD
 import { Achievements } from "types";
+=======
+import { Achievements, MatchFront } from "types";
+>>>>>>> origin
 import ChangePswrd from "../../components/ProfilePage/ChangePswrd";
 import ChangeUsername from "../../components/ProfilePage/ChangeUsername";
 import ChatBar from "../../components/chatBar";
 import styles from "styles/profil.module.scss";
 import textStyles from "styles/text.module.scss";
-import { initMatch } from "../../initType/MatchInit";
 import ConfigTfa from "../../components/ProfilePage/ConfigTfa";
 import ProfilePictureUploader from "../../components/ProfilePictureUploader";
 import { useWebsocketContext } from "../../components/Websocket";
+import {
+  blockUser,
+  selectBlockedUsersState,
+  unblockUser,
+} from "../../store/BlockedUsersSlice";
 
 export default function Profil(): JSX.Element {
   const UserState = useSelector(selectUserState);
@@ -35,9 +43,12 @@ export default function Profil(): JSX.Element {
   const [userProfil, setUserProfil] = useState(false);
   const [openConfigProfil, setOpenConfigProfil] = useState(false);
   const [configProfil, setConfigProfil] = useState(<></>);
-  const [matchHistory, setMatchHistory] = useState([initMatch]);
+  const [matchHistory, setMatchHistory] = useState<MatchFront[]>([]);
   const [listOfMatch, setListOfMatch] = useState<JSX.Element[]>([]);
+  const [isBlocked, setIsBlocked] = useState(false);
+  const dispatch = useDispatch();
   const websockets = useWebsocketContext();
+  const BlockedUsersState = useSelector(selectBlockedUsersState);
 
   /*======for close topBar component when click on screen====*/
   const [openToggle, setOpenToggle] = useState(false);
@@ -46,6 +57,36 @@ export default function Profil(): JSX.Element {
   const [indexOfUser, setIndexOfUser] = useState(-1);
   const prevIndexOfUserRef = useRef(-1);
   const prevSetterUsermenuRef = useRef(setterInit);
+
+  useEffect(() => {
+    if (BlockedUsersState.find((userId) => userId === user.id))
+      setIsBlocked(true);
+    else setIsBlocked(false);
+  }, [BlockedUsersState, user.id]);
+
+  function blockUserOnClick(): void {
+    if (websockets.conversations) {
+      websockets.conversations.emit(
+        "block_user",
+        { targetId: user.id },
+        ({ targetId }: { targetId: string | null }) => {
+          if (targetId) dispatch(blockUser(targetId));
+        }
+      );
+    }
+  }
+
+  function unblockUserOnClick(): void {
+    if (websockets.conversations) {
+      websockets.conversations.emit(
+        "unblock_user",
+        { targetId: user.id },
+        ({ targetId }: { targetId: string | null }) => {
+          if (targetId) dispatch(unblockUser(targetId));
+        }
+      );
+    }
+  }
 
   function clickTopBarToggle(): void {
     setOpenToggle(!openToggle);
@@ -78,6 +119,32 @@ export default function Profil(): JSX.Element {
 
   useEffect((): void => {
     if (!localStorage.getItem("access_token")) return;
+<<<<<<< HEAD
+=======
+    // if foreign user
+    fetch(`/api/user/${router.query.username}`, {
+      headers: {
+        Authorization: "Bearer " + localStorage.getItem("access_token"),
+      },
+    })
+      .then(async (response) => {
+        if (!response.ok) {
+          return response.json().then((error) => {
+            throw new Error(error.message || "An unexpected error occured...");
+          });
+        } else {
+          return response.json();
+        }
+      })
+      .then((response) => {
+        setUser(response);
+      })
+      .catch(() => {
+        router.replace("/");
+      });
+    setUserProfil(router.query.username === UserState.name);
+
+>>>>>>> origin
     if (typeof router.query.username === "string") {
       fetch(`/api/achievements/${router.query.username}`, {
         headers: {
@@ -108,6 +175,7 @@ export default function Profil(): JSX.Element {
         .catch((error) => {
           console.error(`problem with fetch : ${error.message}`);
         });
+<<<<<<< HEAD
     }
 
     // if foreign user
@@ -139,6 +207,13 @@ export default function Profil(): JSX.Element {
     }
 
     if (user.id)
+=======
+    }
+  }, [router.query, UserState, router, user.id]);
+
+  useEffect(() => {
+    if (user) {
+>>>>>>> origin
       fetch(`/api/match/${user.id}`, {
         headers: {
           "Content-Type": "application/json",
@@ -152,7 +227,8 @@ export default function Profil(): JSX.Element {
         .catch((error) => {
           console.error(`problem with fetch : ${error.message}`);
         });
-  }, [router.query, UserState, router, user.id]);
+    }
+  }, [user]);
 
   useEffect(() => {
     const tmp: JSX.Element[] = [];
@@ -275,7 +351,7 @@ export default function Profil(): JSX.Element {
           >
             <div className="fill">
               <ProfilePictureUploader
-                userId={UserState.id}
+                userId={user.id}
                 width={200}
                 height={200}
               />
@@ -442,12 +518,13 @@ export default function Profil(): JSX.Element {
                   <button
                     className={styles.buttonProfil}
                     style={{ backgroundColor: "#e22d44", width: "100px" }}
+                    onClick={isBlocked ? unblockUserOnClick : blockUserOnClick}
                   >
                     <h3
                       className={textStyles.laquer}
                       style={{ fontSize: "18px" }}
                     >
-                      block
+                      {isBlocked ? "unBlock" : "Block"}
                     </h3>
                   </button>
                 </div>

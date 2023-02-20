@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'types';
-import { MoreThan, Not, Repository } from 'typeorm';
+import { DeleteResult, MoreThan, Not, Repository } from 'typeorm';
 import {
   ConversationsDetails,
   ConversationWithUnread,
@@ -22,10 +22,13 @@ import { Message } from 'types';
 import * as bcrypt from 'bcrypt';
 import { conversationRestrictionEnum } from 'types';
 import { ConversationRestriction } from 'types';
+import { Block } from 'types';
 
 @Injectable()
 export class ConversationsService {
   constructor(
+    @InjectRepository(Block)
+    private readonly blocksRepository: Repository<Block>,
     @InjectRepository(Conversation)
     private readonly conversationRepository: Repository<Conversation>,
     @InjectRepository(ConversationRole)
@@ -750,5 +753,32 @@ export class ConversationsService {
     return `User ${
       restrictionType === conversationRestrictionEnum.BAN ? 'banned' : 'muted'
     } until ${until ? until : 'the end of times'}`;
+  }
+
+  async blockExists(sourceId: string, targetId: string): Promise<boolean> {
+    return (
+      (await this.blocksRepository.findOneBy({
+        source: { id: sourceId },
+        target: { id: targetId },
+      })) !== null
+    );
+  }
+
+  async getBlockedUsers(sourceId: string): Promise<Block[]> {
+    return this.blocksRepository.findBy({ source: { id: sourceId } });
+  }
+
+  async blockUser(source: User, target: User): Promise<Block> {
+    const block = new Block();
+    block.source = source;
+    block.target = target;
+    return this.blocksRepository.save(block);
+  }
+
+  async unblockUser(sourceId: string, targetId: string): Promise<DeleteResult> {
+    return this.blocksRepository.delete({
+      source: { id: sourceId },
+      target: { id: targetId },
+    });
   }
 }

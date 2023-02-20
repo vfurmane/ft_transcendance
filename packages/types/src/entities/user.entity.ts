@@ -17,6 +17,7 @@ import { Jwt } from "./jwt.entity";
 import { JwtPayload } from "..";
 import { Opponent } from "./opponent.entity";
 import { Profile } from './profile.entity';
+import { Block } from "./block.entity";
 import { Achievements } from "./Achievements.entity";
 
 @Exclude()
@@ -88,4 +89,12 @@ export class User {
   @OneToOne(() => Profile, (profile) => profile.user)
   @JoinColumn()
   profile!: Profile;
+
+  newlyCreated?: boolean;
+
+  @OneToMany(() => Block, (block) => block.source)
+  blocks!: Block[];
+
+  @OneToMany(() => Block, (block) => block.target)
+  beenBlocked!: Block[];
 }

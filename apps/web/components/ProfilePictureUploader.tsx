@@ -48,8 +48,8 @@ const ProfilePictureUploader = (props: {
     if (uploadedFile?.type != "image/jpeg") {
       return setErrorMessage("Wrong extension, please use jpeg");
     }
-    if (uploadedFile.size > 2000000) {
-      return setErrorMessage("File size exceeds 2MB");
+    if (uploadedFile.size > 5000000) {
+      return setErrorMessage("File size exceeds 5MB");
     }
     if ((await handleFileUpload(props.userId, uploadedFile)) === true) {
       setFileHash(hash(uploadedFile));

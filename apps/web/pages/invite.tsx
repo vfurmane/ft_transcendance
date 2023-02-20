@@ -4,12 +4,16 @@ import { ReactElement, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { GameStartPayload } from "types";
 import { useWebsocketContext } from "../components/Websocket";
+import { selectInvitationState } from "../store/InvitationSlice";
 import { selectUserState } from "../store/UserSlice";
+import styles from "styles/invite-page.module.scss";
+import { Button } from "../components/Button";
 
 export default function Invite(): ReactElement {
   const UserState = useSelector(selectUserState);
   const router = useRouter();
   const websockets = useWebsocketContext();
+  const InvitationState = useSelector(selectInvitationState);
 
   useEffect(() => {
     if (websockets.pong) {
@@ -31,9 +35,11 @@ export default function Invite(): ReactElement {
   }, [router, UserState.id, websockets.pong]);
 
   return (
-    <>
-      <h1>Invited user</h1>
-      <Link href="/">Go back</Link>
-    </>
+    <div className={styles.container}>
+      <h1>Waiting for {InvitationState.user.name}</h1>
+      <Button href="/" danger>
+        Go back
+      </Button>
+    </div>
   );
 }
