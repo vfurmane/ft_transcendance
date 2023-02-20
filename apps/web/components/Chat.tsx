@@ -4,6 +4,8 @@ import {
   ConversationsDetails,
   ConversationWithUnread,
   DMExists,
+  Message,
+  unreadMessagesResponse,
 } from "types";
 import Conversation from "./Conversation";
 import OpenedConversation from "./OpenedConversation";
@@ -19,11 +21,15 @@ import back from "../public/back.png";
 import addCross from "../public/addCross.png";
 import CreateConversation from "./CreateConversation";
 
+interface ChatProps {
+  conversation: { userId: string; userName: string };
+  updateUnreadMessage: React.Dispatch<React.SetStateAction<number>>;
+}
+
 export default function Chat({
   conversation,
-}: {
-  conversation: { userId: string; userName: string };
-}): JSX.Element {
+  updateUnreadMessage,
+}: ChatProps): JSX.Element {
   const [conversationSelected, selectConversation] =
     useState<ConversationEntity | null>(null);
   const [conversationList, setConversationList] = useState<
@@ -38,6 +44,23 @@ export default function Chat({
   const websockets = useWebsocketContext();
   const conversationToOpen = useSelector(selectConversationsState);
   const dispatch = useDispatch();
+
+  const refreshConversations = () => {
+    websockets.conversations?.emit(
+      "getConversations",
+      (conversationDetails: ConversationsDetails) => {
+        setConversationList(() => conversationDetails.conversations);
+      }
+    );
+  };
+
+  const addNewConversation = (conversation: ConversationEntity) => {
+    refreshConversations();
+  };
+
+  const newUnread = (message: { id: string; message: Message }) => {
+    refreshConversations();
+  };
 
   useEffect(() => {
     if (conversationToOpen.userId.length) {
@@ -55,8 +78,6 @@ export default function Chat({
         "DMExists",
         { id: newConversation.userId },
         (DM: DMExists) => {
-          console.error("DM exists", DM);
-          console.error("user ID targeted: ", newConversation.userId);
           if (DM.conversationExists) {
             selectConversation(DM.conversation);
             setNewConversation(() => {
@@ -78,41 +99,21 @@ export default function Chat({
             setLoading(false);
           }
         );
-        websockets.conversations.on(
-          "newConversation",
-          (conversation: ConversationEntity) => {
-            setConversationList((list) => [
-              {
-                conversation: conversation,
-                numberOfUnreadMessages: 1,
-                lastMessage: conversation.created_at,
-              },
-              ...list,
-            ]);
-          }
-        );
-        websockets.conversations.on("newMessage", (message) => {
-          const conversation = conversationList.filter(
-            (e) => e.conversation.id === message.id
-          );
-          if (conversation) {
-            conversation[0].numberOfUnreadMessages =
-              conversation[0].numberOfUnreadMessages !== undefined
-                ? conversation[0].numberOfUnreadMessages + 1
-                : 1;
-            const remainder = conversationList.filter(
-              (e) => e.conversation.id !== message.id
-            );
-            setConversationList(() => [...conversation, ...remainder]);
-          }
-        });
+        websockets.conversations.on("newConversation", addNewConversation);
+        websockets.conversations.on("newMessage", newUnread);
       }
     } else {
       setLoading(false);
     }
     return () => {
-      websockets.conversations?.off("newConversation");
-      websockets.conversations?.off("newMessage");
+      websockets.conversations?.off("newConversation", addNewConversation);
+      websockets.conversations?.off("newMessage", newUnread);
+      websockets.conversations?.emit(
+        "getUnread",
+        ({ totalNumberOfUnreadMessages }: unreadMessagesResponse) => {
+          updateUnreadMessage(totalNumberOfUnreadMessages);
+        }
+      );
     };
   }, [conversationSelected, newConversation, createConversation]);
 
@@ -157,6 +158,8 @@ export default function Chat({
               newConversation.userId.length ? null : conversationSelected
             }
             selectConversation={selectConversation}
+            updateUnreadMessage={updateUnreadMessage}
+            updateConversationList={setConversationList}
           />
         </section>
       </>
@@ -169,7 +172,6 @@ export default function Chat({
         title="Create a group conversation"
         onClick={(e) => {
           setCreateConversation(true);
-          console.error("Creating conversation");
         }}
       >
         <Image alt="create Conversation" src={addCross} />

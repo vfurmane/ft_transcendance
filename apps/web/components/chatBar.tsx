@@ -15,7 +15,6 @@ import ToggleCross from "../public/toggleCross.png";
 export default function ChatBar(): JSX.Element {
   const [visibility, setVisibility] = useState<boolean>(false);
   const [unreadMessages, setUnreadMessages] = useState<number>(0);
-  const [goBack, setGoBack] = useState<boolean>(false);
   const websockets = useWebsocketContext();
   const conversationToOpen = useSelector(selectConversationsState);
   const dispatch = useDispatch();
@@ -51,7 +50,7 @@ export default function ChatBar(): JSX.Element {
     return () => {
       websockets.conversations?.off("newMessage", newUnreadMessage);
     };
-  }, [conversationToOpen, visibility]);
+  }, [conversationToOpen, visibility, unreadMessages]);
 
   if (!visibility) {
     return (
@@ -83,7 +82,10 @@ export default function ChatBar(): JSX.Element {
           </article>
         </section>
         <section className={styles.conversationListContainer}>
-          <Chat conversation={conversationIdProp} />
+          <Chat
+            conversation={conversationIdProp}
+            updateUnreadMessage={setUnreadMessages}
+          />
         </section>
       </div>
     );
