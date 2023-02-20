@@ -26,6 +26,7 @@ export default function UserEntity(props: {
     setOpenMenu: React.Dispatch<React.SetStateAction<boolean>>;
   }) => void;
   delFriendClick?: (e: { idToDelete: string; index: number }) => void;
+  avatarHash?: string | null;
 }): JSX.Element {
   const [status, setStatus] = useState(props.user.status);
   const [openMenu, setOpenMenu] = useState(false);
@@ -165,6 +166,7 @@ export default function UserEntity(props: {
               width={47}
               height={47}
               handleClick={undefined}
+              fileHash={props.avatarHash}
             />
           </div>
           {status === "online" ? (
