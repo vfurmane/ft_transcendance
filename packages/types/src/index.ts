@@ -68,7 +68,6 @@ export interface GameState {
 export interface Userfront {
   id: string;
   name: string;
-  avatar_num: number;
   status: string;
   victory: number;
   defeat: number;
@@ -104,7 +103,7 @@ export interface Matchmaking {
 
 export interface GameStartPayload {
   id: string;
-  users: User[];
+  users: Userfront[];
 }
 
 export interface GameEntityFront {

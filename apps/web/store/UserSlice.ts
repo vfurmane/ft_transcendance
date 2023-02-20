@@ -15,13 +15,16 @@ export const UserSlice = createSlice({
     setUserState(state, action) {
       return action.payload;
     },
+    setUserName(state, action) {
+      return { ...state, name: action.payload };
+    },
     toggleTfa(state) {
       state.tfaSetup = !state.tfaSetup;
     },
   },
 });
 
-export const { setUserState, toggleTfa } = UserSlice.actions;
+export const { setUserState, setUserName, toggleTfa } = UserSlice.actions;
 
 export const selectUserState: (state: AppState) => User = (state: AppState) =>
   state.user;

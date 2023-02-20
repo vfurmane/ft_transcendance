@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { ReactElement } from "react";
 import styles from "styles/Button.module.scss";
 
@@ -14,7 +15,7 @@ export interface ButtonProps {
 export function Button(props: ButtonProps): ReactElement {
   if (props.href && !props.disabled)
     return (
-      <a
+      <Link
         className={`${styles.container} ${
           props.fullWidth ? styles.fullWidth : ""
         } ${props.danger ? styles.danger : ""} ${
@@ -24,7 +25,7 @@ export function Button(props: ButtonProps): ReactElement {
         onClick={props.onClick}
       >
         {props.children}
-      </a>
+      </Link>
     );
   return (
     <button

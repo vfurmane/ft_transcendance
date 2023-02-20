@@ -9,11 +9,11 @@ import PlayButton from "../../components/HomePage/PlayButton";
 import Link from "next/link";
 import playButtonStyles from "styles/playButton.module.scss";
 import PlayMenu from "../../components/HomePage/PlayMenu";
-import Image from "next/image";
 import styles from "styles/pingPong.module.scss";
 import { useSelector } from "react-redux";
 import { selectUserState } from "../../store/UserSlice";
 import { useWebsocketContext } from "../../components/Websocket";
+import ProfilePicture from "../../components/ProfilePicture";
 
 export default function PingPong(): JSX.Element {
   const router = useRouter();
@@ -26,7 +26,6 @@ export default function PingPong(): JSX.Element {
   const [openPlayButton, setOpenPlayButton] = useState(false);
   const openPlayMenuRef = useRef(openPlayButton);
   const [openOverlay, setOpenOverlay] = useState(false);
-  const [win, setWin] = useState(false);
   const [endGame, setEndGame] = useState(false);
   const [printButton, setPrintButton] = useState(true);
   const [game, setGame] = useState<Game | null>(null);
@@ -49,10 +48,11 @@ export default function PingPong(): JSX.Element {
     setGame(null);
   });
 
-  function rotate(user: User[]): User[] {
-    const lastIndex = user.length - 1;
+  function rotate(users: User[]): User[] {
+    if (!users.find((user) => UserState.id === user.id)) return users;
+    const lastIndex = users.length - 1;
     let angle = 0;
-    switch (user.length) {
+    switch (users.length) {
       case 2: {
         angle = -180;
         break;
@@ -80,15 +80,15 @@ export default function PingPong(): JSX.Element {
     const canvas = document.getElementById("canvasElem");
     if (canvas)
       canvas.style.transform = `rotate(${
-        angle * user.findIndex((e) => e.id === UserState.id)
+        angle * users.findIndex((e) => e.id === UserState.id)
       }deg)`;
 
-    while (user.length && user[0].id !== UserState.id) {
-      const last = user[lastIndex];
-      user.unshift(last);
-      user.pop();
+    while (users.length && users[0].id !== UserState.id) {
+      const last = users[lastIndex];
+      users.unshift(last);
+      users.pop();
     }
-    return user;
+    return users;
   }
 
   const changeLife = useCallback(
@@ -120,7 +120,6 @@ export default function PingPong(): JSX.Element {
           return;
         }
         if (tempUsers.length === 1) {
-          if (tempUsers[0].id === UserState.id) setWin(true);
           if (newClassement.length + 1 <= usersRef.current.length)
             setClassement([
               createTrClassement(tempUsers[0], newClassement),
@@ -197,10 +196,13 @@ export default function PingPong(): JSX.Element {
         "subscribe_game",
         { id: router.query.id },
         (game: GameEntityFront) => {
+          console.log("first hi");
           setPrintButton(false);
           let tmp = game.opponents.map((opponent) => opponent.user);
           usersRef.current = game.opponents.map((opponent) => opponent.user);
+          console.log("second hi");
           tmp = rotate(tmp);
+          console.log("third hi");
           setUsers(tmp);
           setMiniProfilArray(
             tmp.map((e: User, i: number) => (
@@ -244,6 +246,7 @@ export default function PingPong(): JSX.Element {
   }, [websockets.pong, router.query.id]);
 
   useEffect(() => {
+    console.log(users);
     if (users.length === 0) return;
     console.log("in setGame");
     setGame(
@@ -326,11 +329,11 @@ export default function PingPong(): JSX.Element {
         <td>
           <div style={{ display: "flex" }}>
             <div className="fill small">
-              <Image
-                alt="avatar"
-                src={`/avatar/avatar-${user.avatar_num}.png`}
+              <ProfilePicture
+                userId={user.id}
                 width={47}
                 height={47}
+                handleClick={undefined}
               />
             </div>
             {user.name}
@@ -463,9 +466,7 @@ export default function PingPong(): JSX.Element {
         </div>
       ) : (
         <div className={styles.afterGameContainer}>
-          <h1 className={textStyles.saira + " " + styles.title}>
-            You {win ? "Win" : "LOose"} !
-          </h1>
+          <h1 className={textStyles.saira + " " + styles.title}>Game Over</h1>
           <div className={styles.tableContainer}>
             <table>
               <thead>

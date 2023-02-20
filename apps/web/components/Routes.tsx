@@ -18,7 +18,7 @@ export default function Routes({ children }: RoutesProps): JSX.Element {
     if (!userState.id.length && isProtected) router.replace("/auth/login");
     else if (userState.id.length && !isProtected) router.replace("/");
     else setLoading(false);
-  }, [router.pathname, userState]);
+  }, [router.pathname, userState.id]);
   if (loading) return <Loading></Loading>;
   return <>{children}</>;
 }
