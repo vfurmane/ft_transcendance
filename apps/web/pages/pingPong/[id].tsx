@@ -59,7 +59,7 @@ export default function PingPong(): JSX.Element {
     const angle = 360 / size;
 
     let ratio = 1;
-    if (users.length === 5 || users.length === 6) {
+    if (users.length  > 4) {
       ratio = 0.5;
     }
     const width = Math.round(window.innerWidth * 0.6);
@@ -76,7 +76,7 @@ export default function PingPong(): JSX.Element {
       else if (users.length === 4) centerAxeX = Math.round(wallSize / 2);
       else if (users.length > 4) centerAxeX =  Math.round((Math.round(wallSize) / Math.round(2 * Math.round(Math.tan(Math.round(180 / users.length))))));
       
-      canvas.style.transformOrigin = `${centerAxeX}px ${Math.floor(wallSize / 2)}px`;
+      canvas.style.transformOrigin = `${centerAxeX}px ${Math.floor(Math.min(Math.round(width), Math.round(height)))}px`;
       canvas.style.transform = `rotate(${
         angle * users.findIndex((e) => e.id === UserState.id)
       }deg)`;
