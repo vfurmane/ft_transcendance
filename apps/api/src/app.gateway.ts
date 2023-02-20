@@ -33,10 +33,15 @@ export class AppGateway {
 
   async handleConnection(client: Socket): Promise<void> {
     const token = client.handshake.headers.cookie?.split('=')[1];
-    if (!token)
-      throw new UnauthorizedException('No Authorization cookie found');
+    if (!token) {
+      client.disconnect();
+      return ;
+    }
     const currentUser = this.authService.verifyUserFromToken(token);
-    if (!currentUser) throw new UnauthorizedException('Invalid token');
+    if (!currentUser) {
+      client.disconnect();
+      return ;
+    }
     client.data = { id: currentUser.sub, name: currentUser.name };
     client.join(`user_${currentUser.sub}`);
     this.server.to(`user_${currentUser.sub}`).emit('user_status_update', {

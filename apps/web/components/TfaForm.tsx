@@ -64,7 +64,7 @@ export function TfaForm(props: TfaFormProps): ReactElement {
         } else if (response === true) {
           setFormSuccess("Success! Redirecting...");
           localStorage.removeItem("state");
-          const user = await identifyUser();
+          const user = await identifyUser(false);
           if (user) dispatch(setUserState(user));
         }
       })

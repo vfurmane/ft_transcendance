@@ -1,0 +1,43 @@
+@import "variables";
+
+.containerOtherMessage {
+  align-self: flex-start;
+  background-color: $dark-system-green;
+  color: black;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  p {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    text-align: left;
+  }
+  .senderName {
+    font-style: italic;
+    color: $dark-neutral-black;
+  }
+}
+.containerSelfMessage {
+  align-self: flex-end;
+  background-color: $dark-primary-yellow;
+  color: black;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  p {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    text-align: left;
+  }
+}
+
+.messageContent {
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  hyphens: auto;
+}
+
+// .senderName

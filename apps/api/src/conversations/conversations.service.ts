@@ -8,6 +8,8 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'types';
 import { DeleteResult, MoreThan, Not, Repository } from 'typeorm';
+import { DMExists, InvitationEnum, User } from 'types';
+import { MoreThan, Not, Repository } from 'typeorm';
 import {
   ConversationsDetails,
   ConversationWithUnread,
@@ -23,6 +25,8 @@ import * as bcrypt from 'bcrypt';
 import { conversationRestrictionEnum } from 'types';
 import { ConversationRestriction } from 'types';
 import { Block } from 'types';
+import { invitationDto } from './dtos/invitation.dto';
+import { muteUserDto } from './dtos/muteUser.dto';
 
 @Injectable()
 export class ConversationsService {
@@ -40,7 +44,7 @@ export class ConversationsService {
     private readonly conversationRestrictionRepository: Repository<ConversationRestriction>,
   ) {}
 
-  async getListOfDMs(user: User): Promise<Conversation[]> {
+  async getListOfDMs({ id }: User | { id: string }): Promise<Conversation[]> {
     const listOfDMs: Conversation[] = [];
     const conversationRolesList = await this.conversationRoleRepository.find({
       relations: {
@@ -49,7 +53,7 @@ export class ConversationsService {
       },
       where: {
         user: {
-          id: user.id,
+          id: id,
         },
         conversation: {
           groupConversation: false,
@@ -60,6 +64,16 @@ export class ConversationsService {
       listOfDMs.push(conversationRole.conversation);
     }
     return listOfDMs;
+  }
+
+  async DMExists(currentUser: User, targetUserId: string): Promise<DMExists> {
+    const creatorDMs = await this.getListOfDMs(currentUser);
+    const recipientDMs = await this.getListOfDMs({ id: targetUserId });
+    for (const creatorDM of creatorDMs) {
+      if (recipientDMs.filter((el) => el.id === creatorDM.id).length)
+        return { conversationExists: true, conversation: creatorDM };
+    }
+    return { conversationExists: false, conversation: null };
   }
 
   async createConversation(
@@ -359,6 +373,11 @@ export class ConversationsService {
           role: Not(ConversationRoleEnum.LEFT),
         },
       },
+      order: {
+        messages: {
+          created_at: 'ASC',
+        },
+      },
     });
     if (!conversation) {
       throw new NotFoundException();
@@ -566,6 +585,142 @@ export class ConversationsService {
     return conversation.conversationRoles;
   }
 
+  async createInvitation(
+    currentUser: User,
+    invitation: invitationDto,
+    type: InvitationEnum,
+    conversation: Conversation,
+    targetName: string,
+  ): Promise<Message> {
+    const newMessage = this.messageRepository.create({
+      sender: currentUser,
+      conversation: conversation,
+      content: targetName,
+      system_generated: true,
+      is_invitation: true,
+      invitation_type: type,
+      target: invitation.conversationID,
+    });
+    return this.messageRepository.save(newMessage);
+  }
+
+  async inviteToConversation(
+    currentUser: User,
+    invitation: invitationDto,
+  ): Promise<{
+    message: Message;
+    conversation: Conversation | null;
+    prevConversation: string | null;
+  } | null> {
+    console.error('invitation: ', invitation);
+    const roles = await this.conversationRoleRepository.find({
+      relations: {
+        conversation: true,
+      },
+      where: {
+        conversation: {
+          id: invitation.conversationID,
+        },
+      },
+    });
+    const currentUserRole = roles.filter(
+      (role) => role.user.id === currentUser.id,
+    );
+    console.error('current role: ', currentUserRole);
+    if (currentUserRole.length === 0) {
+      console.error('Not in conversation');
+      return null;
+    }
+    if (currentUserRole[0].restrictions.length) {
+      console.error('Restricted');
+      return null;
+    }
+    if (currentUserRole[0].role === ConversationRoleEnum.LEFT) return null;
+    console.error('A-OK');
+    if (roles.filter((role) => role.user.id === invitation.target).length !== 0)
+      return null;
+    const targetConversation = await this.conversationRepository.findOne({
+      where: {
+        id: invitation.conversationID,
+        groupConversation: true,
+      },
+    });
+    if (!targetConversation) return null;
+    const conversationExists = await this.DMExists(
+      currentUser,
+      invitation.target,
+    );
+    if (
+      conversationExists.conversationExists &&
+      conversationExists.conversation
+    ) {
+      const message = await this.createInvitation(
+        currentUser,
+        invitation,
+        InvitationEnum.CONVERSATION,
+        conversationExists.conversation,
+        targetConversation.name,
+      );
+      console.error('Message generated: ', message);
+      console.error('poset in', conversationExists.conversation);
+      return {
+        message: message,
+        conversation: null,
+        prevConversation: conversationExists.conversation.id,
+      };
+    }
+    const conversation = await this.createConversation(
+      {
+        groupConversation: false,
+        participants: [invitation.target],
+      } as createConversationDto,
+      currentUser,
+    );
+    const message = await this.createInvitation(
+      currentUser,
+      invitation,
+      InvitationEnum.CONVERSATION,
+      conversation.conversation,
+      targetConversation.name,
+    );
+    console.error('Message generated: ', message);
+    console.error('poset in', conversationExists.conversation);
+    return {
+      message: message,
+      conversation: conversation.conversation,
+      prevConversation: null,
+    };
+  }
+
+  async canJoinConversation(currentUser: User, conversationId: string) {
+    const conversation = await this.conversationRepository.findOne({
+      relations: {
+        conversationRoles: true,
+      },
+      where: {
+        id: conversationId,
+      },
+    });
+    if (!conversation) return { canJoin: false, password: false };
+    const userRole = conversation.conversationRoles.filter(
+      (e) => e.user.id === currentUser.id,
+    );
+    if (userRole.length !== 0) {
+      if (userRole.length) {
+        const currentRestrictions = await this.verifyRestrictionsOnUser(
+          userRole[0].restrictions,
+        );
+        if (currentRestrictions.length)
+          return { canJoin: false, password: false };
+        else if (userRole[0].role !== ConversationRoleEnum.LEFT)
+          return { canJoin: false, password: false };
+      }
+    }
+    return conversation.password
+      ? { canJoin: true, password: true }
+      : { canJoin: true, password: false };
+  }
+
   async leaveConversation(
     currentUser: User,
     conversationId: string,
@@ -590,6 +745,12 @@ export class ConversationsService {
       throw new ForbiddenException('Cannot leave direct message conversation');
     if (conversation.conversationRoles.length === 1) {
       await this.conversationRoleRepository.remove(userRole);
+      const messages = await this.messageRepository.find({
+        where: {
+          id: conversationId,
+        },
+      });
+      if (messages) await this.messageRepository.remove(messages);
       await this.conversationRepository.remove(conversation);
       return { userRole, leftMessage: null };
     }
@@ -780,5 +941,85 @@ export class ConversationsService {
       source: { id: sourceId },
       target: { id: targetId },
     });
+  }
+  
+  async unbanUser(currentUser: User, target: muteUserDto) {
+    await this.clearRestrictions(target.id);
+    const currentConversation = await this.conversationRepository.findOne({
+      relations: {
+        conversationRoles: true,
+      },
+      where: {
+        conversationRoles: {
+          user: {
+            id: currentUser.id,
+          },
+        },
+      },
+    });
+    if (!currentConversation) throw new NotFoundException();
+    const targetUser = await this.conversationRoleRepository.findOne({
+      relations: {
+        conversation: true,
+      },
+      where: {
+        user: {
+          name: target.username,
+        },
+        conversation: {
+          id: target.id,
+        },
+      },
+    });
+    if (!targetUser) throw new NotFoundException();
+    let banRestrictions: ConversationRestriction[] = [];
+    targetUser.restrictions.forEach((restriction) => {
+      if (restriction.status === conversationRestrictionEnum.BAN)
+        banRestrictions.push(restriction);
+    });
+    if (banRestrictions.length) {
+      await this.conversationRestrictionRepository.remove(banRestrictions);
+    }
+    return true;
+  }
+
+  async unmuteUser(currentUser: User, target: muteUserDto) {
+    await this.clearRestrictions(target.id);
+    const currentConversation = await this.conversationRepository.findOne({
+      relations: {
+        conversationRoles: true,
+      },
+      where: {
+        conversationRoles: {
+          user: {
+            id: currentUser.id,
+          },
+        },
+      },
+    });
+    if (!currentConversation) throw new NotFoundException();
+    const targetUser = await this.conversationRoleRepository.findOne({
+      relations: {
+        conversation: true,
+      },
+      where: {
+        user: {
+          name: target.username,
+        },
+        conversation: {
+          id: target.id,
+        },
+      },
+    });
+    if (!targetUser) throw new NotFoundException();
+    let banRestrictions: ConversationRestriction[] = [];
+    targetUser.restrictions.forEach((restriction) => {
+      if (restriction.status === conversationRestrictionEnum.MUTE)
+        banRestrictions.push(restriction);
+    });
+    if (banRestrictions.length) {
+      await this.conversationRestrictionRepository.remove(banRestrictions);
+    }
+    return true;
   }
 }

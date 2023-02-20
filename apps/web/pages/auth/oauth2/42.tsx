@@ -55,7 +55,7 @@ export default function FtOauth2(): JSX.Element {
         } else if (response === true) {
           setMessage("Success! Redirecting...");
           localStorage.removeItem("state");
-          const user = await identifyUser();
+          const user = await identifyUser(false);
           if (user) dispatch(setUserState(user));
           router.replace("/");
         } else if (
