@@ -56,18 +56,27 @@ export default function PingPong(): JSX.Element {
   function rotateInit(users: User[])  {
     const size = users.findIndex(e => e.id === UserState.id) === -1 ? users.length : users.length + 1;
     console.log('-----------------in rotateInit');
-    console.log(users);
-    console.log(usersGame);
     const angle = 360 / size;
+
+    let ratio = 1;
+    if (users.length === 5 || users.length === 6) {
+      ratio = 0.5;
+    }
+    const width = Math.round(window.innerWidth * 0.6);
+    const height = Math.round(window.innerWidth * 0.6 * (1 / 2));
+
 
     const canvas = document.getElementById("canvasElem");
     if (canvas && game)
     {
-      let apothene = users.length === 2? Math.floor(game.boardCanvas.width / 2) : 
-      Math.floor((Math.floor(game.board.wallSize) / Math.floor(2 * Math.tan(Math.floor(180 / size)))));
-      if (size === 3)
-        apothene /= 2;
-      canvas.style.transformOrigin = `${apothene}px ${Math.floor(game.boardCanvas.height / 2)}px`
+      const wallSize = Math.min(Math.round(width * ratio), Math.round(height * ratio));
+      let centerAxeX : number = 0;
+      if (users.length === 2) centerAxeX = Math.round(wallSize);
+      else if (users.length === 3) centerAxeX = Math.round(Math.round((1/3) * (Math.sqrt(3)/2) * wallSize));
+      else if (users.length === 4) centerAxeX = Math.round(wallSize / 2);
+      else if (users.length > 4) centerAxeX =  Math.round((Math.round(wallSize) / Math.round(2 * Math.round(Math.tan(Math.round(180 / users.length))))));
+      
+      canvas.style.transformOrigin = `${centerAxeX}px ${Math.floor(wallSize / 2)}px`;
       canvas.style.transform = `rotate(${
         angle * users.findIndex((e) => e.id === UserState.id)
       }deg)`;
@@ -80,17 +89,27 @@ export default function PingPong(): JSX.Element {
     if (!users.find((user) => UserState.id === user.id)) return users;
     const lastIndex = users.length - 1;
     const angle = -360 / users.length;
+    let ratio = 1;
+    if (users.length === 5 || users.length === 6) {
+      ratio = 0.5;
+    }
+    const width = Math.round(window.innerWidth * 0.6);
+    const height = Math.round(window.innerWidth * 0.6 * (1 / 2));
 
     const canvas = document.getElementById("canvasElem");
     if (canvas)
     {
-      console.log('-----------------in Rotate');
 
-      let apothene = users.length === 2? Math.floor(canvas.clientWidth/ 2) : 
-      Math.floor((Math.floor(canvas.clientHeight / 4) / Math.floor(2 * Math.tan(Math.floor(180 / users.length)))));
-      if (users.length === 3)
-        apothene /= 2;
-      canvas.style.transformOrigin = `${apothene}px ${Math.floor(canvas.clientHeight / 2)}px`
+      console.error('-----------------in Rotate');
+      const wallSize = Math.min(Math.round(width * ratio), Math.round(height * ratio));
+      let centerAxeX : number = 0;
+      if (users.length === 2) centerAxeX = Math.round(wallSize);
+      else if (users.length === 3) centerAxeX = Math.round(Math.sqrt(3)/2 * wallSize) * (1/3);
+      else if (users.length === 4) centerAxeX = Math.round(wallSize / 2);
+      else if (users.length > 4) centerAxeX =  Math.round((Math.round(wallSize) / Math.round(2 * Math.round(Math.tan(Math.round(180 / users.length))))));
+      
+      canvas.style.transformOrigin = `${centerAxeX}px ${Math.floor(wallSize / 2)}px`;
+      
       canvas.style.transform = `rotate(${
         angle * users.findIndex((e) => e.id === UserState.id)
       }deg)`;
@@ -510,7 +529,7 @@ export default function PingPong(): JSX.Element {
               ref={canvasRef}
               style={{
                 marginLeft: usersGame.length > 2 ? "30vw" : "",
-              //  border: "1px solid white", // NEED TO REMOVE FOR BATTLE ROYAL SINCE NON-RECTANGULAR BOARD DOESNT NOT FIT THE CANVAS
+                //border: "1px solid white", // NEED TO REMOVE FOR BATTLE ROYAL SINCE NON-RECTANGULAR BOARD DOESNT NOT FIT THE CANVAS
               }}
             ></canvas>
           </div>
