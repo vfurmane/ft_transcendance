@@ -115,9 +115,7 @@ export default function CreateConversation(
               return;
             }
             fetch(`/api/search?letters=${e.target.value}`, {
-              headers: {
-                Authorization: "Bearer " + localStorage.getItem("access_token"),
-              },
+              credentials:'same-origin'
             })
               .then((response) => {
                 if (!response.ok) return;

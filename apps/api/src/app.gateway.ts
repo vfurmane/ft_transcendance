@@ -35,12 +35,12 @@ export class AppGateway {
     const token = client.handshake.headers.cookie?.split('=')[1];
     if (!token) {
       client.disconnect();
-      return ;
+      return;
     }
     const currentUser = this.authService.verifyUserFromToken(token);
     if (!currentUser) {
       client.disconnect();
-      return ;
+      return;
     }
     client.data = { id: currentUser.sub, name: currentUser.name };
     client.join(`user_${currentUser.sub}`);

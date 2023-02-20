@@ -90,8 +90,8 @@ function Home(): JSX.Element {
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",
-        Authorization: "Bearer " + localStorage.getItem("access_token"),
       },
+      credentials:'same-origin'
     }).catch(function (error) {
       console.error(
         "Il y a eu un problème avec l'opération fetch : " + error.message
@@ -132,8 +132,8 @@ function Home(): JSX.Element {
     fetch(`/api/friendships`, {
       headers: {
         "Content-Type": "application/json",
-        Authorization: "Bearer " + localStorage.getItem("access_token"),
       },
+      credentials:'same-origin'
     })
       .then(function (response) {
         if (response.ok) {

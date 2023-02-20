@@ -6,10 +6,8 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User } from 'types';
 import { DeleteResult, MoreThan, Not, Repository } from 'typeorm';
 import { DMExists, InvitationEnum, User } from 'types';
-import { MoreThan, Not, Repository } from 'typeorm';
 import {
   ConversationsDetails,
   ConversationWithUnread,
@@ -942,7 +940,7 @@ export class ConversationsService {
       target: { id: targetId },
     });
   }
-  
+
   async unbanUser(currentUser: User, target: muteUserDto) {
     await this.clearRestrictions(target.id);
     const currentConversation = await this.conversationRepository.findOne({

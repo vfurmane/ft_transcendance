@@ -78,7 +78,7 @@ export function LoginForm(): ReactElement {
         else if (response === true) {
           setFormSuccess("Success! Redirecting...");
           localStorage.removeItem("state");
-          const user = await identifyUser();
+          const user = await identifyUser(false);
           if (user) dispatch(setUserState(user));
           router.replace("/");
         } else if (

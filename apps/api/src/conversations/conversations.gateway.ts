@@ -174,12 +174,10 @@ export class ConversationsGateway implements OnGatewayConnection {
     } else if (invitationMessage.prevConversation)
       DMId = invitationMessage.prevConversation;
     else DMId = '';
-    this.server
-      .in(`conversation_${DMId}`)
-      .emit('newMessage', {
-        DMId,
-        message: instanceToPlain(invitationMessage.message),
-      });
+    this.server.in(`conversation_${DMId}`).emit('newMessage', {
+      DMId,
+      message: instanceToPlain(invitationMessage.message),
+    });
     return true;
   }
 

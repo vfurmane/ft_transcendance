@@ -37,7 +37,6 @@ export default function UserEntity(props: {
   const router = useRouter();
   const dispatch = useDispatch();
   const websockets = useWebsocketContext();
-  const dispatch = useDispatch();
 
   useEffect(() => {
     const onUserStatusUpdate = (
