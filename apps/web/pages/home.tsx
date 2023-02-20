@@ -1,4 +1,10 @@
-import React, { createRef, useCallback, useEffect, useRef, useState } from "react";
+import React, {
+  createRef,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import TopBar from "../components/TopBar";
 import PlayButton from "../components/HomePage/PlayButton";
 import List from "../components/HomePage/List";
@@ -14,13 +20,10 @@ import styles from "styles/home.module.scss";
 import { useWebsocketContext } from "../components/Websocket";
 import { WatchGame } from "../components/WatchGame";
 
-
-
 function Home(): JSX.Element {
   const friendListRef = useRef<JSX.Element[]>([]);
   const setterInit: React.Dispatch<React.SetStateAction<boolean>> = () => false;
   const websockets = useWebsocketContext();
-
 
   const [openPlayButton, setOpenPlayButton] = useState(false);
   const [openUserMenu, setOpenUserMenu] = useState(false);
