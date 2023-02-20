@@ -26,7 +26,7 @@ interface OpenedConversationProps {
   conversation: ConversationEntity | null;
   selectConversation: Dispatch<SetStateAction<ConversationEntity | null>>;
   updateUnreadMessage: Dispatch<SetStateAction<number>>;
-  updateConversationList: Dispatch<SetStateAction<ConversationWithUnread[]>>
+  updateConversationList: Dispatch<SetStateAction<ConversationWithUnread[]>>;
 }
 
 export default function OpenedConversation(
@@ -91,34 +91,41 @@ export default function OpenedConversation(
     }
     return () => {
       websockets.conversations?.off("newMessage", addNewMessage);
-      if (currentConversation)
-      {
-        const targetId = currentConversation.id
-        console.error("Unmounting: ", currentConversation, "target id", targetId)
-        websockets.conversations?.timeout(2000).emit('read', {id : targetId}, (err : any, mess : boolean) => 
-        {
-          console.error("sent: ", targetId)
-          if (err)
-          {
-            console.error("did not read")
-            return
-          }
-          console.error("Did read")
-          setTimeout(() =>{
-          websockets.conversations?.emit(
-            "getUnread",
-            ({ totalNumberOfUnreadMessages }: unreadMessagesResponse) => {
-              props.updateUnreadMessage(totalNumberOfUnreadMessages);
+      if (currentConversation) {
+        const targetId = currentConversation.id;
+        console.error(
+          "Unmounting: ",
+          currentConversation,
+          "target id",
+          targetId
+        );
+        websockets.conversations
+          ?.timeout(2000)
+          .emit("read", { id: targetId }, (err: any, mess: boolean) => {
+            console.error("sent: ", targetId);
+            if (err) {
+              console.error("did not read");
+              return;
+            }
+            console.error("Did read");
+            setTimeout(() => {
               websockets.conversations?.emit(
-                "getConversations",
-                (conversationDetails: ConversationsDetails) => {
-                  props.updateConversationList(conversationDetails.conversations);
+                "getUnread",
+                ({ totalNumberOfUnreadMessages }: unreadMessagesResponse) => {
+                  props.updateUnreadMessage(totalNumberOfUnreadMessages);
+                  websockets.conversations?.emit(
+                    "getConversations",
+                    (conversationDetails: ConversationsDetails) => {
+                      props.updateConversationList(
+                        conversationDetails.conversations
+                      );
+                    }
+                  );
                 }
               );
-            }
-          )}, 5)
-          return
-        })
+            }, 5);
+            return;
+          });
       }
     };
   }, [currentConversation, websockets.conversations?.connected]);

@@ -82,7 +82,10 @@ export default function ChatBar(): JSX.Element {
           </article>
         </section>
         <section className={styles.conversationListContainer}>
-          <Chat conversation={conversationIdProp} updateUnreadMessage={ setUnreadMessages } />
+          <Chat
+            conversation={conversationIdProp}
+            updateUnreadMessage={setUnreadMessages}
+          />
         </section>
       </div>
     );

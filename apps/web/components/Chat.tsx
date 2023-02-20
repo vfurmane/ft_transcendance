@@ -21,15 +21,15 @@ import back from "../public/back.png";
 import addCross from "../public/addCross.png";
 import CreateConversation from "./CreateConversation";
 
-interface ChatProps
-{
-  conversation: { userId : string, userName: string},
-  updateUnreadMessage: React.Dispatch<React.SetStateAction<number>>
+interface ChatProps {
+  conversation: { userId: string; userName: string };
+  updateUnreadMessage: React.Dispatch<React.SetStateAction<number>>;
 }
 
 export default function Chat({
-  conversation, updateUnreadMessage
-}: ChatProps ): JSX.Element {
+  conversation,
+  updateUnreadMessage,
+}: ChatProps): JSX.Element {
   const [conversationSelected, selectConversation] =
     useState<ConversationEntity | null>(null);
   const [conversationList, setConversationList] = useState<
@@ -45,23 +45,22 @@ export default function Chat({
   const conversationToOpen = useSelector(selectConversationsState);
   const dispatch = useDispatch();
 
-  const refreshConversations = () =>
-  {
+  const refreshConversations = () => {
     websockets.conversations?.emit(
       "getConversations",
       (conversationDetails: ConversationsDetails) => {
         setConversationList(() => conversationDetails.conversations);
       }
     );
-  }
+  };
 
   const addNewConversation = (conversation: ConversationEntity) => {
-    refreshConversations()
-  }
+    refreshConversations();
+  };
 
-  const newUnread = (message : {id: string, message : Message }) => {
-    refreshConversations()
-  }
+  const newUnread = (message: { id: string; message: Message }) => {
+    refreshConversations();
+  };
 
   useEffect(() => {
     if (conversationToOpen.userId.length) {
@@ -93,17 +92,14 @@ export default function Chat({
       );
     } else if (!conversationSelected && !newConversation.userId.length) {
       if (websockets.conversations?.connected) {
-          websockets.conversations.emit(
-            "getConversations",
-            (conversationDetails: ConversationsDetails) => {
-              setConversationList(() => conversationDetails.conversations);
-              setLoading(false);
-            }
-          );
-        websockets.conversations.on(
-          "newConversation",
-          addNewConversation
+        websockets.conversations.emit(
+          "getConversations",
+          (conversationDetails: ConversationsDetails) => {
+            setConversationList(() => conversationDetails.conversations);
+            setLoading(false);
+          }
         );
+        websockets.conversations.on("newConversation", addNewConversation);
         websockets.conversations.on("newMessage", newUnread);
       }
     } else {
@@ -161,7 +157,8 @@ export default function Chat({
             conversation={
               newConversation.userId.length ? null : conversationSelected
             }
-            selectConversation={selectConversation} updateUnreadMessage={updateUnreadMessage}
+            selectConversation={selectConversation}
+            updateUnreadMessage={updateUnreadMessage}
             updateConversationList={setConversationList}
           />
         </section>
