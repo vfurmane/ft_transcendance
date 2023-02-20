@@ -44,9 +44,10 @@ const OpenSocket = (
   namespace: string
 ): Socket<DefaultEventsMap, DefaultEventsMap> => {
   const newSocket = io(namespace, {
-    auth: {
-      token: localStorage.getItem("access_token"),
-    },
+    withCredentials: true
+    // auth: {
+    //   token: localStorage.getItem("access_token"),
+    // },
   });
   newSocket.on("connect_error", () => {
     console.error(`Error while trying to connect ot socket ${namespace}`);
