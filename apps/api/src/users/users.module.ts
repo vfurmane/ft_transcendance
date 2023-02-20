@@ -1,7 +1,6 @@
 import { forwardRef, Logger, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from '../auth/auth.module';
-import { UsersGateway } from './users.gateway';
 import { User, Jwt, Upload, Profile } from 'types';
 import { UsersService } from './users.service';
 import { UserController } from './user.controller';
@@ -16,7 +15,7 @@ import { HttpModule } from '@nestjs/axios';
     forwardRef(() => TransformUserModule),
     HttpModule,
   ],
-  providers: [UsersService, Logger, UsersGateway],
+  providers: [UsersService, Logger],
   controllers: [UsersController, UserController],
   exports: [TypeOrmModule, UsersService],
 })

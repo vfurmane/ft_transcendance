@@ -48,6 +48,7 @@ import { RegisterUserDto } from '../users/register-user.dto';
 import { JwtRefreshAuthGuard } from './jwt-refresh-auth.guard';
 import { ChangePasswordDto } from './change-password.dto';
 import { Response } from 'express';
+import { DateModule } from '@faker-js/faker';
 
 @ApiTags()
 @UseInterceptors(ClassSerializerInterceptor)
@@ -283,8 +284,22 @@ export class AuthController {
 
   @Post('logout')
   @UseGuards(JwtAuthGuard)
-  async logout(@User() user: UserEntity): Promise<{ message: string }> {
+  async logout(
+    @User() user: UserEntity,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<{ message: string }> {
     await this.authService.logout(user.currentJwt.jti);
+    res.cookie('access_token', '', {
+      expires: new Date(),
+      sameSite: 'strict',
+      httpOnly: true,
+    });
+    res.cookie('refresh_token', '', {
+      expires: new Date(),
+      sameSite: 'strict',
+      httpOnly: true,
+      path: '/api/auth/refresh',
+    });
     return { message: 'Successfully logged out' };
   }
 }

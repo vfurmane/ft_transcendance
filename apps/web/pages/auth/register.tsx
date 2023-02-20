@@ -9,12 +9,7 @@ export default function Login(): JSX.Element {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const access_token = localStorage.getItem("access_token");
-    if (access_token !== null) {
-      router.replace("/");
-    } else {
-      setLoading(false);
-    }
+    setLoading(false);
   }, [router]);
 
   if (loading) return <Loading></Loading>;
