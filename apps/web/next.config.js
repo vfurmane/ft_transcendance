@@ -8,7 +8,10 @@ module.exports = {
   webpack: (config) => {
     // Solving the following issue:
     // https://github.com/typeorm/typeorm/issues/2841
-    config.resolve.alias.typeorm = path.resolve(__dirname, "../../node_modules/typeorm/typeorm-model-shim");
+    config.resolve.alias.typeorm = path.resolve(
+      __dirname,
+      "../../node_modules/typeorm/typeorm-model-shim"
+    );
     return config;
-  }
+  },
 };

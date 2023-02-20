@@ -49,7 +49,7 @@ import { AchievementsModule } from './Achievements/Achievements.module';
     TransformUserModule,
     PongModule,
     CacheModule.register(),
-    AchievementsModule
+    AchievementsModule,
   ],
   controllers: [AppController],
   providers: [AppService, AppGateway, Logger],

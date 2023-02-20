@@ -137,7 +137,7 @@ export default function Profil(): JSX.Element {
       .catch(() => {
         router.replace("/");
       });
-      setUserProfil(router.query.username === UserState.name);
+    setUserProfil(router.query.username === UserState.name);
 
     if (typeof router.query.username === "string") {
       fetch(`/api/achievements/${router.query.username}`, {
@@ -148,46 +148,47 @@ export default function Profil(): JSX.Element {
       })
         .then((res) => res.json())
         .then((data) => {
-          setAchievementsList(data.map((e: Achievements, i: number) => 
-            <AchivementEntity
-              achievement={{
-                id: e.id,
-                title: e.title,
-                description: e.description,
-                logo: e.logo,
-                created_at: e.created_at,
-                user: e.user
-              }}
-              key={i}
-              handleClick={achievementClick}
-              className={`achievement${i}`}
-            />
-          ));
+          setAchievementsList(
+            data.map((e: Achievements, i: number) => (
+              <AchivementEntity
+                achievement={{
+                  id: e.id,
+                  title: e.title,
+                  description: e.description,
+                  logo: e.logo,
+                  created_at: e.created_at,
+                  user: e.user,
+                }}
+                key={i}
+                handleClick={achievementClick}
+                className={`achievement${i}`}
+              />
+            ))
+          );
         })
         .catch((error) => {
           console.error(`problem with fetch : ${error.message}`);
         });
-      }
+    }
   }, [router.query, UserState, router, user.id]);
 
   useEffect(() => {
-    if (user)
-    {
+    if (user) {
       fetch(`/api/match/${user.id}`, {
         headers: {
           "Content-Type": "application/json",
           Authorization: "Bearer " + localStorage.getItem("access_token"),
         },
       })
-      .then((res) => res.json())
-      .then((data) => {
-        setMatchHistory(data);
-      })
-      .catch((error) => {
-        console.error(`problem with fetch : ${error.message}`);
-      });
+        .then((res) => res.json())
+        .then((data) => {
+          setMatchHistory(data);
+        })
+        .catch((error) => {
+          console.error(`problem with fetch : ${error.message}`);
+        });
     }
-  }, [user])
+  }, [user]);
 
   useEffect(() => {
     const tmp: JSX.Element[] = [];
