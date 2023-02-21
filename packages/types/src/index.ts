@@ -97,6 +97,11 @@ export interface Achivement {
   description: string;
 }
 
+export interface DMExists {
+  conversationExists: boolean;
+  conversation: Conversation | null;
+}
+
 export interface Matchmaking {
   isInQueue: boolean;
   gameMode: GameMode;

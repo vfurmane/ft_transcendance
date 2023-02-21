@@ -16,7 +16,7 @@ import { Match } from "./match.entity";
 import { Jwt } from "./jwt.entity";
 import { JwtPayload } from "..";
 import { Opponent } from "./opponent.entity";
-import { Profile } from './profile.entity';
+import { Profile } from "./profile.entity";
 import { Block } from "./block.entity";
 import { Achievements } from "./Achievements.entity";
 
@@ -53,11 +53,9 @@ export class User {
   @Column("boolean", { default: false })
   tfa_setup!: boolean;
 
-  @Expose()
   @OneToMany(() => Message, (message) => message.sender)
   messages!: Message[];
 
-  @Expose()
   @OneToMany(
     () => ConversationRole,
     (conversationRole) => conversationRole.user
@@ -74,7 +72,7 @@ export class User {
 
   @Column("smallint", { default: 0 })
   level!: number;
-  
+
   @OneToMany(() => Jwt, (jwt) => jwt.user)
   jwts!: Jwt[];
 

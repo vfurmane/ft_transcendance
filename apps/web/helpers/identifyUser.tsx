@@ -11,14 +11,26 @@ async function fetchUser(): Promise<Response | null> {
   }).catch((error) => null);
 }
 
-export async function identifyUser(): Promise<null | Userfront> {
-  if (localStorage.getItem("access_token") === null) return null;
-  let response = await fetchUser();
-  if (!response || !response.ok) {
-    if (await refreshToken()) {
-      response = await fetchUser();
-      if (!response || !response.ok) return null;
-    } else return null;
+async function refreshUser(): Promise<Response | null> {
+  let response: Response | null;
+  if (await refreshToken()) {
+    response = await fetchUser();
+    if (!response || !response.ok) return null;
+  } else return null;
+  return response;
+}
+
+export async function identifyUser(
+  loading: boolean
+): Promise<null | Userfront> {
+  let response: Response | null;
+  if (loading) {
+    response = await refreshUser();
+  } else {
+    response = await fetchUser();
+    if (!response || !response.ok) {
+      response = await refreshUser();
+    }
   }
-  return response.json() as Promise<Userfront>;
+  return response !== null ? (response.json() as Promise<Userfront>) : null;
 }

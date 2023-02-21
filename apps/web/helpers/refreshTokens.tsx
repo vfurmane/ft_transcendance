@@ -3,6 +3,7 @@ import { Userfront } from "types";
 import { selectUserState, setUserState } from "../store/UserSlice";
 
 export async function refreshToken(): Promise<boolean> {
+  console.error(`old refresh token: ${localStorage.getItem("refresh_token")}`);
   const response = await fetch("/api/auth/refresh", {
     method: "POST",
     headers: {
@@ -15,11 +16,15 @@ export async function refreshToken(): Promise<boolean> {
   if (!response || !response.ok) {
     localStorage.removeItem("refresh_token");
     localStorage.removeItem("access_token");
+    console.error("error on token refresh", response);
     return false;
   }
   await response.json().then((tokens) => {
     localStorage.setItem("refresh_token", tokens.refresh_token);
     localStorage.setItem("access_token", tokens.access_token);
+    console.error(
+      `new refresh token: ${localStorage.getItem("refresh_token")}`
+    );
   });
   return true;
 }

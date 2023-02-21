@@ -9,7 +9,9 @@ import Message from "../../public/message.png";
 import valide from "../../public/valide.png";
 import refuse from "../../public/crossRed.png";
 import { useWebsocketContext } from "../Websocket";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
+import { OpenConversation } from "../../store/ConversationSlice";
+import { useSelector } from "react-redux";
 import { selectUserState } from "../../store/UserSlice";
 import { useRouter } from "next/router";
 import ProfilePicture from "../ProfilePicture";
@@ -110,9 +112,20 @@ export default function UserEntity(props: {
           >
             <h3 className={textStyles.laquer}>profil</h3>
           </Link>
-          <Link href={""} className={styles.buttonEntity}>
+          <article
+            className={styles.buttonEntity}
+            onClick={() => {
+              console.error("Clicked new conversation button");
+              dispatch(
+                OpenConversation({
+                  userId: props.user.id,
+                  userName: props.user.name,
+                })
+              );
+            }}
+          >
             <Image alt="message" src={Message} width={30} height={30} />
-          </Link>
+          </article>
           {UserState.id !== props.user.id ? (
             <Link
               href={""}

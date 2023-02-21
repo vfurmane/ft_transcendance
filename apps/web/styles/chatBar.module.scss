@@ -10,4 +10,82 @@
   text-align: center;
   background: $dark-neutral-black;
   border-radius: 10px;
+  aside {
+    position: absolute;
+    top: 0;
+    right: 40px;
+  }
+  .unreadMessages {
+    color: $dark-primary-yellow;
+  }
+}
+
+.containerChat {
+  position: fixed;
+  display: grid;
+  grid-template-rows: minmax(0, $chat-control-height) auto;
+  gap: 10px;
+  z-index: 99;
+  bottom: 1px;
+  right: 10px;
+  min-width: 0;
+  min-height: 0;
+  width: 350px;
+  height: $chat-height;
+  text-align: center;
+  background: $dark-neutral-black;
+  border-radius: 10px;
+  .chatControls {
+    // padding-top: 5px;
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+    min-height: 0;
+    // display:grid;
+    // grid-template-columns: repeat(4, 1fr);
+    .closeButton {
+      // grid-column: 4 / span 1;
+      position: absolute;
+      top: 5px;
+      right: 10px;
+      width: 20px;
+      height: 20px;
+      // max-height: 100%;
+      // max-width: 100%;
+      contain: strict;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      img {
+        object-fit: contain;
+        max-width: 100%;
+        max-height: 100%;
+        width: 100%;
+        height: 100%;
+      }
+    }
+  }
+  .conversationListContainer {
+    color: white;
+    width: 100%;
+    height: 99%;
+    overflow-y: auto;
+  }
+  /* width */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  /* Track */
+  ::-webkit-scrollbar-track {
+    box-shadow: inset 0 0 5px $dark-neutral-grey-lighter;
+    border-radius: 5px;
+  }
+
+  /* Handle */
+  ::-webkit-scrollbar-thumb {
+    background: $dark-primary-yellow-lighter;
+    border-radius: 7px;
+  }
 }

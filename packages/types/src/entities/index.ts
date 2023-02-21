@@ -1,4 +1,4 @@
-export * from './block.entity'
+export * from "./block.entity";
 export * from "./conversation.entity";
 export * from "./conversationRestriction.entity";
 export * from "./conversationRole.entity";
@@ -11,5 +11,5 @@ export * from "./frienships.entity";
 export * from "./match.entity";
 export * from "./jwt.entity";
 export * from "./Achievements.entity";
-export * from './upload.entity'
-export * from './profile.entity'
+export * from "./upload.entity";
+export * from "./profile.entity";

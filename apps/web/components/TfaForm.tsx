@@ -64,8 +64,7 @@ export function TfaForm(props: TfaFormProps): ReactElement {
           localStorage.setItem("access_token", response.access_token);
           localStorage.setItem("refresh_token", response.refresh_token);
           localStorage.removeItem("state");
-          localStorage.removeItem("state");
-          const user = await identifyUser();
+          const user = await identifyUser(false);
           if (user) dispatch(setUserState(user));
         }
       })
