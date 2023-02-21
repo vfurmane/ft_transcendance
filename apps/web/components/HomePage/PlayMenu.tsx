@@ -20,7 +20,7 @@ export default function PlayMenu(props: { click?: () => void }): JSX.Element {
     return () => {
       if (websockets.pong) {
         dispatch(setGameMode(mode));
-        router.replace("/matchmaking");
+        router.push("/matchmaking");
       }
     };
   };
@@ -31,7 +31,7 @@ export default function PlayMenu(props: { click?: () => void }): JSX.Element {
         className={`${styles.playMenuEntity} ${styles.bar}`}
         onClick={() => {
           if (props.click) props.click();
-          router.replace(`/pingPong`);
+          router.push(`/pingPong`);
         }}
       >
         <h3 className={textStyle.laquer}>Training</h3>

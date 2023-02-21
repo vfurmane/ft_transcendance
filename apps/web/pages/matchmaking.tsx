@@ -29,7 +29,7 @@ export default function Matchmaking(): ReactElement {
   /*===========================================================*/
 
   useEffect(() => {
-    if (!MatchmakingState.isInQueue) router.push("/");
+    if (!MatchmakingState.isInQueue) router.replace("/");
     else setLoading(false);
   }, [MatchmakingState.isInQueue, router]);
 
