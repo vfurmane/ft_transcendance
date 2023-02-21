@@ -322,11 +322,15 @@ export class Ball extends Entity {
   }
 
   goToRandomPlayer(player: Racket[], game: Game): void {
-    const random = Math.floor(Math.random() * 10000) % player.length;
-    const dir = player[random].point[1]
-      .midSegment(player[random].point[2])
-      .vectorTo(player[random].point[0].midSegment(player[random].point[3]))
-      .normalized();
+    // const random = Math.floor(Math.random() * 10000) % player.length;
+    // const dir = player[random].point[1]
+    //   .midSegment(player[random].point[2])
+    //   .vectorTo(player[random].point[0].midSegment(player[random].point[3]))
+    //   .normalized();
+
+
+    const dir = this.point[0].vectorTo(player[1].point[1]).normalized();
+    
     this.speed = new Vector(
       dir.x * this.defaultSpeed,
       dir.y * this.defaultSpeed,
@@ -387,27 +391,20 @@ export class Ball extends Entity {
       );
       this.replaceTo(newCoords);
       const wall = walls[this.nextCollision.wallIndex];
-      const wallVector = wall.point[0].vectorTo(wall.point[2]);
-      const Norm = wallVector.norm() * this.speed.norm();
-      const angle = Math.acos(wallVector.product(this.speed) / Norm);
+      const wallVector = wall.point[0].vectorTo(wall.point[2]).normalized();
       const tmp = new Vector(this.speed.x, this.speed.y);
-      const isAcute = angle <= Math.PI / 2;
-      const outAngle = isAcute ? angle * 2 : (Math.PI - angle) * 2;
-      const cosA = Math.cos(outAngle);
-      const sinA = Math.sin(outAngle);
-      [tmp.x, tmp.y] = [
-        this.speed.x * cosA - this.speed.y * sinA,
-        this.speed.x * sinA + this.speed.y * cosA,
-      ];
-      const angle2 = Math.acos(wallVector.product(tmp) / Norm);
-      if (Math.abs(angle2 - angle) > 0.001) {
+      if (Math.abs(wallVector.x) >= 0.9) {
         [tmp.x, tmp.y] = [
-          this.speed.x * cosA - this.speed.y * -sinA,
-          this.speed.x * -sinA + this.speed.y * cosA,
-        ];
+          tmp.x,
+          -tmp.y
+        ]
+      } else if (Math.abs(wallVector.y) >= 0.9) {
+        [tmp.x, tmp.y] = [
+          -tmp.x,
+          tmp.y
+        ]
       }
       this.speed = tmp;
-      this.moveTo(this.speed, timeRatio);
       this.moveTo(this.speed, timeRatio);
       const index = this.nextCollision.wallIndex;
       if (rackets.length === 2) {
@@ -439,7 +436,7 @@ export class Ball extends Entity {
 
 export class Racket extends Entity {
   public defaultSpeed = 2;
-  public hp = 10;
+  public hp = 100;
   public dir!: Vector;
   public isMoving = false;
   public up = true;
@@ -465,10 +462,10 @@ export class Racket extends Entity {
         -this.dir.y * this.defaultSpeed,
       );
     }
-    this.moveTo(this.speed, 1 /*timeRatio*/);
+    this.moveTo(this.speed, timeRatio);
     for (const wall of walls) {
       if (this.sat(wall)) {
-        this.moveTo(new Vector(-this.speed.x, -this.speed.y), 1 /*timeRatio*/);
+        this.moveTo(new Vector(-this.speed.x, -this.speed.y), timeRatio);
       }
     }
   }
