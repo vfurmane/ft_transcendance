@@ -97,10 +97,9 @@ export default function Websocket({ children }: WebsocketProps): JSX.Element {
         );
       });
 
-      pong.on('replace', (route : string) => {
+      pong.on("replace", (route: string) => {
         router.replace(route);
-      })
-
+      });
     } else {
       closeOpenSockets(socketInstances);
       setSocketInstances({

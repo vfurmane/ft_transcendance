@@ -6,12 +6,7 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import {
-  CACHE_MANAGER,
-  Inject,
-  Logger,
-  UseFilters,
-} from '@nestjs/common';
+import { CACHE_MANAGER, Inject, Logger, UseFilters } from '@nestjs/common';
 import { Cache } from 'cache-manager';
 import { AuthService } from './auth/auth.service';
 import { HttpExceptionTransformationFilter } from './common/filters/HttpExceptionFilter.filter';
@@ -31,7 +26,7 @@ export class AppGateway {
   ) {}
 
   async handleConnection(client: Socket): Promise<void> {
-    const token = getCookie(client, "access_token");
+    const token = getCookie(client, 'access_token');
     if (!token) {
       client.disconnect();
       return;
