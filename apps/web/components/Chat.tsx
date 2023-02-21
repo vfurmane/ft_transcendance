@@ -99,6 +99,7 @@ export default function Chat({
           "getConversations",
           (conversationDetails: ConversationsDetails) => {
             setConversationList(() => conversationDetails.conversations);
+            console.error(conversationDetails)
             setLoading(false);
           }
         );
@@ -219,17 +220,10 @@ export default function Chat({
       <section className={styles.conversationsContainer}>
         {conversationList.length ? (
           conversationList.map((conversation) => (
-            <article
-              key={`${conversation.conversation.id}_container`}
-              onClick={() => {
-                selectConversation(conversation.conversation);
-              }}
-            >
               <Conversation
                 key={conversation.conversation.id}
-                conversation={conversation}
+                conversation={conversation} selectConversation={selectConversation}
               />
-            </article>
           ))
         ) : (
           <article>No conversations yet</article>

@@ -322,7 +322,8 @@ export class ConversationsService {
       totalNumberOfUnreadMessages: 0,
       conversations: [],
     };
-    const conversations = await this.conversationRepository.find({
+    let ret : Conversation[] = [];
+    let conversations = await this.conversationRepository.find({
       relations: {
         conversationRoles: true,
       },
@@ -335,8 +336,27 @@ export class ConversationsService {
         },
       },
     });
-    if (!conversations) return conversationsDetails;
-    for (const conversation of conversations) {
+    for (let conversation of conversations)
+    {
+      if (!conversation.groupConversation)
+      {
+        const newConversation = await this.conversationRepository.findOne({
+          relations: {
+            conversationRoles: true,
+          },
+          where: {
+            id: conversation.id
+          },
+        });
+        if (newConversation)
+          ret.push(newConversation)
+        console.error(newConversation?.conversationRoles)
+      }
+      else
+        ret.push(conversation)
+    }
+    if (!ret) return conversationsDetails;
+    for (const conversation of ret) {
       conversation.conversationRoles[0].restrictions =
         await this.verifyRestrictionsOnUser(
           conversation.conversationRoles[0].restrictions,

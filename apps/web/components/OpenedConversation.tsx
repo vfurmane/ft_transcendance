@@ -173,7 +173,7 @@ export default function OpenedConversation(
                   "createConversation",
                   {
                     groupConversation: false,
-                    participants: [newConversation?.userId],
+                    participant: newConversation?.userId,
                   },
                   (conversation: any) => {
                     createdConversation = conversation;

@@ -115,7 +115,6 @@ export default function UserEntity(props: {
           <article
             className={styles.buttonEntity}
             onClick={() => {
-              console.error("Clicked new conversation button");
               dispatch(
                 OpenConversation({
                   userId: props.user.id,
