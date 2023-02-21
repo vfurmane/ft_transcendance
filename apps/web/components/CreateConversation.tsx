@@ -5,6 +5,7 @@ import { Conversation as ConversationEntity } from "types";
 import ToggleCross from "../public/toggleCross.png";
 import Image from "next/image";
 import { useWebsocketContext } from "./Websocket";
+import styles from "styles/createConversation.module.scss";
 
 interface createConversationProps {
   changeConversation: Dispatch<SetStateAction<ConversationEntity | null>>;
@@ -29,15 +30,16 @@ export default function CreateConversation(
   };
 
   return (
-    <>
+    <section>
       <h4>Create a new group conversation</h4>
-      <section className="errors">
+      <section className={styles.errors}>
         {errors.map((error) => (
           <div>{error}</div>
         ))}
       </section>
       <form
         onSubmit={(e) => {
+          let formErrors = false
           setErrors([]);
           e.preventDefault();
           console.error("Submitting");
@@ -53,17 +55,26 @@ export default function CreateConversation(
             ) as HTMLInputElement
           ).value;
           if (!name.length)
+          {
             setErrors((prev) => [...prev, "Group conversations need a name"]);
+            formErrors = true
+          }
           if (password.length) {
             if (!confirmedPassword.length)
+            {
               setErrors((prev) => [...prev, "Please confirm password"]);
+              formErrors = true
+            }
             else if (password !== confirmedPassword)
+            {
               setErrors((prev) => [...prev, "Passwords do not match"]);
+              formErrors = true
+            }
           }
-          if (errors.length) return;
+          if (formErrors)
+            return;
           const isVisible = (e.currentTarget.elements.namedItem("visible") as HTMLInputElement
           ).checked;
-          console.error("Is visible? ", isVisible)
           if (!websockets.conversations?.connected) {
             setErrors((prev) => [
               ...prev,
@@ -94,21 +105,31 @@ export default function CreateConversation(
         }}
         ref={formRef}
       >
+        <section>
         <input
           autoFocus={true}
           name="name"
           placeholder="Conversation name"
           type="text"
+          autoComplete="off"
+          className={styles.conversationName}
         />
-        <label htmlFor="visible">Is visible ?</label>
+        </section>
+        <section className={ styles.visibilityBlock }>
+        <label htmlFor="visible">Publicly visible ?</label>
         <input type="checkbox" name="visible" id="visible" value="visible" />
+        </section>
+        <section className={ styles.passwordBlock }>
         <label htmlFor="password">
-          Enter a password if you wish to protect your conversation (optional)
+          Enter a password<br/>if you wish to protect your conversation
         </label>
-        <input type="password" name="password" id="password" />
-        <input type="password" name="confirm-password" id="confirm-password" />
-        <input type="submit" value="Create conversation" />
+        <input type="password" name="password" id="password" autoComplete="off" placeholder="Enter password" />
+        <input type="password" name="confirm-password" id="confirm-password" autoComplete="off" placeholder="Confirm password" />
+        </section>
+        <section >
+        <input className={ styles.submit } type="submit" value="Create conversation" />
+        </section>
       </form>
-    </>
+    </ section>
   );
 }

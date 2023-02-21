@@ -209,7 +209,7 @@ export default function Chat({
           setSearchChannel(true);
         }} className={styles.searchBar}
       >
-        SEARCH
+        JOIN
         <Image
               alt="search"
               src={Search}

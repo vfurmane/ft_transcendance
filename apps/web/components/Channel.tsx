@@ -5,6 +5,8 @@ import { Conversation as ConversationEntity } from "types";
 import ToggleCross from "../public/toggleCross.png";
 import Image from "next/image";
 import { useWebsocketContext } from "./Websocket";
+import styles from "styles/channel.module.scss";
+import lockedPadlock from "../public/lockedPadlock.png";
 
 interface ChannelProps {
     changeConversation: Dispatch<SetStateAction<ConversationEntity | null>>;
@@ -31,35 +33,41 @@ export default function Channel( props : ChannelProps )
 
       if (askPassword)
       {
-        return < React.Fragment key={props.current.id}>
-        <aside>{props.current.has_password ? "protected" : ""}</aside>
-        <article>{props.current.name}</article>
-        <form onBlur={(e) =>
+        return < section key={props.current.id} className={ styles.channelForm }>
+            
+        <aside className={ styles.lockedField } >{props.current.has_password ? 
+        < Image src={lockedPadlock} width={20} height={20} alt="padlock" />
+        : <></>}</aside>
+        <section className={ styles.channelInfo }>
+        <article className={ styles.channelName }><p>{props.current.name}</p></article>
+
+        <form onSubmit={ (e) =>
         {
-            setAskPassword(false)
-      }} onSubmit={ (e) =>
-        {
-            // props.setErrors([])
           e.preventDefault()
+          props.setErrors([])
             const password = (e.currentTarget.elements.namedItem("conversationPassword") as HTMLInputElement
             ).value;
             websockets.conversations?.timeout(500).emit("joinConversation", { id: props.current.id, password: password }, joinConversation)
         }}>
-      <input type="password" name="conversationPassword" id="" />
-      <input type="submit" value="JOIN" /> </form >
-        </React.Fragment>
+      <input type="password" name="conversationPassword" placeholder="Enter password" className={ styles.passwordField } />
+      <div className={ styles.joinButton }>
+      <input type="submit" value="JOIN" className={ styles.submitWithPwd} /></div> </form >
+      </section>
+        </section>
       }
 
-    return < React.Fragment key={props.current.id}>
-        <aside>{props.current.has_password ? "protected" : ""}</aside>
-        <article>{props.current.name}</article>
-        <article onClick={ (e) =>
+    return < section key={props.current.id} className={ styles.channelNoForm }>
+        <aside className={ styles.lockedField } >{props.current.has_password ? 
+        < Image src={lockedPadlock} width={20} height={20} alt="padlock" />
+        : <></>}</aside>
+        <article className={ styles.channelName }><p>{props.current.name}</p></article>
+        <article className={ styles.joinButton } ><p onClick={ (e) =>
         {
-            // props.setErrors([])
+            props.setErrors([])
             if (props.current.has_password)
                 setAskPassword(true)
             else
                 websockets.conversations?.timeout(500).emit("joinConversation", { id: props.current.id }, joinConversation)
-        }}>JOIN</article>
-    </ React.Fragment>
+        }}>JOIN</p></article>
+    </ section>
 }

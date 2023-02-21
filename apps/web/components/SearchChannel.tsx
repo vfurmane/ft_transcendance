@@ -6,6 +6,7 @@
   import Image from "next/image";
   import { useWebsocketContext } from "./Websocket";
 import Channel from "./Channel";
+import styles from "styles/searchChannel.module.scss";
 
   interface SearchChannelProps {
     changeConversation: Dispatch<SetStateAction<ConversationEntity | null>>;
@@ -19,23 +20,36 @@ import Channel from "./Channel";
     const [ channels, setChannels ] = useState<ConversationEntity[]>([])
     const [ matches, setMatches ] = useState<ConversationEntity[]>([])
     const websockets = useWebsocketContext();
+    const [ loading, setLoading ] = useState<boolean>(true)
+    const entered = useRef<string | null>("")
 
 
     const updateChannelList = () =>
     {
-      websockets.conversations?.timeout(2000).emit("getChannels", (err: any, conversations:ConversationEntity[]) => {
+      console.error("New Channel")
+      websockets.conversations?.timeout(500).emit("getChannels", (err: any, conversations:ConversationEntity[]) => {
         if (err)
+        {
+          console.error("Could not retrieve list")
           return
+        }
         else
         {
           setChannels(conversations)
-        }
+          if (entered.current && entered.current.length)
+          {
+              const reg = new RegExp(entered.current, "i")
+              setMatches(conversations.filter((currentChannel) => reg.test(currentChannel.name)))
+            }
+            else
+              setMatches(conversations)
+          }
       })
     }
 
     useEffect(() =>
     {
-      if (!channels.length)
+      if (loading)
       {
         if (!websockets.conversations?.connected)
           setErrors(() => ["Temporary network issue, please try again later"])
@@ -53,21 +67,26 @@ import Channel from "./Channel";
               websockets.conversations?.on("NewChannel", updateChannelList)
           })
         }
+        setLoading(false)
       }
       return (() => {websockets.conversations?.off("NewChannel", updateChannelList)})
     }, [websockets.conversations?.connected])
 
+    if (loading)
+      return <></>
+
     return (
-      <>
+      <section className={ styles.searchChannelsContainer }>
         <h4>Join a channel</h4>
-        <section className="errors">
-          {errors.map((error) => (
-            <div>{error}</div>
+        <section className={ styles.errors }>
+          {errors.map((error, i) => (
+            <div key={`joinerror_${i}`}>{error}</div>
           ))}
         </section>
         <section>
-          <input type="text" onChange={(e) =>
+          <input placeholder="Channel name" className={ styles.searchChannelBar } autoComplete="off" type="text" onChange={(e) =>
           {
+            entered.current = e.target.value
             if (!e.target.value.length)
             {
               setMatches(channels)
@@ -80,9 +99,9 @@ import Channel from "./Channel";
             }
           }} />
         </section>
-        <section>
+        <section className={ styles.matchesContainer }>
           {matches.map((match) => < Channel changeConversation={props.changeConversation} closeSearchChannel={props.closeSearchChannel} setErrors={setErrors} current={match} />)}
         </section>
-      </>
+      </section>
     );
   }
