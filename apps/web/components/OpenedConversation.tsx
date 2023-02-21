@@ -123,7 +123,7 @@ export default function OpenedConversation(
                   );
                 }
               );
-            }, 5);
+            }, 25);
             return;
           });
       }

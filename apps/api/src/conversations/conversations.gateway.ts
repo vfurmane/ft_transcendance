@@ -95,14 +95,18 @@ export class ConversationsGateway implements OnGatewayConnection {
       this.server
         .in(`user_${client.data.id}`)
         .socketsJoin(`conversation_${conversation.id}`);
-      for (const participant of newConversation.participants) {
+      if (newConversation.participant) {
         this.server
-          .in(`user_${participant}`)
+          .in(`user_${newConversation.participant}`)
           .socketsJoin(`conversation_${conversation.id}`);
       }
       client
         .to(`conversation_${conversation.id}`)
         .emit('newConversation', instanceToPlain(conversation));
+    }
+    if (newConversation.visible)
+    {
+      this.server.emit("NewChannel")
     }
     return conversation;
   }
@@ -121,6 +125,12 @@ export class ConversationsGateway implements OnGatewayConnection {
   ): Promise<Message[]> {
     console.error('Fetching message');
     return this.conversationsService.getMessages(client.data as User, id);
+  }
+
+  @SubscribeMessage('getChannels')
+  getChannels(@ConnectedSocket() client : Socket) : Promise<Conversation[]>
+  {
+    return this.conversationsService.getChannels(client.data as User)
   }
 
   @SubscribeMessage('postMessage')

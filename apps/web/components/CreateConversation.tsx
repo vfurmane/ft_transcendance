@@ -15,13 +15,15 @@ export default function CreateConversation(
   props: createConversationProps
 ): JSX.Element {
   const formRef = useRef<HTMLFormElement | null>(null);
-  const searchRef = useRef<HTMLInputElement>(null);
-  const [participants, setParticipants] = useState<User[]>([]);
-  const [matches, setMatches] = useState<User[]>([]);
   const [errors, setErrors] = useState<string[]>([]);
   const websockets = useWebsocketContext();
 
-  const newConversation = (conversation: ConversationEntity) => {
+  const newConversation = (err: any, conversation: ConversationEntity) => {
+    if (err)
+    {
+      setErrors(["Could not create conversation, please try again later"])
+      return
+    }
     props.changeConversation(conversation);
     props.closeCreator(false);
   };
@@ -52,11 +54,6 @@ export default function CreateConversation(
           ).value;
           if (!name.length)
             setErrors((prev) => [...prev, "Group conversations need a name"]);
-          if (!participants.length)
-            setErrors((prev) => [
-              ...prev,
-              "Please pick participants for you conversation (you will be able to add more later)",
-            ]);
           if (password.length) {
             if (!confirmedPassword.length)
               setErrors((prev) => [...prev, "Please confirm password"]);
@@ -64,33 +61,33 @@ export default function CreateConversation(
               setErrors((prev) => [...prev, "Passwords do not match"]);
           }
           if (errors.length) return;
+          const isVisible = (e.currentTarget.elements.namedItem("visible") as HTMLInputElement
+          ).checked;
+          console.error("Is visible? ", isVisible)
           if (!websockets.conversations?.connected) {
             setErrors((prev) => [
               ...prev,
               "Network error, please try again later",
             ]);
           }
-          const participantsList = participants.map(
-            (participant) => participant.id
-          );
           if (password.length)
-            websockets.conversations?.emit(
+            websockets.conversations?.timeout(2000).emit(
               "createConversation",
               {
                 name: name,
                 groupConversation: true,
                 password: password,
-                participants: participantsList,
+                visible: isVisible
               },
               newConversation
             );
           else
-            websockets.conversations?.emit(
+            websockets.conversations?.timeout(2000).emit(
               "createConversation",
               {
                 name: name,
                 groupConversation: true,
-                participants: participantsList,
+                visible: isVisible
               },
               newConversation
             );
@@ -103,66 +100,8 @@ export default function CreateConversation(
           placeholder="Conversation name"
           type="text"
         />
-        <div></div>
-        <input
-          ref={searchRef}
-          name="participants"
-          placeholder="Search a user"
-          type="text"
-          onChange={(e) => {
-            if (!e.target.value.length) {
-              setMatches([...[]]);
-              return;
-            }
-            fetch(`/api/search?letters=${e.target.value}`, {
-              credentials: "same-origin",
-            })
-              .then((response) => {
-                if (!response.ok) return;
-                response.json().then((data) => {
-                  setMatches([...data]);
-                });
-              })
-              .catch(function (error) {
-                console.log(
-                  "Il y a eu un problème avec l'opération fetch : " +
-                    error.message
-                );
-              });
-          }} /*onBlur={ (e) => 
-        {
-            e.target.value = ""
-            setMatches([...[]])
-         }}*/
-        />
-        <section>
-          {matches.map((el) => (
-            <article
-              key={el.id}
-              onClick={(e) => {
-                setParticipants((prev) =>
-                  prev.filter((e) => e.id === el.id).length
-                    ? prev
-                    : [...prev, el]
-                );
-                if (searchRef.current) searchRef.current.value = "";
-                setMatches([]);
-              }}
-            >
-              {el.name}
-            </article>
-          ))}
-        </section>
-        <section>
-          {participants.map((participant) => (
-            <article>
-              {participant.name}
-              <aside>
-                <Image alt="toggle" src={ToggleCross} />
-              </aside>
-            </article>
-          ))}
-        </section>
+        <label htmlFor="visible">Is visible ?</label>
+        <input type="checkbox" name="visible" id="visible" value="visible" />
         <label htmlFor="password">
           Enter a password if you wish to protect your conversation (optional)
         </label>

@@ -20,6 +20,8 @@ import Image from "next/image";
 import back from "../public/back.png";
 import addCross from "../public/addCross.png";
 import CreateConversation from "./CreateConversation";
+import SearchChannel from "./SearchChannel";
+import Search from "../public/Search.png";
 
 interface ChatProps {
   conversation: { userId: string; userName: string };
@@ -41,6 +43,7 @@ export default function Chat({
   }>(conversation);
   const [loading, setLoading] = useState(true);
   const [createConversation, setCreateConversation] = useState<boolean>(false);
+  const [searchChannel, setSearchChannel] = useState<boolean>(false);
   const websockets = useWebsocketContext();
   const conversationToOpen = useSelector(selectConversationsState);
   const dispatch = useDispatch();
@@ -125,6 +128,7 @@ export default function Chat({
           className={styles.backButton}
           onClick={(e) => {
             setCreateConversation(false);
+            setSearchChannel(false)
           }}
         >
           <Image alt="back" src={back} />
@@ -137,7 +141,30 @@ export default function Chat({
         </section>
       </>
     );
-  } else if (newConversation.userId.length || conversationSelected !== null) {
+  }
+  else if (searchChannel === true)
+  {
+    return (
+      <>
+        <article
+          className={styles.backButton}
+          onClick={(e) => {
+            setCreateConversation(false);
+            setSearchChannel(false)
+          }}
+        >
+          <Image alt="back" src={back} />
+        </article>
+        <section className={styles.conversationsContainer}>
+          < SearchChannel
+            changeConversation={selectConversation}
+            closeSearchChannel={setSearchChannel}
+          />
+        </section>
+      </>
+    );
+  }
+  else if (newConversation.userId.length || conversationSelected !== null) {
     return (
       <>
         <article
@@ -175,6 +202,19 @@ export default function Chat({
         }}
       >
         <Image alt="create Conversation" src={addCross} />
+      </article>
+      <article
+        title="Search a channel"
+        onClick={(e) => {
+          setSearchChannel(true);
+        }} className={styles.searchBar}
+      >
+        SEARCH
+        <Image
+              alt="search"
+              src={Search}
+              className={styles.logoSearchBar}
+            />
       </article>
       <section className={styles.conversationsContainer}>
         {conversationList.length ? (
