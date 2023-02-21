@@ -115,6 +115,11 @@ function Home(): JSX.Element {
         );
         setFeaturingList((f) => [elm, ...f]);
       });
+      websockets.pong.on("game_end", (gameStartPayload: GameStartPayload) => {
+        setFeaturingList((f) =>
+          f.filter((game) => game.props.gameId !== gameStartPayload.id)
+        );
+      });
 
       websockets.pong.emit("get_featuring", (data: GameStartPayload[]) => {
         setFeaturingList((f) => [
@@ -125,6 +130,13 @@ function Home(): JSX.Element {
         ]);
       });
     }
+
+    return () => {
+      if (websockets.pong) {
+        websockets.pong.off("game_start");
+        websockets.pong.off("game_end");
+      }
+    };
   }, [websockets.pong]);
 
   //get the friend list of the user
