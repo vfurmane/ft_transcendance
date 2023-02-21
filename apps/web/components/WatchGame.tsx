@@ -70,7 +70,7 @@ export function WatchGame(props: WatchGameProps): ReactElement {
 
     scrollContainer!.addEventListener("wheel", (evt) => {
         evt.preventDefault();
-        scrollContainer!.scrollLeft -git = evt.deltaY;
+        scrollContainer!.scrollLeft -= evt.deltaY;
     });
   }, [props.users, isShown])
 
