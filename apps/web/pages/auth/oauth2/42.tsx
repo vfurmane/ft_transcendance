@@ -9,7 +9,7 @@ import { setUserState } from "../../../store/UserSlice";
 async function exchangeCodeForToken(
   code: string,
   state?: string
-): Promise<AccessTokenResponse | TfaNeededResponse | null> {
+): Promise<boolean | TfaNeededResponse> {
   const response = await fetch(
     `/api/auth/login/oauth2/42?${new URLSearchParams({
       code,
@@ -20,11 +20,14 @@ async function exchangeCodeForToken(
       return response.json().then((error) => {
         throw new Error(error.message || "An unexpected error occured...");
       });
-    } else {
-      return response.json();
+    } else if (response.status < 400) {
+      return await response.text().then((data) => {
+        return data ? JSON.parse(data) : {};
+      });
     }
   });
-  if (!response) return null;
+  if (!response) return false;
+  else if (!Object.keys(response).length) return true;
   return response;
 }
 
@@ -46,25 +49,20 @@ export default function FtOauth2(): JSX.Element {
     }
     exchangeCodeForToken(code, state)
       .then(async (response) => {
-        if (response === null) {
+        console.log(response);
+        if (response === false) {
           throw new Error("An unexpected error occured...");
-        } else {
-          if ("access_token" in response && response.access_token) {
-            setMessage("Success! Redirecting...");
-            localStorage.setItem("access_token", response.access_token);
-            localStorage.setItem("refresh_token", response.refresh_token);
-            localStorage.removeItem("state");
-            const user = await identifyUser(false);
-            if (user) dispatch(setUserState(user));
-            if (response.username)
-              router.replace(`/profile/${response.username}`);
-            else router.replace("/");
-          } else if (
-            "message" in response &&
-            response.message === "Authentication factor needed"
-          ) {
-            router.replace(`/auth/${response.route}`);
-          }
+        } else if (response === true) {
+          setMessage("Success! Redirecting...");
+          localStorage.removeItem("state");
+          const user = await identifyUser(false);
+          if (user) dispatch(setUserState(user));
+          router.replace("/");
+        } else if (
+          "message" in response &&
+          response.message === "Authentication factor needed"
+        ) {
+          router.replace(`/auth/${response.route}`);
         }
       })
       .catch((error) => {

@@ -18,6 +18,7 @@ import { AuthService } from './auth/auth.service';
 import { HttpExceptionTransformationFilter } from './common/filters/HttpExceptionFilter.filter';
 import { SpiedUserDto } from './spied-user.dto';
 import { User, UserStatusUpdatePayload } from 'types';
+import { nextTick } from 'process';
 
 @WebSocketGateway()
 @UseFilters(HttpExceptionTransformationFilter)
@@ -31,13 +32,12 @@ export class AppGateway {
   ) {}
 
   async handleConnection(client: Socket): Promise<void> {
-    if (!client.handshake.auth.token) {
+    const token = client.handshake.headers.cookie?.split('=')[1];
+    if (!token) {
       client.disconnect();
       return;
     }
-    const currentUser = this.authService.verifyUserFromToken(
-      client.handshake.auth.token,
-    );
+    const currentUser = this.authService.verifyUserFromToken(token);
     if (!currentUser) {
       client.disconnect();
       return;

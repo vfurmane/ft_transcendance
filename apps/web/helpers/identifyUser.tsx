@@ -5,9 +5,7 @@ import { refreshToken } from "./refreshTokens";
 
 async function fetchUser(): Promise<Response | null> {
   return await fetch("/api/user", {
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-    },
+    credentials: "same-origin",
   }).catch((error) => null);
 }
 

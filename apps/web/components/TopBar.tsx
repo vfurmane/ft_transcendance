@@ -13,7 +13,6 @@ import textStyles from "styles/text.module.scss";
 import List from "./HomePage/List";
 import { Userfront as User } from "types";
 import { initUser } from "../initType/UserInit";
-import { clearTokens } from "../helpers/clearTokens";
 import ProfilePicture from "./ProfilePicture";
 
 interface propsTopBar {
@@ -34,9 +33,7 @@ interface propsTopBar {
 async function logout(): Promise<null> {
   const response = await fetch(`/api/auth/logout`, {
     method: "POST",
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-    },
+    credentials: "same-origin",
   }).then(async (response) => {
     if (!response.ok) {
       return response.json().then((error) => {
@@ -81,7 +78,6 @@ function TopBar(props: propsTopBar): JSX.Element {
   function logoutHandler(): void {
     logout()
       .then(() => {
-        clearTokens();
         dispatch(setUserState(initUser));
       })
       .catch((error) => console.error(error));
@@ -92,8 +88,8 @@ function TopBar(props: propsTopBar): JSX.Element {
       fetch(`/api/search?letters=${value}`, {
         headers: {
           "Content-Type": "application/json",
-          Authorization: "Bearer " + localStorage.getItem("access_token"),
         },
+        credentials: "same-origin",
       })
         .then(function (response) {
           response.json().then(function (data) {

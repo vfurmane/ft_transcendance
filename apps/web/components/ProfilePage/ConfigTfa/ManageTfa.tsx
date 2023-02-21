@@ -9,9 +9,7 @@ async function deleteTfa(): Promise<void | null> {
     `${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/tfa`,
     {
       method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-      },
+      credentials: "same-origin",
     }
   ).then(async (response) => {
     if (!response.ok) {

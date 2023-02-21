@@ -18,9 +18,9 @@ async function changeUsername(
     {
       method: "PATCH",
       headers: {
-        Authorization: `Bearer ${localStorage.getItem("access_token")}`,
         "Content-Type": "application/json",
       },
+      credentials: "same-origin",
       body: JSON.stringify(data),
     }
   ).then(async (response) => {

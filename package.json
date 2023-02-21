@@ -13,6 +13,7 @@
     "format": "prettier --write \"**/*.{ts,tsx,md}\""
   },
   "devDependencies": {
+    "@types/cookie-parser": "^1.4.3",
     "eslint-config-custom": "*",
     "prettier": "2.8.3",
     "turbo": "latest"
@@ -22,6 +23,7 @@
   },
   "packageManager": "npm@8.19.2",
   "dependencies": {
+    "cookie-parser": "^1.4.6",
     "qrcode": "^1.5.1"
   }
 }

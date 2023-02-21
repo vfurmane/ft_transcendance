@@ -182,6 +182,7 @@ export class AuthService {
     if (state) {
       this.removeState(state);
     }
+
     return {
       access_token: accessToken,
       refresh_token: refreshToken,

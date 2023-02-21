@@ -31,8 +31,8 @@ import { Message } from 'types';
 import { ConversationRole } from 'types';
 import { UsersService } from '../users/users.service';
 import { instanceToPlain } from 'class-transformer';
-import { invitationDto } from './dtos/invitation.dto';
 import { BlockUserDto } from './block-user.dto';
+import { invitationDto } from './dtos/invitation.dto';
 
 @UseFilters(HttpExceptionTransformationFilter)
 @UsePipes(new ValidationPipe())
@@ -51,15 +51,16 @@ export class ConversationsGateway implements OnGatewayConnection {
 
   async handleConnection(client: Socket): Promise<string | void> {
     console.error('Someone is trying to connect');
-    if (!client.handshake.auth.token) {
+    const token = client.handshake.headers.cookie?.split('=')[1];
+    if (!token) {
       client.disconnect();
+      console.log('No Authorization cookie found');
       return;
     }
-    const currentUser = this.authService.verifyUserFromToken(
-      client.handshake.auth.token,
-    );
+    const currentUser = this.authService.verifyUserFromToken(token);
     if (!currentUser) {
       client.disconnect();
+      console.log('invalid Token');
       return;
     }
     client.data = { id: currentUser.sub, name: currentUser.name };
@@ -70,10 +71,6 @@ export class ConversationsGateway implements OnGatewayConnection {
     conversations.forEach((el) => client.join(`conversation_${el}`));
     console.error(`new socket id: ${client.id}`);
     return 'Connection established';
-  }
-
-  handleDisconnect(client: any) {
-    console.error(`Closed socket: ${client.id}`);
   }
 
   @SubscribeMessage('getConversations')
@@ -358,28 +355,6 @@ export class ConversationsGateway implements OnGatewayConnection {
     return restriction;
   }
 
-  @SubscribeMessage('unbanUser')
-  async unbanUser(
-    @ConnectedSocket() client: Socket,
-    @MessageBody() { id, username }: muteUserDto,
-  ) {
-    return this.conversationsService.unbanUser(client.data as User, {
-      id,
-      username,
-    });
-  }
-
-  @SubscribeMessage('unmuteUser')
-  async unmuteUser(
-    @ConnectedSocket() client: Socket,
-    @MessageBody() { id, username }: muteUserDto,
-  ) {
-    return this.conversationsService.unmuteUser(client.data as User, {
-      id,
-      username,
-    });
-  }
-
   @SubscribeMessage('get_blocked_users')
   async getBlockedUsers(@ConnectedSocket() client: Socket): Promise<Block[]> {
     return this.conversationsService.getBlockedUsers(client.data.id);
@@ -413,5 +388,27 @@ export class ConversationsGateway implements OnGatewayConnection {
     if (client.data.id === targetId) return { targetId: null };
     await this.conversationsService.unblockUser(client.data.id, targetId);
     return { targetId };
+  }
+
+  @SubscribeMessage('unbanUser')
+  async unbanUser(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() { id, username }: muteUserDto,
+  ) {
+    return this.conversationsService.unbanUser(client.data as User, {
+      id,
+      username,
+    });
+  }
+
+  @SubscribeMessage('unmuteUser')
+  async unmuteUser(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() { id, username }: muteUserDto,
+  ) {
+    return this.conversationsService.unmuteUser(client.data as User, {
+      id,
+      username,
+    });
   }
 }

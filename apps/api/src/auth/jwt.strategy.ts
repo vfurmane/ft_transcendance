@@ -9,6 +9,7 @@ import { JwtPayload } from 'types';
 import { Repository } from 'typeorm';
 import { AuthService } from './auth.service';
 import { Jwt } from 'types';
+import { Request } from 'express';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -20,10 +21,20 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     private readonly jwtsRepository: Repository<Jwt>,
   ) {
     super({
-      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      ignoreExpiration: true, //Has to be changed for prod
+      jwtFromRequest: ExtractJwt.fromExtractors([JwtStrategy.extractJWT]),
+      ignoreExpiration: false, //Has to be changed for prod
       secretOrKey: configService.get('JWT_SECRET'),
     });
+  }
+
+  private static extractJWT(req: Request): string | null {
+    if (
+      req.cookies &&
+      'access_token' in req.cookies &&
+      req.cookies.access_token.length > 0
+    )
+      return req.cookies.access_token;
+    return null;
   }
 
   async validate(payload: JwtPayload): Promise<User | null> {

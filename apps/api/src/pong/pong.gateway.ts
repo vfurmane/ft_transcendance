@@ -57,12 +57,16 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   async handleConnection(client: Socket): Promise<void | string> {
     console.log('SOMEBODY IS TRYING TO CONNECT');
-    const currentUser = this.authService.verifyUserFromToken(
-      client.handshake.auth.token,
-    );
+    const token = client.handshake.headers.cookie?.split('=')[1];
+    if (!token) {
+      client.disconnect();
+      console.log('No Authorization cookie found');
+      return;
+    }
+    const currentUser = this.authService.verifyUserFromToken(token);
     if (!currentUser) {
       client.disconnect();
-      console.log('no Authorization');
+      console.log('invalid Token');
       return;
     }
     client.data = {

@@ -12,9 +12,7 @@ async function handleFileUpload(
   formData.append("file", file);
   const response = await fetch(`/api/users/${userId}/update-profile-picture`, {
     method: "PUT",
-    headers: {
-      Authorization: "Bearer " + localStorage.getItem("access_token"),
-    },
+    credentials: "same-origin",
     body: formData,
   });
   return response.ok ? true : false;
