@@ -112,20 +112,22 @@ export default function UserEntity(props: {
           >
             <h3 className={textStyles.laquer}>profil</h3>
           </Link>
-          <article
-            className={styles.buttonEntity}
-            onClick={() => {
-              console.error("Clicked new conversation button");
-              dispatch(
-                OpenConversation({
-                  userId: props.user.id,
-                  userName: props.user.name,
-                })
-              );
-            }}
-          >
-            <Image alt="message" src={Message} width={30} height={30} />
-          </article>
+          {UserState.id !== props.user.id ? (
+            <article
+              className={styles.buttonEntity}
+              onClick={() => {
+                console.error("Clicked new conversation button");
+                dispatch(
+                  OpenConversation({
+                    userId: props.user.id,
+                    userName: props.user.name,
+                  })
+                );
+              }}
+            >
+              <Image alt="message" src={Message} width={30} height={30} />
+            </article>
+          ) : null}
           {UserState.id !== props.user.id ? (
             <Link
               href={""}
