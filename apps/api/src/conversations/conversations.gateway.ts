@@ -33,6 +33,7 @@ import { UsersService } from '../users/users.service';
 import { instanceToPlain } from 'class-transformer';
 import { BlockUserDto } from './block-user.dto';
 import { invitationDto } from './dtos/invitation.dto';
+import getCookie from 'src/common/helpers/getCookie';
 
 @UseFilters(HttpExceptionTransformationFilter)
 @UsePipes(new ValidationPipe())
@@ -51,7 +52,7 @@ export class ConversationsGateway implements OnGatewayConnection {
 
   async handleConnection(client: Socket): Promise<string | void> {
     console.error('Someone is trying to connect');
-    const token = client.handshake.headers.cookie?.split('=')[1];
+    const token = getCookie(client, "access_token");
     if (!token) {
       client.disconnect();
       console.log('No Authorization cookie found');
