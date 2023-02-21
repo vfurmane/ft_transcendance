@@ -261,6 +261,10 @@ export class AuthController {
     @Body() changePasswordDto: ChangePasswordDto,
     @User() user: UserEntity,
   ): Promise<{ message: string }> {
+    if (user.password === null)
+      throw new BadRequestException(
+        'You are authenticated using OAuth2, you cannot change your password',
+      );
     if (
       changePasswordDto.new_password !== changePasswordDto.confirm_new_password
     )

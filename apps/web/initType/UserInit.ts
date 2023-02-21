@@ -7,4 +7,5 @@ export const initUser = {
   rank: 0,
   level: 0,
   tfaSetup: false,
+  isOauth: true,
 };

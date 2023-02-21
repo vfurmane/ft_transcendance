@@ -75,6 +75,7 @@ export interface Userfront {
   rank: number;
   level: number;
   tfaSetup: boolean;
+  isOauth: boolean;
 }
 
 export interface FriendshipRequestStatus {
