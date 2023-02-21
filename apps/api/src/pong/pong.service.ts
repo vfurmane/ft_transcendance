@@ -88,7 +88,7 @@ export class PongService {
     return false;
   }
 
-  async getGame(gameId: string): Promise<{game : GameEntityFront, players: (Userfront | undefined)[]}> {
+  async getGame(gameId: string): Promise<GameEntityFront> {
     const game = await this.gamesRepository.findOne({
       where: { id: gameId },
       relations: { opponents: { user: true } },
@@ -103,11 +103,15 @@ export class PongService {
       }),
     );
     const playersIds = this.games.get(gameId)![1].map(e => e.id);
-    console.log(playersIds);
-    const players = playersIds.map(e => opponentsFront.find(el => el.user.id === e)?.user).filter(e => typeof e !== 'undefined');
-    console.log(players);
-    
-    return {game : { ...game, opponents: opponentsFront }, players: players};
+    const players : Userfront[] = [];
+    for (let i = 0; i < playersIds.length; i++)
+    {
+      const player = opponentsFront.find(e => e.user.id === playersIds[i]);
+      if (player)
+        players.push(player.user);
+    }
+
+    return { ...game, opponents: players.map(e => {return {user : e}})};
   }
 
   static getGameModeDetails(mode: GameMode): GameModeDetails {

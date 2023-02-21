@@ -165,7 +165,7 @@ export default function PingPong(): JSX.Element {
         game={{
           life: Game.live,
           score: Game.scoreMax,
-          numOfPlayers: users.length,
+          numOfPlayers: usersGame.length,
         }}
       />
     );
@@ -230,7 +230,7 @@ export default function PingPong(): JSX.Element {
           //console.log('----------------someone mark point');
           const indexWin = indexHurt !== 0 ? 0 : 1;
           const life = Number(newMiniProfilArray[indexWin].props.life);
-          const score = Number(newMiniProfilArray[indexWin].props.score) + 1;
+          const score = Game.live - Number(newMiniProfilArray[indexHurt].props.life);
           newMiniProfilArray[indexWin] = changeScoreOrLife(
             indexWin,
             life,
@@ -250,13 +250,11 @@ export default function PingPong(): JSX.Element {
       websockets.pong.emit(
         "subscribe_game",
         { id: router.query.id },
-        (game: GameEntityFront, players : User[]) => {
+        (game: GameEntityFront) => {
           setPrintButton(false);
-          //let tmp = game.opponents.map((opponent) => opponent.user);
-          //usersRef.current = game.opponents.map((opponent) => opponent.user);
-          console.log(players);
-          let tmp = players;
-          usersRef.current = players;
+          let tmp = game.opponents.map((opponent) => opponent.user);
+          usersRef.current = game.opponents.map((opponent) => opponent.user);
+  
           //console.log('----------------in first useEffect');
           setUsersGame(usersRef.current);
           tmp = rotate(tmp);
