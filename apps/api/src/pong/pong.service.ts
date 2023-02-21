@@ -17,6 +17,7 @@ import {
   GameMode,
   Opponent,
   User,
+  Userfront,
 } from 'types';
 import { Game } from './game.service';
 
@@ -87,7 +88,7 @@ export class PongService {
     return false;
   }
 
-  async getGame(gameId: string): Promise<GameEntityFront> {
+  async getGame(gameId: string): Promise<{game : GameEntityFront, players: (Userfront | undefined)[]}> {
     const game = await this.gamesRepository.findOne({
       where: { id: gameId },
       relations: { opponents: { user: true } },
@@ -101,8 +102,12 @@ export class PongService {
         };
       }),
     );
-
-    return { ...game, opponents: opponentsFront };
+    const playersIds = this.games.get(gameId)![1].map(e => e.id);
+    console.log(playersIds);
+    const players = playersIds.map(e => opponentsFront.find(el => el.user.id === e)?.user).filter(e => typeof e !== 'undefined');
+    console.log(players);
+    
+    return {game : { ...game, opponents: opponentsFront }, players: players};
   }
 
   static getGameModeDetails(mode: GameMode): GameModeDetails {

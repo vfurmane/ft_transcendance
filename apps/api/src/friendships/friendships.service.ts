@@ -48,7 +48,7 @@ export class FriendshipsService {
       },
     });
     if (!target) throw new NotFoundException('Unknown user');
-    if (targetFriend) return this.update(target, currentUser.id);
+    if (targetFriend) return this.update(currentUser, target.id);
     const newFriendship = new friendshipsEntity();
     newFriendship.initiator = currentUser;
     newFriendship.target = target;
@@ -134,10 +134,13 @@ export class FriendshipsService {
         },
       },
     });
+    console.log(friendContract);
     if (friendContract) {
+      console.log('fiend');
       if (friendContract.accepted === true) return true;
       friendContract.accepted = true;
       this.friendshipsRepository.save(friendContract);
+      console.log('save');
       return true;
     }
     return false;

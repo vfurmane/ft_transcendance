@@ -246,13 +246,17 @@ export default function PingPong(): JSX.Element {
 
   useEffect(() => {
     if (websockets.pong?.connected) {
+
       websockets.pong.emit(
         "subscribe_game",
         { id: router.query.id },
-        (game: GameEntityFront) => {
+        (game: GameEntityFront, players : User[]) => {
           setPrintButton(false);
-          let tmp = game.opponents.map((opponent) => opponent.user);
-          usersRef.current = game.opponents.map((opponent) => opponent.user);
+          //let tmp = game.opponents.map((opponent) => opponent.user);
+          //usersRef.current = game.opponents.map((opponent) => opponent.user);
+          console.log(players);
+          let tmp = players;
+          usersRef.current = players;
           //console.log('----------------in first useEffect');
           setUsersGame(usersRef.current);
           tmp = rotate(tmp);

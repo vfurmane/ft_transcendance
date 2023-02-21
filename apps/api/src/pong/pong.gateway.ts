@@ -277,15 +277,17 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
   async subscribeGame(
     @ConnectedSocket() client: Socket,
     @MessageBody() subscribedGameDto: SubscribedGameDto,
-  ): Promise<GameEntityFront> {
+  ): Promise<{game: GameEntityFront, players: (Userfront | undefined)[]}> {
     client.data.room = subscribedGameDto.id;
     const game = await this.pongService.getGame(subscribedGameDto.id);
-    client.data.position = game.opponents.findIndex(
+    client.data.position = game.game.opponents.findIndex(
       (opponent) => opponent.user.id === client.data.id,
     );
     client.join(`game_${subscribedGameDto.id}`);
     return this.pongService.getGame(subscribedGameDto.id);
   }
+
+
 
   @SubscribeMessage('launch')
   async launch(@ConnectedSocket() client: Socket) {
