@@ -32,7 +32,7 @@ export class AppGateway {
   ) {}
 
   async handleConnection(client: Socket): Promise<void> {
-    const token = getCookie(client, "access_token");
+    const token = getCookie(client, 'access_token');
     if (!token) {
       client.disconnect();
       return;

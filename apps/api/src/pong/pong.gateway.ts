@@ -35,7 +35,7 @@ import { JoinQueueDto } from './join-queue.dto';
 import { UsersService } from 'src/users/users.service';
 import { instanceToPlain, TransformInstanceToPlain } from 'class-transformer';
 import { InviteUserDto } from './invite-user.dto';
-import getCookie from '../common/helpers/getCookie'
+import getCookie from '../common/helpers/getCookie';
 
 @UsePipes(new ValidationPipe())
 @UseInterceptors(ClassSerializerInterceptor)
@@ -58,7 +58,7 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   async handleConnection(client: Socket): Promise<void | string> {
     console.log('SOMEBODY IS TRYING TO CONNECT');
-    const token = getCookie(client, "access_token");
+    const token = getCookie(client, 'access_token');
     if (!token) {
       client.disconnect();
       console.log('No Authorization cookie found');
@@ -342,6 +342,17 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
         }),
       );
     }
+    const lead = this.pongService.getFirstUserOfGameModeQueue(
+      GameMode.BATTLE_ROYALE,
+    );
+    if (lead !== undefined) {
+      this.server
+        .in(`user_${lead.id}`)
+        .emit(
+          'lead',
+          this.pongService.getLengthOfGameModeQueue(GameMode.BATTLE_ROYALE),
+        );
+    }
   }
 
   @SubscribeMessage('leave_queue')
@@ -350,6 +361,17 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
     if (!user) return;
     this.pongService.leave(user);
     this.logger.log(`'${user.id}' (${user.name}) has left queue`);
+    const lead = this.pongService.getFirstUserOfGameModeQueue(
+      GameMode.BATTLE_ROYALE,
+    );
+    if (lead !== undefined) {
+      this.server
+        .in(`user_${lead.id}`)
+        .emit(
+          'lead',
+          this.pongService.getLengthOfGameModeQueue(GameMode.BATTLE_ROYALE),
+        );
+    }
   }
 
   @SubscribeMessage('invite')
