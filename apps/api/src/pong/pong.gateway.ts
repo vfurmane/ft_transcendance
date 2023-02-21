@@ -85,8 +85,9 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
           if (user.id === client.data.id) {
             client.data.room = key;
             client.data.position = value[1].indexOf(user);
-            client.join(key);
+            client.join(`game_${key}`);
             console.log('Reconnected to the game !');
+            this.server.in(`user_${client.data.id}`).emit('replace', `/pingPong/${key}`);
             return 'Connection restored';
           }
         });
