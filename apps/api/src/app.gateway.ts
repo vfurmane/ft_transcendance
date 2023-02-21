@@ -10,7 +10,6 @@ import {
   CACHE_MANAGER,
   Inject,
   Logger,
-  UnauthorizedException,
   UseFilters,
 } from '@nestjs/common';
 import { Cache } from 'cache-manager';
