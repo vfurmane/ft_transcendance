@@ -529,9 +529,7 @@ export default function PingPong(): JSX.Element {
         </div>
       ) : (
         <div className={styles.afterGameContainer}>
-          <h1 className={textStyles.saira + " " + styles.title}>
-            Game Over <br></br> You {win ? "win" : "loose"} this game !
-          </h1>
+          <h1 className={textStyles.saira + " " + styles.title}>Game Over</h1>
           <div className={styles.tableContainer}>
             <table>
               <thead>
