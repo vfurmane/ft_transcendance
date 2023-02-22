@@ -1,7 +1,6 @@
-import { IsUUID, IsNotEmpty } from 'class-validator';
+import { IsNotEmpty } from 'class-validator';
 
 export class InviteUserDto {
-  @IsUUID()
   @IsNotEmpty()
   id!: string;
 }
