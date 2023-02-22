@@ -13,6 +13,8 @@ import textStyles from "styles/text.module.scss";
 import styles from "styles/home.module.scss";
 import { useWebsocketContext } from "../components/Websocket";
 import { WatchGame } from "../components/WatchGame";
+import refreshIcon from "../public/refresh-icon.svg";
+import Image from "next/image";
 
 function Home(): JSX.Element {
   const friendListRef = useRef<JSX.Element[]>([]);
@@ -24,6 +26,7 @@ function Home(): JSX.Element {
   const [indexOfUser, setIndexOfUser] = useState(-1);
   const [friendList, setFriendList] = useState<JSX.Element[]>([]);
   const [featuringList, setFeaturingList] = useState<JSX.Element[]>([]);
+  const [refreshFriendsList, setRefreshFriendsList] = useState(true);
 
   const prevIndexOfUserRef = useRef(-1);
   const prevSetterUsermenuRef = useRef(setterInit);
@@ -171,7 +174,7 @@ function Home(): JSX.Element {
             error.message
         );
       });
-  }, [handleClickUserMenu]);
+  }, [handleClickUserMenu, refreshFriendsList]);
 
   return (
     <div onClick={(): void => close()} id={"top"}>
@@ -234,6 +237,20 @@ function Home(): JSX.Element {
         <div className="row">
           <div className="col-10 offset-1 col-lg-4">
             <div className="card">
+              <Image
+                alt="refresh-icon"
+                src={refreshIcon}
+                width={25}
+                height={25}
+                onClick={(event): void => {
+                  setRefreshFriendsList(!refreshFriendsList);
+                  const target = event.target as HTMLElement;
+                  target.classList.add("spin");
+                  setTimeout(() => {
+                    target.classList.remove("spin");
+                  }, 1000);
+                }}
+              />
               <List title="Friends List" list={friendList} />
             </div>
           </div>
