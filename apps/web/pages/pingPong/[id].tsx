@@ -18,7 +18,6 @@ import { setUserGameId } from "../../store/UserSlice";
 import { relative } from "path";
 import { Loading } from "../../components/Loading";
 
-
 export default function PingPong(): JSX.Element {
   const router = useRouter();
   const [users, setUsers] = useState<User[]>([]);
@@ -60,10 +59,10 @@ export default function PingPong(): JSX.Element {
 
   const dispatch = useDispatch();
   useEffect(() => {
-    if (endGame){
-      dispatch(setUserGameId(undefined))
+    if (endGame) {
+      dispatch(setUserGameId(undefined));
       setGame(null);
-    };
+    }
 
     if (openOverlay) dispatch(setUserGameId(undefined));
   }, [dispatch, router.query.id, endGame, openOverlay]);
@@ -326,8 +325,6 @@ export default function PingPong(): JSX.Element {
       //console.log(usersGame);
       setGame(new Game(usersGame.length, index, changeLife));
       usersGameRef.current = usersGame;
-      console.log('------------setGame');
-      console.log(usersGame.length);
     }
   }, [users, usersGame, usersRotate, changeLife, dispatch]);
 
@@ -336,10 +333,8 @@ export default function PingPong(): JSX.Element {
       if (websockets.pong?.connected && users.length > 1 && game) {
         game?.setWebsocket(websockets.pong);
         game?.init(canvasRef);
-        console.log('------------initGame');
-        console.log(usersGame.length);
-        console.log(game.player.length);
-        if (game && usersGame.length === game.player.length) intervalRef.current = setInterval(handleResize, 4, game);
+        if (game && usersGame.length === game.player.length)
+          intervalRef.current = setInterval(handleResize, 4, game);
       }
     }
     return (): void => {

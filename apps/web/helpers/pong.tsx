@@ -63,7 +63,6 @@ class Game {
       Game.position = 0;
     }
     Game.changeLife = changeLife;
-    console.log('constructeur game');
   }
 
   setWebsocket(socket: Socket<DefaultEventsMap, DefaultEventsMap>): void {
