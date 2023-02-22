@@ -45,6 +45,8 @@ services:
       POSTGRES_USER: ${DATABASE_USERNAME}
       POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
       POSTGRES_PORT: ${DATABASE_PORT}
+    volumes:
+      - postgres-database:/var/lib/postgresql/data
     healthcheck:
       test:
         [
@@ -74,3 +76,6 @@ services:
 
 networks:
   app:
+
+volumes:
+  postgres-database:
