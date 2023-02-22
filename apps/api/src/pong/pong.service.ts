@@ -115,6 +115,19 @@ export class PongService {
     return this.queues[GameMode[mode as string as keyof typeof GameMode]];
   }
 
+  getUserPositionInGameModeQueue(user: User, mode: GameMode): number {
+    const queue = this.getGameModeQueue(mode);
+    return queue.indexOf(user);
+  }
+
+  getFirstUserOfGameModeQueue(mode: GameMode): User {
+    return this.getGameModeQueue(mode)[0];
+  }
+
+  getLengthOfGameModeQueue(mode: GameMode): number {
+    return this.getGameModeQueue(mode).length;
+  }
+
   userIsInQueue(user: User, mode?: GameMode): GameMode | null {
     if (mode)
       return this.getGameModeQueue(mode).find(
