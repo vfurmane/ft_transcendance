@@ -22,6 +22,7 @@ import addCross from "../public/addCross.png";
 import CreateConversation from "./CreateConversation";
 import SearchChannel from "./SearchChannel";
 import Search from "../public/Search.png";
+import { selectUserState } from "../store/UserSlice";
 
 interface ChatProps {
   conversation: { userId: string; userName: string };
@@ -32,6 +33,7 @@ export default function Chat({
   conversation,
   updateUnreadMessage,
 }: ChatProps): JSX.Element {
+  const userState = useSelector(selectUserState);
   const [conversationSelected, selectConversation] =
     useState<ConversationEntity | null>(null);
   const [conversationList, setConversationList] = useState<
@@ -73,9 +75,21 @@ export default function Chat({
     }
   }, [conversationToOpen]);
 
+  const kickMeImFamous = (kicked: {
+    conversationID: string;
+    userId: string | undefined;
+  }) => {
+    if (
+      kicked.userId !== undefined &&
+      kicked.userId === userState.id
+    ) {
+      selectConversation(null);
+      setTimeout(refreshConversations, 25)
+    }
+  };
+
   useEffect(() => {
     setLoading(true);
-    console.error("Conversation selected: ", conversationSelected);
     if (newConversation.userId.length) {
       websockets.conversations?.emit(
         "DMExists",
@@ -99,12 +113,13 @@ export default function Chat({
           "getConversations",
           (conversationDetails: ConversationsDetails) => {
             setConversationList(() => conversationDetails.conversations);
-            console.error(conversationDetails)
+            console.error(conversationDetails);
             setLoading(false);
           }
         );
         websockets.conversations.on("newConversation", addNewConversation);
         websockets.conversations.on("newMessage", newUnread);
+        websockets.conversations.on("kickedUser", kickMeImFamous);
       }
     } else {
       setLoading(false);
@@ -131,7 +146,7 @@ export default function Chat({
           className={styles.backButton}
           onClick={(e) => {
             setCreateConversation(false);
-            setSearchChannel(false)
+            setSearchChannel(false);
           }}
         >
           <Image alt="back" src={back} />
@@ -144,30 +159,27 @@ export default function Chat({
         </section>
       </>
     );
-  }
-  else if (searchChannel === true)
-  {
+  } else if (searchChannel === true) {
     return (
       <>
         <article
           className={styles.backButton}
           onClick={(e) => {
             setCreateConversation(false);
-            setSearchChannel(false)
+            setSearchChannel(false);
           }}
         >
           <Image alt="back" src={back} />
         </article>
         <section className={styles.conversationsContainer}>
-          < SearchChannel
+          <SearchChannel
             changeConversation={selectConversation}
             closeSearchChannel={setSearchChannel}
           />
         </section>
       </>
     );
-  }
-  else if (newConversation.userId.length || conversationSelected !== null) {
+  } else if (newConversation.userId.length || conversationSelected !== null) {
     return (
       <>
         <article
@@ -186,6 +198,15 @@ export default function Chat({
             }
             conversation={
               newConversation.userId.length ? null : conversationSelected
+            }
+            name={
+              conversationSelected
+                ? conversationSelected.groupConversation
+                  ? conversationSelected.name
+                  : conversationSelected.conversationRoles?.find(
+                      (role) => role.user.id !== userState.id
+                    )?.user.name
+                : newConversation.userName
             }
             selectConversation={selectConversation}
             updateUnreadMessage={updateUnreadMessage}
@@ -210,23 +231,21 @@ export default function Chat({
         title="Search a channel"
         onClick={(e) => {
           setSearchChannel(true);
-        }} className={styles.searchBar}
+        }}
+        className={styles.searchBar}
       >
         JOIN
-        <Image
-              alt="search"
-              src={Search}
-              className={styles.logoSearchBar}
-            />
+        <Image alt="search" src={Search} className={styles.logoSearchBar} />
       </article>
       <section className={styles.conversationsContainer}>
         {conversationList.length ? (
           conversationList.map((conversation) => (
-              <Conversation
-                key={conversation.conversation.id}
-                conversation={conversation} selectConversation={selectConversation}
-                setConversationList={setConversationList}
-              />
+            <Conversation
+              key={conversation.conversation.id}
+              conversation={conversation}
+              selectConversation={selectConversation}
+              setConversationList={setConversationList}
+            />
           ))
         ) : (
           <article>No conversations yet</article>

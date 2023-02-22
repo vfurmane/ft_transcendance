@@ -16,28 +16,29 @@ export default function Message(props: MessageProps): JSX.Element {
   const [requirePassword, setRequirePassword] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
   const [success, setSuccess] = useState<string>("");
-  const feedbackRef = useRef<HTMLElement>(null);
+  const feedbackRef = useRef<HTMLDivElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
   const websockets = useWebsocketContext();
+  const selfMessage = useRef(props.message.sender && props.message.sender.id !== userState.id)
 
   if (props.message.system_generated) {
     if (!props.message.is_invitation)
       return (
-        <section
-          className={styles.containerSystemMessage}
-        >
+        <section className={styles.containerSystemMessage}>
           <p className={styles.messageContent}>{props.message.content}</p>
         </section>
       );
-    return (
-      <>
+    if (props.message.invitation_type === InvitationEnum.CONVERSATION) {
+      return (
         <article
-          className={`${styles.invitationMessage} ${styles.messageContent}`}
+          className={`${selfMessage.current ? styles.otherInvitationMessage : styles.invitationMessage} ${styles.messageContent}`}
         >
-          {props.message.invitation_type === InvitationEnum.CONVERSATION ? (
-            <p>
-              You are invited to join {props.message.content}, click{" "}
-              <span
+          <p>
+            You are invited to join the conversation {props.message.content}
+            </p>
+            {!requirePassword ? (
+              <button
+                className={ styles.joinButton }
                 onClick={(e) => {
                   setError("");
                   setSuccess("");
@@ -76,59 +77,60 @@ export default function Message(props: MessageProps): JSX.Element {
                   );
                 }}
               >
-                here to join
-              </span>
-            </p>
-          ) : (
-            <p>Invitation to play Pong</p>
-          )}
-        </article>
-        {requirePassword ? (
-          <>
-            <article>Please enter password: </article>
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                setError("");
-                if (!websockets.conversations?.connected) {
-                  setError("Connection error, please try again later");
-                  return;
-                }
-                websockets.conversations.timeout(1000).emit(
-                  "joinConversation",
-                  {
-                    id: props.message.target,
-                    password: passwordRef.current?.value,
-                  },
-                  (err: any, conversation: Conversation) => {
-                    if (err) {
-                      setError("Could not join conversation, check password");
+                JOIN
+              </button>
+            ) : (
+              <>
+                <form className={ styles.invitationForm }
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    setError("");
+                    if (!websockets.conversations?.connected) {
+                      setError("Connection error, please try again later");
                       return;
                     }
-                    setSuccess(`Successfully joined ${props.message.content}`);
-                    setRequirePassword(false);
-                  }
-                );
-              }}
-            >
-              <input
-                type="password"
-                placeholder="Enter password"
-                name="password"
-                ref={passwordRef}
-              />
-              <input type="submit" value="submit" />
-            </form>
-          </>
-        ) : (
-          <></>
-        )}
-        <article ref={feedbackRef}>
-          {error.length ? error : <></>}
-          {success.length ? success : <></>}
+                    websockets.conversations.timeout(1000).emit(
+                      "joinConversation",
+                      {
+                        id: props.message.target,
+                        password: passwordRef.current?.value,
+                      },
+                      (err: any, conversation: Conversation) => {
+                        if (err) {
+                          setError(
+                            "Could not join conversation, check password"
+                          );
+                          return;
+                        }
+                        setSuccess(
+                          `Successfully joined ${props.message.content}`
+                        );
+                        setRequirePassword(false);
+                      }
+                    );
+                  }}
+                >
+                  <input
+                  className={ styles.passwordField }
+                    type="password"
+                    placeholder="Enter password"
+                    name="password"
+                    ref={passwordRef}
+                  />
+                  <input className={ styles.joinButton } type="submit" value="JOIN" />
+                </form>
+              </>
+            )}
+            <div ref={feedbackRef}>
+              {error.length ? <div className={ styles.error }>{error}</div> : <></>}
+              {success.length ?<div className={ styles.success }>{success}</div> : <></>}
+            </div>
+          
         </article>
-      </>
-    );
+      );
+    } else {
+      return <p>Invitation to play Pong</p>;
+    }
   } else if (props.message.sender && props.message.sender.id !== userState.id) {
     return (
       <article className={styles.containerOtherMessage}>

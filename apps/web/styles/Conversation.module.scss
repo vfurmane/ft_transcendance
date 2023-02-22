@@ -12,15 +12,14 @@
     padding: 5px 0 5px 10px;
     // padding-left: 10px;
     width: 100%;
-    overflow-y:hidden;
+    overflow-y: hidden;
     white-space: pre-wrap;
     overflow-wrap: break-word;
     word-wrap: break-word;
     hyphens: auto;
     margin-bottom: 0;
   }
-  aside 
-  {
+  aside {
     width: 100%;
     height: 100%;
     display: flex;
@@ -46,15 +45,14 @@
     padding: 5px 0 5px 10px;
     // padding-left: 10px;
     width: 100%;
-    overflow-y:hidden;
+    overflow-y: hidden;
     white-space: pre-wrap;
     overflow-wrap: break-word;
     word-wrap: break-word;
     hyphens: auto;
     margin-bottom: 0;
   }
-  aside 
-  {
+  aside {
     width: 100%;
     height: 100%;
     display: flex;
@@ -66,9 +64,8 @@
   }
 }
 
-.containerConversation:hover
-{
+.containerConversation:hover {
   cursor: pointer;
   border: solid 1px rgba(234, 196, 53, 0.3);
-  transform: translateY(-6px)
+  transform: translateY(-6px);
 }

@@ -29,8 +29,7 @@ export default function ChatBar(): JSX.Element {
     setUnreadMessages((unreadMessages) => unreadMessages + 1);
   };
 
-  useEffect(() =>
-  {
+  useEffect(() => {
     if (websockets.conversations?.connected) {
       websockets.conversations.emit(
         "getUnread",
@@ -39,7 +38,7 @@ export default function ChatBar(): JSX.Element {
         }
       );
     }
-  }, [ BlockedUsersState ])
+  }, [BlockedUsersState]);
 
   useEffect(() => {
     if (conversationToOpen.userId.length) {

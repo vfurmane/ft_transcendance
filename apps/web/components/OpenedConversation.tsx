@@ -26,6 +26,7 @@ import { selectUserState } from "../store/UserSlice";
 interface OpenedConversationProps {
   newConversation: { userId: string; userName: string } | null;
   conversation: ConversationEntity | null;
+  name: string | undefined;
   selectConversation: Dispatch<SetStateAction<ConversationEntity | null>>;
   updateUnreadMessage: Dispatch<SetStateAction<number>>;
   updateConversationList: Dispatch<SetStateAction<ConversationWithUnread[]>>;
@@ -50,9 +51,44 @@ export default function OpenedConversation(
   const [menuVisibility, setMenuVisibility] = useState<boolean>(false);
   const dispatch = useDispatch();
 
-  const amIBanned = (banned : { conversationID : string, userId: string | undefined }) => 
-  {if (banned.conversationID === props.conversation?.id && banned.userId !== undefined && banned.userId === userState.id)
-   {   props.selectConversation(null)}
+  const updateConvList = () =>
+  {
+    websockets.conversations?.emit(
+      "getConversations",
+      (conversationDetails: ConversationsDetails) => {
+        props.updateConversationList(
+          conversationDetails.conversations
+        );
+      }
+    )
+  }
+
+  const amIBanned = (banned: {
+    conversationID: string;
+    userId: string | undefined;
+  }) => {
+    if (
+      banned.conversationID === props.conversation?.id &&
+      banned.userId !== undefined &&
+      banned.userId === userState.id
+    ) {
+      props.selectConversation(null);
+      setTimeout(updateConvList, 50)
+    }
+  };
+
+  const amIKicked = (kicked: {
+    conversationID: string;
+    userId: string | undefined;
+  }) => {
+    if (
+      kicked.conversationID === props.conversation?.id &&
+      kicked.userId !== undefined &&
+      kicked.userId === userState.id
+    ) {
+      props.selectConversation(null);
+      setTimeout(updateConvList, 50)
+    }
   };
 
   const addNewMessage = (message: any) => {
@@ -91,6 +127,7 @@ export default function OpenedConversation(
         hydrateMessages();
         websockets.conversations.on("newMessage", addNewMessage);
         websockets.conversations.on("bannedUser", amIBanned);
+        websockets.conversations.on("kickedUser", amIKicked);
         socketConnected.current = true;
       } else if (websockets.conversations?.disconnected) {
         socketConnected.current = false;
@@ -113,17 +150,10 @@ export default function OpenedConversation(
                 "getUnread",
                 ({ totalNumberOfUnreadMessages }: unreadMessagesResponse) => {
                   props.updateUnreadMessage(totalNumberOfUnreadMessages);
-                  websockets.conversations?.emit(
-                    "getConversations",
-                    (conversationDetails: ConversationsDetails) => {
-                      props.updateConversationList(
-                        conversationDetails.conversations
-                      );
-                    }
-                  );
+                  updateConvList()
                 }
               );
-            }, 25);
+            }, 50);
             return;
           });
       }
@@ -135,91 +165,92 @@ export default function OpenedConversation(
   }, [messages, scroll]);
 
   return (
-      <section className={styles.openedConversationContainer}>
-          <ConversationControls
-            conversation={currentConversation}
-            newConversation={newConversation}
-            visibility={menuVisibility}
-            setVisibility={setMenuVisibility}
+    <section className={styles.openedConversationContainer}>
+      <ConversationControls
+        conversation={currentConversation}
+        newConversation={newConversation}
+        visibility={menuVisibility}
+        setVisibility={setMenuVisibility}
+        name={props.name}
+      />
+      <section className={styles.messages}>
+        {messages.map((currentMessage) => (
+          <Message
+            message={currentMessage}
+            key={currentMessage.id}
+            group={currentConversation?.groupConversation ? true : false}
           />
-        <section className={styles.messages}>
-          {messages.map((currentMessage) => (
-            <Message
-              message={currentMessage}
-              key={currentMessage.id}
-              group={currentConversation?.groupConversation ? true : false}
-            />
-          ))}
-          <article ref={lastElement}></article>
-        </section>
-        <section className={styles.sendForm}>
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              const message = (
-                e.currentTarget.elements.namedItem(
-                  "messageContent"
-                ) as HTMLTextAreaElement
-              ).value;
-              console.error(message);
-              if (!message || !message.length) return;
-              if (!currentConversation) {
-                console.error("Creating new conversation");
-                let createdConversation!: ConversationEntity;
-                websockets.conversations?.emit(
-                  "createConversation",
-                  {
-                    groupConversation: false,
-                    participant: newConversation?.userId,
-                  },
-                  (conversation: any) => {
-                    createdConversation = conversation;
-                    setCurrentConversation(createdConversation);
-                    websockets.conversations?.emit(
-                      "postMessage",
-                      { id: conversation.id, content: message },
-                      (message: MessageEntity) => {
-                        setMessages((prev) => [...prev, message]);
-                      }
-                    );
-                    setNewConversation(null);
-                  }
-                );
-              } else {
-                websockets.conversations?.emit(
-                  "postMessage",
-                  { id: currentConversation.id, content: message },
-                  (message: MessageEntity) => {
-                    setMessages([...messages, message]);
-                    setScroll(true);
-                  }
-                );
-              }
-              (
-                e.currentTarget.elements.namedItem(
-                  "messageContent"
-                ) as HTMLTextAreaElement
-              ).value = "";
-            }}
-            ref={formRef}
-          >
-            <textarea
-              className={styles.sendMessageField}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey) {
-                  e.preventDefault();
-                  formRef.current?.requestSubmit();
+        ))}
+        <article ref={lastElement}></article>
+      </section>
+      <section className={styles.sendForm}>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            const message = (
+              e.currentTarget.elements.namedItem(
+                "messageContent"
+              ) as HTMLTextAreaElement
+            ).value;
+            console.error(message);
+            if (!message || !message.length) return;
+            if (!currentConversation) {
+              console.error("Creating new conversation");
+              let createdConversation!: ConversationEntity;
+              websockets.conversations?.emit(
+                "createConversation",
+                {
+                  groupConversation: false,
+                  participant: newConversation?.userId,
+                },
+                (conversation: any) => {
+                  createdConversation = conversation;
+                  setCurrentConversation(createdConversation);
+                  websockets.conversations?.emit(
+                    "postMessage",
+                    { id: conversation.id, content: message },
+                    (message: MessageEntity) => {
+                      setMessages((prev) => [...prev, message]);
+                      setNewConversation(null);
+                    }
+                  );
                 }
-              }}
-              name="messageContent"
-              id="messageContent"
-              cols={42}
-              rows={10}
-            ></textarea>
-            <input type="submit" value="Send" />
-          </form>
-        </section>
-        {menuVisibility && currentConversation ? (
+              );
+            } else {
+              websockets.conversations?.emit(
+                "postMessage",
+                { id: currentConversation.id, content: message },
+                (message: MessageEntity) => {
+                  setMessages([...messages, message]);
+                  setScroll(true);
+                }
+              );
+            }
+            (
+              e.currentTarget.elements.namedItem(
+                "messageContent"
+              ) as HTMLTextAreaElement
+            ).value = "";
+          }}
+          ref={formRef}
+        >
+          <textarea
+            className={styles.sendMessageField}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                formRef.current?.requestSubmit();
+              }
+            }}
+            name="messageContent"
+            id="messageContent"
+            cols={42}
+            rows={10}
+          ></textarea>
+          <input type="submit" value="Send" />
+        </form>
+      </section>
+      {menuVisibility && currentConversation ? (
         <section className={styles.chatParams}>
           <ChatParams
             currentConversation={currentConversation}
@@ -229,6 +260,6 @@ export default function OpenedConversation(
       ) : (
         <></>
       )}
-      </section>
+    </section>
   );
 }

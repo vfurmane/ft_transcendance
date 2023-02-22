@@ -20,10 +20,9 @@ export default function CreateConversation(
   const websockets = useWebsocketContext();
 
   const newConversation = (err: any, conversation: ConversationEntity) => {
-    if (err)
-    {
-      setErrors(["Could not create conversation, please try again later"])
-      return
+    if (err) {
+      setErrors(["Could not create conversation, please try again later"]);
+      return;
     }
     props.changeConversation(conversation);
     props.closeCreator(false);
@@ -39,7 +38,7 @@ export default function CreateConversation(
       </section>
       <form
         onSubmit={(e) => {
-          let formErrors = false
+          let formErrors = false;
           setErrors([]);
           e.preventDefault();
           console.error("Submitting");
@@ -54,26 +53,22 @@ export default function CreateConversation(
               "confirm-password"
             ) as HTMLInputElement
           ).value;
-          if (!name.length)
-          {
+          if (!name.length) {
             setErrors((prev) => [...prev, "Group conversations need a name"]);
-            formErrors = true
+            formErrors = true;
           }
           if (password.length) {
-            if (!confirmedPassword.length)
-            {
+            if (!confirmedPassword.length) {
               setErrors((prev) => [...prev, "Please confirm password"]);
-              formErrors = true
-            }
-            else if (password !== confirmedPassword)
-            {
+              formErrors = true;
+            } else if (password !== confirmedPassword) {
               setErrors((prev) => [...prev, "Passwords do not match"]);
-              formErrors = true
+              formErrors = true;
             }
           }
-          if (formErrors)
-            return;
-          const isVisible = (e.currentTarget.elements.namedItem("visible") as HTMLInputElement
+          if (formErrors) return;
+          const isVisible = (
+            e.currentTarget.elements.namedItem("visible") as HTMLInputElement
           ).checked;
           if (!websockets.conversations?.connected) {
             setErrors((prev) => [
@@ -88,7 +83,7 @@ export default function CreateConversation(
                 name: name,
                 groupConversation: true,
                 password: password,
-                visible: isVisible
+                visible: isVisible,
               },
               newConversation
             );
@@ -98,7 +93,7 @@ export default function CreateConversation(
               {
                 name: name,
                 groupConversation: true,
-                visible: isVisible
+                visible: isVisible,
               },
               newConversation
             );
@@ -106,30 +101,48 @@ export default function CreateConversation(
         ref={formRef}
       >
         <section>
-        <input
-          autoFocus={true}
-          name="name"
-          placeholder="Conversation name"
-          type="text"
-          autoComplete="off"
-          className={styles.conversationName}
-        />
+          <input
+            autoFocus={true}
+            name="name"
+            placeholder="Conversation name"
+            type="text"
+            autoComplete="off"
+            className={styles.conversationName}
+          />
         </section>
-        <section className={ styles.visibilityBlock }>
-        <label htmlFor="visible">Publicly visible ?</label>
-        <input type="checkbox" name="visible" id="visible" value="visible" />
+        <section className={styles.visibilityBlock}>
+          <label htmlFor="visible">Publicly visible ?</label>
+          <input type="checkbox" name="visible" id="visible" value="visible" />
         </section>
-        <section className={ styles.passwordBlock }>
-        <label htmlFor="password">
-          Enter a password<br/>if you wish to protect your conversation
-        </label>
-        <input type="password" name="password" id="password" autoComplete="off" placeholder="Enter password" />
-        <input type="password" name="confirm-password" id="confirm-password" autoComplete="off" placeholder="Confirm password" />
+        <section className={styles.passwordBlock}>
+          <label htmlFor="password">
+            Enter a password
+            <br />
+            if you wish to protect your conversation
+          </label>
+          <input
+            type="password"
+            name="password"
+            id="password"
+            autoComplete="off"
+            placeholder="Enter password"
+          />
+          <input
+            type="password"
+            name="confirm-password"
+            id="confirm-password"
+            autoComplete="off"
+            placeholder="Confirm password"
+          />
         </section>
-        <section >
-        <input className={ styles.submit } type="submit" value="Create conversation" />
+        <section>
+          <input
+            className={styles.submit}
+            type="submit"
+            value="Create conversation"
+          />
         </section>
       </form>
-    </ section>
+    </section>
   );
 }
