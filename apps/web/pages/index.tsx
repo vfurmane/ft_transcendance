@@ -275,7 +275,7 @@ function Home(): JSX.Element {
         <div className="row">
           <div className="col-8 offset-2">
             <h3 className={`${styles.text} ${textStyles.laquer}`}>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit...
+              Lorem ipsum dolor sit amet, consectetur adipiscing elit...
             </h3>
           </div>
         </div>

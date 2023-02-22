@@ -133,9 +133,13 @@ export default function Matchmaking(): ReactElement {
         handleClickUserMenu={handleClickUserMenu}
       />
       <div className={styles.container}>
-        <h1 style={{marginBottom:'20px'}}>Waiting for an opponent...</h1>
+        <h1 style={{ marginBottom: "20px" }}>Waiting for an opponent...</h1>
         {MatchmakingState.gameMode === GameMode.BATTLE_ROYALE && isFirst ? (
-          <Button onClick={launch} danger>{`LAUNCH : ${numberOfPlayerinQueue - 1} player${numberOfPlayerinQueue - 1 > 1? 's' : ''} joined this game`}</Button>
+          <Button onClick={launch} danger>{`LAUNCH : ${
+            numberOfPlayerinQueue - 1
+          } player${
+            numberOfPlayerinQueue - 1 > 1 ? "s" : ""
+          } joined this game`}</Button>
         ) : (
           <></>
         )}
