@@ -58,6 +58,7 @@ export class TransformUserService {
         rank: 0,
         level: 0,
         tfaSetup: false,
+        isOauth: true,
       };
     return {
       id: userBack.id,
@@ -68,6 +69,7 @@ export class TransformUserService {
       rank: await this.#getRank(userBack.id),
       level: userBack.level,
       tfaSetup: userBack.tfa_setup,
+      isOauth: userBack.password === null,
     };
   }
 }

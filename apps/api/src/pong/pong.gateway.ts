@@ -135,6 +135,10 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
       } else {
         console.log('GAME ENDED');
         const sockets = await this.server.in(`game_${room}`).fetchSockets();
+        this.server.emit('game_end', {
+          id: room,
+          users: [],
+        } as GameStartPayload);
         this.server.in(`game_${room}`).emit('endGame');
         sockets.forEach((socket) => {
           socket.leave(`game_${room}`);
@@ -352,6 +356,17 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
         }),
       );
     }
+    const lead = this.pongService.getFirstUserOfGameModeQueue(
+      GameMode.BATTLE_ROYALE,
+    );
+    if (lead !== undefined) {
+      this.server
+        .in(`user_${lead.id}`)
+        .emit(
+          'lead',
+          this.pongService.getLengthOfGameModeQueue(GameMode.BATTLE_ROYALE),
+        );
+    }
   }
 
   @SubscribeMessage('leave_queue')
@@ -360,6 +375,17 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
     if (!user) return;
     this.pongService.leave(user);
     this.logger.log(`'${user.id}' (${user.name}) has left queue`);
+    const lead = this.pongService.getFirstUserOfGameModeQueue(
+      GameMode.BATTLE_ROYALE,
+    );
+    if (lead !== undefined) {
+      this.server
+        .in(`user_${lead.id}`)
+        .emit(
+          'lead',
+          this.pongService.getLengthOfGameModeQueue(GameMode.BATTLE_ROYALE),
+        );
+    }
   }
 
   @SubscribeMessage('invite')
