@@ -281,7 +281,7 @@ export default function PingPong(): JSX.Element {
 
     function catchKey(e: KeyboardEvent) {
       if (
-        ["Space", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].indexOf(
+        ["ArrowUp", "ArrowDown"].indexOf(
           e.code
         ) > -1
       ) {
@@ -314,11 +314,8 @@ export default function PingPong(): JSX.Element {
           function (e) {
             if (
               [
-                "Space",
                 "ArrowUp",
                 "ArrowDown",
-                "ArrowLeft",
-                "ArrowRight",
               ].indexOf(e.code) > -1
             ) {
               e.preventDefault();
