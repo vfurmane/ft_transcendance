@@ -82,7 +82,7 @@ export default function UserEntity(props: {
           { userId: props.user.id },
           (isGaming: boolean) => {
             console.log("RESPONSE : ", isGaming);
-            isGaming ? setStatus("gaming") : setStatus("online");
+            if (isGaming) setStatus("gaming");
           }
         );
       } else {
