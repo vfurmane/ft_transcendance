@@ -49,6 +49,7 @@ export default function PingPong(): JSX.Element {
 
   websockets.pong?.on("endGame", () => {
     setEndGame(true);
+    setOpenOverlay(false);
     setPrintButton(true);
     setGame(null);
   });
@@ -208,6 +209,7 @@ export default function PingPong(): JSX.Element {
           //console.log(newClassement);
           setClassement(newClassement);
           setEndGame(true);
+          setOpenOverlay(false);
           setPrintButton(true);
           return;
         }
@@ -230,7 +232,8 @@ export default function PingPong(): JSX.Element {
           //console.log('----------------someone mark point');
           const indexWin = indexHurt !== 0 ? 0 : 1;
           const life = Number(newMiniProfilArray[indexWin].props.life);
-          const score = Game.live - Number(newMiniProfilArray[indexHurt].props.life);
+          const score =
+            Game.live - Number(newMiniProfilArray[indexHurt].props.life);
           newMiniProfilArray[indexWin] = changeScoreOrLife(
             indexWin,
             life,
@@ -246,7 +249,6 @@ export default function PingPong(): JSX.Element {
 
   useEffect(() => {
     if (websockets.pong?.connected) {
-
       websockets.pong.emit(
         "subscribe_game",
         { id: router.query.id },
@@ -254,7 +256,7 @@ export default function PingPong(): JSX.Element {
           setPrintButton(false);
           let tmp = game.opponents.map((opponent) => opponent.user);
           usersRef.current = game.opponents.map((opponent) => opponent.user);
-  
+
           //console.log('----------------in first useEffect');
           setUsersGame(usersRef.current);
           tmp = rotate(tmp);
@@ -314,6 +316,8 @@ export default function PingPong(): JSX.Element {
         );
       }
       if (intervalRef.current) clearInterval(intervalRef.current);
+      console.error('------------------setGame');
+      console.error(usersGame.length);
       setGame(
         new Game(
           usersGame.length,

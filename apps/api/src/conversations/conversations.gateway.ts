@@ -52,7 +52,7 @@ export class ConversationsGateway implements OnGatewayConnection {
 
   async handleConnection(client: Socket): Promise<string | void> {
     console.error('Someone is trying to connect');
-    const token = getCookie(client, "access_token");
+    const token = getCookie(client, 'access_token');
     if (!token) {
       client.disconnect();
       console.log('No Authorization cookie found');

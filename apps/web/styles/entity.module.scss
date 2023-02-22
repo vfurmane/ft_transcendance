@@ -141,8 +141,7 @@
   transform: scale(1.2, 1);
 }
 
-.playerList
-{
+.playerList {
   display: flex;
   min-width: 10vw;
   min-height: 100vh;
@@ -154,6 +153,3 @@
 .playerList::-webkit-scrollbar {
   display: none;
 }
-
-
-

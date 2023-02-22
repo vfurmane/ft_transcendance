@@ -102,16 +102,19 @@ export class PongService {
         };
       }),
     );
-    const playersIds = this.games.get(gameId)![1].map(e => e.id);
-    const players : Userfront[] = [];
-    for (let i = 0; i < playersIds.length; i++)
-    {
-      const player = opponentsFront.find(e => e.user.id === playersIds[i]);
-      if (player)
-        players.push(player.user);
+    const playersIds = this.games.get(gameId)![1].map((e) => e.id);
+    const players: Userfront[] = [];
+    for (let i = 0; i < playersIds.length; i++) {
+      const player = opponentsFront.find((e) => e.user.id === playersIds[i]);
+      if (player) players.push(player.user);
     }
 
-    return { ...game, opponents: players.map(e => {return {user : e}})};
+    return {
+      ...game,
+      opponents: players.map((e) => {
+        return { user: e };
+      }),
+    };
   }
 
   static getGameModeDetails(mode: GameMode): GameModeDetails {

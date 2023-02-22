@@ -305,7 +305,7 @@ class Game {
           p3.x + wallPerp.x * this.ballWidth,
           p3.y + wallPerp.y * this.ballWidth
         );
-        if (this.player === undefined)
+        if (this.player[i] === undefined)
           racket.push(new Racket(i, [p0, p1, p2, p3], this.color[i]));
         else racket.push(new Racket(i, [p0, p1, p2, p3], this.player[i].color));
         Game.changeLife(i, player[i].hp, wall.length);
