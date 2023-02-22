@@ -10,6 +10,8 @@ import {
 } from "types";
 import ToggleCross from "../public/toggleCross.png";
 import { useWebsocketContext } from "./Websocket";
+import { Button } from "./Button";
+import styles from "../styles/openedConversation.module.scss";
 
 interface ConversationParticipantsProps {
   participant: ConversationRole;
@@ -59,8 +61,10 @@ export default function ConversationParticipant(
   if (!props.conversation.groupConversation)
     return (
       <article>
-        <Link href={`/profile/${props.participant.user.name}`}>
-          {props.participant.user.name}
+        <Link href={`/profile/${props.participant.user.name}`} style={{textDecoration:'none'}}>
+          <div style={{display: 'flex', justifyContent:'center', marginTop:'10px'}}>
+              <Button primary>Profil</Button>
+          </div>
         </Link>
       </article>
     );
@@ -71,9 +75,10 @@ export default function ConversationParticipant(
           onClick={(e) => {
             setShowOptions(true);
           }}
+          style={{display:'flex', justifyContent: 'start'}}
         >
-          <article>{props.participant.user.name}</article>
-          <article>{props.participant.role}</article>
+          <article style={{marginLeft: '10px'}}>{props.participant.user.name} :</article>
+          <article style={{marginLeft: '10px'}}>{props.participant.role}</article>
         </section>
       );
     return (
@@ -81,10 +86,11 @@ export default function ConversationParticipant(
         onClick={(e) => {
           setShowOptions(true);
         }}
+        style={{display:'flex', justifyContent: 'start'}}
       >
-        <article>{props.participant.user.name}</article>
-        <article>{props.participant.role}</article>
-        <article>
+        <article style={{marginLeft: '10px'}}>{props.participant.user.name} :</article>
+        <article style={{marginLeft: '10px'}}>{props.participant.role}</article>
+        <article style={{marginLeft: '10px'}}>
           {props.participant.restrictions.filter(
             (e) => e.status === conversationRestrictionEnum.BAN
           ).length
@@ -100,17 +106,30 @@ export default function ConversationParticipant(
       props.participant.role === ConversationRoleEnum.USER)
   ) {
     return (
-      <section>
+      <section style={{border: 'solid 1px white', borderRadius: '20px', width: '60%', marginLeft:'20%', marginBottom:'20px', position: 'relative'}}>
+         <article
+          onClick={() => {
+            setShowOptions(false);
+          }}
+          className={styles.cross}
+        >
+          <Image src={ToggleCross} alt="toggle bar" width={10} height={10}/>
+        </article>
         <article>
-          <Link href={`/profile/${props.participant.user.name}`}>
-            {props.participant.user.name}
+           {props.participant.user.name}
+          <Link href={`/profile/${props.participant.user.name}`} style={{textDecoration: 'none'}}>
+            <div style={{display: 'flex', justifyContent:'center', marginTop:'10px', width:'60%', marginLeft:'20%'}}>
+                <Button primary fullWidth>Profil</Button>
+            </div>
           </Link>
         </article>
-        <article>{props.participant.role}</article>
+        <article>Role: {props.participant.role}</article>
+        <article style={{display:'flex', flexDirection:'column', alignItems: 'center', width:'60%', marginLeft:'20%'}}>
         {!props.participant.restrictions.filter(
           (e) => e.status === conversationRestrictionEnum.MUTE
         ).length ? (
-          <article
+          <div style={{marginBottom:'5px'}}>
+          <Button fullWidth
             onClick={() => {
               setError("");
               setSuccess("");
@@ -136,9 +155,9 @@ export default function ConversationParticipant(
             }}
           >
             Mute for 24h
-          </article>
+          </Button></div>
         ) : (
-          <article
+          <div style={{marginBottom:'5px'}}><Button
             onClick={() => {
               setError("");
               setSuccess("");
@@ -165,13 +184,13 @@ export default function ConversationParticipant(
             }}
           >
             Unmute
-          </article>
+          </Button></div>
         )}
         {!props.participant.restrictions.filter(
           (e) => e.status === conversationRestrictionEnum.BAN
         ).length ? (
           <>
-            <article
+            <div style={{marginBottom:'5px'}}><Button
               onClick={() => {
                 setError("");
                 setSuccess("");
@@ -197,8 +216,8 @@ export default function ConversationParticipant(
               }}
             >
               Ban for 24h
-            </article>
-            <article
+            </Button></div>
+            <div style={{marginBottom:'20px'}}><Button
               onClick={() => {
                 setError("");
                 setSuccess("");
@@ -223,10 +242,10 @@ export default function ConversationParticipant(
               }}
             >
               Ban indefinitely
-            </article>
+            </Button></div>
           </>
         ) : (
-          <article
+          <div style={{marginBottom:'20px'}}><Button
             onClick={() => {
               setError("");
               setSuccess("");
@@ -253,7 +272,7 @@ export default function ConversationParticipant(
             }}
           >
             Unban
-          </article>
+          </Button></div>
         )}
         <article
           onClick={() => {
@@ -286,55 +305,50 @@ export default function ConversationParticipant(
           {props.self?.role === ConversationRoleEnum.OWNER ? (
             props.participant.role === ConversationRoleEnum.USER ? (
               <>
-                <span
+                <Button danger fullWidth
                   onClick={() => {
                     promoteUser(ConversationRoleEnum.OWNER, true);
                   }}
                 >
                   OWNER
-                </span>
-                <span
+                </Button>
+                <div style={{marginTop: '10px', marginBottom:'10px'}}><Button danger fullWidth
                   onClick={() => {
                     promoteUser(ConversationRoleEnum.ADMIN, true);
                   }}
                 >
                   ADMIN
-                </span>
+                </Button></div>
               </>
             ) : (
               <>
-                <span
+                <Button danger fullWidth
                   onClick={() => {
                     promoteUser(ConversationRoleEnum.OWNER, true);
                   }}
                 >
                   OWNER
-                </span>
-                <span
+                </Button>
+                <div style={{marginTop: '10px', marginBottom:'10px'}}><Button danger fullWidth
                   onClick={() => {
                     promoteUser(ConversationRoleEnum.USER, false);
                   }}
                 >
                   USER
-                </span>
+                </Button></div>
               </>
             )
           ) : (
-            <span
+            <div style={{marginTop: '10px', marginBottom:'10px'}}><Button danger fullWidth
               onClick={() => {
                 promoteUser(ConversationRoleEnum.ADMIN, true);
               }}
             >
               ADMIN
-            </span>
+            </Button></div>
           )}
+          
         </article>
-        <article
-          onClick={() => {
-            setShowOptions(false);
-          }}
-        >
-          <Image src={ToggleCross} alt="toggle bar" />
         </article>
         {error.length ? <article>{error}</article> : <></>}
         {success.length ? <article>{success}</article> : <></>}
@@ -346,13 +360,25 @@ export default function ConversationParticipant(
       onClick={(e) => {
         setShowOptions(false);
       }}
+      style={{border: 'solid 1px white', borderRadius: '20px', width: '60%', marginLeft:'20%', marginBottom:'20px', position:'relative'}}
     >
-      <article>
-        <Link href={`/profile/${props.participant.user.name}`}>
-          {props.participant.user.name}
+       <article
+        onClick={() => {
+          setShowOptions(false);
+        }}
+        className={styles.cross}
+      >
+        <Image src={ToggleCross} alt="toggle bar" width={10} height={10}/>
+      </article>
+      <article >
+        {props.participant.user.name}
+        <Link href={`/profile/${props.participant.user.name}`} style={{textDecoration: 'none'}}>
+          <div style={{display: 'flex', justifyContent:'center', marginTop:'10px'}}>
+                <Button primary>Profil</Button>
+          </div>
         </Link>
       </article>
-      <article>{props.participant.role}</article>
+      <article>Role : {props.participant.role}</article>
       <article>
         {props.participant.restrictions.length ? (
           props.participant.restrictions.filter(
@@ -365,13 +391,6 @@ export default function ConversationParticipant(
         ) : (
           <></>
         )}
-      </article>
-      <article
-        onClick={() => {
-          setShowOptions(false);
-        }}
-      >
-        <Image src={ToggleCross} alt="toggle bar" />
       </article>
     </section>
   );

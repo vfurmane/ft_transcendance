@@ -50,10 +50,24 @@
 }
 
 .chatParams {
-  height: 99%;
+  height: 100%;
   position: absolute;
   top: 70px;
   right: 0;
   width: 100%;
+  z-index: 99;
   background: rgba($color: #302e2e, $alpha: 0.95);
+}
+
+.cross
+{
+  transform: scale(1);
+  position: absolute;
+  top: 5px;
+  left: 5px;
+}
+
+.cross:hover
+{
+  transform: scale(1.3);
 }

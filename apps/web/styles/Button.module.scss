@@ -9,6 +9,7 @@
   padding: 7px 18px;
   width: auto;
   overflow: visible;
+  border: 1px solid transparent;
 
   display: block;
 
@@ -29,6 +30,7 @@
 .container:hover {
   cursor: pointer;
   border: 1px solid white;
+  height: auto;
 }
 
 .container:disabled {
