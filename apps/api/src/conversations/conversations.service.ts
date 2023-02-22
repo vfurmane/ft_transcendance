@@ -569,6 +569,52 @@ export class ConversationsService {
     return newMessage;
   }
 
+  async postPongInvitationMessage(
+    currentUser: User,
+    conversationId: string,
+    content: string,
+  ): Promise<Message> {
+    await this.clearRestrictions(conversationId);
+    const conversation = await this.conversationRepository.findOne({
+      relations: {
+        conversationRoles: true,
+      },
+      where: {
+        id: conversationId,
+        conversationRoles: {
+          user: {
+            id: currentUser.id,
+          },
+          role: Not(ConversationRoleEnum.LEFT),
+        },
+      },
+    });
+    if (!conversation) throw new NotFoundException();
+    const [userRole] = conversation.conversationRoles.filter(
+      (el) => el.user.id === currentUser.id,
+    );
+    if (userRole.restrictions.length)
+      throw new ForbiddenException(
+        `Cannot post message to a conversation while you are ${
+          userRole.restrictions[0].status === conversationRestrictionEnum.BAN
+            ? 'banned'
+            : 'muted'
+        }`,
+      );
+    const newMessage = this.messageRepository.create({
+      system_generated: true,
+      is_invitation: true,
+      invitation_type: InvitationEnum.PONG,
+      sender: currentUser,
+      conversation: conversation,
+      content: content,
+    });
+    await this.messageRepository.save(newMessage);
+    userRole.lastRead = new Date();
+    this.conversationRoleRepository.save(userRole);
+    return newMessage;
+  }
+
   async joinConversation(
     currentUser: User,
     conversationId: string,

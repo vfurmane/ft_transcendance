@@ -7,6 +7,7 @@ import {
   IsOptional,
   IsString,
   IsUUID,
+  MaxLength,
 } from 'class-validator';
 import sanitize from 'sanitize-html';
 
@@ -22,6 +23,7 @@ export class createConversationDto {
 
   @IsOptional()
   @IsString()
+  @MaxLength(72)
   password!: string;
 
   @IsOptional()

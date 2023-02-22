@@ -140,3 +140,16 @@
 .valideButton:hover {
   transform: scale(1.2, 1);
 }
+
+.playerList {
+  display: flex;
+  min-width: 10vw;
+  min-height: 100vh;
+
+  scrollbar-width: 1px;
+  scrollbar-color: rebeccapurple green;
+}
+
+.playerList::-webkit-scrollbar {
+  display: none;
+}

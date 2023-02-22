@@ -1,11 +1,15 @@
 import { Conversation, InvitationEnum, Message as MessageEntity } from "types";
 import styles from "styles/Message.module.scss";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { selectUserState } from "../store/UserSlice";
 import { useEffect, useRef, useState } from "react";
 import { useWebsocketContext } from "./Websocket";
 import { connected } from "process";
 import { selectBlockedUsersState, setBlockedUsers } from "../store/BlockedUsersSlice";
+import { Button } from "./Button";
+import { setInvitedUser } from "../store/InvitationSlice";
+import { useRouter } from "next/router";
+import { initUser } from "../initType/UserInit";
 
 interface MessageProps {
   message: MessageEntity;
@@ -21,6 +25,8 @@ export default function Message(props: MessageProps): JSX.Element {
   const BlockedUsersState = useSelector(selectBlockedUsersState);
   const feedbackRef = useRef<HTMLDivElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
+  const dispatch = useDispatch();
+  const router = useRouter();
   const websockets = useWebsocketContext();
   const selfMessage = useRef(props.message.sender && props.message.sender.id !== userState.id)
 
@@ -47,7 +53,7 @@ export default function Message(props: MessageProps): JSX.Element {
           <p>
             You are invited to join the conversation {props.message.content}
             </p>
-            {!requirePassword ? (
+            {!requirePassword && selfMessage.current ? (
               <button
                 className={ styles.joinButton }
                 onClick={(e) => {
@@ -138,7 +144,35 @@ export default function Message(props: MessageProps): JSX.Element {
         </article>
       );
     } else {
-      return <p>Invitation to play Pong</p>;
+      return <article
+      className={`${selfMessage.current ? styles.otherInvitationMessage : styles.invitationMessage} ${styles.messageContent}`}
+    > <p>Invitation to play Pong</p>
+      {props.message.sender?.id !== userState.id ? (
+        <Button
+          primary
+          onClick={(): void => {
+            if (!props.message.sender) return;
+            websockets.pong?.emit(
+              "invite",
+              {
+                id: props.message.sender.id,
+              },
+              () => {
+                if (!props.message.sender) return;
+                dispatch(
+                  setInvitedUser({
+                    ...initUser,
+                    name: props.message.sender.name,
+                  })
+                );
+                router.push("/invite");
+              }
+            );
+          }}
+        >
+          Click to join
+        </Button>
+      ) : null};</article>
     }
   } else if (props.message.sender && props.message.sender.id !== userState.id) {
     if (isBlocked)

@@ -17,6 +17,7 @@ import {
   GameMode,
   Opponent,
   User,
+  Userfront,
 } from 'types';
 import { Game } from './game.service';
 
@@ -101,8 +102,19 @@ export class PongService {
         };
       }),
     );
+    const playersIds = this.games.get(gameId)![1].map((e) => e.id);
+    const players: Userfront[] = [];
+    for (let i = 0; i < playersIds.length; i++) {
+      const player = opponentsFront.find((e) => e.user.id === playersIds[i]);
+      if (player) players.push(player.user);
+    }
 
-    return { ...game, opponents: opponentsFront };
+    return {
+      ...game,
+      opponents: players.map((e) => {
+        return { user: e };
+      }),
+    };
   }
 
   static getGameModeDetails(mode: GameMode): GameModeDetails {
@@ -113,6 +125,19 @@ export class PongService {
 
   getGameModeQueue(mode: GameMode): QueueList {
     return this.queues[GameMode[mode as string as keyof typeof GameMode]];
+  }
+
+  getUserPositionInGameModeQueue(user: User, mode: GameMode): number {
+    const queue = this.getGameModeQueue(mode);
+    return queue.indexOf(user);
+  }
+
+  getFirstUserOfGameModeQueue(mode: GameMode): User {
+    return this.getGameModeQueue(mode)[0];
+  }
+
+  getLengthOfGameModeQueue(mode: GameMode): number {
+    return this.getGameModeQueue(mode).length;
   }
 
   userIsInQueue(user: User, mode?: GameMode): GameMode | null {

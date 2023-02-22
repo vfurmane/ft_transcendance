@@ -10,10 +10,13 @@ import Link from "next/link";
 import playButtonStyles from "styles/playButton.module.scss";
 import PlayMenu from "../../components/HomePage/PlayMenu";
 import styles from "styles/pingPong.module.scss";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { selectUserState } from "../../store/UserSlice";
 import { useWebsocketContext } from "../../components/Websocket";
 import ProfilePicture from "../../components/ProfilePicture";
+import { setUserGameId } from "../../store/UserSlice";
+import { relative } from "path";
+import { Loading } from "../../components/Loading";
 
 export default function PingPong(): JSX.Element {
   const router = useRouter();
@@ -27,7 +30,7 @@ export default function PingPong(): JSX.Element {
   const openPlayMenuRef = useRef(openPlayButton);
   const [openOverlay, setOpenOverlay] = useState(false);
   const [endGame, setEndGame] = useState(false);
-  const [printButton, setPrintButton] = useState(true);
+  const [printButton, setPrintButton] = useState(false);
   const [game, setGame] = useState<Game | null>(null);
   const [win, setWin] = useState(false);
 
@@ -47,18 +50,29 @@ export default function PingPong(): JSX.Element {
   const UserState = useSelector(selectUserState);
   const websockets = useWebsocketContext();
 
-  websockets.pong?.on("endGame", () => {
+  /*websockets.pong?.on("endGame", () => {
     setEndGame(true);
+    setOpenOverlay(false);
     setPrintButton(true);
     setGame(null);
-  });
+  });*/
+
+  const dispatch = useDispatch();
+  useEffect(() => {
+    if (endGame) {
+      dispatch(setUserGameId(undefined));
+      setGame(null);
+    }
+
+    if (openOverlay) dispatch(setUserGameId(undefined));
+  }, [dispatch, router.query.id, endGame, openOverlay]);
 
   useEffect(() => {
     return () => {
-      const canvas = document.getElementById("canvasElem");
-      if (canvas) {
-        canvas.style.transformOrigin = `0px 0px`;
-      }
+      websockets.pong?.emit("unsubscribe_game");
+      websockets.pong?.off("refresh");
+      websockets.pong?.off("endGame");
+      setGame(null);
     };
   }, []);
 
@@ -165,7 +179,7 @@ export default function PingPong(): JSX.Element {
         game={{
           life: Game.live,
           score: Game.scoreMax,
-          numOfPlayers: users.length,
+          numOfPlayers: usersGame.length,
         }}
       />
     );
@@ -208,6 +222,7 @@ export default function PingPong(): JSX.Element {
           //console.log(newClassement);
           setClassement(newClassement);
           setEndGame(true);
+          setOpenOverlay(false);
           setPrintButton(true);
           return;
         }
@@ -230,7 +245,8 @@ export default function PingPong(): JSX.Element {
           //console.log('----------------someone mark point');
           const indexWin = indexHurt !== 0 ? 0 : 1;
           const life = Number(newMiniProfilArray[indexWin].props.life);
-          const score = Number(newMiniProfilArray[indexWin].props.score) + 1;
+          const score =
+            Game.live - Number(newMiniProfilArray[indexHurt].props.life);
           newMiniProfilArray[indexWin] = changeScoreOrLife(
             indexWin,
             life,
@@ -245,11 +261,15 @@ export default function PingPong(): JSX.Element {
   );
 
   useEffect(() => {
-    if (websockets.pong?.connected) {
+    if (websockets.pong) {
       websockets.pong.emit(
         "subscribe_game",
         { id: router.query.id },
         (game: GameEntityFront) => {
+          if (!game.id) {
+            router.replace("/");
+            return;
+          }
           setPrintButton(false);
           let tmp = game.opponents.map((opponent) => opponent.user);
           usersRef.current = game.opponents.map((opponent) => opponent.user);
@@ -264,23 +284,16 @@ export default function PingPong(): JSX.Element {
     }
 
     function catchKey(e: KeyboardEvent) {
-      if (
-        ["Space", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].indexOf(
-          e.code
-        ) > -1
-      ) {
+      if (["ArrowUp", "ArrowDown"].indexOf(e.code) > -1) {
         e.preventDefault();
       }
     }
     window.addEventListener("keydown", catchKey, false);
 
     return () => {
-      if (websockets.pong?.connected) {
-        websockets.pong.emit("unsubscribe_game");
-      }
       window.removeEventListener("keydown", catchKey);
     };
-  }, [websockets.pong?.connected, router.query.id]);
+  }, [websockets.pong, router.query.id]);
 
   useEffect(() => {
     //console.log('----------------in UseEffect');
@@ -296,15 +309,7 @@ export default function PingPong(): JSX.Element {
         window.addEventListener(
           "keydown",
           function (e) {
-            if (
-              [
-                "Space",
-                "ArrowUp",
-                "ArrowDown",
-                "ArrowLeft",
-                "ArrowRight",
-              ].indexOf(e.code) > -1
-            ) {
+            if (["ArrowUp", "ArrowDown"].indexOf(e.code) > -1) {
               e.preventDefault();
             }
           },
@@ -312,27 +317,30 @@ export default function PingPong(): JSX.Element {
         );
       }
       if (intervalRef.current) clearInterval(intervalRef.current);
-      setGame(
-        new Game(
-          usersGame.length,
-          usersGame.findIndex((user) => user.id === UserState.id),
-          changeLife
-        )
-      );
+      //console.error('------------------setGame');
+      //console.error(usersGame.length);
+      const index = usersGame.findIndex((user) => user.id === UserState.id);
+      if (index >= 0) dispatch(setUserGameId(router.query.id));
+      //console.log("------------------setGAme");
+      //console.log(usersGame);
+      setGame(new Game(usersGame.length, index, changeLife));
       usersGameRef.current = usersGame;
     }
-  }, [users, usersGame, usersRotate, changeLife]);
+  }, [users, usersGame, usersRotate, changeLife, dispatch]);
 
   useEffect(() => {
     if (canvasRef && users.length > 1) {
       if (websockets.pong?.connected && users.length > 1 && game) {
         game?.setWebsocket(websockets.pong);
         game?.init(canvasRef);
-        if (game) intervalRef.current = setInterval(handleResize, 4, game);
+        if (game && usersGame.length === game.player.length)
+          intervalRef.current = setInterval(handleResize, 4, game);
       }
     }
     return (): void => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
     };
   }, [game]);
 
@@ -433,20 +441,7 @@ export default function PingPong(): JSX.Element {
           }}
         />
       </Link>
-      {openOverlay ? (
-        <div>
-          <PlayButton
-            open={false}
-            style={{
-              text: openPlayButton ? "" : "continu to WATCH",
-              small: true,
-              color: false,
-            }}
-          />
-        </div>
-      ) : (
-        <></>
-      )}
+
       <PlayButton
         handleClick={handleClickPlayButton}
         open={openPlayButton}
@@ -471,6 +466,9 @@ export default function PingPong(): JSX.Element {
     </div>
   );
 
+  //if (!game)
+  //return <Loading></Loading>
+
   return (
     <div onClick={() => close()} style={{ width: "100vw", height: "100vh" }}>
       {openOverlay ? (
@@ -478,7 +476,6 @@ export default function PingPong(): JSX.Element {
           <h1 className={textStyles.saira} style={{ color: "white" }}>
             You LOose !
           </h1>
-          {buttons}
         </div>
       ) : (
         <></>
@@ -529,9 +526,7 @@ export default function PingPong(): JSX.Element {
         </div>
       ) : (
         <div className={styles.afterGameContainer}>
-          <h1 className={textStyles.saira + " " + styles.title}>
-            Game Over <br></br> You {win ? "win" : "loose"} this game !
-          </h1>
+          <h1 className={textStyles.saira + " " + styles.title}>Game Over</h1>
           <div className={styles.tableContainer}>
             <table>
               <thead>

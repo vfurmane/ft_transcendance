@@ -22,6 +22,7 @@ import {
   unblockUser,
 } from "../../store/BlockedUsersSlice";
 import { OpenConversation } from "../../store/ConversationSlice";
+import ProfilePicture from "../../components/ProfilePicture";
 
 export default function Profil(): JSX.Element {
   const UserState = useSelector(selectUserState);
@@ -212,7 +213,7 @@ export default function Profil(): JSX.Element {
       };
       incrementLevel();
     }
-  }, [matchHistory, user]);
+  }, [matchHistory, user, avatarHash]);
 
   function achivementListClick(): void {
     setOpenAchivementList(true);
@@ -306,13 +307,22 @@ export default function Profil(): JSX.Element {
             className={`col-10 offset-1 offset-md-0 offset-lg-1 col-md-2 ${styles.flexCenterColumn}`}
           >
             <div className="fill">
-              <ProfilePictureUploader
-                userId={user.id}
-                width={200}
-                height={200}
-                setFileHash={setAvatarHash}
-                fileHash={avatarHash}
-              />
+              {UserState.id === user.id ? (
+                <ProfilePictureUploader
+                  userId={user.id}
+                  width={200}
+                  height={200}
+                  setFileHash={setAvatarHash}
+                  fileHash={avatarHash}
+                />
+              ) : (
+                <ProfilePicture
+                  userId={user.id}
+                  width={200}
+                  height={200}
+                  handleClick={undefined}
+                />
+              )}
             </div>
             <div className={styles.rank + " " + textStyles.saira}>
               {user.rank}
@@ -409,7 +419,16 @@ export default function Profil(): JSX.Element {
                       Change username
                     </h3>
                   </button>
-                  <button className={styles.buttonProfil} onClick={changePswrd}>
+                  <button
+                    className={styles.buttonProfil}
+                    onClick={changePswrd}
+                    disabled={UserState.isOauth}
+                    title={
+                      UserState.isOauth
+                        ? "Your account is connected to 42, you cannot change your password."
+                        : undefined
+                    }
+                  >
                     <h3
                       className={textStyles.laquer}
                       style={{ fontSize: "18px" }}

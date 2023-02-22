@@ -1,7 +1,10 @@
 import Link from "next/link";
-import { ReactElement, useCallback, useRef, useState } from "react";
+import { ReactElement, useCallback, useEffect, useRef, useState } from "react";
 import { Userfront } from "types";
 import UserEntity from "./HomePage/UserEntity";
+import styles from "styles/entity.module.scss";
+import textStyles from "styles/text.module.scss";
+import ProfilePicture from "./ProfilePicture";
 
 export interface WatchGameProps {
   gameId: string;
@@ -14,6 +17,8 @@ export function WatchGame(props: WatchGameProps): ReactElement {
   const prevSetterUsermenuRef = useRef(setterInit);
   const [indexOfUser, setIndexOfUser] = useState(-1);
   const [openUserMenu, setOpenUserMenu] = useState(false);
+  const [isShown, setIsShown] = useState(false);
+  const [userList, setUserList] = useState<JSX.Element[]>([]);
 
   const handleClickUserMenu = useCallback(
     (e: {
@@ -35,29 +40,70 @@ export function WatchGame(props: WatchGameProps): ReactElement {
     []
   );
 
-  if (props.users.length != 2) return <></>;
+  useEffect(() => {
+    if (!props.users.length) return;
+    setUserList(
+      props.users.map((user, i) => {
+        return (
+          <div className={styles.imageText}>
+            <div className="fill small">
+              <ProfilePicture
+                userId={user.id}
+                width={47}
+                height={47}
+                handleClick={undefined}
+                fileHash={null}
+              />
+            </div>
+            {isShown ? (
+              <div>
+                <h3 className={textStyles.laquer}>{user.name}</h3>
+              </div>
+            ) : (
+              <div>
+                {i === props.users.length - 1 ? (
+                  <></>
+                ) : (
+                  <p className={textStyles.laquer}> vs</p>
+                )}
+              </div>
+            )}
+          </div>
+        );
+      })
+    );
+
+    const scrollContainer = document.getElementById("scroll");
+
+    scrollContainer!.addEventListener(
+      "wheel",
+      (evt) => {
+        //evt.preventDefault();
+        scrollContainer!.scrollLeft -= evt.deltaY;
+      },
+      { passive: true }
+    );
+  }, [props.users, isShown]);
 
   return (
     <div>
       {" "}
-      <UserEntity
-        small={false}
-        option={{ del: false, accept: true, ask: false }}
-        user={props.users[0]}
-        index={0}
-        handleClick={handleClickUserMenu}
-      />
-      <p>VS</p>
-      <UserEntity
-        small={false}
-        option={{ del: false, accept: true, ask: false }}
-        user={props.users[1]}
-        index={1}
-        handleClick={handleClickUserMenu}
-      />
-      <p>
-        <Link href={`/pingPong/${props.gameId}`}>Watch</Link>
-      </p>
+      <Link
+        href={`/pingPong/${props.gameId}`}
+        style={{ textDecoration: "none" }}
+      >
+        <div className={styles.shadowContainer}>
+          <div
+            className={`${styles.entityContainer} ${styles.entity}`}
+            onMouseEnter={() => setIsShown(true)}
+            onMouseLeave={() => setIsShown(false)}
+            id="scroll"
+          >
+            <div className={styles.playerList}>{userList}</div>
+          </div>
+          <div className={`${styles.entityShadow}   d-none d-sm-block`}></div>
+        </div>
+      </Link>
     </div>
   );
 }

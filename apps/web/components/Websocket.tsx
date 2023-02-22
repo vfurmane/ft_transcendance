@@ -1,3 +1,4 @@
+import { useRouter } from "next/router";
 import {
   createContext,
   ReactElement,
@@ -32,7 +33,9 @@ const deregisterSocket = (
   socket: Socket<DefaultEventsMap, DefaultEventsMap>
 ): void => {
   console.error("disconnecting socket");
-  socket.disconnect();
+  setTimeout(() => {
+    socket.disconnect();
+  }, 5000);
   socket.off("connect");
   socket.off("connect_error");
   socket.off("disconnect");
@@ -57,6 +60,7 @@ const OpenSocket = (
 };
 
 export default function Websocket({ children }: WebsocketProps): JSX.Element {
+  const router = useRouter();
   const [socketInstances, setSocketInstances] = useState<OpenedSockets>({
     general: null,
     conversations: null,
@@ -93,6 +97,10 @@ export default function Websocket({ children }: WebsocketProps): JSX.Element {
             })
           )
         );
+      });
+
+      pong.on("replace", (route: string) => {
+        router.replace(route);
       });
     } else {
       closeOpenSockets(socketInstances);

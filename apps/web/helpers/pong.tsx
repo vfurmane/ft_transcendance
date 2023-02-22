@@ -305,7 +305,7 @@ class Game {
           p3.x + wallPerp.x * this.ballWidth,
           p3.y + wallPerp.y * this.ballWidth
         );
-        if (this.player === undefined)
+        if (this.player[i] === undefined)
           racket.push(new Racket(i, [p0, p1, p2, p3], this.color[i]));
         else racket.push(new Racket(i, [p0, p1, p2, p3], this.player[i].color));
         Game.changeLife(i, player[i].hp, wall.length);
@@ -617,6 +617,7 @@ class Game {
           this.ball.point[0].x > this.board.wall[2].point[0].x ||
           this.ball.point[0].y > this.board.wall[3].point[0].y
         ) {
+          //console.log("BALL SAVED");
           this.ball = this.saveBall.ball;
         }
         this.saveBall.count = 0;
@@ -852,7 +853,7 @@ class Ball extends Entity {
       ((this.nextCollision.wall &&
         this.nextCollision.wall > this.nextCollision.racket.time) ||
         !this.nextCollision.wall) &&
-      this.nextCollision.racket.time <= 0.5
+      this.nextCollision.racket.time <= 0.0
     ) {
       const racket = rackets[this.nextCollision.racket.index];
       let angle = 0;
@@ -892,27 +893,15 @@ class Ball extends Entity {
         this.update(rackets, walls, board, 0);
       return;
     }
-    if (this.nextCollision.wall && this.nextCollision.wall <= 0.5) {
+    if (this.nextCollision.wall && this.nextCollision.wall <= 0.0) {
       const prevTime = this.nextCollision.wall;
       const wall = walls[this.nextCollision.wallIndex];
-      const wallVector = wall.point[0].vectorTo(wall.point[2]);
-      const Norm = wallVector.norm() * this.speed.norm();
-      const angle = Math.acos(wallVector.product(this.speed) / Norm);
+      const wallVector = wall.point[0].vectorTo(wall.point[2]).normalized();
       const tmp = new Vector(this.speed.x, this.speed.y);
-      const isAcute = angle <= Math.PI / 2;
-      const outAngle = isAcute ? angle * 2 : (Math.PI - angle) * 2;
-      const cosA = Math.cos(outAngle);
-      const sinA = Math.sin(outAngle);
-      [tmp.x, tmp.y] = [
-        this.speed.x * cosA - this.speed.y * sinA,
-        this.speed.x * sinA + this.speed.y * cosA,
-      ];
-      const angle2 = Math.acos(wallVector.product(tmp) / Norm);
-      if (Math.abs(angle2 - angle) > 0.001) {
-        [tmp.x, tmp.y] = [
-          this.speed.x * cosA - this.speed.y * -sinA,
-          this.speed.x * -sinA + this.speed.y * cosA,
-        ];
+      if (Math.abs(wallVector.x) >= 0.9) {
+        [tmp.x, tmp.y] = [tmp.x, -tmp.y];
+      } else if (Math.abs(wallVector.y) >= 0.9) {
+        [tmp.x, tmp.y] = [-tmp.x, tmp.y];
       }
       this.speed = tmp;
       const index = this.nextCollision.wallIndex;
@@ -929,8 +918,8 @@ class Ball extends Entity {
           this.moveTo(this.speed, -prevTime);
           if (
             (this.nextCollision.racket &&
-              this.nextCollision.racket.time <= 0.5) ||
-            (this.nextCollision.wall && this.nextCollision.wall <= 0.5)
+              this.nextCollision.racket.time <= 0.0) ||
+            (this.nextCollision.wall && this.nextCollision.wall <= 0.0)
           )
             this.update(rackets, walls, board, 0);
         }
@@ -939,13 +928,11 @@ class Ball extends Entity {
       if (rackets.length === 2) {
         if (index === 2) {
           rackets[1].hp--;
-          //Game.changeLife(1, rackets[1].hp);
           this.replaceTo(board.board.center());
           this.goToRandomPlayer(rackets);
           this.calcNextCollision(rackets, walls, null, null);
         } else if (index === 0) {
           rackets[0].hp--;
-          //Game.changeLife(0, rackets[0].hp);
           this.replaceTo(board.board.center());
           this.goToRandomPlayer(rackets);
           this.calcNextCollision(rackets, walls, null, null);
@@ -957,14 +944,13 @@ class Ball extends Entity {
           this.moveTo(this.speed, -prevTime);
           if (
             (this.nextCollision.racket &&
-              this.nextCollision.racket.time <= 0.5) ||
-            (this.nextCollision.wall && this.nextCollision.wall <= 0.5)
+              this.nextCollision.racket.time <= 0.0) ||
+            (this.nextCollision.wall && this.nextCollision.wall <= 0.0)
           )
             this.update(rackets, walls, board, 0);
         }
       } else {
         rackets[index].hp--;
-        //Game.changeLife(index, rackets[index].hp);
         this.replaceTo(board.board.center());
         this.goToRandomPlayer(rackets);
         this.calcNextCollision(rackets, walls, null, null);

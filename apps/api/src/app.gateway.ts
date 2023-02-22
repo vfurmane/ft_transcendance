@@ -6,19 +6,13 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import {
-  CACHE_MANAGER,
-  Inject,
-  Logger,
-  UnauthorizedException,
-  UseFilters,
-} from '@nestjs/common';
+import { CACHE_MANAGER, Inject, Logger, UseFilters } from '@nestjs/common';
 import { Cache } from 'cache-manager';
 import { AuthService } from './auth/auth.service';
 import { HttpExceptionTransformationFilter } from './common/filters/HttpExceptionFilter.filter';
 import { SpiedUserDto } from './spied-user.dto';
 import { User, UserStatusUpdatePayload } from 'types';
-import { nextTick } from 'process';
+import getCookie from './common/helpers/getCookie';
 
 @WebSocketGateway()
 @UseFilters(HttpExceptionTransformationFilter)
@@ -32,7 +26,7 @@ export class AppGateway {
   ) {}
 
   async handleConnection(client: Socket): Promise<void> {
-    const token = client.handshake.headers.cookie?.split('=')[1];
+    const token = getCookie(client, 'access_token');
     if (!token) {
       client.disconnect();
       return;

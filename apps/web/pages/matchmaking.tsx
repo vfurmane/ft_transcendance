@@ -1,17 +1,26 @@
 import { useRouter } from "next/router";
-import { ReactElement, useEffect, useState, useRef } from "react";
+import {
+  ReactElement,
+  useEffect,
+  useState,
+  useRef,
+  useContext,
+  useCallback,
+} from "react";
 import { useSelector } from "react-redux";
 import styles from "styles/matchmaking-page.module.scss";
-import { GameStartPayload } from "types";
+import { GameMode, GameStartPayload } from "types";
 import { Loading } from "../components/Loading";
 import { QueueReconnectionPrompt } from "../components/QueueReconnectionPrompt";
 import { useWebsocketContext } from "../components/Websocket";
 import { selectMatchmakingState } from "../store/MatchmakingSlice";
 import { selectUserState } from "../store/UserSlice";
 import TopBar from "../components/TopBar";
+import { Button } from "../components/Button";
 
 export default function Matchmaking(): ReactElement {
   const [hasLeftQueue, setHasLeftQueue] = useState(false);
+  const [isFirst, setIsFirst] = useState(false);
   const [loading, setLoading] = useState(true);
   const websockets = useWebsocketContext();
   const router = useRouter();
@@ -22,6 +31,7 @@ export default function Matchmaking(): ReactElement {
   const [openToggle, setOpenToggle] = useState(false);
   const [openProfil, setOpenProfil] = useState(false);
   const [openUserList, setOpenUserList] = useState(false);
+  const [numberOfPlayerinQueue, setNumberOfPlayerInQueue] = useState(0);
   const [indexOfUser, setIndexOfUser] = useState(-1);
   const prevIndexOfUserRef = useRef(-1);
   const prevSetterUsermenuRef =
@@ -29,7 +39,7 @@ export default function Matchmaking(): ReactElement {
   /*===========================================================*/
 
   useEffect(() => {
-    if (!MatchmakingState.isInQueue) router.push("/");
+    if (!MatchmakingState.isInQueue) router.replace("/");
     else setLoading(false);
   }, [MatchmakingState.isInQueue, router]);
 
@@ -38,7 +48,13 @@ export default function Matchmaking(): ReactElement {
     if (websockets.pong) {
       websockets.pong.on("game_start", (data: GameStartPayload) => {
         if (data.users.find((user) => user.id == UserState.id)) {
-          router.push(`/pingPong/${data.id}`);
+          router.replace(`/pingPong/${data.id}`);
+        }
+      });
+      websockets.pong.on("lead", (n: number) => {
+        if (!isFirst) setIsFirst(true);
+        if (numberOfPlayerinQueue !== n) {
+          setNumberOfPlayerInQueue(n);
         }
       });
       websockets.pong.emit("join_queue", {
@@ -117,8 +133,16 @@ export default function Matchmaking(): ReactElement {
         handleClickUserMenu={handleClickUserMenu}
       />
       <div className={styles.container}>
-        <h1>Waiting for an opponent...</h1>
-        <button onClick={launch}>LAUNCH</button>
+        <h1 style={{ marginBottom: "20px" }}>Waiting for an opponent...</h1>
+        {MatchmakingState.gameMode === GameMode.BATTLE_ROYALE && isFirst ? (
+          <Button onClick={launch} danger>{`LAUNCH : ${
+            numberOfPlayerinQueue - 1
+          } player${
+            numberOfPlayerinQueue - 1 > 1 ? "s" : ""
+          } joined this game`}</Button>
+        ) : (
+          <></>
+        )}
         {hasLeftQueue ? (
           <QueueReconnectionPrompt
             onReconnection={(): void => {

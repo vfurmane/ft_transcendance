@@ -6,9 +6,7 @@ const ProfilePicture = (props: {
   width: number;
   height: number;
   fileHash?: string | null;
-  handleClick:
-    | ((event: React.MouseEvent<HTMLImageElement>) => void)
-    | undefined;
+  handleClick?: (event: React.MouseEvent<HTMLImageElement>) => void;
 }): JSX.Element => {
   return (
     <>

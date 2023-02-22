@@ -7,11 +7,13 @@ import { TransformUserModule } from 'src/TransformUser/TransformUser.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Game, Opponent } from 'types';
 import { MatchModule } from 'src/Match/Match.module';
+import { ConversationsModule } from '../conversations/conversations.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Opponent, Game]),
     AuthModule,
+    ConversationsModule,
     UsersModule,
     TransformUserModule,
     MatchModule,

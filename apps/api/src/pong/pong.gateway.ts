@@ -35,6 +35,9 @@ import { JoinQueueDto } from './join-queue.dto';
 import { UsersService } from 'src/users/users.service';
 import { instanceToPlain, TransformInstanceToPlain } from 'class-transformer';
 import { InviteUserDto } from './invite-user.dto';
+import getCookie from '../common/helpers/getCookie';
+import { eventNames, listeners } from 'process';
+import { ConversationsService } from '../conversations/conversations.service';
 
 @UsePipes(new ValidationPipe())
 @UseInterceptors(ClassSerializerInterceptor)
@@ -45,6 +48,7 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   constructor(
     private readonly authService: AuthService,
+    private readonly conversationsService: ConversationsService,
     private readonly logger: Logger,
     private readonly pongService: PongService,
     @InjectRepository(User)
@@ -57,7 +61,7 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   async handleConnection(client: Socket): Promise<void | string> {
     console.log('SOMEBODY IS TRYING TO CONNECT');
-    const token = client.handshake.headers.cookie?.split('=')[1];
+    const token = getCookie(client, 'access_token');
     if (!token) {
       client.disconnect();
       console.log('No Authorization cookie found');
@@ -84,8 +88,11 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
           if (user.id === client.data.id) {
             client.data.room = key;
             client.data.position = value[1].indexOf(user);
-            client.join(key);
+            client.join(`game_${key}`);
             console.log('Reconnected to the game !');
+            this.server
+              .in(`user_${client.data.id}`)
+              .emit('replace', `/pingPong/${key}`);
             return 'Connection restored';
           }
         });
@@ -131,6 +138,10 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
       } else {
         console.log('GAME ENDED');
         const sockets = await this.server.in(`game_${room}`).fetchSockets();
+        this.server.emit('game_end', {
+          id: room,
+          users: [],
+        } as GameStartPayload);
         this.server.in(`game_${room}`).emit('endGame');
         sockets.forEach((socket) => {
           socket.leave(`game_${room}`);
@@ -279,12 +290,24 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() subscribedGameDto: SubscribedGameDto,
   ): Promise<GameEntityFront> {
     client.data.room = subscribedGameDto.id;
-    const game = await this.pongService.getGame(subscribedGameDto.id);
+    let game: GameEntityFront;
+    try {
+      game = await this.pongService.getGame(subscribedGameDto.id);
+    } catch (error) {
+      return { id: '', opponents: [] };
+    }
     client.data.position = game.opponents.findIndex(
       (opponent) => opponent.user.id === client.data.id,
     );
     client.join(`game_${subscribedGameDto.id}`);
-    return this.pongService.getGame(subscribedGameDto.id);
+    return game;
+    return await this.pongService.getGame(subscribedGameDto.id);
+  }
+
+  @SubscribeMessage('unsubscribe_game')
+  unsubscribeGame(@ConnectedSocket() client: Socket): void {
+    client.leave(`game_${client.data.room}`);
+    client.data.room = undefined;
   }
 
   @SubscribeMessage('launch')
@@ -341,6 +364,17 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
         }),
       );
     }
+    const lead = this.pongService.getFirstUserOfGameModeQueue(
+      GameMode.BATTLE_ROYALE,
+    );
+    if (lead !== undefined) {
+      this.server
+        .in(`user_${lead.id}`)
+        .emit(
+          'lead',
+          this.pongService.getLengthOfGameModeQueue(GameMode.BATTLE_ROYALE),
+        );
+    }
   }
 
   @SubscribeMessage('leave_queue')
@@ -349,6 +383,17 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
     if (!user) return;
     this.pongService.leave(user);
     this.logger.log(`'${user.id}' (${user.name}) has left queue`);
+    const lead = this.pongService.getFirstUserOfGameModeQueue(
+      GameMode.BATTLE_ROYALE,
+    );
+    if (lead !== undefined) {
+      this.server
+        .in(`user_${lead.id}`)
+        .emit(
+          'lead',
+          this.pongService.getLengthOfGameModeQueue(GameMode.BATTLE_ROYALE),
+        );
+    }
   }
 
   @SubscribeMessage('invite')
@@ -371,17 +416,46 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
         this.logger.log(`- ${user_loop.id} (${user_loop.name})`);
       });
       const game = await this.pongService.startGame(gameQueue, this.server);
-      this.server.emit(
-        'game_start',
-        instanceToPlain<GameStartPayload>({
-          id: game.id,
-          users: await Promise.all(
-            gameQueue.map((opponent) =>
-              this.transformUserService.transform(opponent),
+      setTimeout(async () => {
+        this.server.emit(
+          'game_start',
+          instanceToPlain<GameStartPayload>({
+            id: game.id,
+            users: await Promise.all(
+              gameQueue.map((opponent) =>
+                this.transformUserService.transform(opponent),
+              ),
             ),
-          ),
-        }),
+          }),
+        );
+      }, 100);
+    } else {
+      this.logger.log(`Invitation sent, the user will receive a message`);
+      const { conversation, newConversationMessage } =
+        await this.conversationsService.createConversation(
+          {
+            name: `${host.name} - ${target.name}`,
+            groupConversation: false,
+            password: '',
+            participant: target.id,
+            visible: false
+          },
+          client.data as User,
+        );
+      if (newConversationMessage) {
+        this.server
+          .to(`user_${target.id}`)
+          .emit('newConversation', instanceToPlain(conversation));
+      }
+      const ret = await this.conversationsService.postPongInvitationMessage(
+        client.data as User,
+        conversation.id,
+        "let's play",
       );
+      this.server.to(`user_${target.id}`).emit('newMessage', {
+        id: conversation.id,
+        message: instanceToPlain(ret),
+      });
     }
 
     return { message: 'Waiting for approval' };

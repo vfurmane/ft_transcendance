@@ -13,6 +13,8 @@ import textStyles from "styles/text.module.scss";
 import styles from "styles/home.module.scss";
 import { useWebsocketContext } from "../components/Websocket";
 import { WatchGame } from "../components/WatchGame";
+import refreshIcon from "../public/refresh-icon.svg";
+import Image from "next/image";
 
 function Home(): JSX.Element {
   const friendListRef = useRef<JSX.Element[]>([]);
@@ -24,6 +26,7 @@ function Home(): JSX.Element {
   const [indexOfUser, setIndexOfUser] = useState(-1);
   const [friendList, setFriendList] = useState<JSX.Element[]>([]);
   const [featuringList, setFeaturingList] = useState<JSX.Element[]>([]);
+  const [refreshFriendsList, setRefreshFriendsList] = useState(true);
 
   const prevIndexOfUserRef = useRef(-1);
   const prevSetterUsermenuRef = useRef(setterInit);
@@ -115,6 +118,11 @@ function Home(): JSX.Element {
         );
         setFeaturingList((f) => [elm, ...f]);
       });
+      websockets.pong.on("game_end", (gameStartPayload: GameStartPayload) => {
+        setFeaturingList((f) =>
+          f.filter((game) => game.props.gameId !== gameStartPayload.id)
+        );
+      });
 
       websockets.pong.emit("get_featuring", (data: GameStartPayload[]) => {
         setFeaturingList((f) => [
@@ -125,6 +133,13 @@ function Home(): JSX.Element {
         ]);
       });
     }
+
+    return () => {
+      if (websockets.pong) {
+        websockets.pong.off("game_start");
+        websockets.pong.off("game_end");
+      }
+    };
   }, [websockets.pong]);
 
   //get the friend list of the user
@@ -171,7 +186,7 @@ function Home(): JSX.Element {
             error.message
         );
       });
-  }, [handleClickUserMenu]);
+  }, [handleClickUserMenu, refreshFriendsList]);
 
   return (
     <div onClick={(): void => close()} id={"top"}>
@@ -234,6 +249,20 @@ function Home(): JSX.Element {
         <div className="row">
           <div className="col-10 offset-1 col-lg-4">
             <div className="card">
+              <Image
+                alt="refresh-icon"
+                src={refreshIcon}
+                width={25}
+                height={25}
+                onClick={(event): void => {
+                  setRefreshFriendsList(!refreshFriendsList);
+                  const target = event.target as HTMLElement;
+                  target.classList.add("spin");
+                  setTimeout(() => {
+                    target.classList.remove("spin");
+                  }, 1000);
+                }}
+              />
               <List title="Friends List" list={friendList} />
             </div>
           </div>
@@ -246,8 +275,7 @@ function Home(): JSX.Element {
         <div className="row">
           <div className="col-8 offset-2">
             <h3 className={`${styles.text} ${textStyles.laquer}`}>
-              These guy are the best pong player of the world ... we are so
-              proud of them !!
+              Lorem ipsum dolor sit amet, consectetur adipiscing elit...
             </h3>
           </div>
         </div>
