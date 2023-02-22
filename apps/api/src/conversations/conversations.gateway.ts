@@ -35,7 +35,7 @@ import { BlockUserDto } from './block-user.dto';
 import { invitationDto } from './dtos/invitation.dto';
 import getCookie from 'src/common/helpers/getCookie';
 
-@UseFilters(HttpExceptionTransformationFilter)
+@UseFilters(new HttpExceptionTransformationFilter())
 @UsePipes(new ValidationPipe())
 @UseInterceptors(ClassSerializerInterceptor)
 @WebSocketGateway({
