@@ -132,6 +132,10 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
       } else {
         console.log('GAME ENDED');
         const sockets = await this.server.in(`game_${room}`).fetchSockets();
+        this.server.emit('game_end', {
+          id: room,
+          users: [],
+        } as GameStartPayload);
         this.server.in(`game_${room}`).emit('endGame');
         sockets.forEach((socket) => {
           socket.leave(`game_${room}`);
