@@ -59,6 +59,9 @@ export default function UserEntity(props: {
       };
     };
 
+    setAccept(props.option.accept);
+
+
     if (props.user.id === UserState.id) {
       setStatus("online");
     } else if (websockets.general?.connected) {
@@ -72,7 +75,7 @@ export default function UserEntity(props: {
         onUserStatusUpdate(props.user.id, setStatus)
       );
       if (websockets.pong?.connected) {
-        console.log("PONG CONNECTED");
+        //console.log("PONG CONNECTED");
         websockets.pong.on(
           "user_status_update",
           onUserStatusUpdate(props.user.id, setStatus)
@@ -81,12 +84,12 @@ export default function UserEntity(props: {
           "subscribe_user",
           { userId: props.user.id },
           (isGaming: boolean) => {
-            console.log("RESPONSE : ", isGaming);
+            //console.log("RESPONSE : ", isGaming);
             isGaming ? setStatus("gaming") : setStatus("online");
           }
         );
       } else {
-        console.log("PONG NOT CONNECTED");
+        //console.log("PONG NOT CONNECTED");
       }
     }
 
@@ -98,7 +101,7 @@ export default function UserEntity(props: {
         websockets.pong?.off("user_status_update");
       }
     };
-  }, [websockets.general, props.user.id, UserState]);
+  }, [websockets.general, props, UserState]);
 
   if (typeof props.user === "undefined" || !props.option) return <></>;
 
@@ -112,9 +115,9 @@ export default function UserEntity(props: {
     })
       .then(function (response) {
         response.json().then((res) => {
-          console.log(res);
+          //console.log(res);
           if (res) {
-            console.log("validation succes");
+            //console.log("validation succes");
             setAccept(true);
           }
         });
@@ -144,7 +147,7 @@ export default function UserEntity(props: {
             <article
               className={styles.buttonEntity}
               onClick={() => {
-                console.error("Clicked new conversation button");
+                //console.error("Clicked new conversation button");
                 dispatch(
                   OpenConversation({
                     userId: props.user.id,

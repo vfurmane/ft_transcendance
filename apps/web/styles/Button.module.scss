@@ -28,6 +28,7 @@
 
 .container:hover {
   cursor: pointer;
+  border: 1px solid white;
 }
 
 .container:disabled {
@@ -43,6 +44,7 @@
   background-color: $dark-system-red;
   color: $dark-neutral-white;
 }
+
 
 .container.primary {
   background-color: $dark-primary-yellow;

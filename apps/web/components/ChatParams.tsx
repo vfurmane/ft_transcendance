@@ -52,7 +52,12 @@ export default function ChatParams(props: chatParamsProps): JSX.Element {
         )}
         <section>
           {props.currentConversation.groupConversation ? (
-            <h4>Participants</h4>
+            <div>
+              <p style={{marginTop:'20px'}}>____________________________________</p>
+              <h4 >Participants :</h4>
+              
+            </div>
+           
           ) : (
             <></>
           )}

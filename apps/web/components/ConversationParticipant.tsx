@@ -10,6 +10,7 @@ import {
 } from "types";
 import ToggleCross from "../public/toggleCross.png";
 import { useWebsocketContext } from "./Websocket";
+import { Button } from "./Button";
 
 interface ConversationParticipantsProps {
   participant: ConversationRole;
@@ -59,8 +60,11 @@ export default function ConversationParticipant(
   if (!props.conversation.groupConversation)
     return (
       <article>
-        <Link href={`/profile/${props.participant.user.name}`}>
-          {props.participant.user.name}
+        <Link href={`/profile/${props.participant.user.name}`} style={{textDecoration:'none'}}>
+          <div style={{display: 'flex', justifyContent:'center', marginTop:'10px'}}>
+              <Button primary>Profil</Button>
+          </div>
+        
         </Link>
       </article>
     );
@@ -255,32 +259,6 @@ export default function ConversationParticipant(
             Unban
           </article>
         )}
-        <article
-          onClick={() => {
-            setError("");
-            setSuccess("");
-            if (!websockets.conversations?.connected) {
-              setError("Temporary network error, please try again later");
-              return;
-            }
-            websockets.conversations.timeout(1000).emit(
-              "kickUser",
-              {
-                id: props.conversation.id,
-                username: props.participant.user.name,
-              },
-              (err: any, answer: string) => {
-                if (err) {
-                  setError("Failed to kick user");
-                  return;
-                }
-                setSuccess(`${props.participant.user.name} has been kicked`);
-              }
-            );
-          }}
-        >
-          Kick
-        </article>
         <article>
           Change role:{" "}
           {props.self?.role === ConversationRoleEnum.OWNER ? (
