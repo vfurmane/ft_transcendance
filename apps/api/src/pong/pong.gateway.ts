@@ -37,6 +37,7 @@ import { instanceToPlain, TransformInstanceToPlain } from 'class-transformer';
 import { InviteUserDto } from './invite-user.dto';
 import getCookie from '../common/helpers/getCookie';
 import { eventNames, listeners } from 'process';
+import { ConversationsService } from '../conversations/conversations.service';
 
 @UsePipes(new ValidationPipe())
 @UseInterceptors(ClassSerializerInterceptor)
@@ -47,6 +48,7 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   constructor(
     private readonly authService: AuthService,
+    private readonly conversationsService: ConversationsService,
     private readonly logger: Logger,
     private readonly pongService: PongService,
     @InjectRepository(User)
@@ -414,17 +416,45 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
         this.logger.log(`- ${user_loop.id} (${user_loop.name})`);
       });
       const game = await this.pongService.startGame(gameQueue, this.server);
-      this.server.emit(
-        'game_start',
-        instanceToPlain<GameStartPayload>({
-          id: game.id,
-          users: await Promise.all(
-            gameQueue.map((opponent) =>
-              this.transformUserService.transform(opponent),
+      setTimeout(async () => {
+        this.server.emit(
+          'game_start',
+          instanceToPlain<GameStartPayload>({
+            id: game.id,
+            users: await Promise.all(
+              gameQueue.map((opponent) =>
+                this.transformUserService.transform(opponent),
+              ),
             ),
-          ),
-        }),
+          }),
+        );
+      }, 100);
+    } else {
+      this.logger.log(`Invitation sent, the user will receive a message`);
+      const { conversation, newConversationMessage } =
+        await this.conversationsService.createConversation(
+          {
+            name: `${host.name} - ${target.name}`,
+            groupConversation: false,
+            password: '',
+            participants: [target.id],
+          },
+          client.data as User,
+        );
+      if (newConversationMessage) {
+        this.server
+          .to(`user_${target.id}`)
+          .emit('newConversation', instanceToPlain(conversation));
+      }
+      const ret = await this.conversationsService.postPongInvitationMessage(
+        client.data as User,
+        conversation.id,
+        "let's play",
       );
+      this.server.to(`user_${target.id}`).emit('newMessage', {
+        id: conversation.id,
+        message: instanceToPlain(ret),
+      });
     }
 
     return { message: 'Waiting for approval' };

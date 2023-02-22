@@ -91,7 +91,7 @@ export default function Chat({
         }
       );
     } else if (!conversationSelected && !newConversation.userId.length) {
-      if (websockets.conversations?.connected) {
+      if (websockets.conversations?.connected && websockets.pong?.connected) {
         websockets.conversations.emit(
           "getConversations",
           (conversationDetails: ConversationsDetails) => {
@@ -100,14 +100,18 @@ export default function Chat({
           }
         );
         websockets.conversations.on("newConversation", addNewConversation);
+        websockets.pong.on("newConversation", addNewConversation);
         websockets.conversations.on("newMessage", newUnread);
+        websockets.pong.on("newMessage", newUnread);
       }
     } else {
       setLoading(false);
     }
     return () => {
       websockets.conversations?.off("newConversation", addNewConversation);
+      websockets.pong?.off("newConversation");
       websockets.conversations?.off("newMessage", newUnread);
+      websockets.pong?.off("newMessage");
       websockets.conversations?.emit(
         "getUnread",
         ({ totalNumberOfUnreadMessages }: unreadMessagesResponse) => {

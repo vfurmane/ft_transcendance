@@ -1,10 +1,14 @@
 import { Conversation, InvitationEnum, Message as MessageEntity } from "types";
 import styles from "styles/Message.module.scss";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { selectUserState } from "../store/UserSlice";
 import { useRef, useState } from "react";
 import { useWebsocketContext } from "./Websocket";
 import { connected } from "process";
+import { Button } from "./Button";
+import { setInvitedUser } from "../store/InvitationSlice";
+import { useRouter } from "next/router";
+import { initUser } from "../initType/UserInit";
 
 interface MessageProps {
   message: MessageEntity;
@@ -18,7 +22,10 @@ export default function Message(props: MessageProps): JSX.Element {
   const [success, setSuccess] = useState<string>("");
   const feedbackRef = useRef<HTMLElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
+  const dispatch = useDispatch();
+  const router = useRouter();
   const websockets = useWebsocketContext();
+  const UserState = useSelector(selectUserState);
 
   if (props.message.system_generated) {
     if (!props.message.is_invitation)
@@ -80,7 +87,35 @@ export default function Message(props: MessageProps): JSX.Element {
               </span>
             </p>
           ) : (
-            <p>Invitation to play Pong</p>
+            <>
+              <p>Invitation to play Pong</p>
+              {props.message.sender?.id !== UserState.id ? (
+                <Button
+                  primary
+                  onClick={(): void => {
+                    if (!props.message.sender) return;
+                    websockets.pong?.emit(
+                      "invite",
+                      {
+                        id: props.message.sender.id,
+                      },
+                      () => {
+                        if (!props.message.sender) return;
+                        dispatch(
+                          setInvitedUser({
+                            ...initUser,
+                            name: props.message.sender.name,
+                          })
+                        );
+                        router.push("/invite");
+                      }
+                    );
+                  }}
+                >
+                  Click to join
+                </Button>
+              ) : null}
+            </>
           )}
         </article>
         {requirePassword ? (
