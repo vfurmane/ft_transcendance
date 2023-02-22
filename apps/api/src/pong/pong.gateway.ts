@@ -41,7 +41,7 @@ import { instanceToPlain, TransformInstanceToPlain } from 'class-transformer';
 import { InviteUserDto } from './invite-user.dto';
 import getCookie from '../common/helpers/getCookie';
 import { eventNames, listeners } from 'process';
-import { SpiedUserDto } from '../spied-user.dto
+import { SpiedUserDto } from '../spied-user.dto';
 import { ConversationsService } from '../conversations/conversations.service';
 
 
