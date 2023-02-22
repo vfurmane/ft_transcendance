@@ -22,6 +22,9 @@ import ChatParams from "./ChatParams";
 import { useDispatch, useSelector } from "react-redux";
 import { OpenConversation } from "../store/ConversationSlice";
 import { selectUserState } from "../store/UserSlice";
+import {
+  ReinitConversations,
+} from "../store/ConversationSlice";
 
 interface OpenedConversationProps {
   newConversation: { userId: string; userName: string } | null;
@@ -71,8 +74,8 @@ export default function OpenedConversation(
       banned.userId !== undefined &&
       banned.userId === userState.id
     ) {
+      setTimeout(updateConvList, 100);
       props.selectConversation(null);
-      setTimeout(updateConvList, 50);
     }
   };
 
@@ -85,8 +88,8 @@ export default function OpenedConversation(
       kicked.userId !== undefined &&
       kicked.userId === userState.id
     ) {
+      setTimeout(updateConvList, 100);
       props.selectConversation(null);
-      setTimeout(updateConvList, 50);
     }
   };
 
@@ -237,6 +240,7 @@ export default function OpenedConversation(
                       (message: MessageEntity) => {
                         setMessages((prev) => [...prev, message]);
                         setNewConversation(null);
+                        dispatch(ReinitConversations());
                       }
                     );
                   }
@@ -283,6 +287,7 @@ export default function OpenedConversation(
           <ChatParams
             currentConversation={currentConversation}
             selectConversation={props.selectConversation}
+            updateConversationList={props.updateConversationList}
           />
         </section>
       ) : (

@@ -5,6 +5,7 @@ import {
   Conversation as ConversationEntity,
   conversationRestrictionEnum,
   ConversationRole,
+  ConversationWithUnread,
 } from "types";
 import { selectUserState } from "../store/UserSlice";
 import ConversationParticipant from "./ConversationParticipant";
@@ -13,6 +14,7 @@ import { useWebsocketContext } from "./Websocket";
 
 interface chatParamsProps {
   currentConversation: ConversationEntity;
+  updateConversationList: Dispatch<SetStateAction<ConversationWithUnread[]>>;
   selectConversation: Dispatch<SetStateAction<ConversationEntity | null>>;
 }
 export default function ChatParams(props: chatParamsProps): JSX.Element {
@@ -46,6 +48,7 @@ export default function ChatParams(props: chatParamsProps): JSX.Element {
             currentConversation={props.currentConversation}
             self={self}
             participants={participants}
+            updateConversationList={props.updateConversationList}
           />
         ) : (
           <></>

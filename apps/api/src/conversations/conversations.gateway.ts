@@ -478,4 +478,29 @@ export class ConversationsGateway implements OnGatewayConnection {
       .emit('unmutedUser', { conversationID: id, userId: target?.id });
     return ret;
   }
+
+  @SubscribeMessage('makeVisible')
+  async makeVisible(@ConnectedSocket() client : Socket, @MessageBody() {id} : isUUIDDto)
+  {
+    const ret = await this.conversationsService.changeVisibility(client.data as User, id, true)
+    if (ret)
+    {
+      client.emit("isVisible", id)
+    }
+    return (true);
+  }
+
+  @SubscribeMessage('makeVisible')
+  async makeInvisible(@ConnectedSocket() client : Socket, @MessageBody() {id} : isUUIDDto)
+  {
+    const ret = await this.conversationsService.changeVisibility(client.data as User, id, false)
+    if (ret)
+    {
+      client.emit("isInvisible", id)
+    }
+    return (true);
+  }
+
+  // @SubscribeMessage('removePassword')
+  // async removePassword(@ConnectedSocket() client : Socket, @MessageBody() {id} : isUUIDDto)
 }

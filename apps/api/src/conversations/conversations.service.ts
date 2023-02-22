@@ -1208,4 +1208,31 @@ export class ConversationsService {
       target: { id: targetId },
     });
   }
+
+  async changeVisibility(currentUser : User, id : string, visible : boolean)
+  {
+    const conversation = await this.conversationRepository.findOne({
+      relations: {
+        conversationRoles: true
+      },
+      where:
+      {
+        id: id,
+        groupConversation: true,
+        conversationRoles:
+        {
+          user:
+          {
+            id: currentUser.id
+          },
+          role: ConversationRoleEnum.OWNER
+        }
+      }
+    })
+    if (!conversation)
+      throw new NotFoundException()
+    conversation.visible = visible;
+    await this.conversationRepository.save(conversation)
+    return (true)
+  }
 }
