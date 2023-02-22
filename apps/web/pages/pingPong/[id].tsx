@@ -349,7 +349,10 @@ export default function PingPong(): JSX.Element {
       }
     }
     return (): void => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
+      if (intervalRef.current){
+        clearInterval(intervalRef.current);
+        websockets.pong?.emit('unsubscribe_game');
+      }
     };
   }, [game]);
 
