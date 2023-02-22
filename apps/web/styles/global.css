@@ -172,7 +172,7 @@ th {
   background: rgba(151, 150, 150, 0.1);
   border-radius: 10px;
   position: absolute;
-  top: 40%;
+  top: 45%;
   left: 40%;
   width: 20%;
   height: 10%;
@@ -182,5 +182,5 @@ th {
   justify-content: center;
   align-items: center;
   flex-direction: column;
-
+  
 }

@@ -15,6 +15,7 @@ import { selectUserState } from "../../store/UserSlice";
 import { useWebsocketContext } from "../../components/Websocket";
 import ProfilePicture from "../../components/ProfilePicture";
 import { setUserGameId } from "../../store/UserSlice";
+import { relative } from "path";
 
 export default function PingPong(): JSX.Element {
   const router = useRouter();
@@ -64,10 +65,10 @@ export default function PingPong(): JSX.Element {
       dispatch(setUserGameId(undefined));
 
     return () => {
-      const canvas = document.getElementById("canvasElem");
+      /*const canvas = document.getElementById("canvasElem");
       if (canvas) {
         canvas.style.transformOrigin = `0px 0px`;
-      }
+      }*/
     };
   }, [dispatch, router.query.id, endGame, openOverlay]);
 
@@ -476,16 +477,16 @@ export default function PingPong(): JSX.Element {
   );
 
   return (
-    <div onClick={() => close()} style={{ width: "100vw", height: "100vh" }}>
-      {openOverlay ? (
-        <div className="overlay">
-          <h1 className={textStyles.saira} style={{ color: "white" }}>
-            You LOose !
-          </h1>
-        </div>
-      ) : (
-        <></>
-      )}
+    <div onClick={() => close()} style={{ width: "100vw", height: "100vh"}}>
+        {openOverlay ? (
+          <div className="overlay">
+            <h1 className={textStyles.saira} style={{ color: "white" }}>
+              You LOose !
+            </h1>
+          </div>
+        ) : (
+          <></>
+        )}
       <TopBar
         openProfil={openProfil}
         openToggle={openToggle}
