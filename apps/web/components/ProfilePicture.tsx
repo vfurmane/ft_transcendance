@@ -8,6 +8,7 @@ const ProfilePicture = (props: {
   fileHash?: string | null;
   handleClick?: (event: React.MouseEvent<HTMLImageElement>) => void;
 }): JSX.Element => {
+  if (!props.userId) return <></>;
   return (
     <>
       <img

@@ -1,7 +1,12 @@
 import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
 import Image from "next/image";
 import Connect from "../../public/statusConnect.png";
-import { Userfront as User, UserStatusUpdatePayload } from "types";
+import Gaming from "../../public/statusGaming.png";
+import {
+  GameStartPayload,
+  Userfront as User,
+  UserStatusUpdatePayload,
+} from "types";
 import styles from "styles/entity.module.scss";
 import textStyles from "styles/text.module.scss";
 import Link from "next/link";
@@ -66,12 +71,31 @@ export default function UserEntity(props: {
         { userId: props.user.id },
         onUserStatusUpdate(props.user.id, setStatus)
       );
+      if (websockets.pong?.connected) {
+        console.log("PONG CONNECTED");
+        websockets.pong.on(
+          "user_status_update",
+          onUserStatusUpdate(props.user.id, setStatus)
+        );
+        websockets.pong.emit(
+          "subscribe_user",
+          { userId: props.user.id },
+          (isGaming: boolean) => {
+            console.log("RESPONSE : ", isGaming);
+            isGaming ? setStatus("gaming") : setStatus("online");
+          }
+        );
+      } else {
+        console.log("PONG NOT CONNECTED");
+      }
     }
 
     return () => {
       if (websockets.general?.connected && props.user.id !== UserState.id) {
         websockets.general.emit("unsubscribe_user", { userId: props.user.id });
         websockets.general.off("user_status_update");
+        websockets.pong?.emit("unsubscribe_user", { userId: props.user.id });
+        websockets.pong?.off("user_status_update");
       }
     };
   }, [websockets.general, props.user.id, UserState]);
@@ -183,6 +207,17 @@ export default function UserEntity(props: {
             <Image
               alt="status"
               src={Connect}
+              width={20}
+              height={20}
+              className="statusImage"
+            />
+          ) : (
+            <div></div>
+          )}
+          {status === "gaming" ? (
+            <Image
+              alt="status"
+              src={Gaming}
               width={20}
               height={20}
               className="statusImage"
