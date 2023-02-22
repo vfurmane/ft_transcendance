@@ -18,6 +18,26 @@
     color: $dark-neutral-black;
   }
 }
+
+.containerOtherMessageBlocked {
+  align-self: flex-start;
+  background-color: $dark-neutral-grey;
+  color: black;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  p {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    text-align: center;
+  }
+}
+
+.containerOtherMessageBlocked:hover {
+  cursor: pointer;
+}
+
 .containerSelfMessage {
   align-self: flex-end;
   background-color: $dark-primary-yellow;
@@ -33,6 +53,53 @@
   }
 }
 
+.otherInvitationMessage {
+  align-self: flex-start;
+  background-color: rgb(212, 221, 228);
+  color: black;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  border: solid 1px white;
+  p {
+    width: 100%;
+    margin: 0;
+    margin-bottom: 5px;
+    padding: 0;
+    text-align: left;
+  }
+}
+.invitationMessage {
+  align-self: flex-end;
+  background-color: $dark-primary-yellow;
+  color: black;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  p {
+    width: 100%;
+    margin: 0;
+    margin-bottom: 5px;
+    padding: 0;
+    text-align: left;
+  }
+}
+
+.containerSystemMessage {
+  align-self: center;
+  background-color: none;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  p {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    text-align: center;
+  }
+}
+
 .messageContent {
   white-space: pre-wrap;
   overflow-wrap: break-word;
@@ -40,4 +107,67 @@
   hyphens: auto;
 }
 
-// .senderName
+.joinButton {
+  align-self: center;
+  width: 50%;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 5px;
+  margin: 0 0;
+  background: url("../public/texture.png"),
+    linear-gradient(
+      160deg,
+      rgba(234, 196, 53, 1) 45%,
+      rgb(233, 110, 9) 70%,
+      rgb(218, 74, 8) 100%
+    );
+  background-repeat: repeat, no-repeat;
+  background-size: 50px 50px, 100% 100%;
+  border-radius: 10px;
+  border: solid 1px white;
+  color: #1e1e1e;
+  transition: transform 0.3s ease;
+  transform: translateX(0px);
+  text-align: center;
+  box-shadow: 0px 0px 1px 1px rgba(234, 196, 53, 1);
+}
+
+.invitationForm {
+  align-self: center;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  width: 90%;
+  input {
+    margin: 0 3px;
+  }
+}
+
+.passwordField {
+  width: 80%;
+  margin-bottom: 2px;
+  border-top: 0px;
+  border-bottom: solid black 1px;
+  border-left: 0px;
+  border-right: 0px;
+  background-color: rgba(0, 0, 0, 0);
+  text-align: left;
+}
+
+.error {
+  color: red;
+  text-align: center;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+}
+
+.success {
+  font-style: italic;
+  text-align: center;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+}

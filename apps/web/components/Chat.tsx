@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import {
   Conversation as ConversationEntity,
+  conversationRestrictionEnum,
   ConversationsDetails,
   ConversationWithUnread,
   DMExists,
@@ -20,6 +21,9 @@ import Image from "next/image";
 import back from "../public/back.png";
 import addCross from "../public/addCross.png";
 import CreateConversation from "./CreateConversation";
+import SearchChannel from "./SearchChannel";
+import Search from "../public/Search.png";
+import { selectUserState } from "../store/UserSlice";
 
 interface ChatProps {
   conversation: { userId: string; userName: string };
@@ -30,6 +34,7 @@ export default function Chat({
   conversation,
   updateUnreadMessage,
 }: ChatProps): JSX.Element {
+  const userState = useSelector(selectUserState);
   const [conversationSelected, selectConversation] =
     useState<ConversationEntity | null>(null);
   const [conversationList, setConversationList] = useState<
@@ -41,6 +46,7 @@ export default function Chat({
   }>(conversation);
   const [loading, setLoading] = useState(true);
   const [createConversation, setCreateConversation] = useState<boolean>(false);
+  const [searchChannel, setSearchChannel] = useState<boolean>(false);
   const websockets = useWebsocketContext();
   const conversationToOpen = useSelector(selectConversationsState);
   const dispatch = useDispatch();
@@ -49,7 +55,7 @@ export default function Chat({
     websockets.conversations?.emit(
       "getConversations",
       (conversationDetails: ConversationsDetails) => {
-        setConversationList(() => conversationDetails.conversations);
+        setConversationList(conversationDetails.conversations);
       }
     );
   };
@@ -70,9 +76,18 @@ export default function Chat({
     }
   }, [conversationToOpen]);
 
+  const kickMeImFamous = (kicked: {
+    conversationID: string;
+    userId: string | undefined;
+  }) => {
+    if (kicked.userId !== undefined && kicked.userId === userState.id) {
+      selectConversation(null);
+      setTimeout(refreshConversations, 25);
+    }
+  };
+
   useEffect(() => {
     setLoading(true);
-    console.error("Conversation selected: ", conversationSelected);
     if (newConversation.userId.length) {
       websockets.conversations?.emit(
         "DMExists",
@@ -102,6 +117,7 @@ export default function Chat({
         websockets.conversations.on("newConversation", addNewConversation);
         websockets.pong.on("newConversation", addNewConversation);
         websockets.conversations.on("newMessage", newUnread);
+        websockets.conversations.on("kickedUser", kickMeImFamous);
         websockets.pong.on("newMessage", newUnread);
       }
     } else {
@@ -111,6 +127,8 @@ export default function Chat({
       websockets.conversations?.off("newConversation", addNewConversation);
       websockets.pong?.off("newConversation");
       websockets.conversations?.off("newMessage", newUnread);
+      websockets.conversations?.off("bannedUser");
+      websockets.conversations?.off("unbannedUser");
       websockets.pong?.off("newMessage");
       websockets.conversations?.emit(
         "getUnread",
@@ -129,6 +147,7 @@ export default function Chat({
           className={styles.backButton}
           onClick={(e) => {
             setCreateConversation(false);
+            setSearchChannel(false);
           }}
         >
           <Image alt="back" src={back} />
@@ -137,6 +156,26 @@ export default function Chat({
           <CreateConversation
             changeConversation={selectConversation}
             closeCreator={setCreateConversation}
+          />
+        </section>
+      </>
+    );
+  } else if (searchChannel === true) {
+    return (
+      <>
+        <article
+          className={styles.backButton}
+          onClick={(e) => {
+            setCreateConversation(false);
+            setSearchChannel(false);
+          }}
+        >
+          <Image alt="back" src={back} />
+        </article>
+        <section className={styles.conversationsContainer}>
+          <SearchChannel
+            changeConversation={selectConversation}
+            closeSearchChannel={setSearchChannel}
           />
         </section>
       </>
@@ -161,6 +200,28 @@ export default function Chat({
             conversation={
               newConversation.userId.length ? null : conversationSelected
             }
+            name={
+              conversationSelected
+                ? conversationSelected.groupConversation
+                  ? conversationSelected.name
+                  : conversationSelected.conversationRoles?.find(
+                      (role) => role.user.id !== userState.id
+                    )?.user.name
+                : newConversation.userName
+            }
+            muted={
+              !conversationSelected
+                ? false
+                : conversationSelected.groupConversation === false
+                ? false
+                : conversationSelected.conversationRoles === undefined ||
+                  !conversationSelected.conversationRoles.length
+                ? false
+                : conversationSelected.conversationRoles[0].restrictions.find(
+                    (restriction) =>
+                      restriction.status === conversationRestrictionEnum.MUTE
+                  ) !== undefined
+            }
             selectConversation={selectConversation}
             updateUnreadMessage={updateUnreadMessage}
             updateConversationList={setConversationList}
@@ -180,20 +241,25 @@ export default function Chat({
       >
         <Image alt="create Conversation" src={addCross} />
       </article>
+      <article
+        title="Search a channel"
+        onClick={(e) => {
+          setSearchChannel(true);
+        }}
+        className={styles.searchBar}
+      >
+        JOIN
+        <Image alt="search" src={Search} className={styles.logoSearchBar} />
+      </article>
       <section className={styles.conversationsContainer}>
         {conversationList.length ? (
           conversationList.map((conversation) => (
-            <article
-              key={`${conversation.conversation.id}_container`}
-              onClick={() => {
-                selectConversation(conversation.conversation);
-              }}
-            >
-              <Conversation
-                key={conversation.conversation.id}
-                conversation={conversation}
-              />
-            </article>
+            <Conversation
+              key={conversation.conversation.id}
+              conversation={conversation}
+              selectConversation={selectConversation}
+              setConversationList={setConversationList}
+            />
           ))
         ) : (
           <article>No conversations yet</article>

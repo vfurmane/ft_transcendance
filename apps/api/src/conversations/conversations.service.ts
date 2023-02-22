@@ -67,10 +67,81 @@ export class ConversationsService {
     const creatorDMs = await this.getListOfDMs(currentUser);
     const recipientDMs = await this.getListOfDMs({ id: targetUserId });
     for (const creatorDM of creatorDMs) {
-      if (recipientDMs.filter((el) => el.id === creatorDM.id).length)
-        return { conversationExists: true, conversation: creatorDM };
+      if (recipientDMs.filter((el) => el.id === creatorDM.id).length) {
+        const fullConversation = await this.conversationRepository.findOne({
+          relations: {
+            conversationRoles: true,
+          },
+          where: {
+            id: creatorDM.id,
+          },
+        });
+        return {
+          conversationExists: true,
+          conversation: fullConversation ? fullConversation : creatorDM,
+        };
+      }
     }
     return { conversationExists: false, conversation: null };
+  }
+
+  async createDM(
+    newConversation: createConversationDto,
+    creator: User,
+  ): Promise<{
+    conversation: Conversation;
+    newConversationMessage: Message | null;
+  }> {
+    if (newConversation.participant === undefined) {
+      throw new BadRequestException('Unable to create DM without a target');
+    }
+    if (creator.id === newConversation.participant) {
+      throw new BadRequestException(
+        'You cannot have a conversation with yourself',
+      );
+    }
+    const participant = await this.userRepository.findOne({
+      where: {
+        id: newConversation.participant,
+      },
+    });
+    if (!participant) {
+      throw new BadRequestException('Targeted user does not exist');
+    }
+    const creatorDMs = await this.getListOfDMs(creator);
+    const recipientDMs = await this.getListOfDMs(participant);
+    for (const creatorDM of creatorDMs) {
+      if (recipientDMs.filter((el) => el.id === creatorDM.id).length)
+        return { conversation: creatorDM, newConversationMessage: null };
+    }
+    const createdConversation =
+      this.conversationRepository.create(newConversation);
+    createdConversation.name = `${creator.name} - ${participant.name}`;
+    createdConversation.password = null;
+    createdConversation.visible = false;
+    await this.conversationRepository.save(createdConversation);
+    const conversationRoleCreator = this.conversationRoleRepository.create({
+      lastRead: new Date(),
+      role: ConversationRoleEnum.OWNER,
+      user: creator,
+      conversation: createdConversation,
+    });
+    await this.conversationRoleRepository.save(conversationRoleCreator);
+    const conversationRoleParticipant = this.conversationRoleRepository.create({
+      lastRead: new Date(),
+      role: ConversationRoleEnum.ADMIN,
+      user: participant,
+      conversation: createdConversation,
+    });
+    await this.conversationRoleRepository.save(conversationRoleParticipant);
+    const newConversationMessage = this.messageRepository.create({
+      sender: null,
+      conversation: createdConversation,
+      content: `This is the beginning of your conversation`,
+      system_generated: true,
+    });
+    this.messageRepository.save(newConversationMessage);
+    return { conversation: createdConversation, newConversationMessage };
   }
 
   async createConversation(
@@ -81,82 +152,25 @@ export class ConversationsService {
     newConversationMessage: Message | null;
   }> {
     const users: User[] = [];
-    if (newConversation.participants.length === 0)
-      throw new BadRequestException(
-        'Unable to create conversation, missing participants list',
-      );
-    if (
-      newConversation.groupConversation === false &&
-      newConversation.participants.length !== 1
-    )
-      throw new BadRequestException(
-        'Direct messages cannot involve more than one two participants',
-      );
-    if (newConversation.groupConversation === false && newConversation.password)
-      throw new BadRequestException(
-        'Direct messages cannot be password protected',
-      );
-    if (newConversation.groupConversation === true && !newConversation.name) {
+
+    if (!newConversation.groupConversation)
+      return this.createDM(newConversation, creator);
+    if (!newConversation.name) {
       throw new BadRequestException(
         'Please provide a name for your new group conversation',
       );
     }
-    for (const participant of newConversation.participants) {
-      const currentUser = await this.userRepository.findOne({
-        where: {
-          id: participant,
-        },
-      });
-      if (!currentUser) {
-        throw new BadRequestException('Some participants do not exist');
-      }
-      if (currentUser.id === creator.id) {
-        throw new BadRequestException(
-          'You cannot have a conversation with yourself',
-        );
-      }
-      users.push(currentUser);
-    }
-    if (!newConversation.groupConversation) {
-      const creatorDMs = await this.getListOfDMs(creator);
-      const recipientDMs = await this.getListOfDMs(users[0]);
-      for (const creatorDM of creatorDMs) {
-        if (recipientDMs.filter((el) => el.id === creatorDM.id).length)
-          return { conversation: creatorDM, newConversationMessage: null };
-      }
-    }
     const createdConversation =
       this.conversationRepository.create(newConversation);
-    if (!newConversation.groupConversation) {
-      createdConversation.name = `${creator.name} - ${users[0].name}`;
-    }
     if (createdConversation.password) {
       const salt = await bcrypt.genSalt();
       createdConversation.password = await bcrypt.hash(
         createdConversation.password,
         salt,
       );
+      createdConversation.has_password = true;
     }
     await this.conversationRepository.save(createdConversation);
-    if (newConversation.groupConversation === false) {
-      const conversationRole = this.conversationRoleRepository.create({
-        lastRead: new Date(),
-        role: ConversationRoleEnum.ADMIN,
-        user: users[0],
-        conversation: createdConversation,
-      });
-      await this.conversationRoleRepository.save(conversationRole);
-    } else {
-      for (const currentUser of users) {
-        const conversationRole = this.conversationRoleRepository.create({
-          lastRead: new Date(),
-          role: ConversationRoleEnum.USER,
-          user: currentUser,
-          conversation: createdConversation,
-        });
-        await this.conversationRoleRepository.save(conversationRole);
-      }
-    }
     const conversationRole = this.conversationRoleRepository.create({
       lastRead: new Date(),
       role: ConversationRoleEnum.OWNER,
@@ -167,11 +181,42 @@ export class ConversationsService {
     const newConversationMessage = this.messageRepository.create({
       sender: null,
       conversation: createdConversation,
-      content: `This is the beginning of your conversation`,
+      content: `This is the beginning of ${newConversation.name}`,
       system_generated: true,
     });
     this.messageRepository.save(newConversationMessage);
     return { conversation: createdConversation, newConversationMessage };
+  }
+
+  async getChannels(currentUser: User): Promise<Conversation[]> {
+    const userChannels = await this.conversationRepository.find({
+      relations: {
+        conversationRoles: true,
+      },
+      where: {
+        groupConversation: true,
+        visible: true,
+        conversationRoles: {
+          user: {
+            id: currentUser.id,
+          },
+        },
+      },
+    });
+    const channels = await this.conversationRepository.find({
+      where: {
+        groupConversation: true,
+        visible: true,
+      },
+    });
+    return channels.filter((channel) => {
+      if (
+        userChannels.filter((userChannel) => userChannel.id === channel.id)
+          .length
+      )
+        return false;
+      return true;
+    });
   }
 
   async updateRole(
@@ -284,7 +329,7 @@ export class ConversationsService {
       totalNumberOfUnreadMessages: 0,
       conversations: [],
     };
-    const conversations = await this.conversationRepository.find({
+    let conversations = await this.conversationRepository.find({
       relations: {
         conversationRoles: true,
       },
@@ -344,14 +389,22 @@ export class ConversationsService {
       }
       conversationsDetails.totalNumberOfUnreadMessages +=
         currentConversationWithUnread.numberOfUnreadMessages;
+      if (!currentConversationWithUnread.conversation.groupConversation) {
+        const check = await this.conversationRepository.findOne({
+          relations: {
+            conversationRoles: true,
+          },
+          where: {
+            id: conversation.id,
+          },
+        });
+        if (check) currentConversationWithUnread.conversation = check;
+      }
       conversationsDetails.conversations.push(currentConversationWithUnread);
     }
-    console.error(conversationsDetails);
     conversationsDetails.conversations.sort(
       (a, b) => b.lastMessage.getTime() - a.lastMessage.getTime(),
     );
-    console.error('post sort');
-    console.error(conversationsDetails);
     return conversationsDetails;
   }
 
@@ -420,6 +473,7 @@ export class ConversationsService {
     if (!conversationRoles.length) {
       return response;
     }
+    const blockedUser = await this.getBlockedUsers(currentUser.id);
     for (const role of conversationRoles) {
       if (
         (await this.verifyRestrictionsOnUser(role.restrictions)).filter(
@@ -428,6 +482,27 @@ export class ConversationsService {
         ).length
       )
         continue;
+      if (role.conversation.groupConversation === false) {
+        const check = await this.conversationRoleRepository.findOne({
+          relations: {
+            conversation: true,
+          },
+          where: {
+            conversation: {
+              id: role.conversation.id,
+            },
+            user: {
+              id: Not(currentUser.id),
+            },
+          },
+        });
+        if (
+          check &&
+          blockedUser.find((block) => block.target.id === check.user.id) !==
+            undefined
+        )
+          continue;
+      }
       const unreadMessages = await this.messageRepository.count({
         relations: {
           conversation: true,
@@ -661,7 +736,6 @@ export class ConversationsService {
     conversation: Conversation | null;
     prevConversation: string | null;
   } | null> {
-    console.error('invitation: ', invitation);
     const roles = await this.conversationRoleRepository.find({
       relations: {
         conversation: true,
@@ -675,17 +749,13 @@ export class ConversationsService {
     const currentUserRole = roles.filter(
       (role) => role.user.id === currentUser.id,
     );
-    console.error('current role: ', currentUserRole);
     if (currentUserRole.length === 0) {
-      console.error('Not in conversation');
       return null;
     }
     if (currentUserRole[0].restrictions.length) {
-      console.error('Restricted');
       return null;
     }
     if (currentUserRole[0].role === ConversationRoleEnum.LEFT) return null;
-    console.error('A-OK');
     if (roles.filter((role) => role.user.id === invitation.target).length !== 0)
       return null;
     const targetConversation = await this.conversationRepository.findOne({
@@ -710,8 +780,6 @@ export class ConversationsService {
         conversationExists.conversation,
         targetConversation.name,
       );
-      console.error('Message generated: ', message);
-      console.error('poset in', conversationExists.conversation);
       return {
         message: message,
         conversation: null,
@@ -721,7 +789,7 @@ export class ConversationsService {
     const conversation = await this.createConversation(
       {
         groupConversation: false,
-        participants: [invitation.target],
+        participant: invitation.target,
       } as createConversationDto,
       currentUser,
     );
@@ -732,8 +800,6 @@ export class ConversationsService {
       conversation.conversation,
       targetConversation.name,
     );
-    console.error('Message generated: ', message);
-    console.error('poset in', conversationExists.conversation);
     return {
       message: message,
       conversation: conversation.conversation,
@@ -780,6 +846,7 @@ export class ConversationsService {
         conversationRoles: {
           conversation: true,
         },
+        messages: true,
       },
       where: {
         id: conversationId,
@@ -793,13 +860,11 @@ export class ConversationsService {
     if (conversation.groupConversation === false)
       throw new ForbiddenException('Cannot leave direct message conversation');
     if (conversation.conversationRoles.length === 1) {
+      await this.messageRepository.remove(conversation.messages);
+      await this.conversationRestrictionRepository.remove(
+        userRole.restrictions,
+      );
       await this.conversationRoleRepository.remove(userRole);
-      const messages = await this.messageRepository.find({
-        where: {
-          id: conversationId,
-        },
-      });
-      if (messages) await this.messageRepository.remove(messages);
       await this.conversationRepository.remove(conversation);
       return { userRole, leftMessage: null };
     }
@@ -963,6 +1028,56 @@ export class ConversationsService {
     return `User ${
       restrictionType === conversationRestrictionEnum.BAN ? 'banned' : 'muted'
     } until ${until ? until : 'the end of times'}`;
+  }
+
+  async kickUser(
+    currentUser: User,
+    conversationId: string,
+    username: string,
+  ): Promise<boolean> {
+    await this.clearRestrictions(conversationId);
+    const conversation = await this.conversationRepository.findOne({
+      relations: {
+        conversationRoles: true,
+      },
+      where: {
+        id: conversationId,
+        conversationRoles: {
+          role: Not(ConversationRoleEnum.LEFT),
+        },
+      },
+    });
+    if (!conversation) throw new NotFoundException();
+    if (conversation.groupConversation === false)
+      throw new ForbiddenException(
+        'Cannot kick other party in a direct message conversation',
+      );
+    const [currentUserRole] = conversation.conversationRoles.filter(
+      (el) => el.user.id === currentUser.id,
+    );
+    if (!currentUserRole)
+      throw new ForbiddenException('No such conversation found');
+    if (currentUserRole.restrictions.length)
+      throw new ForbiddenException(
+        'Cannot restrict other party while some restrictions are upon you',
+      );
+    const [targetUserRole] = conversation.conversationRoles.filter(
+      (el) => el.user.name === username,
+    );
+    if (!targetUserRole)
+      throw new NotFoundException('Target user not found in this conversation');
+    if (
+      currentUserRole.role === ConversationRoleEnum.USER ||
+      targetUserRole.role === ConversationRoleEnum.OWNER ||
+      (targetUserRole.role === ConversationRoleEnum.ADMIN &&
+        currentUserRole.role !== ConversationRoleEnum.OWNER)
+    )
+      throw new ForbiddenException('You do not hold such power');
+    await this.conversationRestrictionRepository.remove(
+      targetUserRole.restrictions,
+    );
+    await this.conversationRoleRepository.remove(targetUserRole);
+    return true;
   }
 
   async unbanUser(currentUser: User, target: muteUserDto) {

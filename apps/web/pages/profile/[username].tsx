@@ -21,6 +21,7 @@ import {
   selectBlockedUsersState,
   unblockUser,
 } from "../../store/BlockedUsersSlice";
+import { OpenConversation } from "../../store/ConversationSlice";
 import ProfilePicture from "../../components/ProfilePicture";
 
 export default function Profil(): JSX.Element {
@@ -116,8 +117,6 @@ export default function Profil(): JSX.Element {
   /*==========================================================*/
 
   useEffect((): void => {
-    // if (router.query.username !== UserState.name) {
-    // if foreign user
     fetch(`/api/user/${router.query.username}`, {
       credentials: "same-origin",
     })
@@ -463,6 +462,14 @@ export default function Profil(): JSX.Element {
                   <button
                     className={styles.buttonProfil}
                     style={{ width: "100px" }}
+                    onClick={() => {
+                      dispatch(
+                        OpenConversation({
+                          userId: user.id,
+                          userName: user.name,
+                        })
+                      );
+                    }}
                   >
                     <Image
                       alt="message"

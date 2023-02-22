@@ -8,6 +8,7 @@ import {
 } from "react";
 import {
   Conversation as ConversationEntity,
+  conversationRestrictionEnum,
   ConversationsDetails,
   ConversationWithUnread,
   Message as MessageEntity,
@@ -18,12 +19,15 @@ import ConversationControls from "./ConversationControls";
 import { useWebsocketContext } from "./Websocket";
 import styles from "styles/openedConversation.module.scss";
 import ChatParams from "./ChatParams";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { OpenConversation } from "../store/ConversationSlice";
+import { selectUserState } from "../store/UserSlice";
 
 interface OpenedConversationProps {
   newConversation: { userId: string; userName: string } | null;
   conversation: ConversationEntity | null;
+  name: string | undefined;
+  muted: boolean;
   selectConversation: Dispatch<SetStateAction<ConversationEntity | null>>;
   updateUnreadMessage: Dispatch<SetStateAction<number>>;
   updateConversationList: Dispatch<SetStateAction<ConversationWithUnread[]>>;
@@ -32,6 +36,7 @@ interface OpenedConversationProps {
 export default function OpenedConversation(
   props: OpenedConversationProps
 ): JSX.Element {
+  const userState = useSelector(selectUserState);
   const [messages, setMessages] = useState<MessageEntity[]>([]);
   const [currentConversation, setCurrentConversation] =
     useState<ConversationEntity | null>(props.conversation);
@@ -45,17 +50,78 @@ export default function OpenedConversation(
   const [scroll, setScroll] = useState<boolean>(true);
   const socketConnected = useRef<boolean>(false);
   const [menuVisibility, setMenuVisibility] = useState<boolean>(false);
+  const [muted, setMuted] = useState<boolean>(props.muted);
   const dispatch = useDispatch();
+
+  const updateConvList = () => {
+    websockets.conversations?.emit(
+      "getConversations",
+      (conversationDetails: ConversationsDetails) => {
+        props.updateConversationList(conversationDetails.conversations);
+      }
+    );
+  };
+
+  const amIBanned = (banned: {
+    conversationID: string;
+    userId: string | undefined;
+  }) => {
+    if (
+      banned.conversationID === props.conversation?.id &&
+      banned.userId !== undefined &&
+      banned.userId === userState.id
+    ) {
+      props.selectConversation(null);
+      setTimeout(updateConvList, 50);
+    }
+  };
+
+  const amIKicked = (kicked: {
+    conversationID: string;
+    userId: string | undefined;
+  }) => {
+    if (
+      kicked.conversationID === props.conversation?.id &&
+      kicked.userId !== undefined &&
+      kicked.userId === userState.id
+    ) {
+      props.selectConversation(null);
+      setTimeout(updateConvList, 50);
+    }
+  };
+
+  const amIMuted = (muted: {
+    conversationID: string;
+    userId: string | undefined;
+  }) => {
+    if (
+      muted.conversationID === props.conversation?.id &&
+      muted.userId !== undefined &&
+      muted.userId === userState.id
+    ) {
+      setMuted(true);
+    }
+  };
+
+  const amIUnmuted = (muted: {
+    conversationID: string;
+    userId: string | undefined;
+  }) => {
+    if (
+      muted.conversationID === props.conversation?.id &&
+      muted.userId !== undefined &&
+      muted.userId === userState.id
+    ) {
+      setMuted(false);
+    }
+  };
 
   const addNewMessage = (message: any) => {
     if (message.id === currentConversation?.id) {
       setMessages((m) => [...m, message.message]);
-      console.error(lastElement.current?.getBoundingClientRect().top);
       if (lastElement !== null) {
         const top = lastElement.current?.getBoundingClientRect().top;
-        console.error(top, window.innerHeight);
         if (top && top >= 0 && top <= window.innerHeight) {
-          console.error("needToScroll");
           setScroll(true);
           return;
         }
@@ -83,6 +149,10 @@ export default function OpenedConversation(
       ) {
         hydrateMessages();
         websockets.conversations.on("newMessage", addNewMessage);
+        websockets.conversations.on("bannedUser", amIBanned);
+        websockets.conversations.on("kickedUser", amIKicked);
+        websockets.conversations.on("mutedUser", amIMuted);
+        websockets.conversations.on("unmutedUser", amIUnmuted);
         websockets.pong.on("newMessage", addNewMessage);
         socketConnected.current = true;
       } else if (websockets.conversations?.disconnected) {
@@ -96,37 +166,21 @@ export default function OpenedConversation(
       websockets.pong?.off("newMessage");
       if (currentConversation) {
         const targetId = currentConversation.id;
-        console.error(
-          "Unmounting: ",
-          currentConversation,
-          "target id",
-          targetId
-        );
         websockets.conversations
           ?.timeout(2000)
           .emit("read", { id: targetId }, (err: any, mess: boolean) => {
-            console.error("sent: ", targetId);
             if (err) {
-              console.error("did not read");
               return;
             }
-            console.error("Did read");
             setTimeout(() => {
               websockets.conversations?.emit(
                 "getUnread",
                 ({ totalNumberOfUnreadMessages }: unreadMessagesResponse) => {
                   props.updateUnreadMessage(totalNumberOfUnreadMessages);
-                  websockets.conversations?.emit(
-                    "getConversations",
-                    (conversationDetails: ConversationsDetails) => {
-                      props.updateConversationList(
-                        conversationDetails.conversations
-                      );
-                    }
-                  );
+                  updateConvList();
                 }
               );
-            }, 5);
+            }, 50);
             return;
           });
       }
@@ -134,31 +188,32 @@ export default function OpenedConversation(
   }, [currentConversation, websockets.conversations, websockets.pong]);
 
   useEffect(() => {
-    if (scroll) lastElement.current?.scrollIntoView({ behavior: "smooth" });
+    if (scroll) {
+      lastElement.current?.scrollIntoView({ behavior: "smooth" });
+    }
   }, [messages, scroll]);
 
   return (
-    <>
-      <section className={styles.openedConversationContainer}>
-        <section className={styles.conversationControls}>
-          <ConversationControls
-            conversation={currentConversation}
-            newConversation={newConversation}
-            visibility={menuVisibility}
-            setVisibility={setMenuVisibility}
+    <section className={styles.openedConversationContainer}>
+      <ConversationControls
+        conversation={currentConversation}
+        newConversation={newConversation}
+        visibility={menuVisibility}
+        setVisibility={setMenuVisibility}
+        name={props.name}
+      />
+      <section className={styles.messages}>
+        {messages.map((currentMessage) => (
+          <Message
+            message={currentMessage}
+            key={currentMessage.id}
+            group={currentConversation?.groupConversation ? true : false}
           />
-        </section>
-        <section className={styles.messages}>
-          {messages.map((currentMessage) => (
-            <Message
-              message={currentMessage}
-              key={currentMessage.id}
-              group={currentConversation?.groupConversation ? true : false}
-            />
-          ))}
-          <article ref={lastElement}></article>
-        </section>
-        <section className={styles.sendForm}>
+        ))}
+        <article ref={lastElement}></article>
+      </section>
+      <section className={styles.sendForm}>
+        {!muted ? (
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -167,16 +222,14 @@ export default function OpenedConversation(
                   "messageContent"
                 ) as HTMLTextAreaElement
               ).value;
-              console.error(message);
               if (!message || !message.length) return;
               if (!currentConversation) {
-                console.error("Creating new conversation");
                 let createdConversation!: ConversationEntity;
                 websockets.conversations?.emit(
                   "createConversation",
                   {
                     groupConversation: false,
-                    participants: [newConversation?.userId],
+                    participant: newConversation?.userId,
                   },
                   (conversation: any) => {
                     createdConversation = conversation;
@@ -186,9 +239,9 @@ export default function OpenedConversation(
                       { id: conversation.id, content: message },
                       (message: MessageEntity) => {
                         setMessages((prev) => [...prev, message]);
+                        setNewConversation(null);
                       }
                     );
-                    setNewConversation(null);
                   }
                 );
               } else {
@@ -224,7 +277,9 @@ export default function OpenedConversation(
             ></textarea>
             <input type="submit" value="Send" />
           </form>
-        </section>
+        ) : (
+          <div className={styles.mutedField}>You have been muted</div>
+        )}
       </section>
       {menuVisibility && currentConversation ? (
         <section className={styles.chatParams}>
@@ -236,6 +291,6 @@ export default function OpenedConversation(
       ) : (
         <></>
       )}
-    </>
+    </section>
   );
 }

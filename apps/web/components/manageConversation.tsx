@@ -125,7 +125,6 @@ export default function ManageConversation(
                 onClick={(e) => {
                   setErrors([]);
                   setSuccess("");
-                  console.error("Inviting");
                   if (!websockets.conversations?.connected) {
                     setErrors(["Cannot reach server, try again later"]);
                     return;

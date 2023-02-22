@@ -70,7 +70,6 @@ export class ConversationsGateway implements OnGatewayConnection {
       currentUser.sub,
     );
     conversations.forEach((el) => client.join(`conversation_${el}`));
-    console.error(`new socket id: ${client.id}`);
     return 'Connection established';
   }
 
@@ -78,7 +77,6 @@ export class ConversationsGateway implements OnGatewayConnection {
   getConversations(
     @ConnectedSocket() client: Socket,
   ): Promise<ConversationsDetails> {
-    console.error('Getting conversations');
     return this.conversationsService.getConversations(client.data as User);
   }
 
@@ -96,14 +94,17 @@ export class ConversationsGateway implements OnGatewayConnection {
       this.server
         .in(`user_${client.data.id}`)
         .socketsJoin(`conversation_${conversation.id}`);
-      for (const participant of newConversation.participants) {
+      if (newConversation.participant) {
         this.server
-          .in(`user_${participant}`)
+          .in(`user_${newConversation.participant}`)
           .socketsJoin(`conversation_${conversation.id}`);
       }
       client
         .to(`conversation_${conversation.id}`)
         .emit('newConversation', instanceToPlain(conversation));
+    }
+    if (newConversation.visible) {
+      this.server.emit('NewChannel');
     }
     return conversation;
   }
@@ -120,8 +121,12 @@ export class ConversationsGateway implements OnGatewayConnection {
     @ConnectedSocket() client: Socket,
     @MessageBody() { id }: isUUIDDto,
   ): Promise<Message[]> {
-    console.error('Fetching message');
     return this.conversationsService.getMessages(client.data as User, id);
+  }
+
+  @SubscribeMessage('getChannels')
+  getChannels(@ConnectedSocket() client: Socket): Promise<Conversation[]> {
+    return this.conversationsService.getChannels(client.data as User);
   }
 
   @SubscribeMessage('postMessage')
@@ -155,7 +160,6 @@ export class ConversationsGateway implements OnGatewayConnection {
     @ConnectedSocket() client: Socket,
     @MessageBody() invitation: invitationDto,
   ): Promise<boolean> {
-    console.error(invitation);
     let DMId!: string;
     if (!invitation.conversationID) return false;
     const invitationMessage =
@@ -163,7 +167,6 @@ export class ConversationsGateway implements OnGatewayConnection {
         client.data as User,
         invitation,
       );
-    console.error('invitationMessage: ', invitationMessage);
     if (!invitationMessage) return false;
     if (invitationMessage.conversation) {
       this.server
@@ -311,9 +314,10 @@ export class ConversationsGateway implements OnGatewayConnection {
       conversationRestrictionEnum.MUTE,
       new Date(date),
     );
+    const target = await this.usersService.getByUsername(username);
     client
       .to(`conversation_${id}`)
-      .emit('mutedUser', instanceToPlain(restriction));
+      .emit('mutedUser', { conversationID: id, userId: target?.id });
     return restriction;
   }
 
@@ -330,10 +334,35 @@ export class ConversationsGateway implements OnGatewayConnection {
       conversationRestrictionEnum.BAN,
       new Date(date),
     );
+    const target = await this.usersService.getByUsername(username);
     client
       .to(`conversation_${id}`)
-      .emit('bannedUser', instanceToPlain(restriction));
-    this.server.in(`user_${id}`).socketsLeave(`conversation_${id}`);
+      .emit('bannedUser', { conversationID: id, userId: target?.id });
+    client
+      .to(`user_${target?.id}`)
+      .emit('bannedUser', { conversationID: id, userId: target?.id });
+    this.server.in(`user_${target?.id}`).socketsLeave(`conversation_${id}`);
+    return restriction;
+  }
+
+  @SubscribeMessage('kickUser')
+  async kickUser(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() { id, username }: muteUserDto,
+  ): Promise<boolean> {
+    const restriction = await this.conversationsService.kickUser(
+      client.data as User,
+      id,
+      username,
+    );
+    const target = await this.usersService.getByUsername(username);
+    client
+      .to(`conversation_${id}`)
+      .emit('kickedUser', { conversationID: id, userId: target?.id });
+    client
+      .to(`user_${target?.id}`)
+      .emit('kickedUser', { conversationID: id, userId: target?.id });
+    this.server.in(`user_${target?.id}`).socketsLeave(`conversation_${id}`);
     return restriction;
   }
 
@@ -349,10 +378,14 @@ export class ConversationsGateway implements OnGatewayConnection {
       conversationRestrictionEnum.BAN,
       null,
     );
+    const target = await this.usersService.getByUsername(username);
     client
       .to(`conversation_${id}`)
-      .emit('bannedUser', instanceToPlain(restriction));
-    this.server.in(`user_${id}`).socketsLeave(`conversation_${id}`);
+      .emit('bannedUser', { conversationID: id, userId: target?.id });
+    client
+      .to(`user_${target?.id}`)
+      .emit('bannedUser', { conversationID: id, userId: target?.id });
+    this.server.in(`user_${target?.id}`).socketsLeave(`conversation_${id}`);
     return restriction;
   }
 
@@ -378,6 +411,15 @@ export class ConversationsGateway implements OnGatewayConnection {
       return { targetId: null };
     }
     await this.conversationsService.blockUser(source, target);
+    const DMExists = await this.conversationsService.DMExists(
+      client.data as User,
+      targetId,
+    );
+    if (DMExists.conversationExists) {
+      this.server
+        .in(`user_${client.data.id}`)
+        .socketsLeave(`conversation_${DMExists.conversation?.id}`);
+    }
     return { targetId };
   }
 
@@ -388,6 +430,15 @@ export class ConversationsGateway implements OnGatewayConnection {
   ): Promise<{ targetId: string | null }> {
     if (client.data.id === targetId) return { targetId: null };
     await this.conversationsService.unblockUser(client.data.id, targetId);
+    const DMExists = await this.conversationsService.DMExists(
+      client.data as User,
+      targetId,
+    );
+    if (DMExists.conversationExists) {
+      this.server
+        .in(`user_${client.data.id}`)
+        .socketsJoin(`conversation_${DMExists.conversation?.id}`);
+    }
     return { targetId };
   }
 
@@ -396,10 +447,20 @@ export class ConversationsGateway implements OnGatewayConnection {
     @ConnectedSocket() client: Socket,
     @MessageBody() { id, username }: muteUserDto,
   ) {
-    return this.conversationsService.unbanUser(client.data as User, {
+    const ret = await this.conversationsService.unbanUser(client.data as User, {
       id,
       username,
     });
+    const target = await this.usersService.getByUsername(username);
+    if (target)
+      this.server.in(`user_${target.id}`).socketsJoin(`conversation_${id}`);
+    client
+      .to(`conversation_${id}`)
+      .emit('unbannedUser', { conversationID: id, userId: target?.id });
+    client
+      .to(`user_${target?.id}`)
+      .emit('unbannedUser', { conversationID: id, userId: target?.id });
+    return ret;
   }
 
   @SubscribeMessage('unmuteUser')
@@ -407,9 +468,14 @@ export class ConversationsGateway implements OnGatewayConnection {
     @ConnectedSocket() client: Socket,
     @MessageBody() { id, username }: muteUserDto,
   ) {
-    return this.conversationsService.unmuteUser(client.data as User, {
+    const ret = this.conversationsService.unmuteUser(client.data as User, {
       id,
       username,
     });
+    const target = await this.usersService.getByUsername(username);
+    client
+      .to(`conversation_${id}`)
+      .emit('unmutedUser', { conversationID: id, userId: target?.id });
+    return ret;
   }
 }

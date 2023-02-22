@@ -5,6 +5,7 @@ import { Conversation as ConversationEntity } from "types";
 import ToggleCross from "../public/toggleCross.png";
 import Image from "next/image";
 import { useWebsocketContext } from "./Websocket";
+import styles from "styles/createConversation.module.scss";
 
 interface createConversationProps {
   changeConversation: Dispatch<SetStateAction<ConversationEntity | null>>;
@@ -15,30 +16,31 @@ export default function CreateConversation(
   props: createConversationProps
 ): JSX.Element {
   const formRef = useRef<HTMLFormElement | null>(null);
-  const searchRef = useRef<HTMLInputElement>(null);
-  const [participants, setParticipants] = useState<User[]>([]);
-  const [matches, setMatches] = useState<User[]>([]);
   const [errors, setErrors] = useState<string[]>([]);
   const websockets = useWebsocketContext();
 
-  const newConversation = (conversation: ConversationEntity) => {
+  const newConversation = (err: any, conversation: ConversationEntity) => {
+    if (err) {
+      setErrors(["Could not create conversation, please try again later"]);
+      return;
+    }
     props.changeConversation(conversation);
     props.closeCreator(false);
   };
 
   return (
-    <>
+    <section>
       <h4>Create a new group conversation</h4>
-      <section className="errors">
+      <section className={styles.errors}>
         {errors.map((error) => (
           <div>{error}</div>
         ))}
       </section>
       <form
         onSubmit={(e) => {
+          let formErrors = false;
           setErrors([]);
           e.preventDefault();
-          console.error("Submitting");
           const name = (
             e.currentTarget.elements.namedItem("name") as HTMLInputElement
           ).value;
@@ -50,126 +52,96 @@ export default function CreateConversation(
               "confirm-password"
             ) as HTMLInputElement
           ).value;
-          if (!name.length)
+          if (!name.length) {
             setErrors((prev) => [...prev, "Group conversations need a name"]);
-          if (!participants.length)
-            setErrors((prev) => [
-              ...prev,
-              "Please pick participants for you conversation (you will be able to add more later)",
-            ]);
-          if (password.length) {
-            if (!confirmedPassword.length)
-              setErrors((prev) => [...prev, "Please confirm password"]);
-            else if (password !== confirmedPassword)
-              setErrors((prev) => [...prev, "Passwords do not match"]);
+            formErrors = true;
           }
-          if (errors.length) return;
+          if (password.length) {
+            if (!confirmedPassword.length) {
+              setErrors((prev) => [...prev, "Please confirm password"]);
+              formErrors = true;
+            } else if (password !== confirmedPassword) {
+              setErrors((prev) => [...prev, "Passwords do not match"]);
+              formErrors = true;
+            }
+          }
+          if (formErrors) return;
+          const isVisible = (
+            e.currentTarget.elements.namedItem("visible") as HTMLInputElement
+          ).checked;
           if (!websockets.conversations?.connected) {
             setErrors((prev) => [
               ...prev,
               "Network error, please try again later",
             ]);
           }
-          const participantsList = participants.map(
-            (participant) => participant.id
-          );
           if (password.length)
-            websockets.conversations?.emit(
+            websockets.conversations?.timeout(2000).emit(
               "createConversation",
               {
                 name: name,
                 groupConversation: true,
                 password: password,
-                participants: participantsList,
+                visible: isVisible,
               },
               newConversation
             );
           else
-            websockets.conversations?.emit(
+            websockets.conversations?.timeout(2000).emit(
               "createConversation",
               {
                 name: name,
                 groupConversation: true,
-                participants: participantsList,
+                visible: isVisible,
               },
               newConversation
             );
         }}
         ref={formRef}
       >
-        <input
-          autoFocus={true}
-          name="name"
-          placeholder="Conversation name"
-          type="text"
-        />
-        <div></div>
-        <input
-          ref={searchRef}
-          name="participants"
-          placeholder="Search a user"
-          type="text"
-          onChange={(e) => {
-            if (!e.target.value.length) {
-              setMatches([...[]]);
-              return;
-            }
-            fetch(`/api/search?letters=${e.target.value}`, {
-              credentials: "same-origin",
-            })
-              .then((response) => {
-                if (!response.ok) return;
-                response.json().then((data) => {
-                  setMatches([...data]);
-                });
-              })
-              .catch(function (error) {
-                console.log(
-                  "Il y a eu un problème avec l'opération fetch : " +
-                    error.message
-                );
-              });
-          }} /*onBlur={ (e) => 
-        {
-            e.target.value = ""
-            setMatches([...[]])
-         }}*/
-        />
         <section>
-          {matches.map((el) => (
-            <article
-              key={el.id}
-              onClick={(e) => {
-                setParticipants((prev) =>
-                  prev.filter((e) => e.id === el.id).length
-                    ? prev
-                    : [...prev, el]
-                );
-                if (searchRef.current) searchRef.current.value = "";
-                setMatches([]);
-              }}
-            >
-              {el.name}
-            </article>
-          ))}
+          <input
+            autoFocus={true}
+            name="name"
+            placeholder="Conversation name"
+            type="text"
+            autoComplete="off"
+            className={styles.conversationName}
+          />
+        </section>
+        <section className={styles.visibilityBlock}>
+          <label htmlFor="visible">Publicly visible ?</label>
+          <input type="checkbox" name="visible" id="visible" value="visible" />
+        </section>
+        <section className={styles.passwordBlock}>
+          <label htmlFor="password">
+            Enter a password
+            <br />
+            if you wish to protect your conversation
+          </label>
+          <input
+            type="password"
+            name="password"
+            id="password"
+            autoComplete="off"
+            placeholder="Enter password"
+          />
+          <input
+            type="password"
+            name="confirm-password"
+            id="confirm-password"
+            autoComplete="off"
+            placeholder="Confirm password"
+          />
         </section>
         <section>
-          {participants.map((participant) => (
-            <article>
-              {participant.name}
-              <aside>
-                <Image alt="toggle" src={ToggleCross} />
-              </aside>
-            </article>
-          ))}
+          <input
+            className={styles.submit}
+            type="submit"
+            value="Create conversation"
+          />
         </section>
-        <label htmlFor="password">
-          Enter a password if you wish to protect your conversation (optional)
-        </label>
-        <input type="password" name="password" id="password" />
-        <input type="password" name="confirm-password" id="confirm-password" />
-        <input type="submit" value="Create conversation" />
       </form>
-    </>
+    </section>
   );
 }

@@ -2,9 +2,13 @@ import { Conversation, InvitationEnum, Message as MessageEntity } from "types";
 import styles from "styles/Message.module.scss";
 import { useDispatch, useSelector } from "react-redux";
 import { selectUserState } from "../store/UserSlice";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useWebsocketContext } from "./Websocket";
 import { connected } from "process";
+import {
+  selectBlockedUsersState,
+  setBlockedUsers,
+} from "../store/BlockedUsersSlice";
 import { Button } from "./Button";
 import { setInvitedUser } from "../store/InvitationSlice";
 import { useRouter } from "next/router";
@@ -20,151 +24,201 @@ export default function Message(props: MessageProps): JSX.Element {
   const [requirePassword, setRequirePassword] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
   const [success, setSuccess] = useState<string>("");
-  const feedbackRef = useRef<HTMLElement>(null);
+  const [isBlocked, setIsBlocked] = useState(false);
+  const BlockedUsersState = useSelector(selectBlockedUsersState);
+  const feedbackRef = useRef<HTMLDivElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
   const dispatch = useDispatch();
   const router = useRouter();
   const websockets = useWebsocketContext();
-  const UserState = useSelector(selectUserState);
+  const selfMessage = useRef(
+    props.message.sender && props.message.sender.id !== userState.id
+  );
+
+  useEffect(() => {
+    if (
+      props.group &&
+      props.message.sender &&
+      BlockedUsersState.includes(props.message.sender.id)
+    )
+      setIsBlocked(true);
+    else if (
+      props.group &&
+      props.message.sender &&
+      !BlockedUsersState.includes(props.message.sender.id)
+    )
+      setIsBlocked(false);
+  }, [BlockedUsersState]);
 
   if (props.message.system_generated) {
     if (!props.message.is_invitation)
       return (
-        <article
-          className={`${styles.containerSystemMessage} ${styles.messageContent}`}
-        >
-          {props.message.content}
-        </article>
+        <section className={styles.containerSystemMessage}>
+          <p className={styles.messageContent}>{props.message.content}</p>
+        </section>
       );
-    return (
-      <>
+    if (props.message.invitation_type === InvitationEnum.CONVERSATION) {
+      return (
         <article
-          className={`${styles.invitationMessage} ${styles.messageContent}`}
+          className={`${
+            selfMessage.current
+              ? styles.otherInvitationMessage
+              : styles.invitationMessage
+          } ${styles.messageContent}`}
         >
-          {props.message.invitation_type === InvitationEnum.CONVERSATION ? (
-            <p>
-              You are invited to join {props.message.content}, click{" "}
-              <span
-                onClick={(e) => {
-                  setError("");
-                  setSuccess("");
-                  if (!websockets.conversations?.connected) {
-                    setError("Connection error, please try again later");
-                    return;
-                  }
-
-                  const payload = { id: props.message.target };
-                  console.error("target: ", payload);
-                  websockets.conversations.emit(
-                    "canJoinConversation",
-                    payload,
-                    (ret: { canJoin: boolean; password: boolean }) => {
-                      console.error("canJoin: ", ret);
-                      if (ret.canJoin === false) {
-                        setError(
-                          "Cannot join this conversation, please verify you are not already in it or ask the invitor"
-                        );
-                        return;
-                      }
-                      if (!ret.password) {
-                        websockets.conversations?.emit(
-                          "joinConversation",
-                          { id: props.message.target },
-                          () => {
-                            setSuccess("Successfully joined conversation");
-                            return;
-                          }
-                        );
-                      } else {
-                        setRequirePassword(true);
-                        return;
-                      }
-                    }
-                  );
-                }}
-              >
-                here to join
-              </span>
-            </p>
-          ) : (
-            <>
-              <p>Invitation to play Pong</p>
-              {props.message.sender?.id !== UserState.id ? (
-                <Button
-                  primary
-                  onClick={(): void => {
-                    if (!props.message.sender) return;
-                    websockets.pong?.emit(
-                      "invite",
-                      {
-                        id: props.message.sender.id,
-                      },
-                      () => {
-                        if (!props.message.sender) return;
-                        dispatch(
-                          setInvitedUser({
-                            ...initUser,
-                            name: props.message.sender.name,
-                          })
-                        );
-                        router.push("/invite");
-                      }
-                    );
-                  }}
-                >
-                  Click to join
-                </Button>
-              ) : null}
-            </>
-          )}
-        </article>
-        {requirePassword ? (
-          <>
-            <article>Please enter password: </article>
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
+          <p>
+            You are invited to join the conversation {props.message.content}
+          </p>
+          {!requirePassword && selfMessage.current ? (
+            <button
+              className={styles.joinButton}
+              onClick={(e) => {
                 setError("");
+                setSuccess("");
                 if (!websockets.conversations?.connected) {
                   setError("Connection error, please try again later");
                   return;
                 }
-                websockets.conversations.timeout(1000).emit(
-                  "joinConversation",
-                  {
-                    id: props.message.target,
-                    password: passwordRef.current?.value,
-                  },
-                  (err: any, conversation: Conversation) => {
-                    if (err) {
-                      setError("Could not join conversation, check password");
+
+                const payload = { id: props.message.target };
+                websockets.conversations.emit(
+                  "canJoinConversation",
+                  payload,
+                  (ret: { canJoin: boolean; password: boolean }) => {
+                    if (ret.canJoin === false) {
+                      setError(
+                        "Cannot join this conversation, please verify you are not already in it or ask the invitor"
+                      );
                       return;
                     }
-                    setSuccess(`Successfully joined ${props.message.content}`);
-                    setRequirePassword(false);
+                    if (!ret.password) {
+                      websockets.conversations?.emit(
+                        "joinConversation",
+                        { id: props.message.target },
+                        () => {
+                          setSuccess("Successfully joined conversation");
+                          return;
+                        }
+                      );
+                    } else {
+                      setRequirePassword(true);
+                      return;
+                    }
                   }
                 );
               }}
             >
-              <input
-                type="password"
-                placeholder="Enter password"
-                name="password"
-                ref={passwordRef}
-              />
-              <input type="submit" value="submit" />
-            </form>
-          </>
-        ) : (
-          <></>
-        )}
-        <article ref={feedbackRef}>
-          {error.length ? error : <></>}
-          {success.length ? success : <></>}
+              JOIN
+            </button>
+          ) : (
+            <>
+              <form
+                className={styles.invitationForm}
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  setError("");
+                  if (!websockets.conversations?.connected) {
+                    setError("Connection error, please try again later");
+                    return;
+                  }
+                  websockets.conversations.timeout(1000).emit(
+                    "joinConversation",
+                    {
+                      id: props.message.target,
+                      password: passwordRef.current?.value,
+                    },
+                    (err: any, conversation: Conversation) => {
+                      if (err) {
+                        setError("Could not join conversation, check password");
+                        return;
+                      }
+                      setSuccess(
+                        `Successfully joined ${props.message.content}`
+                      );
+                      setRequirePassword(false);
+                    }
+                  );
+                }}
+              >
+                <input
+                  className={styles.passwordField}
+                  type="password"
+                  placeholder="Enter password"
+                  name="password"
+                  ref={passwordRef}
+                />
+                <input
+                  className={styles.joinButton}
+                  type="submit"
+                  value="JOIN"
+                />
+              </form>
+            </>
+          )}
+          <div ref={feedbackRef}>
+            {error.length ? <div className={styles.error}>{error}</div> : <></>}
+            {success.length ? (
+              <div className={styles.success}>{success}</div>
+            ) : (
+              <></>
+            )}
+          </div>
         </article>
-      </>
-    );
+      );
+    } else {
+      return (
+        <article
+          className={`${
+            selfMessage.current
+              ? styles.otherInvitationMessage
+              : styles.invitationMessage
+          } ${styles.messageContent}`}
+        >
+          {" "}
+          <p>Invitation to play Pong</p>
+          {props.message.sender?.id !== userState.id ? (
+            <Button
+              primary
+              onClick={(): void => {
+                if (!props.message.sender) return;
+                websockets.pong?.emit(
+                  "invite",
+                  {
+                    id: props.message.sender.id,
+                  },
+                  () => {
+                    if (!props.message.sender) return;
+                    dispatch(
+                      setInvitedUser({
+                        ...initUser,
+                        name: props.message.sender.name,
+                      })
+                    );
+                    router.push("/invite");
+                  }
+                );
+              }}
+            >
+              Click to join
+            </Button>
+          ) : null}
+          ;
+        </article>
+      );
+    }
   } else if (props.message.sender && props.message.sender.id !== userState.id) {
+    if (isBlocked) {
+      return (
+        <article
+          className={styles.containerOtherMessageBlocked}
+          onClick={() => {
+            setIsBlocked(false);
+          }}
+        >
+          <p>&lt;Blocked user content, click to unveil&gt;</p>
+        </article>
+      );
+    }
     return (
       <article className={styles.containerOtherMessage}>
         {props.group ? (

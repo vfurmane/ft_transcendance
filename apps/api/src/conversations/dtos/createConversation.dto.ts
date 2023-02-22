@@ -26,8 +26,11 @@ export class createConversationDto {
   @MaxLength(72)
   password!: string;
 
-  @IsArray()
-  @ArrayNotEmpty()
-  @IsUUID('all', { each: true })
-  participants!: string[];
+  @IsOptional()
+  @IsUUID()
+  participant!: string;
+
+  @IsOptional()
+  @IsBoolean()
+  visible!: boolean;
 }

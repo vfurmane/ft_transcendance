@@ -1,0 +1,33 @@
+@import "variables";
+
+.errors {
+  color: red;
+  text-align: center;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  margin: 20px 0px;
+}
+
+.searchChannelsContainer {
+  width: 95%;
+}
+
+.searchChannelBar {
+  margin-bottom: 30px;
+  border-top: 0px;
+  border-bottom: solid $dark-neutral-white 1px;
+  border-left: 0px;
+  border-right: 0px;
+  background-color: rgba(0, 0, 0, 0);
+  // margin-right: 50px;
+  text-align: center;
+  width: 200px;
+  font-size: 20px;
+  color: $dark-neutral-white;
+}
+
+.matchesContainer {
+  display: flex;
+  flex-direction: column;
+  padding-left: 10px;
+}

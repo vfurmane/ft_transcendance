@@ -460,7 +460,8 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
             name: `${host.name} - ${target.name}`,
             groupConversation: false,
             password: '',
-            participants: [target.id],
+            participant: target.id,
+            visible: false,
           },
           client.data as User,
         );

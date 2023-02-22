@@ -1,12 +1,8 @@
-.conversationControls {
-  border-bottom: rgba($color: #ddd4d4, $alpha: 0.7) solid 1px;
-}
-
 .openedConversationContainer {
   height: 99%;
   width: 99.5%;
   display: grid;
-  grid-template-rows: 30px auto 5vh;
+  grid-template-rows: 33px auto 5vh;
   gap: 1px;
   .messages {
     height: 100%;
@@ -21,6 +17,13 @@
       margin: 7px 5px;
       padding: 5px 3%;
       width: 80%;
+      border-radius: 15px;
+      overflow-wrap: break-word;
+    }
+    section {
+      margin: 7px 5px;
+      padding: 5px 3%;
+      width: 90%;
       border-radius: 15px;
       overflow-wrap: break-word;
     }
@@ -40,6 +43,10 @@
       }
     }
   }
+}
+
+.mutedField {
+  color: red;
 }
 
 .chatParams {

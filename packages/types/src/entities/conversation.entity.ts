@@ -26,6 +26,12 @@ export class Conversation {
   @Column("varchar", { length: 255, nullable: true, default: null })
   password!: string | null;
 
+  @Column("boolean", { default: false })
+  has_password!: boolean;
+
+  @Column("boolean", { default: false })
+  visible!: boolean;
+
   @CreateDateColumn()
   created_at!: Date;
 
