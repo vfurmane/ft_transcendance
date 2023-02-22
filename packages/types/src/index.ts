@@ -75,7 +75,7 @@ export interface Userfront {
   rank: number;
   level: number;
   tfaSetup: boolean;
-  gameId?: string; 
+  gameId?: string;
   isOauth: boolean;
 }
 

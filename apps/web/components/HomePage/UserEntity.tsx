@@ -2,7 +2,11 @@ import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
 import Image from "next/image";
 import Connect from "../../public/statusConnect.png";
 import Gaming from "../../public/statusGaming.png";
-import { GameStartPayload, Userfront as User, UserStatusUpdatePayload } from "types";
+import {
+  GameStartPayload,
+  Userfront as User,
+  UserStatusUpdatePayload,
+} from "types";
 import styles from "styles/entity.module.scss";
 import textStyles from "styles/text.module.scss";
 import Link from "next/link";
@@ -52,7 +56,7 @@ export default function UserEntity(props: {
     };
 
     if (props.user.id === UserState.id) {
-     setStatus("online");
+      setStatus("online");
     } else if (websockets.general?.connected) {
       websockets.general.on(
         "user_status_update",
@@ -64,21 +68,22 @@ export default function UserEntity(props: {
         onUserStatusUpdate(props.user.id, setStatus)
       );
       if (websockets.pong?.connected) {
-        console.log("PONG CONNECTED")
+        console.log("PONG CONNECTED");
         websockets.pong.on(
           "user_status_update",
           onUserStatusUpdate(props.user.id, setStatus)
         );
         websockets.pong.emit(
           "subscribe_user",
-          { userId: props.user.id }, (isGaming : boolean) => {
-            console.log("RESPONSE : ", isGaming)
-            isGaming ? setStatus("gaming") : setStatus("online")
+          { userId: props.user.id },
+          (isGaming: boolean) => {
+            console.log("RESPONSE : ", isGaming);
+            isGaming ? setStatus("gaming") : setStatus("online");
           }
         );
-     } else {
-      console.log("PONG NOT CONNECTED");
-     }
+      } else {
+        console.log("PONG NOT CONNECTED");
+      }
     }
 
     return () => {
@@ -214,7 +219,17 @@ export default function UserEntity(props: {
           ) : (
             <div></div>
           )}
-          {status === "gaming" ? (<Image alt="status" src={Gaming} width={20} height={20} className="statusImage"/>) : (<div></div>)}
+          {status === "gaming" ? (
+            <Image
+              alt="status"
+              src={Gaming}
+              width={20}
+              height={20}
+              className="statusImage"
+            />
+          ) : (
+            <div></div>
+          )}
           <div className={styles.entityText}>
             <h3 className={textStyles.laquer}>{props.user.name}</h3>
             <p className={textStyles.saira}>{status}</p>

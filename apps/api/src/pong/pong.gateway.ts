@@ -134,10 +134,12 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
             if (socket.data.position === pos) {
               socket.data.position = -1;
               this.cacheManager.del(`spy:${socket.data.id}`);
-              this.server.to(`spy_${socket.data.id}`).emit('user_status_update', {
-                type: 'online',
-                userId: socket.data.id,
-              });
+              this.server
+                .to(`spy_${socket.data.id}`)
+                .emit('user_status_update', {
+                  type: 'online',
+                  userId: socket.data.id,
+                });
             } else if (socket.data.position > pos) {
               socket.data.position--;
             }
@@ -478,9 +480,11 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() spiedUserDto: SpiedUserDto,
   ): Promise<boolean> {
     client.join(`spy_${spiedUserDto.userId}`);
-    const user = await this.cacheManager.get<User>(`spy:${spiedUserDto.userId}`);
+    const user = await this.cacheManager.get<User>(
+      `spy:${spiedUserDto.userId}`,
+    );
     console.log(user);
-    return (user !== undefined);
+    return user !== undefined;
   }
 
   @SubscribeMessage('unsubscribe_user')
