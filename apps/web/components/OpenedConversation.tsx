@@ -143,7 +143,8 @@ export default function OpenedConversation(
   useEffect(() => {
     if (currentConversation) {
       if (
-        websockets.conversations?.connected &&
+        websockets.conversations &&
+        websockets.pong &&
         socketConnected.current === false
       ) {
         hydrateMessages();
@@ -161,6 +162,7 @@ export default function OpenedConversation(
     }
     return () => {
       websockets.conversations?.off("newMessage", addNewMessage);
+      websockets.pong?.off("newMessage");
       if (currentConversation) {
         const targetId = currentConversation.id;
         websockets.conversations
@@ -182,7 +184,7 @@ export default function OpenedConversation(
           });
       }
     };
-  }, [currentConversation, websockets.conversations?.connected]);
+  }, [currentConversation, websockets.conversations, websockets.pong]);
 
   useEffect(() => {
     if (scroll) {
