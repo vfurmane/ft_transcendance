@@ -1,3 +1,4 @@
+import { useRouter } from "next/router";
 import {
   createContext,
   ReactElement,
@@ -57,6 +58,7 @@ const OpenSocket = (
 };
 
 export default function Websocket({ children }: WebsocketProps): JSX.Element {
+  const router = useRouter();
   const [socketInstances, setSocketInstances] = useState<OpenedSockets>({
     general: null,
     conversations: null,
@@ -93,6 +95,10 @@ export default function Websocket({ children }: WebsocketProps): JSX.Element {
             })
           )
         );
+      });
+
+      pong.on("replace", (route: string) => {
+        router.replace(route);
       });
     } else {
       closeOpenSockets(socketInstances);

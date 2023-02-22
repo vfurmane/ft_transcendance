@@ -85,8 +85,11 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
           if (user.id === client.data.id) {
             client.data.room = key;
             client.data.position = value[1].indexOf(user);
-            client.join(key);
+            client.join(`game_${key}`);
             console.log('Reconnected to the game !');
+            this.server
+              .in(`user_${client.data.id}`)
+              .emit('replace', `/pingPong/${key}`);
             return 'Connection restored';
           }
         });
@@ -282,14 +285,21 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
   async subscribeGame(
     @ConnectedSocket() client: Socket,
     @MessageBody() subscribedGameDto: SubscribedGameDto,
-  ): Promise<GameEntityFront> {
-    client.data.room = subscribedGameDto.id;
-    const game = await this.pongService.getGame(subscribedGameDto.id);
-    client.data.position = game.opponents.findIndex(
-      (opponent) => opponent.user.id === client.data.id,
-    );
-    client.join(`game_${subscribedGameDto.id}`);
-    return this.pongService.getGame(subscribedGameDto.id);
+  ): Promise<GameEntityFront | null> {
+    try {
+      client.data.room = subscribedGameDto.id;
+      const game = await this.pongService.getGame(subscribedGameDto.id);
+      console.log(game);
+      client.data.position = game.opponents.findIndex(
+        (opponent) => opponent.user.id === client.data.id,
+      );
+      client.join(`game_${subscribedGameDto.id}`);
+      return this.pongService.getGame(subscribedGameDto.id);
+    } catch {
+      client.data.room = undefined;
+      client.data.position = -1;
+      return null;
+    }
   }
 
   @SubscribeMessage('launch')

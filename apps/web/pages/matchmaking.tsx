@@ -38,7 +38,7 @@ export default function Matchmaking(): ReactElement {
   /*===========================================================*/
 
   useEffect(() => {
-    if (!MatchmakingState.isInQueue) router.push("/");
+    if (!MatchmakingState.isInQueue) router.replace("/");
     else setLoading(false);
   }, [MatchmakingState.isInQueue, router]);
 
@@ -47,7 +47,7 @@ export default function Matchmaking(): ReactElement {
     if (websockets.pong) {
       websockets.pong.on("game_start", (data: GameStartPayload) => {
         if (data.users.find((user) => user.id == UserState.id)) {
-          router.push(`/pingPong/${data.id}`);
+          router.replace(`/pingPong/${data.id}`);
         }
       });
       websockets.pong.on("lead", (n: number) => {
