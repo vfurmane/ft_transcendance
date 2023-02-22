@@ -259,7 +259,12 @@ export default function PingPong(): JSX.Element {
       websockets.pong.emit(
         "subscribe_game",
         { id: router.query.id },
-        (game: GameEntityFront) => {
+        (game: GameEntityFront | null) => {
+          console.log(game);
+          if (!game) {
+            router.replace("/");
+            return;
+          }
           setPrintButton(false);
           let tmp = game.opponents.map((opponent) => opponent.user);
           usersRef.current = game.opponents.map((opponent) => opponent.user);

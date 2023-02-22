@@ -420,7 +420,16 @@ export default function Profil(): JSX.Element {
                       Change username
                     </h3>
                   </button>
-                  <button className={styles.buttonProfil} onClick={changePswrd}>
+                  <button
+                    className={styles.buttonProfil}
+                    onClick={changePswrd}
+                    disabled={UserState.isOauth}
+                    title={
+                      UserState.isOauth
+                        ? "Your account is connected to 42, you cannot change your password."
+                        : undefined
+                    }
+                  >
                     <h3
                       className={textStyles.laquer}
                       style={{ fontSize: "18px" }}

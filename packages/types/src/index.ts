@@ -76,6 +76,7 @@ export interface Userfront {
   level: number;
   tfaSetup: boolean;
   gameId?: string; 
+  isOauth: boolean;
 }
 
 export interface FriendshipRequestStatus {

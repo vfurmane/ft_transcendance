@@ -6,13 +6,7 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import {
-  CACHE_MANAGER,
-  Inject,
-  Logger,
-  UnauthorizedException,
-  UseFilters,
-} from '@nestjs/common';
+import { CACHE_MANAGER, Inject, Logger, UseFilters } from '@nestjs/common';
 import { Cache } from 'cache-manager';
 import { AuthService } from './auth/auth.service';
 import { HttpExceptionTransformationFilter } from './common/filters/HttpExceptionFilter.filter';
