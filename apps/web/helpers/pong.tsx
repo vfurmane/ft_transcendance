@@ -63,6 +63,7 @@ class Game {
       Game.position = 0;
     }
     Game.changeLife = changeLife;
+    console.log('constructeur game');
   }
 
   setWebsocket(socket: Socket<DefaultEventsMap, DefaultEventsMap>): void {
@@ -282,8 +283,6 @@ class Game {
       );
       return [new Racket(0, [p0, p1, p2, p3], this.color[0])];
     } else {
-      console.log(player);
-      console.log(this.player);
       const racket: Racket[] = [];
       for (let i = 0; i < wall.length; i++) {
         const wallDir = wall[i].point[0]
@@ -619,7 +618,7 @@ class Game {
           this.ball.point[0].x > this.board.wall[2].point[0].x ||
           this.ball.point[0].y > this.board.wall[3].point[0].y
         ) {
-          console.log("BALL SAVED");
+          //console.log("BALL SAVED");
           this.ball = this.saveBall.ball;
         }
         this.saveBall.count = 0;

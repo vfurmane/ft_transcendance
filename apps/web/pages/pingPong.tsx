@@ -51,7 +51,7 @@ export default function PingPong(): JSX.Element {
       "keydown",
       function (e) {
         if (
-          ["Space", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].indexOf(
+          ["ArrowUp", "ArrowDown"].indexOf(
             e.code
           ) > -1
         ) {
