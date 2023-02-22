@@ -5,6 +5,7 @@ import { Strategy, VerifyCallback } from 'passport-oauth2';
 import { UsersService } from '../users/users.service';
 import { User } from 'types';
 import { AuthService } from './auth.service';
+import { faker } from '@faker-js/faker';
 
 @Injectable()
 export class FtOauth2Strategy extends PassportStrategy(Strategy) {
@@ -33,7 +34,10 @@ export class FtOauth2Strategy extends PassportStrategy(Strategy) {
     if (user === null) {
       user = await this.usersService.addUser({
         email: ftUser.email,
-        name: ftUser.login,
+        name:
+          (await this.usersService.getByUsername(ftUser.login)) === null
+            ? ftUser.login
+            : faker.internet.userName(ftUser.login),
         password: null,
       });
       user.newlyCreated = true;
