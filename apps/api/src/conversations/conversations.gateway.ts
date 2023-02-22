@@ -353,7 +353,7 @@ export class ConversationsGateway implements OnGatewayConnection {
     const restriction = await this.conversationsService.kickUser(
       client.data as User,
       id,
-      username
+      username,
     );
     const target = await this.usersService.getByUsername(username);
     client

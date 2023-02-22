@@ -1033,7 +1033,7 @@ export class ConversationsService {
   async kickUser(
     currentUser: User,
     conversationId: string,
-    username: string
+    username: string,
   ): Promise<boolean> {
     await this.clearRestrictions(conversationId);
     const conversation = await this.conversationRepository.findOne({
@@ -1072,10 +1072,12 @@ export class ConversationsService {
       (targetUserRole.role === ConversationRoleEnum.ADMIN &&
         currentUserRole.role !== ConversationRoleEnum.OWNER)
     )
-    throw new ForbiddenException('You do not hold such power');
-    await this.conversationRestrictionRepository.remove(targetUserRole.restrictions)
-    await this.conversationRoleRepository.remove(targetUserRole)
-    return (true)
+      throw new ForbiddenException('You do not hold such power');
+    await this.conversationRestrictionRepository.remove(
+      targetUserRole.restrictions,
+    );
+    await this.conversationRoleRepository.remove(targetUserRole);
+    return true;
   }
 
   async unbanUser(currentUser: User, target: muteUserDto) {

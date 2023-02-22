@@ -80,12 +80,9 @@ export default function Chat({
     conversationID: string;
     userId: string | undefined;
   }) => {
-    if (
-      kicked.userId !== undefined &&
-      kicked.userId === userState.id
-    ) {
+    if (kicked.userId !== undefined && kicked.userId === userState.id) {
       selectConversation(null);
-      setTimeout(refreshConversations, 25)
+      setTimeout(refreshConversations, 25);
     }
   };
 
@@ -212,7 +209,19 @@ export default function Chat({
                     )?.user.name
                 : newConversation.userName
             }
-            muted={ !conversationSelected ? false : (conversationSelected.groupConversation === false ? false:((conversationSelected.conversationRoles === undefined || !conversationSelected.conversationRoles.length) ? false : conversationSelected.conversationRoles[0].restrictions.find((restriction) => restriction.status === conversationRestrictionEnum.MUTE) !== undefined))}
+            muted={
+              !conversationSelected
+                ? false
+                : conversationSelected.groupConversation === false
+                ? false
+                : conversationSelected.conversationRoles === undefined ||
+                  !conversationSelected.conversationRoles.length
+                ? false
+                : conversationSelected.conversationRoles[0].restrictions.find(
+                    (restriction) =>
+                      restriction.status === conversationRestrictionEnum.MUTE
+                  ) !== undefined
+            }
             selectConversation={selectConversation}
             updateUnreadMessage={updateUnreadMessage}
             updateConversationList={setConversationList}

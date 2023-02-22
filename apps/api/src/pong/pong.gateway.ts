@@ -44,7 +44,6 @@ import { eventNames, listeners } from 'process';
 import { SpiedUserDto } from '../spied-user.dto';
 import { ConversationsService } from '../conversations/conversations.service';
 
-
 @UsePipes(new ValidationPipe())
 @UseInterceptors(ClassSerializerInterceptor)
 @WebSocketGateway({ namespace: 'pong' })
@@ -462,7 +461,7 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
             groupConversation: false,
             password: '',
             participant: target.id,
-            visible: false
+            visible: false,
           },
           client.data as User,
         );

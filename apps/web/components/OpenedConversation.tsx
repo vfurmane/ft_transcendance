@@ -50,20 +50,17 @@ export default function OpenedConversation(
   const [scroll, setScroll] = useState<boolean>(true);
   const socketConnected = useRef<boolean>(false);
   const [menuVisibility, setMenuVisibility] = useState<boolean>(false);
-  const [ muted, setMuted ] = useState<boolean>(props.muted)
+  const [muted, setMuted] = useState<boolean>(props.muted);
   const dispatch = useDispatch();
 
-  const updateConvList = () =>
-  {
+  const updateConvList = () => {
     websockets.conversations?.emit(
       "getConversations",
       (conversationDetails: ConversationsDetails) => {
-        props.updateConversationList(
-          conversationDetails.conversations
-        );
+        props.updateConversationList(conversationDetails.conversations);
       }
-    )
-  }
+    );
+  };
 
   const amIBanned = (banned: {
     conversationID: string;
@@ -75,7 +72,7 @@ export default function OpenedConversation(
       banned.userId === userState.id
     ) {
       props.selectConversation(null);
-      setTimeout(updateConvList, 50)
+      setTimeout(updateConvList, 50);
     }
   };
 
@@ -89,7 +86,7 @@ export default function OpenedConversation(
       kicked.userId === userState.id
     ) {
       props.selectConversation(null);
-      setTimeout(updateConvList, 50)
+      setTimeout(updateConvList, 50);
     }
   };
 
@@ -102,7 +99,7 @@ export default function OpenedConversation(
       muted.userId !== undefined &&
       muted.userId === userState.id
     ) {
-      setMuted(true)
+      setMuted(true);
     }
   };
 
@@ -115,7 +112,7 @@ export default function OpenedConversation(
       muted.userId !== undefined &&
       muted.userId === userState.id
     ) {
-      setMuted(false)
+      setMuted(false);
     }
   };
 
@@ -177,7 +174,7 @@ export default function OpenedConversation(
                 "getUnread",
                 ({ totalNumberOfUnreadMessages }: unreadMessagesResponse) => {
                   props.updateUnreadMessage(totalNumberOfUnreadMessages);
-                  updateConvList()
+                  updateConvList();
                 }
               );
             }, 50);
@@ -188,9 +185,7 @@ export default function OpenedConversation(
   }, [currentConversation, websockets.conversations?.connected]);
 
   useEffect(() => {
-
-    if (scroll)
-    {
+    if (scroll) {
       lastElement.current?.scrollIntoView({ behavior: "smooth" });
     }
   }, [messages, scroll]);
@@ -215,71 +210,73 @@ export default function OpenedConversation(
         <article ref={lastElement}></article>
       </section>
       <section className={styles.sendForm}>
-        { !muted ?
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            const message = (
-              e.currentTarget.elements.namedItem(
-                "messageContent"
-              ) as HTMLTextAreaElement
-            ).value;
-            if (!message || !message.length) return;
-            if (!currentConversation) {
-              let createdConversation!: ConversationEntity;
-              websockets.conversations?.emit(
-                "createConversation",
-                {
-                  groupConversation: false,
-                  participant: newConversation?.userId,
-                },
-                (conversation: any) => {
-                  createdConversation = conversation;
-                  setCurrentConversation(createdConversation);
-                  websockets.conversations?.emit(
-                    "postMessage",
-                    { id: conversation.id, content: message },
-                    (message: MessageEntity) => {
-                      setMessages((prev) => [...prev, message]);
-                      setNewConversation(null);
-                    }
-                  );
-                }
-              );
-            } else {
-              websockets.conversations?.emit(
-                "postMessage",
-                { id: currentConversation.id, content: message },
-                (message: MessageEntity) => {
-                  setMessages([...messages, message]);
-                  setScroll(true);
-                }
-              );
-            }
-            (
-              e.currentTarget.elements.namedItem(
-                "messageContent"
-              ) as HTMLTextAreaElement
-            ).value = "";
-          }}
-          ref={formRef}
-        >
-          <textarea
-            className={styles.sendMessageField}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey) {
-                e.preventDefault();
-                formRef.current?.requestSubmit();
+        {!muted ? (
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              const message = (
+                e.currentTarget.elements.namedItem(
+                  "messageContent"
+                ) as HTMLTextAreaElement
+              ).value;
+              if (!message || !message.length) return;
+              if (!currentConversation) {
+                let createdConversation!: ConversationEntity;
+                websockets.conversations?.emit(
+                  "createConversation",
+                  {
+                    groupConversation: false,
+                    participant: newConversation?.userId,
+                  },
+                  (conversation: any) => {
+                    createdConversation = conversation;
+                    setCurrentConversation(createdConversation);
+                    websockets.conversations?.emit(
+                      "postMessage",
+                      { id: conversation.id, content: message },
+                      (message: MessageEntity) => {
+                        setMessages((prev) => [...prev, message]);
+                        setNewConversation(null);
+                      }
+                    );
+                  }
+                );
+              } else {
+                websockets.conversations?.emit(
+                  "postMessage",
+                  { id: currentConversation.id, content: message },
+                  (message: MessageEntity) => {
+                    setMessages([...messages, message]);
+                    setScroll(true);
+                  }
+                );
               }
+              (
+                e.currentTarget.elements.namedItem(
+                  "messageContent"
+                ) as HTMLTextAreaElement
+              ).value = "";
             }}
-            name="messageContent"
-            id="messageContent"
-            cols={42}
-            rows={10}
-          ></textarea>
-          <input type="submit" value="Send" />
-        </form>
-        : <div className={styles.mutedField}>You have been muted</div>}
+            ref={formRef}
+          >
+            <textarea
+              className={styles.sendMessageField}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  formRef.current?.requestSubmit();
+                }
+              }}
+              name="messageContent"
+              id="messageContent"
+              cols={42}
+              rows={10}
+            ></textarea>
+            <input type="submit" value="Send" />
+          </form>
+        ) : (
+          <div className={styles.mutedField}>You have been muted</div>
+        )}
       </section>
       {menuVisibility && currentConversation ? (
         <section className={styles.chatParams}>
