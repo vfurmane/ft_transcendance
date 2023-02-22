@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString, Max } from 'class-validator';
+import { IsNotEmpty, IsString, MaxLength } from 'class-validator';
 
 export class StateDto {
   @ApiProperty({
@@ -8,6 +8,6 @@ export class StateDto {
   })
   @IsNotEmpty()
   @IsString()
-  @Max(255)
+  @MaxLength(255)
   state!: string;
 }
