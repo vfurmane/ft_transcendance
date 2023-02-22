@@ -17,6 +17,7 @@ export default function Routes({ children }: RoutesProps): JSX.Element {
     const isProtected = !/^\/auth\//.test(router.pathname);
     if (!userState.id.length && isProtected) router.replace("/auth/login");
     else if (userState.id.length && !isProtected) router.replace("/");
+    else if (userState.gameId) router.replace(`/pingPong/${userState.gameId}`)
     else setLoading(false);
   }, [router.pathname, userState.id]);
   if (loading) return <Loading></Loading>;

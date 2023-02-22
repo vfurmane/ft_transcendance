@@ -10,10 +10,11 @@ import Link from "next/link";
 import playButtonStyles from "styles/playButton.module.scss";
 import PlayMenu from "../../components/HomePage/PlayMenu";
 import styles from "styles/pingPong.module.scss";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { selectUserState } from "../../store/UserSlice";
 import { useWebsocketContext } from "../../components/Websocket";
 import ProfilePicture from "../../components/ProfilePicture";
+import { setUserGameId } from "../../store/UserSlice";
 
 export default function PingPong(): JSX.Element {
   const router = useRouter();
@@ -47,21 +48,28 @@ export default function PingPong(): JSX.Element {
   const UserState = useSelector(selectUserState);
   const websockets = useWebsocketContext();
 
-  websockets.pong?.on("endGame", () => {
+  /*websockets.pong?.on("endGame", () => {
     setEndGame(true);
     setOpenOverlay(false);
     setPrintButton(true);
     setGame(null);
-  });
+  });*/
 
+  const dispatch = useDispatch();
   useEffect(() => {
+    if (endGame)
+      dispatch(setUserGameId(undefined));
+
+    if (openOverlay)
+      dispatch(setUserGameId(undefined));
+
     return () => {
       const canvas = document.getElementById("canvasElem");
       if (canvas) {
         canvas.style.transformOrigin = `0px 0px`;
       }
     };
-  }, []);
+  }, [dispatch, router.query.id, endGame, openOverlay]);
 
   function rotateInit(users: User[]) {
     const size =
@@ -279,9 +287,9 @@ export default function PingPong(): JSX.Element {
     window.addEventListener("keydown", catchKey, false);
 
     return () => {
-      if (websockets.pong?.connected) {
-        websockets.pong.emit("unsubscribe_game");
-      }
+      /*if (websockets.pong?.connected) {
+        websockets.pong.emit("unsubscribe_game", { id: router.query.id });
+      }*/
       window.removeEventListener("keydown", catchKey);
     };
   }, [websockets.pong?.connected, router.query.id]);
@@ -316,18 +324,20 @@ export default function PingPong(): JSX.Element {
         );
       }
       if (intervalRef.current) clearInterval(intervalRef.current);
-      console.error('------------------setGame');
-      console.error(usersGame.length);
+      //console.error('------------------setGame');
+      //console.error(usersGame.length);
+      const index = usersGame.findIndex((user) => user.id === UserState.id);
+      if (index >= 0) dispatch(setUserGameId(router.query.id));
       setGame(
         new Game(
           usersGame.length,
-          usersGame.findIndex((user) => user.id === UserState.id),
+          index,
           changeLife
         )
       );
       usersGameRef.current = usersGame;
     }
-  }, [users, usersGame, usersRotate, changeLife]);
+  }, [users, usersGame, usersRotate, changeLife, dispatch]);
 
   useEffect(() => {
     if (canvasRef && users.length > 1) {
@@ -428,52 +438,40 @@ export default function PingPong(): JSX.Element {
   }
 
   const buttons = (
+    
     <div className={styles.buttons}>
-      <Link href={"/"} className={styles.link}>
-        <PlayButton
-          open={false}
-          style={{
-            text: openPlayButton ? "" : "HOME",
-            small: true,
-            color: false,
-          }}
-        />
-      </Link>
-      {openOverlay ? (
-        <div>
+          <Link href={"/"} className={styles.link}>
+            <PlayButton
+              open={false}
+              style={{
+                text: openPlayButton ? "" : "HOME",
+                small: true,
+                color: false,
+              }}
+            />
+          </Link>
+        
+      
           <PlayButton
-            open={false}
+            handleClick={handleClickPlayButton}
+            open={openPlayButton}
             style={{
-              text: openPlayButton ? "" : "continu to WATCH",
+              text: openPlayButton ? "" : "PLAY AGAIN",
               small: true,
-              color: false,
+              color: true,
             }}
           />
-        </div>
-      ) : (
-        <></>
-      )}
-      <PlayButton
-        handleClick={handleClickPlayButton}
-        open={openPlayButton}
-        style={{
-          text: openPlayButton ? "" : "PLAY AGAIN",
-          small: true,
-          color: true,
-        }}
-      />
-      {openPlayButton ? (
-        <div
-          className="col-10 offset-1 offset-xl-0 offset-lg-1 col-lg-3 offset-xl-1 "
-          style={{ width: "80%" }}
-        >
-          <div className={`${playButtonStyles.playMenuContainer} d-block `}>
-            <PlayMenu click={() => newPartie()} />
-          </div>
-        </div>
-      ) : (
-        <></>
-      )}
+          {openPlayButton ? (
+            <div
+              className="col-10 offset-1 offset-xl-0 offset-lg-1 col-lg-3 offset-xl-1 "
+              style={{ width: "80%" }}
+            >
+              <div className={`${playButtonStyles.playMenuContainer} d-block `}>
+                <PlayMenu click={() => newPartie()} />
+              </div>
+            </div>
+          ) : <></>}
+      
     </div>
   );
 
@@ -484,7 +482,6 @@ export default function PingPong(): JSX.Element {
           <h1 className={textStyles.saira} style={{ color: "white" }}>
             You LOose !
           </h1>
-          {buttons}
         </div>
       ) : (
         <></>

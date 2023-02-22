@@ -76,9 +76,9 @@ export function WatchGame(props: WatchGameProps): ReactElement {
     const scrollContainer = document.getElementById("scroll");
 
     scrollContainer!.addEventListener("wheel", (evt) => {
-      evt.preventDefault();
+      //evt.preventDefault();
       scrollContainer!.scrollLeft -= evt.deltaY;
-    });
+    }, { passive: true });
   }, [props.users, isShown]);
 
   return (

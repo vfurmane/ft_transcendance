@@ -75,6 +75,7 @@ export interface Userfront {
   rank: number;
   level: number;
   tfaSetup: boolean;
+  gameId?: string; 
 }
 
 export interface FriendshipRequestStatus {

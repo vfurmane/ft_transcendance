@@ -172,14 +172,15 @@ th {
   background: rgba(151, 150, 150, 0.1);
   border-radius: 10px;
   position: absolute;
-  top: 25%;
-  left: 25%;
-  width: 50%;
-  height: 50%;
+  top: 40%;
+  left: 40%;
+  width: 20%;
+  height: 10%;
   z-index: 99;
   backdrop-filter: blur(8px);
   display: flex;
   justify-content: center;
   align-items: center;
   flex-direction: column;
+
 }

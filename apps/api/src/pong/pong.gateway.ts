@@ -36,6 +36,7 @@ import { UsersService } from 'src/users/users.service';
 import { instanceToPlain, TransformInstanceToPlain } from 'class-transformer';
 import { InviteUserDto } from './invite-user.dto';
 import getCookie from '../common/helpers/getCookie';
+import { eventNames, listeners } from 'process';
 
 @UsePipes(new ValidationPipe())
 @UseInterceptors(ClassSerializerInterceptor)
@@ -287,6 +288,21 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
     client.join(`game_${subscribedGameDto.id}`);
     return await this.pongService.getGame(subscribedGameDto.id);
   }
+
+  @SubscribeMessage('unsubscribe_game')
+  unsubscribeGame(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() subscribedGameDto: SubscribedGameDto,
+  ): void {
+    client.data.room = subscribedGameDto.id;
+    client.removeListener("refresh",() => {
+      console.log('remove listener refresh');
+    });
+    client.removeListener('endGame', () => {
+      console.log('remove listener refresh');
+    });
+  }
+
 
   @SubscribeMessage('launch')
   async launch(@ConnectedSocket() client: Socket) {
