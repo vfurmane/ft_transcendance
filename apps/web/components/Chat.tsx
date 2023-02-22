@@ -91,7 +91,7 @@ export default function Chat({
         }
       );
     } else if (!conversationSelected && !newConversation.userId.length) {
-      if (websockets.conversations?.connected && websockets.pong?.connected) {
+      if (websockets.conversations && websockets.pong) {
         websockets.conversations.emit(
           "getConversations",
           (conversationDetails: ConversationsDetails) => {
