@@ -8,6 +8,7 @@ import {
 } from "react";
 import {
   Conversation as ConversationEntity,
+  conversationRestrictionEnum,
   ConversationsDetails,
   ConversationWithUnread,
   Message as MessageEntity,
@@ -18,8 +19,9 @@ import ConversationControls from "./ConversationControls";
 import { useWebsocketContext } from "./Websocket";
 import styles from "styles/openedConversation.module.scss";
 import ChatParams from "./ChatParams";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { OpenConversation } from "../store/ConversationSlice";
+import { selectUserState } from "../store/UserSlice";
 
 interface OpenedConversationProps {
   newConversation: { userId: string; userName: string } | null;
@@ -32,6 +34,7 @@ interface OpenedConversationProps {
 export default function OpenedConversation(
   props: OpenedConversationProps
 ): JSX.Element {
+  const userState = useSelector(selectUserState);
   const [messages, setMessages] = useState<MessageEntity[]>([]);
   const [currentConversation, setCurrentConversation] =
     useState<ConversationEntity | null>(props.conversation);
@@ -46,6 +49,11 @@ export default function OpenedConversation(
   const socketConnected = useRef<boolean>(false);
   const [menuVisibility, setMenuVisibility] = useState<boolean>(false);
   const dispatch = useDispatch();
+
+  const amIBanned = (banned : { conversationID : string, userId: string | undefined }) => 
+  {if (banned.conversationID === props.conversation?.id && banned.userId !== undefined && banned.userId === userState.id)
+   {   props.selectConversation(null)}
+  };
 
   const addNewMessage = (message: any) => {
     if (message.id === currentConversation?.id) {
@@ -82,6 +90,7 @@ export default function OpenedConversation(
       ) {
         hydrateMessages();
         websockets.conversations.on("newMessage", addNewMessage);
+        websockets.conversations.on("bannedUser", amIBanned);
         socketConnected.current = true;
       } else if (websockets.conversations?.disconnected) {
         socketConnected.current = false;
@@ -93,21 +102,12 @@ export default function OpenedConversation(
       websockets.conversations?.off("newMessage", addNewMessage);
       if (currentConversation) {
         const targetId = currentConversation.id;
-        console.error(
-          "Unmounting: ",
-          currentConversation,
-          "target id",
-          targetId
-        );
         websockets.conversations
           ?.timeout(2000)
           .emit("read", { id: targetId }, (err: any, mess: boolean) => {
-            console.error("sent: ", targetId);
             if (err) {
-              console.error("did not read");
               return;
             }
-            console.error("Did read");
             setTimeout(() => {
               websockets.conversations?.emit(
                 "getUnread",
@@ -135,16 +135,13 @@ export default function OpenedConversation(
   }, [messages, scroll]);
 
   return (
-    <>
       <section className={styles.openedConversationContainer}>
-        <section className={styles.conversationControls}>
           <ConversationControls
             conversation={currentConversation}
             newConversation={newConversation}
             visibility={menuVisibility}
             setVisibility={setMenuVisibility}
           />
-        </section>
         <section className={styles.messages}>
           {messages.map((currentMessage) => (
             <Message
@@ -222,8 +219,7 @@ export default function OpenedConversation(
             <input type="submit" value="Send" />
           </form>
         </section>
-      </section>
-      {menuVisibility && currentConversation ? (
+        {menuVisibility && currentConversation ? (
         <section className={styles.chatParams}>
           <ChatParams
             currentConversation={currentConversation}
@@ -233,6 +229,6 @@ export default function OpenedConversation(
       ) : (
         <></>
       )}
-    </>
+      </section>
   );
 }

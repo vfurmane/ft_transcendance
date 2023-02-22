@@ -20,12 +20,11 @@ export default function ConversationControls(
 
   if (!props.visibility) {
     return (
-      <>
+      <section className={styles.conversationControls}>
         <p className={styles.conversationName}>
           {props.conversation
-            ? props.conversation.name
-                .replace(userState.name, "")
-                .replace(" - ", "")
+            ? (props.conversation.groupConversation ? props.conversation.name :
+              props.conversation.conversationRoles.find((role) => role.user.id !== userState.id)?.user.name)
             : props.newConversation?.userName}
         </p>
         <section
@@ -36,17 +35,16 @@ export default function ConversationControls(
         >
           <Image src={ToggleBar} alt="toggle bar" />
         </section>
-      </>
+      </section>
     );
   }
   return (
-    <>
+    <section className={styles.conversationControls}>
       <p className={styles.conversationName}>
-        {props.conversation
-          ? props.conversation.name
-              .replace(userState.name, "")
-              .replace(" - ", "")
-          : props.newConversation?.userName}
+      {props.conversation
+            ? (props.conversation.groupConversation ? props.conversation.name :
+              props.conversation.conversationRoles.find((role) => role.user.id !== userState.id)?.user.name)
+            : props.newConversation?.userName}
       </p>
       <section
         className={styles.conversationMenu}
@@ -56,6 +54,6 @@ export default function ConversationControls(
       >
         <Image src={ToggleBar} alt="toggle bar" />
       </section>
-    </>
+      </section>
   );
 }

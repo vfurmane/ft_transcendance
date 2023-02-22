@@ -23,11 +23,11 @@ export default function Message(props: MessageProps): JSX.Element {
   if (props.message.system_generated) {
     if (!props.message.is_invitation)
       return (
-        <article
-          className={`${styles.containerSystemMessage} ${styles.messageContent}`}
+        <section
+          className={styles.containerSystemMessage}
         >
-          {props.message.content}
-        </article>
+          <p className={styles.messageContent}>{props.message.content}</p>
+        </section>
       );
     return (
       <>

@@ -322,7 +322,6 @@ export class ConversationsService {
       totalNumberOfUnreadMessages: 0,
       conversations: [],
     };
-    let ret : Conversation[] = [];
     let conversations = await this.conversationRepository.find({
       relations: {
         conversationRoles: true,
@@ -336,27 +335,8 @@ export class ConversationsService {
         },
       },
     });
-    for (let conversation of conversations)
-    {
-      if (!conversation.groupConversation)
-      {
-        const newConversation = await this.conversationRepository.findOne({
-          relations: {
-            conversationRoles: true,
-          },
-          where: {
-            id: conversation.id
-          },
-        });
-        if (newConversation)
-          ret.push(newConversation)
-        console.error(newConversation?.conversationRoles)
-      }
-      else
-        ret.push(conversation)
-    }
-    if (!ret) return conversationsDetails;
-    for (const conversation of ret) {
+    if (!conversations) return conversationsDetails;
+    for (const conversation of conversations) {
       conversation.conversationRoles[0].restrictions =
         await this.verifyRestrictionsOnUser(
           conversation.conversationRoles[0].restrictions,
@@ -402,14 +382,24 @@ export class ConversationsService {
       }
       conversationsDetails.totalNumberOfUnreadMessages +=
         currentConversationWithUnread.numberOfUnreadMessages;
+      if (!currentConversationWithUnread.conversation.groupConversation)
+      {
+        const check = await this.conversationRepository.findOne({
+          relations: {
+            conversationRoles: true,
+          },
+          where: {
+            id: conversation.id
+          },
+        });
+        if (check)
+          currentConversationWithUnread.conversation = check
+      }
       conversationsDetails.conversations.push(currentConversationWithUnread);
     }
-    console.error(conversationsDetails);
     conversationsDetails.conversations.sort(
       (a, b) => b.lastMessage.getTime() - a.lastMessage.getTime(),
     );
-    console.error('post sort');
-    console.error(conversationsDetails);
     return conversationsDetails;
   }
 
@@ -478,6 +468,7 @@ export class ConversationsService {
     if (!conversationRoles.length) {
       return response;
     }
+    const blockedUser = await this.getBlockedUsers(currentUser.id)
     for (const role of conversationRoles) {
       if (
         (await this.verifyRestrictionsOnUser(role.restrictions)).filter(
@@ -486,6 +477,26 @@ export class ConversationsService {
         ).length
       )
         continue;
+      if (role.conversation.groupConversation === false)
+      {
+        const check = await this.conversationRoleRepository.findOne({
+          relations: {
+            conversation: true,
+          },
+          where: {
+            conversation:
+            {
+              id: role.conversation.id
+            },
+            user:
+            {
+              id: Not(currentUser.id)
+            }
+          },
+        });
+        if (check && blockedUser.find((block) => block.target.id === check.user.id) !== undefined)
+          continue;
+      }
       const unreadMessages = await this.messageRepository.count({
         relations: {
           conversation: true,

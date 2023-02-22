@@ -1,12 +1,19 @@
+@import "variables";
+
+.conversationControls {
+  border-bottom: rgba($color: #ddd4d4, $alpha: 0.7) solid 1px;
+  width: 100%;
+}
+
 .conversationMenu {
   width: 100%;
   height: 100%;
 }
 
 .conversationName {
-  width: 75%;
+  width: 300px;
+  overflow-y:hidden;
   overflow-x: hidden;
-  overflow-y: hidden;
   margin: 0;
   padding: 3px 5px;
   text-align: left;

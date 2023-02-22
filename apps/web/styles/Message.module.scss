@@ -33,11 +33,24 @@
   }
 }
 
+.containerSystemMessage {
+  align-self: center;
+  background-color: none;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  p {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    text-align: center;
+  }
+}
+
 .messageContent {
   white-space: pre-wrap;
   overflow-wrap: break-word;
   word-wrap: break-word;
   hyphens: auto;
 }
-
-// .senderName

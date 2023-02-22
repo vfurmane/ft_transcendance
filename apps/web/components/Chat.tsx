@@ -52,7 +52,7 @@ export default function Chat({
     websockets.conversations?.emit(
       "getConversations",
       (conversationDetails: ConversationsDetails) => {
-        setConversationList(() => conversationDetails.conversations);
+        setConversationList(conversationDetails.conversations);
       }
     );
   };
@@ -112,6 +112,8 @@ export default function Chat({
     return () => {
       websockets.conversations?.off("newConversation", addNewConversation);
       websockets.conversations?.off("newMessage", newUnread);
+      websockets.conversations?.off("bannedUser");
+      websockets.conversations?.off("unbannedUser");
       websockets.conversations?.emit(
         "getUnread",
         ({ totalNumberOfUnreadMessages }: unreadMessagesResponse) => {
@@ -223,6 +225,7 @@ export default function Chat({
               <Conversation
                 key={conversation.conversation.id}
                 conversation={conversation} selectConversation={selectConversation}
+                setConversationList={setConversationList}
               />
           ))
         ) : (

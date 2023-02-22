@@ -11,6 +11,7 @@ import {
 import Chat from "./Chat";
 import { useWebsocketContext } from "./Websocket";
 import ToggleCross from "../public/toggleCross.png";
+import { selectBlockedUsersState } from "../store/BlockedUsersSlice";
 
 export default function ChatBar(): JSX.Element {
   const [visibility, setVisibility] = useState<boolean>(false);
@@ -18,6 +19,7 @@ export default function ChatBar(): JSX.Element {
   const websockets = useWebsocketContext();
   const conversationToOpen = useSelector(selectConversationsState);
   const dispatch = useDispatch();
+  const BlockedUsersState = useSelector(selectBlockedUsersState);
   const [conversationIdProp, setConversationIdProp] = useState<{
     userId: string;
     userName: string;
@@ -26,6 +28,18 @@ export default function ChatBar(): JSX.Element {
   const newUnreadMessage = () => {
     setUnreadMessages((unreadMessages) => unreadMessages + 1);
   };
+
+  useEffect(() =>
+  {
+    if (websockets.conversations?.connected) {
+      websockets.conversations.emit(
+        "getUnread",
+        ({ totalNumberOfUnreadMessages }: unreadMessagesResponse) => {
+          setUnreadMessages(totalNumberOfUnreadMessages);
+        }
+      );
+    }
+  }, [ BlockedUsersState ])
 
   useEffect(() => {
     if (conversationToOpen.userId.length) {

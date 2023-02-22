@@ -339,10 +339,14 @@ export class ConversationsGateway implements OnGatewayConnection {
       conversationRestrictionEnum.BAN,
       new Date(date),
     );
+    const target = await this.usersService.getByUsername(username)
     client
       .to(`conversation_${id}`)
-      .emit('bannedUser', instanceToPlain(restriction));
-    this.server.in(`user_${id}`).socketsLeave(`conversation_${id}`);
+      .emit('bannedUser', { conversationID: id, userId: target?.id });
+    client
+      .to(`user_${target?.id}`)
+      .emit('bannedUser', { conversationID: id, userId: target?.id });
+    this.server.in(`user_${target?.id}`).socketsLeave(`conversation_${id}`);
     return restriction;
   }
 
@@ -358,10 +362,14 @@ export class ConversationsGateway implements OnGatewayConnection {
       conversationRestrictionEnum.BAN,
       null,
     );
+    const target = await this.usersService.getByUsername(username)
     client
       .to(`conversation_${id}`)
-      .emit('bannedUser', instanceToPlain(restriction));
-    this.server.in(`user_${id}`).socketsLeave(`conversation_${id}`);
+      .emit('bannedUser', { conversationID: id, userId: target?.id });
+    client
+      .to(`user_${target?.id}`)
+      .emit('bannedUser', { conversationID: id, userId: target?.id });
+    this.server.in(`user_${target?.id}`).socketsLeave(`conversation_${id}`);
     return restriction;
   }
 
@@ -387,6 +395,11 @@ export class ConversationsGateway implements OnGatewayConnection {
       return { targetId: null };
     }
     await this.conversationsService.blockUser(source, target);
+    const DMExists = await this.conversationsService.DMExists(client.data as User, targetId);
+    if (DMExists.conversationExists)
+    {
+      this.server.in(`user_${client.data.id}`).socketsLeave(`conversation_${DMExists.conversation?.id}`);
+    }
     return { targetId };
   }
 
@@ -397,6 +410,11 @@ export class ConversationsGateway implements OnGatewayConnection {
   ): Promise<{ targetId: string | null }> {
     if (client.data.id === targetId) return { targetId: null };
     await this.conversationsService.unblockUser(client.data.id, targetId);
+    const DMExists = await this.conversationsService.DMExists(client.data as User, targetId);
+    if (DMExists.conversationExists)
+    {
+      this.server.in(`user_${client.data.id}`).socketsJoin(`conversation_${DMExists.conversation?.id}`);
+    }
     return { targetId };
   }
 
@@ -405,10 +423,20 @@ export class ConversationsGateway implements OnGatewayConnection {
     @ConnectedSocket() client: Socket,
     @MessageBody() { id, username }: muteUserDto,
   ) {
-    return this.conversationsService.unbanUser(client.data as User, {
+    const ret = await this.conversationsService.unbanUser(client.data as User, {
       id,
       username,
     });
+    const target = await this.usersService.getByUsername(username)
+    if (target)
+      this.server.in(`user_${target.id}`).socketsJoin(`conversation_${id}`);
+    client
+      .to(`conversation_${id}`)
+      .emit('unbannedUser', { conversationID: id, userId: target?.id });
+    client
+      .to(`user_${target?.id}`)
+      .emit('unbannedUser', { conversationID: id, userId: target?.id });
+    return (ret)
   }
 
   @SubscribeMessage('unmuteUser')
