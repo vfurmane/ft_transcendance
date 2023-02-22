@@ -33,7 +33,9 @@ const deregisterSocket = (
   socket: Socket<DefaultEventsMap, DefaultEventsMap>
 ): void => {
   console.error("disconnecting socket");
-  socket.disconnect();
+  setTimeout(() => {
+    socket.disconnect();
+  }, 5000);
   socket.off("connect");
   socket.off("connect_error");
   socket.off("disconnect");
