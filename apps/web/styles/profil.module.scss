@@ -50,9 +50,13 @@
   border: solid 1px $dark-neutral-white;
   font-size: 15px;
   margin-right: 5px;
+
+  &:disabled {
+    background-color: $dark-background-grey-lighter;
+  }
 }
 
-.buttonProfil:hover {
+.buttonProfil:enabled:hover {
   background: url("../public/texture.png"),
     linear-gradient(
       160deg,
