@@ -61,7 +61,6 @@ export default function UserEntity(props: {
 
     setAccept(props.option.accept);
 
-
     if (props.user.id === UserState.id) {
       setStatus("online");
     } else if (websockets.general?.connected) {
