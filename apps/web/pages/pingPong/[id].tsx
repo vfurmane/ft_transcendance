@@ -255,20 +255,18 @@ export default function PingPong(): JSX.Element {
   );
 
   useEffect(() => {
-    if (websockets.pong?.connected) {
+    if (websockets.pong) {
       websockets.pong.emit(
         "subscribe_game",
         { id: router.query.id },
-        (game: GameEntityFront | null) => {
-          console.log(game);
-          if (!game) {
+        (game: GameEntityFront) => {
+          if (!game.id) {
             router.replace("/");
             return;
           }
           setPrintButton(false);
           let tmp = game.opponents.map((opponent) => opponent.user);
           usersRef.current = game.opponents.map((opponent) => opponent.user);
-
           //console.log('----------------in first useEffect');
           setUsersGame(usersRef.current);
           tmp = rotate(tmp);
@@ -281,7 +279,7 @@ export default function PingPong(): JSX.Element {
 
     function catchKey(e: KeyboardEvent) {
       if (
-        ["Space", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].indexOf(
+        ["ArrowUp", "ArrowDown"].indexOf(
           e.code
         ) > -1
       ) {
@@ -296,7 +294,7 @@ export default function PingPong(): JSX.Element {
       }*/
       window.removeEventListener("keydown", catchKey);
     };
-  }, [websockets.pong?.connected, router.query.id]);
+  }, [websockets.pong, router.query.id]);
 
   useEffect(() => {
     //console.log('----------------in UseEffect');
@@ -314,11 +312,8 @@ export default function PingPong(): JSX.Element {
           function (e) {
             if (
               [
-                "Space",
                 "ArrowUp",
                 "ArrowDown",
-                "ArrowLeft",
-                "ArrowRight",
               ].indexOf(e.code) > -1
             ) {
               e.preventDefault();

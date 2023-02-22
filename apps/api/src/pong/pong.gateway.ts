@@ -311,11 +311,17 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() subscribedGameDto: SubscribedGameDto,
   ): Promise<GameEntityFront> {
     client.data.room = subscribedGameDto.id;
-    const game = await this.pongService.getGame(subscribedGameDto.id);
+    let game: GameEntityFront;
+    try {
+      game = await this.pongService.getGame(subscribedGameDto.id);
+    } catch (error) {
+      return { id: '', opponents: [] };
+    }
     client.data.position = game.opponents.findIndex(
       (opponent) => opponent.user.id === client.data.id,
     );
     client.join(`game_${subscribedGameDto.id}`);
+    return game;
     return await this.pongService.getGame(subscribedGameDto.id);
   }
 
