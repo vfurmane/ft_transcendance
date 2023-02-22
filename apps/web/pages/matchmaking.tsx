@@ -16,6 +16,7 @@ import { useWebsocketContext } from "../components/Websocket";
 import { selectMatchmakingState } from "../store/MatchmakingSlice";
 import { selectUserState } from "../store/UserSlice";
 import TopBar from "../components/TopBar";
+import { Button } from "../components/Button";
 
 export default function Matchmaking(): ReactElement {
   const [hasLeftQueue, setHasLeftQueue] = useState(false);
@@ -132,9 +133,9 @@ export default function Matchmaking(): ReactElement {
         handleClickUserMenu={handleClickUserMenu}
       />
       <div className={styles.container}>
-        <h1>Waiting for an opponent...</h1>
+        <h1 style={{marginBottom:'20px'}}>Waiting for an opponent...</h1>
         {MatchmakingState.gameMode === GameMode.BATTLE_ROYALE && isFirst ? (
-          <button onClick={launch}>LAUNCH : {numberOfPlayerinQueue}</button>
+          <Button onClick={launch} danger>{`LAUNCH : ${numberOfPlayerinQueue - 1} player${numberOfPlayerinQueue - 1 > 1? 's' : ''} join this game`}</Button>
         ) : (
           <></>
         )}

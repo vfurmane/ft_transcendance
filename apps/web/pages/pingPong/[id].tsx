@@ -16,6 +16,7 @@ import { useWebsocketContext } from "../../components/Websocket";
 import ProfilePicture from "../../components/ProfilePicture";
 import { setUserGameId } from "../../store/UserSlice";
 import { relative } from "path";
+import { Loading } from "../../components/Loading";
 
 export default function PingPong(): JSX.Element {
   const router = useRouter();
@@ -29,7 +30,7 @@ export default function PingPong(): JSX.Element {
   const openPlayMenuRef = useRef(openPlayButton);
   const [openOverlay, setOpenOverlay] = useState(false);
   const [endGame, setEndGame] = useState(false);
-  const [printButton, setPrintButton] = useState(true);
+  const [printButton, setPrintButton] = useState(false);
   const [game, setGame] = useState<Game | null>(null);
   const [win, setWin] = useState(false);
 
@@ -469,6 +470,9 @@ export default function PingPong(): JSX.Element {
       )}
     </div>
   );
+
+  //if (!game)
+    //return <Loading></Loading>
 
   return (
     <div onClick={() => close()} style={{ width: "100vw", height: "100vh" }}>
