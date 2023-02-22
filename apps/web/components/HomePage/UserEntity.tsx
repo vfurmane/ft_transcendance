@@ -15,7 +15,10 @@ import { useSelector } from "react-redux";
 import { selectUserState } from "../../store/UserSlice";
 import { useRouter } from "next/router";
 import ProfilePicture from "../ProfilePicture";
-import { setInvitedUser } from "../../store/InvitationSlice";
+import {
+  selectInvitationState,
+  setInvitedUser,
+} from "../../store/InvitationSlice";
 
 export default function UserEntity(props: {
   user: User;
@@ -33,6 +36,7 @@ export default function UserEntity(props: {
   const [status, setStatus] = useState(props.user.status);
   const [openMenu, setOpenMenu] = useState(false);
   const [accept, setAccept] = useState(props.option?.accept);
+  const InvitedUserState = useSelector(selectInvitationState);
   const UserState = useSelector(selectUserState);
   const router = useRouter();
   const dispatch = useDispatch();
@@ -130,19 +134,10 @@ export default function UserEntity(props: {
           ) : null}
           {UserState.id !== props.user.id ? (
             <Link
-              href={""}
+              href="/invite"
               className={styles.buttonEntity}
-              onClick={(): void => {
-                websockets.pong?.emit(
-                  "invite",
-                  {
-                    id: props.user.id,
-                  },
-                  () => {
-                    dispatch(setInvitedUser(props.user));
-                    router.push("/invite");
-                  }
-                );
+              onClick={async (): Promise<void> => {
+                dispatch(setInvitedUser(props.user));
               }}
             >
               <h3 className={textStyles.laquer}>Play</h3>
