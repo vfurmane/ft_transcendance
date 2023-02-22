@@ -61,9 +61,18 @@ export default function ConversationParticipant(
   if (!props.conversation.groupConversation)
     return (
       <article>
-        <Link href={`/profile/${props.participant.user.name}`} style={{textDecoration:'none'}}>
-          <div style={{display: 'flex', justifyContent:'center', marginTop:'10px'}}>
-              <Button primary>Profil</Button>
+        <Link
+          href={`/profile/${props.participant.user.name}`}
+          style={{ textDecoration: "none" }}
+        >
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              marginTop: "10px",
+            }}
+          >
+            <Button primary>Profil</Button>
           </div>
         </Link>
       </article>
@@ -75,10 +84,14 @@ export default function ConversationParticipant(
           onClick={(e) => {
             setShowOptions(true);
           }}
-          style={{display:'flex', justifyContent: 'start'}}
+          style={{ display: "flex", justifyContent: "start" }}
         >
-          <article style={{marginLeft: '10px'}}>{props.participant.user.name} :</article>
-          <article style={{marginLeft: '10px'}}>{props.participant.role}</article>
+          <article style={{ marginLeft: "10px" }}>
+            {props.participant.user.name} :
+          </article>
+          <article style={{ marginLeft: "10px" }}>
+            {props.participant.role}
+          </article>
         </section>
       );
     return (
@@ -86,11 +99,15 @@ export default function ConversationParticipant(
         onClick={(e) => {
           setShowOptions(true);
         }}
-        style={{display:'flex', justifyContent: 'start'}}
+        style={{ display: "flex", justifyContent: "start" }}
       >
-        <article style={{marginLeft: '10px'}}>{props.participant.user.name} :</article>
-        <article style={{marginLeft: '10px'}}>{props.participant.role}</article>
-        <article style={{marginLeft: '10px'}}>
+        <article style={{ marginLeft: "10px" }}>
+          {props.participant.user.name} :
+        </article>
+        <article style={{ marginLeft: "10px" }}>
+          {props.participant.role}
+        </article>
+        <article style={{ marginLeft: "10px" }}>
           {props.participant.restrictions.filter(
             (e) => e.status === conversationRestrictionEnum.BAN
           ).length
@@ -106,223 +123,286 @@ export default function ConversationParticipant(
       props.participant.role === ConversationRoleEnum.USER)
   ) {
     return (
-      <section style={{border: 'solid 1px white', borderRadius: '20px', width: '60%', marginLeft:'20%', marginBottom:'20px', position: 'relative'}}>
-         <article
+      <section
+        style={{
+          border: "solid 1px white",
+          borderRadius: "20px",
+          width: "60%",
+          marginLeft: "20%",
+          marginBottom: "20px",
+          position: "relative",
+        }}
+      >
+        <article
           onClick={() => {
             setShowOptions(false);
           }}
           className={styles.cross}
         >
-          <Image src={ToggleCross} alt="toggle bar" width={10} height={10}/>
+          <Image src={ToggleCross} alt="toggle bar" width={10} height={10} />
         </article>
         <article>
-           {props.participant.user.name}
-          <Link href={`/profile/${props.participant.user.name}`} style={{textDecoration: 'none'}}>
-            <div style={{display: 'flex', justifyContent:'center', marginTop:'10px', width:'60%', marginLeft:'20%'}}>
-                <Button primary fullWidth>Profil</Button>
+          {props.participant.user.name}
+          <Link
+            href={`/profile/${props.participant.user.name}`}
+            style={{ textDecoration: "none" }}
+          >
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                marginTop: "10px",
+                width: "60%",
+                marginLeft: "20%",
+              }}
+            >
+              <Button primary fullWidth>
+                Profil
+              </Button>
             </div>
           </Link>
         </article>
         <article>Role: {props.participant.role}</article>
-        <article style={{display:'flex', flexDirection:'column', alignItems: 'center', width:'60%', marginLeft:'20%'}}>
-        {!props.participant.restrictions.filter(
-          (e) => e.status === conversationRestrictionEnum.MUTE
-        ).length ? (
-          <div style={{marginBottom:'5px'}}>
-          <Button fullWidth
-            onClick={() => {
-              setError("");
-              setSuccess("");
-              if (!websockets.conversations?.connected) {
-                setError("Temporary network error, please try again later");
-                return;
-              }
-              websockets.conversations.timeout(1000).emit(
-                "muteUser",
-                {
-                  id: props.conversation.id,
-                  username: props.participant.user.name,
-                  date: new Date(new Date().getTime() + 24 * 60 * 60 * 1000),
-                },
-                (err: any, answer: string) => {
-                  if (err) {
-                    setError("Failed to mute user");
+        <article
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            width: "60%",
+            marginLeft: "20%",
+          }}
+        >
+          {!props.participant.restrictions.filter(
+            (e) => e.status === conversationRestrictionEnum.MUTE
+          ).length ? (
+            <div style={{ marginBottom: "5px" }}>
+              <Button
+                fullWidth
+                onClick={() => {
+                  setError("");
+                  setSuccess("");
+                  if (!websockets.conversations?.connected) {
+                    setError("Temporary network error, please try again later");
                     return;
                   }
-                  setSuccess(answer);
-                }
-              );
-            }}
-          >
-            Mute for 24h
-          </Button></div>
-        ) : (
-          <div style={{marginBottom:'5px'}}><Button
-            onClick={() => {
-              setError("");
-              setSuccess("");
-              if (!websockets.conversations?.connected) {
-                setError("Temporary network error, please try again later");
-                return;
-              }
-              websockets.conversations.timeout(1000).emit(
-                "unmuteUser",
-                {
-                  id: props.conversation.id,
-                  username: props.participant.user.name,
-                },
-                (err: any, answer: string) => {
-                  if (err) {
-                    setError("Failed to unmute user");
-                    return;
-                  }
-                  setSuccess(
-                    `Sucessfully unmuted ${props.participant.user.name}`
-                  );
-                }
-              );
-            }}
-          >
-            Unmute
-          </Button></div>
-        )}
-        {!props.participant.restrictions.filter(
-          (e) => e.status === conversationRestrictionEnum.BAN
-        ).length ? (
-          <>
-            <div style={{marginBottom:'5px'}}><Button
-              onClick={() => {
-                setError("");
-                setSuccess("");
-                if (!websockets.conversations?.connected) {
-                  setError("Temporary network error, please try again later");
-                  return;
-                }
-                websockets.conversations.timeout(1000).emit(
-                  "banUser",
-                  {
-                    id: props.conversation.id,
-                    username: props.participant.user.name,
-                    date: new Date(new Date().getTime() + 24 * 60 * 60 * 1000),
-                  },
-                  (err: any, answer: string) => {
-                    if (err) {
-                      setError("Failed to ban user");
-                      return;
+                  websockets.conversations.timeout(1000).emit(
+                    "muteUser",
+                    {
+                      id: props.conversation.id,
+                      username: props.participant.user.name,
+                      date: new Date(
+                        new Date().getTime() + 24 * 60 * 60 * 1000
+                      ),
+                    },
+                    (err: any, answer: string) => {
+                      if (err) {
+                        setError("Failed to mute user");
+                        return;
+                      }
+                      setSuccess(answer);
                     }
-                    setSuccess(answer);
-                  }
-                );
-              }}
-            >
-              Ban for 24h
-            </Button></div>
-            <div style={{marginBottom:'20px'}}><Button
-              onClick={() => {
-                setError("");
-                setSuccess("");
-                if (!websockets.conversations?.connected) {
-                  setError("Temporary network error, please try again later");
-                  return;
-                }
-                websockets.conversations.timeout(1000).emit(
-                  "banUserIndefinitely",
-                  {
-                    id: props.conversation.id,
-                    username: props.participant.user.name,
-                  },
-                  (err: any, answer: string) => {
-                    if (err) {
-                      setError("Failed to ban user");
-                      return;
-                    }
-                    setSuccess(answer);
-                  }
-                );
-              }}
-            >
-              Ban indefinitely
-            </Button></div>
-          </>
-        ) : (
-          <div style={{marginBottom:'20px'}}><Button
-            onClick={() => {
-              setError("");
-              setSuccess("");
-              if (!websockets.conversations?.connected) {
-                setError("Temporary network error, please try again later");
-                return;
-              }
-              websockets.conversations.timeout(1000).emit(
-                "unbanUser",
-                {
-                  id: props.conversation.id,
-                  username: props.participant.user.name,
-                },
-                (err: any, answer: string) => {
-                  if (err) {
-                    setError("Failed to unban user");
+                  );
+                }}
+              >
+                Mute for 24h
+              </Button>
+            </div>
+          ) : (
+            <div style={{ marginBottom: "5px" }}>
+              <Button
+                onClick={() => {
+                  setError("");
+                  setSuccess("");
+                  if (!websockets.conversations?.connected) {
+                    setError("Temporary network error, please try again later");
                     return;
                   }
-                  setSuccess(
-                    `Sucessfully unbanned ${props.participant.user.name}`
+                  websockets.conversations.timeout(1000).emit(
+                    "unmuteUser",
+                    {
+                      id: props.conversation.id,
+                      username: props.participant.user.name,
+                    },
+                    (err: any, answer: string) => {
+                      if (err) {
+                        setError("Failed to unmute user");
+                        return;
+                      }
+                      setSuccess(
+                        `Sucessfully unmuted ${props.participant.user.name}`
+                      );
+                    }
                   );
-                }
-              );
-            }}
-          >
-            Unban
-          </Button></div>
-        )}
-        <article>
-          Change role:{" "}
-          {props.self?.role === ConversationRoleEnum.OWNER ? (
-            props.participant.role === ConversationRoleEnum.USER ? (
-              <>
-                <Button danger fullWidth
+                }}
+              >
+                Unmute
+              </Button>
+            </div>
+          )}
+          {!props.participant.restrictions.filter(
+            (e) => e.status === conversationRestrictionEnum.BAN
+          ).length ? (
+            <>
+              <div style={{ marginBottom: "5px" }}>
+                <Button
                   onClick={() => {
-                    promoteUser(ConversationRoleEnum.OWNER, true);
+                    setError("");
+                    setSuccess("");
+                    if (!websockets.conversations?.connected) {
+                      setError(
+                        "Temporary network error, please try again later"
+                      );
+                      return;
+                    }
+                    websockets.conversations.timeout(1000).emit(
+                      "banUser",
+                      {
+                        id: props.conversation.id,
+                        username: props.participant.user.name,
+                        date: new Date(
+                          new Date().getTime() + 24 * 60 * 60 * 1000
+                        ),
+                      },
+                      (err: any, answer: string) => {
+                        if (err) {
+                          setError("Failed to ban user");
+                          return;
+                        }
+                        setSuccess(answer);
+                      }
+                    );
                   }}
                 >
-                  OWNER
+                  Ban for 24h
                 </Button>
-                <div style={{marginTop: '10px', marginBottom:'10px'}}><Button danger fullWidth
+              </div>
+              <div style={{ marginBottom: "20px" }}>
+                <Button
+                  onClick={() => {
+                    setError("");
+                    setSuccess("");
+                    if (!websockets.conversations?.connected) {
+                      setError(
+                        "Temporary network error, please try again later"
+                      );
+                      return;
+                    }
+                    websockets.conversations.timeout(1000).emit(
+                      "banUserIndefinitely",
+                      {
+                        id: props.conversation.id,
+                        username: props.participant.user.name,
+                      },
+                      (err: any, answer: string) => {
+                        if (err) {
+                          setError("Failed to ban user");
+                          return;
+                        }
+                        setSuccess(answer);
+                      }
+                    );
+                  }}
+                >
+                  Ban indefinitely
+                </Button>
+              </div>
+            </>
+          ) : (
+            <div style={{ marginBottom: "20px" }}>
+              <Button
+                onClick={() => {
+                  setError("");
+                  setSuccess("");
+                  if (!websockets.conversations?.connected) {
+                    setError("Temporary network error, please try again later");
+                    return;
+                  }
+                  websockets.conversations.timeout(1000).emit(
+                    "unbanUser",
+                    {
+                      id: props.conversation.id,
+                      username: props.participant.user.name,
+                    },
+                    (err: any, answer: string) => {
+                      if (err) {
+                        setError("Failed to unban user");
+                        return;
+                      }
+                      setSuccess(
+                        `Sucessfully unbanned ${props.participant.user.name}`
+                      );
+                    }
+                  );
+                }}
+              >
+                Unban
+              </Button>
+            </div>
+          )}
+          <article>
+            Change role:{" "}
+            {props.self?.role === ConversationRoleEnum.OWNER ? (
+              props.participant.role === ConversationRoleEnum.USER ? (
+                <>
+                  <Button
+                    danger
+                    fullWidth
+                    onClick={() => {
+                      promoteUser(ConversationRoleEnum.OWNER, true);
+                    }}
+                  >
+                    OWNER
+                  </Button>
+                  <div style={{ marginTop: "10px", marginBottom: "10px" }}>
+                    <Button
+                      danger
+                      fullWidth
+                      onClick={() => {
+                        promoteUser(ConversationRoleEnum.ADMIN, true);
+                      }}
+                    >
+                      ADMIN
+                    </Button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <Button
+                    danger
+                    fullWidth
+                    onClick={() => {
+                      promoteUser(ConversationRoleEnum.OWNER, true);
+                    }}
+                  >
+                    OWNER
+                  </Button>
+                  <div style={{ marginTop: "10px", marginBottom: "10px" }}>
+                    <Button
+                      danger
+                      fullWidth
+                      onClick={() => {
+                        promoteUser(ConversationRoleEnum.USER, false);
+                      }}
+                    >
+                      USER
+                    </Button>
+                  </div>
+                </>
+              )
+            ) : (
+              <div style={{ marginTop: "10px", marginBottom: "10px" }}>
+                <Button
+                  danger
+                  fullWidth
                   onClick={() => {
                     promoteUser(ConversationRoleEnum.ADMIN, true);
                   }}
                 >
                   ADMIN
-                </Button></div>
-              </>
-            ) : (
-              <>
-                <Button danger fullWidth
-                  onClick={() => {
-                    promoteUser(ConversationRoleEnum.OWNER, true);
-                  }}
-                >
-                  OWNER
                 </Button>
-                <div style={{marginTop: '10px', marginBottom:'10px'}}><Button danger fullWidth
-                  onClick={() => {
-                    promoteUser(ConversationRoleEnum.USER, false);
-                  }}
-                >
-                  USER
-                </Button></div>
-              </>
-            )
-          ) : (
-            <div style={{marginTop: '10px', marginBottom:'10px'}}><Button danger fullWidth
-              onClick={() => {
-                promoteUser(ConversationRoleEnum.ADMIN, true);
-              }}
-            >
-              ADMIN
-            </Button></div>
-          )}
-          
-        </article>
+              </div>
+            )}
+          </article>
         </article>
         {error.length ? <article>{error}</article> : <></>}
         {success.length ? <article>{success}</article> : <></>}
@@ -334,21 +414,37 @@ export default function ConversationParticipant(
       onClick={(e) => {
         setShowOptions(false);
       }}
-      style={{border: 'solid 1px white', borderRadius: '20px', width: '60%', marginLeft:'20%', marginBottom:'20px', position:'relative'}}
+      style={{
+        border: "solid 1px white",
+        borderRadius: "20px",
+        width: "60%",
+        marginLeft: "20%",
+        marginBottom: "20px",
+        position: "relative",
+      }}
     >
-       <article
+      <article
         onClick={() => {
           setShowOptions(false);
         }}
         className={styles.cross}
       >
-        <Image src={ToggleCross} alt="toggle bar" width={10} height={10}/>
+        <Image src={ToggleCross} alt="toggle bar" width={10} height={10} />
       </article>
-      <article >
+      <article>
         {props.participant.user.name}
-        <Link href={`/profile/${props.participant.user.name}`} style={{textDecoration: 'none'}}>
-          <div style={{display: 'flex', justifyContent:'center', marginTop:'10px'}}>
-                <Button primary>Profil</Button>
+        <Link
+          href={`/profile/${props.participant.user.name}`}
+          style={{ textDecoration: "none" }}
+        >
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              marginTop: "10px",
+            }}
+          >
+            <Button primary>Profil</Button>
           </div>
         </Link>
       </article>
