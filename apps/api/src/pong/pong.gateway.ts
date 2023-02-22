@@ -10,7 +10,9 @@ import {
 } from '@nestjs/websockets';
 import {
   BadRequestException,
+  CACHE_MANAGER,
   ClassSerializerInterceptor,
+  Inject,
   Logger,
   NotFoundException,
   UseInterceptors,
@@ -26,7 +28,9 @@ import {
   User,
   Userfront,
   GameMode,
+  UserStatusUpdatePayload,
 } from 'types';
+import { Cache } from 'cache-manager';
 import { Repository } from 'typeorm';
 import { TransformUserService } from 'src/TransformUser/TransformUser.service';
 import { SubscribedGameDto } from './subscribed-game.dto';
@@ -37,6 +41,7 @@ import { instanceToPlain, TransformInstanceToPlain } from 'class-transformer';
 import { InviteUserDto } from './invite-user.dto';
 import getCookie from '../common/helpers/getCookie';
 import { eventNames, listeners } from 'process';
+import { SpiedUserDto } from '../spied-user.dto';
 
 @UsePipes(new ValidationPipe())
 @UseInterceptors(ClassSerializerInterceptor)
@@ -53,6 +58,7 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
     private readonly userRepository: Repository<User>,
     private readonly usersService: UsersService,
     private readonly transformUserService: TransformUserService,
+    @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
   ) {
     this.room_id = [];
   }
@@ -127,6 +133,11 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
           sockets.forEach((socket) => {
             if (socket.data.position === pos) {
               socket.data.position = -1;
+              this.cacheManager.del(`spy:${socket.data.id}`);
+              this.server.to(`spy_${socket.data.id}`).emit('user_status_update', {
+                type: 'online',
+                userId: socket.data.id,
+              });
             } else if (socket.data.position > pos) {
               socket.data.position--;
             }
@@ -143,6 +154,11 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
         this.server.in(`game_${room}`).emit('endGame');
         sockets.forEach((socket) => {
           socket.leave(`game_${room}`);
+          this.cacheManager.del(`spy:${socket.data.id}`);
+          this.server.to(`spy_${socket.data.id}`).emit('user_status_update', {
+            type: 'online',
+            userId: socket.data.id,
+          });
           socket.data.room = undefined;
         });
         if (key[1].length === 2)
@@ -178,6 +194,11 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
         }
         console.log(client.data.name + ' IS READY IN GAME ' + room);
         user.ready = true;
+        this.cacheManager.set(`spy:${user.id}`, user.id, 0);
+        this.server.to(`spy_${user.id}`).emit('user_status_update', {
+          type: 'gaming',
+          userId: user.id,
+        });
         for (let i = 0; i < game[1].length; i++) {
           if (game[1][i].ready === false) {
             return;
@@ -449,5 +470,27 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
       });
     }
     return games;
+  }
+
+  @SubscribeMessage('subscribe_user')
+  async subscribeUser(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() spiedUserDto: SpiedUserDto,
+  ): Promise<boolean> {
+    client.join(`spy_${spiedUserDto.userId}`);
+    const user = await this.cacheManager.get<User>(`spy:${spiedUserDto.userId}`);
+    console.log(user);
+    return (user !== undefined);
+  }
+
+  @SubscribeMessage('unsubscribe_user')
+  unsubscribeUser(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() spiedUserDto: SpiedUserDto,
+  ): void {
+    this.logger.log(
+      `'${client.data.id}' (${client.data.name}) is not spying on '${spiedUserDto.userId}' anymore`,
+    );
+    client.leave(`spy_${spiedUserDto.userId}`);
   }
 }

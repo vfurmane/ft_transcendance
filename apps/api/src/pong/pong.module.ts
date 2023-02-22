@@ -1,4 +1,4 @@
-import { Logger, Module } from '@nestjs/common';
+import { CacheModule, Logger, Module } from '@nestjs/common';
 import { UsersModule } from 'src/users/users.module';
 import { AuthModule } from 'src/auth/auth.module';
 import { PongGateway } from './pong.gateway';
@@ -15,6 +15,7 @@ import { MatchModule } from 'src/Match/Match.module';
     UsersModule,
     TransformUserModule,
     MatchModule,
+    CacheModule.register(),
     TypeOrmModule.forFeature([Opponent, Game]),
   ],
   controllers: [],
