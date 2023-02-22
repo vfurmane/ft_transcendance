@@ -50,7 +50,7 @@ export default function ChatParams(props: chatParamsProps): JSX.Element {
         ) : (
           <></>
         )}
-        <section>
+        <section style={{overflowY:'scroll', overflowX:'hidden', height:'80%'}}>
           {props.currentConversation.groupConversation ? (
             <div>
               <p style={{marginTop:'20px'}}>____________________________________</p>
@@ -64,11 +64,15 @@ export default function ChatParams(props: chatParamsProps): JSX.Element {
           {participants.map((participant) => {
             if (participant.user.id === userState.id) return <></>;
             return (
-              <ConversationParticipant
+              <div style={{marginBottom: '10px'}}>
+                <ConversationParticipant
+                key={participant.user.id}
                 participant={participant}
                 self={self.current}
                 conversation={props.currentConversation}
               />
+              </div>
+              
             );
           })}
         </section>
