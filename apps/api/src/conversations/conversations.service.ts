@@ -690,7 +690,6 @@ export class ConversationsService {
     conversation: Conversation | null;
     prevConversation: string | null;
   } | null> {
-    console.error('invitation: ', invitation);
     const roles = await this.conversationRoleRepository.find({
       relations: {
         conversation: true,
@@ -704,17 +703,13 @@ export class ConversationsService {
     const currentUserRole = roles.filter(
       (role) => role.user.id === currentUser.id,
     );
-    console.error('current role: ', currentUserRole);
     if (currentUserRole.length === 0) {
-      console.error('Not in conversation');
       return null;
     }
     if (currentUserRole[0].restrictions.length) {
-      console.error('Restricted');
       return null;
     }
     if (currentUserRole[0].role === ConversationRoleEnum.LEFT) return null;
-    console.error('A-OK');
     if (roles.filter((role) => role.user.id === invitation.target).length !== 0)
       return null;
     const targetConversation = await this.conversationRepository.findOne({
@@ -739,8 +734,6 @@ export class ConversationsService {
         conversationExists.conversation,
         targetConversation.name,
       );
-      console.error('Message generated: ', message);
-      console.error('poset in', conversationExists.conversation);
       return {
         message: message,
         conversation: null,
@@ -761,8 +754,6 @@ export class ConversationsService {
       conversation.conversation,
       targetConversation.name,
     );
-    console.error('Message generated: ', message);
-    console.error('poset in', conversationExists.conversation);
     return {
       message: message,
       conversation: conversation.conversation,

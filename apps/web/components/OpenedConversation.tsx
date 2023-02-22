@@ -27,6 +27,7 @@ interface OpenedConversationProps {
   newConversation: { userId: string; userName: string } | null;
   conversation: ConversationEntity | null;
   name: string | undefined;
+  muted: boolean;
   selectConversation: Dispatch<SetStateAction<ConversationEntity | null>>;
   updateUnreadMessage: Dispatch<SetStateAction<number>>;
   updateConversationList: Dispatch<SetStateAction<ConversationWithUnread[]>>;
@@ -49,6 +50,7 @@ export default function OpenedConversation(
   const [scroll, setScroll] = useState<boolean>(true);
   const socketConnected = useRef<boolean>(false);
   const [menuVisibility, setMenuVisibility] = useState<boolean>(false);
+  const [ muted, setMuted ] = useState<boolean>(props.muted)
   const dispatch = useDispatch();
 
   const updateConvList = () =>
@@ -91,15 +93,38 @@ export default function OpenedConversation(
     }
   };
 
+  const amIMuted = (muted: {
+    conversationID: string;
+    userId: string | undefined;
+  }) => {
+    if (
+      muted.conversationID === props.conversation?.id &&
+      muted.userId !== undefined &&
+      muted.userId === userState.id
+    ) {
+      setMuted(true)
+    }
+  };
+
+  const amIUnmuted = (muted: {
+    conversationID: string;
+    userId: string | undefined;
+  }) => {
+    if (
+      muted.conversationID === props.conversation?.id &&
+      muted.userId !== undefined &&
+      muted.userId === userState.id
+    ) {
+      setMuted(false)
+    }
+  };
+
   const addNewMessage = (message: any) => {
     if (message.id === currentConversation?.id) {
       setMessages((m) => [...m, message.message]);
-      console.error(lastElement.current?.getBoundingClientRect().top);
       if (lastElement !== null) {
         const top = lastElement.current?.getBoundingClientRect().top;
-        console.error(top, window.innerHeight);
         if (top && top >= 0 && top <= window.innerHeight) {
-          console.error("needToScroll");
           setScroll(true);
           return;
         }
@@ -128,6 +153,8 @@ export default function OpenedConversation(
         websockets.conversations.on("newMessage", addNewMessage);
         websockets.conversations.on("bannedUser", amIBanned);
         websockets.conversations.on("kickedUser", amIKicked);
+        websockets.conversations.on("mutedUser", amIMuted);
+        websockets.conversations.on("unmutedUser", amIUnmuted);
         socketConnected.current = true;
       } else if (websockets.conversations?.disconnected) {
         socketConnected.current = false;
@@ -161,7 +188,11 @@ export default function OpenedConversation(
   }, [currentConversation, websockets.conversations?.connected]);
 
   useEffect(() => {
-    if (scroll) lastElement.current?.scrollIntoView({ behavior: "smooth" });
+
+    if (scroll)
+    {
+      lastElement.current?.scrollIntoView({ behavior: "smooth" });
+    }
   }, [messages, scroll]);
 
   return (
@@ -184,6 +215,7 @@ export default function OpenedConversation(
         <article ref={lastElement}></article>
       </section>
       <section className={styles.sendForm}>
+        { !muted ?
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -192,10 +224,8 @@ export default function OpenedConversation(
                 "messageContent"
               ) as HTMLTextAreaElement
             ).value;
-            console.error(message);
             if (!message || !message.length) return;
             if (!currentConversation) {
-              console.error("Creating new conversation");
               let createdConversation!: ConversationEntity;
               websockets.conversations?.emit(
                 "createConversation",
@@ -249,6 +279,7 @@ export default function OpenedConversation(
           ></textarea>
           <input type="submit" value="Send" />
         </form>
+        : <div className={styles.mutedField}>You have been muted</div>}
       </section>
       {menuVisibility && currentConversation ? (
         <section className={styles.chatParams}>

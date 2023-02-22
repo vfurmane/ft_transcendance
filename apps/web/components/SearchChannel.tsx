@@ -28,12 +28,10 @@ export default function SearchChannel(props: SearchChannelProps): JSX.Element {
   const entered = useRef<string | null>("");
 
   const updateChannelList = () => {
-    console.error("New Channel");
     websockets.conversations
       ?.timeout(500)
       .emit("getChannels", (err: any, conversations: ConversationEntity[]) => {
         if (err) {
-          console.error("Could not retrieve list");
           return;
         } else {
           setChannels(conversations);

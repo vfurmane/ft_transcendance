@@ -18,6 +18,27 @@
     color: $dark-neutral-black;
   }
 }
+
+.containerOtherMessageBlocked {
+  align-self: flex-start;
+  background-color: $dark-neutral-grey;
+  color: black;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  p {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    text-align: center;
+  }
+}
+
+.containerOtherMessageBlocked:hover
+{
+  cursor: pointer;
+}
+
 .containerSelfMessage {
   align-self: flex-end;
   background-color: $dark-primary-yellow;

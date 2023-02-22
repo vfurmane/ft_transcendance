@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import {
   Conversation as ConversationEntity,
+  conversationRestrictionEnum,
   ConversationsDetails,
   ConversationWithUnread,
   DMExists,
@@ -113,7 +114,6 @@ export default function Chat({
           "getConversations",
           (conversationDetails: ConversationsDetails) => {
             setConversationList(() => conversationDetails.conversations);
-            console.error(conversationDetails);
             setLoading(false);
           }
         );
@@ -208,6 +208,7 @@ export default function Chat({
                     )?.user.name
                 : newConversation.userName
             }
+            muted={ !conversationSelected ? false : (conversationSelected.groupConversation === false ? false:((conversationSelected.conversationRoles === undefined || !conversationSelected.conversationRoles.length) ? false : conversationSelected.conversationRoles[0].restrictions.find((restriction) => restriction.status === conversationRestrictionEnum.MUTE) !== undefined))}
             selectConversation={selectConversation}
             updateUnreadMessage={updateUnreadMessage}
             updateConversationList={setConversationList}

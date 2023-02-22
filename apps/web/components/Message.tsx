@@ -2,9 +2,10 @@ import { Conversation, InvitationEnum, Message as MessageEntity } from "types";
 import styles from "styles/Message.module.scss";
 import { useSelector } from "react-redux";
 import { selectUserState } from "../store/UserSlice";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useWebsocketContext } from "./Websocket";
 import { connected } from "process";
+import { selectBlockedUsersState, setBlockedUsers } from "../store/BlockedUsersSlice";
 
 interface MessageProps {
   message: MessageEntity;
@@ -16,10 +17,20 @@ export default function Message(props: MessageProps): JSX.Element {
   const [requirePassword, setRequirePassword] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
   const [success, setSuccess] = useState<string>("");
+  const [ isBlocked, setIsBlocked ] = useState(false)
+  const BlockedUsersState = useSelector(selectBlockedUsersState);
   const feedbackRef = useRef<HTMLDivElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
   const websockets = useWebsocketContext();
   const selfMessage = useRef(props.message.sender && props.message.sender.id !== userState.id)
+
+  useEffect(() =>
+  {
+    if (props.group && props.message.sender && BlockedUsersState.includes(props.message.sender.id))
+      setIsBlocked(true)
+    else if (props.group && props.message.sender && !BlockedUsersState.includes(props.message.sender.id))
+      setIsBlocked(false)
+  }, [BlockedUsersState])
 
   if (props.message.system_generated) {
     if (!props.message.is_invitation)
@@ -48,12 +59,10 @@ export default function Message(props: MessageProps): JSX.Element {
                   }
 
                   const payload = { id: props.message.target };
-                  console.error("target: ", payload);
                   websockets.conversations.emit(
                     "canJoinConversation",
                     payload,
                     (ret: { canJoin: boolean; password: boolean }) => {
-                      console.error("canJoin: ", ret);
                       if (ret.canJoin === false) {
                         setError(
                           "Cannot join this conversation, please verify you are not already in it or ask the invitor"
@@ -132,6 +141,14 @@ export default function Message(props: MessageProps): JSX.Element {
       return <p>Invitation to play Pong</p>;
     }
   } else if (props.message.sender && props.message.sender.id !== userState.id) {
+    if (isBlocked)
+    {
+      return (
+        <article className={styles.containerOtherMessageBlocked} onClick={() => {setIsBlocked(false)}}>
+            <p>&lt;Blocked user content, click to unveil&gt;</p>
+        </article>
+      );
+    }
     return (
       <article className={styles.containerOtherMessage}>
         {props.group ? (

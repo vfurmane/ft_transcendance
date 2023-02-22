@@ -41,7 +41,6 @@ export default function CreateConversation(
           let formErrors = false;
           setErrors([]);
           e.preventDefault();
-          console.error("Submitting");
           const name = (
             e.currentTarget.elements.namedItem("name") as HTMLInputElement
           ).value;

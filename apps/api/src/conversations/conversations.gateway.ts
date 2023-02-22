@@ -50,7 +50,6 @@ export class ConversationsGateway implements OnGatewayConnection {
   ) {}
 
   async handleConnection(client: Socket): Promise<string | void> {
-    console.error('Someone is trying to connect');
     const token = client.handshake.headers.cookie?.split('=')[1];
     if (!token) {
       client.disconnect();
@@ -69,7 +68,6 @@ export class ConversationsGateway implements OnGatewayConnection {
       currentUser.sub,
     );
     conversations.forEach((el) => client.join(`conversation_${el}`));
-    console.error(`new socket id: ${client.id}`);
     return 'Connection established';
   }
 
@@ -77,7 +75,6 @@ export class ConversationsGateway implements OnGatewayConnection {
   getConversations(
     @ConnectedSocket() client: Socket,
   ): Promise<ConversationsDetails> {
-    console.error('Getting conversations');
     return this.conversationsService.getConversations(client.data as User);
   }
 
@@ -122,7 +119,6 @@ export class ConversationsGateway implements OnGatewayConnection {
     @ConnectedSocket() client: Socket,
     @MessageBody() { id }: isUUIDDto,
   ): Promise<Message[]> {
-    console.error('Fetching message');
     return this.conversationsService.getMessages(client.data as User, id);
   }
 
@@ -162,7 +158,6 @@ export class ConversationsGateway implements OnGatewayConnection {
     @ConnectedSocket() client: Socket,
     @MessageBody() invitation: invitationDto,
   ): Promise<boolean> {
-    console.error(invitation);
     let DMId!: string;
     if (!invitation.conversationID) return false;
     const invitationMessage =
@@ -170,7 +165,6 @@ export class ConversationsGateway implements OnGatewayConnection {
         client.data as User,
         invitation,
       );
-    console.error('invitationMessage: ', invitationMessage);
     if (!invitationMessage) return false;
     if (invitationMessage.conversation) {
       this.server
@@ -318,9 +312,10 @@ export class ConversationsGateway implements OnGatewayConnection {
       conversationRestrictionEnum.MUTE,
       new Date(date),
     );
+    const target = await this.usersService.getByUsername(username);
     client
       .to(`conversation_${id}`)
-      .emit('mutedUser', instanceToPlain(restriction));
+      .emit('mutedUser', { conversationID: id, userId: target?.id });
     return restriction;
   }
 
@@ -471,9 +466,14 @@ export class ConversationsGateway implements OnGatewayConnection {
     @ConnectedSocket() client: Socket,
     @MessageBody() { id, username }: muteUserDto,
   ) {
-    return this.conversationsService.unmuteUser(client.data as User, {
+    const ret = this.conversationsService.unmuteUser(client.data as User, {
       id,
       username,
     });
+    const target = await this.usersService.getByUsername(username);
+    client
+      .to(`conversation_${id}`)
+      .emit('unmutedUser', { conversationID: id, userId: target?.id });
+    return ret;
   }
 }

@@ -37,7 +37,6 @@ async function login(
     credentials: "same-origin",
     body: JSON.stringify({ ...data, state }),
   }).then(async (response) => {
-    console.error("Response: ", response);
     if (!response.ok) {
       return response.json().then((error) => {
         throw new Error(error.message || "An unexpected error occured...");
