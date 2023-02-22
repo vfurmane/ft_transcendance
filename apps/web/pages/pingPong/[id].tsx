@@ -62,16 +62,15 @@ export default function PingPong(): JSX.Element {
     if (endGame) dispatch(setUserGameId(undefined));
 
     if (openOverlay) dispatch(setUserGameId(undefined));
-
   }, [dispatch, router.query.id, endGame, openOverlay]);
 
   useEffect(() => {
-    return (() => {
+    return () => {
       websockets.pong?.emit("unsubscribe_game");
       websockets.pong?.off("refresh");
       websockets.pong?.off("endGame");
       setGame(null);
-    })
+    };
   }, []);
 
   function rotateInit(users: User[]) {
@@ -282,11 +281,7 @@ export default function PingPong(): JSX.Element {
     }
 
     function catchKey(e: KeyboardEvent) {
-      if (
-        ["ArrowUp", "ArrowDown"].indexOf(
-          e.code
-        ) > -1
-      ) {
+      if (["ArrowUp", "ArrowDown"].indexOf(e.code) > -1) {
         e.preventDefault();
       }
     }
@@ -311,12 +306,7 @@ export default function PingPong(): JSX.Element {
         window.addEventListener(
           "keydown",
           function (e) {
-            if (
-              [
-                "ArrowUp",
-                "ArrowDown",
-              ].indexOf(e.code) > -1
-            ) {
+            if (["ArrowUp", "ArrowDown"].indexOf(e.code) > -1) {
               e.preventDefault();
             }
           },
@@ -328,7 +318,7 @@ export default function PingPong(): JSX.Element {
       //console.error(usersGame.length);
       const index = usersGame.findIndex((user) => user.id === UserState.id);
       if (index >= 0) dispatch(setUserGameId(router.query.id));
-      console.log('------------------setGAme');
+      console.log("------------------setGAme");
       console.log(usersGame);
       setGame(new Game(usersGame.length, index, changeLife));
       usersGameRef.current = usersGame;
@@ -473,7 +463,7 @@ export default function PingPong(): JSX.Element {
   );
 
   //if (!game)
-    //return <Loading></Loading>
+  //return <Loading></Loading>
 
   return (
     <div onClick={() => close()} style={{ width: "100vw", height: "100vh" }}>
