@@ -275,8 +275,7 @@ function Home(): JSX.Element {
         <div className="row">
           <div className="col-8 offset-2">
             <h3 className={`${styles.text} ${textStyles.laquer}`}>
-              These guy are the best pong player of the world ... we are so
-              proud of them !!
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit...
             </h3>
           </div>
         </div>
