@@ -282,6 +282,8 @@ class Game {
       );
       return [new Racket(0, [p0, p1, p2, p3], this.color[0])];
     } else {
+      console.log(player);
+      console.log(this.player);
       const racket: Racket[] = [];
       for (let i = 0; i < wall.length; i++) {
         const wallDir = wall[i].point[0]
