@@ -288,16 +288,12 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
     client.join(`game_${subscribedGameDto.id}`);
     return await this.pongService.getGame(subscribedGameDto.id);
   }
- 
+
   @SubscribeMessage('unsubscribe_game')
-  unsubscribeGame(
-    @ConnectedSocket() client: Socket,
-  ): void {
+  unsubscribeGame(@ConnectedSocket() client: Socket): void {
     client.leave(`game_${client.data.room}`);
     client.data.room = undefined;
-    
   }
-
 
   @SubscribeMessage('launch')
   async launch(@ConnectedSocket() client: Socket) {

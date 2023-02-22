@@ -58,11 +58,9 @@ export default function PingPong(): JSX.Element {
 
   const dispatch = useDispatch();
   useEffect(() => {
-    if (endGame)
-      dispatch(setUserGameId(undefined));
+    if (endGame) dispatch(setUserGameId(undefined));
 
-    if (openOverlay)
-      dispatch(setUserGameId(undefined));
+    if (openOverlay) dispatch(setUserGameId(undefined));
 
     return () => {
       /*const canvas = document.getElementById("canvasElem");
@@ -329,13 +327,7 @@ export default function PingPong(): JSX.Element {
       //console.error(usersGame.length);
       const index = usersGame.findIndex((user) => user.id === UserState.id);
       if (index >= 0) dispatch(setUserGameId(router.query.id));
-      setGame(
-        new Game(
-          usersGame.length,
-          index,
-          changeLife
-        )
-      );
+      setGame(new Game(usersGame.length, index, changeLife));
       usersGameRef.current = usersGame;
     }
   }, [users, usersGame, usersRotate, changeLife, dispatch]);
@@ -349,9 +341,9 @@ export default function PingPong(): JSX.Element {
       }
     }
     return (): void => {
-      if (intervalRef.current){
+      if (intervalRef.current) {
         clearInterval(intervalRef.current);
-        websockets.pong?.emit('unsubscribe_game');
+        websockets.pong?.emit("unsubscribe_game");
       }
     };
   }, [game]);
@@ -442,54 +434,53 @@ export default function PingPong(): JSX.Element {
   }
 
   const buttons = (
-    
     <div className={styles.buttons}>
-          <Link href={"/"} className={styles.link}>
-            <PlayButton
-              open={false}
-              style={{
-                text: openPlayButton ? "" : "HOME",
-                small: true,
-                color: false,
-              }}
-            />
-          </Link>
-        
-      
-          <PlayButton
-            handleClick={handleClickPlayButton}
-            open={openPlayButton}
-            style={{
-              text: openPlayButton ? "" : "PLAY AGAIN",
-              small: true,
-              color: true,
-            }}
-          />
-          {openPlayButton ? (
-            <div
-              className="col-10 offset-1 offset-xl-0 offset-lg-1 col-lg-3 offset-xl-1 "
-              style={{ width: "80%" }}
-            >
-              <div className={`${playButtonStyles.playMenuContainer} d-block `}>
-                <PlayMenu click={() => newPartie()} />
-              </div>
-            </div>
-          ) : <></>}
-      
+      <Link href={"/"} className={styles.link}>
+        <PlayButton
+          open={false}
+          style={{
+            text: openPlayButton ? "" : "HOME",
+            small: true,
+            color: false,
+          }}
+        />
+      </Link>
+
+      <PlayButton
+        handleClick={handleClickPlayButton}
+        open={openPlayButton}
+        style={{
+          text: openPlayButton ? "" : "PLAY AGAIN",
+          small: true,
+          color: true,
+        }}
+      />
+      {openPlayButton ? (
+        <div
+          className="col-10 offset-1 offset-xl-0 offset-lg-1 col-lg-3 offset-xl-1 "
+          style={{ width: "80%" }}
+        >
+          <div className={`${playButtonStyles.playMenuContainer} d-block `}>
+            <PlayMenu click={() => newPartie()} />
+          </div>
+        </div>
+      ) : (
+        <></>
+      )}
     </div>
   );
 
   return (
-    <div onClick={() => close()} style={{ width: "100vw", height: "100vh"}}>
-        {openOverlay ? (
-          <div className="overlay">
-            <h1 className={textStyles.saira} style={{ color: "white" }}>
-              You LOose !
-            </h1>
-          </div>
-        ) : (
-          <></>
-        )}
+    <div onClick={() => close()} style={{ width: "100vw", height: "100vh" }}>
+      {openOverlay ? (
+        <div className="overlay">
+          <h1 className={textStyles.saira} style={{ color: "white" }}>
+            You LOose !
+          </h1>
+        </div>
+      ) : (
+        <></>
+      )}
       <TopBar
         openProfil={openProfil}
         openToggle={openToggle}
