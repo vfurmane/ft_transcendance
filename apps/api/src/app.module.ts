@@ -15,6 +15,8 @@ import { PongModule } from './pong/pong.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { AchievementsModule } from './Achievements/Achievements.module';
 import { AppGateway } from './app.gateway';
+import { dataSourceOptions } from 'db/data-source';
+import { DataSource } from 'typeorm';
 
 @Module({
   imports: [
@@ -25,18 +27,15 @@ import { AppGateway } from './app.gateway';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
-        type: 'postgres',
-        host: configService.get('POSTGRES_HOST'),
-        port: 5432,
-        username: configService.get('POSTGRES_USERNAME'),
-        password: configService.get('POSTGRES_PASSWORD'),
-        database: configService.get('POSTGRES_DATABASE'),
+        ...dataSourceOptions,
         autoLoadEntities: true,
-        // From NestJS docs:
-        // Setting `synchronize: true` shouldn't be used in production - otherwise you can lose production data.
-        synchronize: configService.get('NODE_ENV') === 'development',
-        // logging: configService.get('NODE_ENV') === 'development',
       }),
+      dataSourceFactory: async (options) => {
+        const dataSource = await new DataSource(options!).initialize();
+        await dataSource.runMigrations();
+        return dataSource;
+      },
+
     }),
     ScheduleModule.forRoot(),
     UsersModule,
