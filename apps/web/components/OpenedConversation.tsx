@@ -52,6 +52,8 @@ export default function OpenedConversation(
   const socketConnected = useRef<boolean>(false);
   const [menuVisibility, setMenuVisibility] = useState<boolean>(false);
   const [muted, setMuted] = useState<boolean>(props.muted);
+  const [ conversationVisibility, setConversationVisibility ] = useState<boolean>(!props.conversation ? false : props.conversation.visible)
+  const [ conversationPassword, setConversationPassword ] = useState<boolean>(!props.conversation ? false : props.conversation.has_password)
   const dispatch = useDispatch();
 
   const updateConvList = () => {
@@ -118,8 +120,6 @@ export default function OpenedConversation(
   };
 
   const addNewMessage = (message: any) => {
-    console.error("Adding message", message);
-    console.error("currentConversation", currentConversation);
     if (message.id === currentConversation?.id) {
       setMessages((m) => [...m, message.message]);
       if (lastElement !== null) {
@@ -293,6 +293,8 @@ export default function OpenedConversation(
             currentConversation={currentConversation}
             selectConversation={props.selectConversation}
             updateConversationList={props.updateConversationList}
+            visibility={{conversationVisibility, setConversationVisibility}}
+            password={{conversationPassword, setConversationPassword}}
           />
         </section>
       ) : (

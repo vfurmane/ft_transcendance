@@ -17,6 +17,7 @@ import {
 import { selectUserState } from "../store/UserSlice";
 import { useWebsocketContext } from "./Websocket";
 import { Userfront as User } from "types";
+import styles from "../styles/manageConversation.module.scss";
 
 interface manageConversationProps {
   currentConversation: ConversationEntity;
@@ -24,6 +25,15 @@ interface manageConversationProps {
   self: MutableRefObject<ConversationRole | null>;
   participants: ConversationRole[];
   updateConversationList: Dispatch<SetStateAction<ConversationWithUnread[]>>;
+  visibility: {
+    conversationVisibility: boolean;
+    setConversationVisibility: Dispatch<SetStateAction<boolean>>;
+};
+password: {
+  conversationPassword: boolean;
+  setConversationPassword: Dispatch<SetStateAction<boolean>>;
+}
+
 }
 
 export default function ManageConversation(
@@ -37,10 +47,10 @@ export default function ManageConversation(
   const [matches, setMatches] = useState<User[]>([]);
   const [displaySearchBox, setDisplaySearchBox] = useState<boolean>(false);
   const [isVisible, setIsVisible] = useState<boolean>(
-    props.currentConversation.visible
+    props.visibility.conversationVisibility
   );
   const [hasPassword, setHasPassword] = useState<boolean>(
-    props.currentConversation.has_password
+    props.password.conversationPassword
   );
   const [updatePassword, setUpdatePassword] = useState<boolean>(false);
   const [addPassword, setAddPassword] = useState<boolean>(false);
@@ -58,38 +68,42 @@ export default function ManageConversation(
       );
   };
 
+  useEffect(() =>
+  {
+    websockets.conversations?.on("userJoined", () => {setTimeout(updateConvList, 500)})
+    websockets.conversations?.on("userLeft", () => {setTimeout(updateConvList, 500)})
+  },[])
+
   const makeInvisible = () => {
-    console.error("Making Invisible");
     websockets.conversations
       ?.timeout(1000)
       .emit(
         "makeInvisible",
         { id: props.currentConversation.id },
         (err: any, ret: boolean) => {
-          console.error("Callback, entering with: ", err, ret);
           if (err) {
             setErrors(["Network issue, please try again later"]);
             return;
           }
           setIsVisible(false);
+          props.visibility.setConversationVisibility(false)
         }
       );
   };
 
   const makeVisible = () => {
-    console.error("Making visible");
     websockets.conversations
       ?.timeout(1000)
       .emit(
         "makeVisible",
         { id: props.currentConversation.id },
         (err: any, ret: boolean) => {
-          console.error("Callback, entering with: ", err, ret);
           if (err) {
             setErrors(["Network issue, please try again later"]);
             return;
           }
           setIsVisible(true);
+          props.visibility.setConversationVisibility(true)
         }
       );
   };
@@ -114,28 +128,35 @@ export default function ManageConversation(
   };
 
   const amIVisible = (conversationID: string) => {
-    if (conversationID === props.currentConversation.id) setIsVisible(true);
+    if (conversationID === props.currentConversation.id)
+    {
+      setIsVisible(true);
+      props.visibility.setConversationVisibility(true)
+    }
   };
 
   const amIInvisible = (conversationID: string) => {
-    if (conversationID === props.currentConversation.id) setIsVisible(false);
+    if (conversationID === props.currentConversation.id)
+    {
+      setIsVisible(false);
+      props.visibility.setConversationVisibility(false)
+    }
   };
 
   const removeConvPassword = (password: string) => {
-    console.error("Removing password");
     websockets.conversations
       ?.timeout(1000)
       .emit(
         "removePassword",
         { id: props.currentConversation.id, password: password },
         (err: any, ret: boolean) => {
-          console.error("callback: ", err, ret);
           if (err) {
             setErrors(["Please verify the password provided is correct"]);
             return;
           }
           setSuccess("Password successfully deleted");
           setHasPassword(false);
+          props.password.setConversationPassword(false)
           setAddPassword(false);
           setUpdatePassword(false);
           setRemovePassword(false);
@@ -158,6 +179,7 @@ export default function ManageConversation(
         }
         setSuccess("Password successfully added");
         setHasPassword(true);
+        props.password.setConversationPassword(true)
         setAddPassword(false);
         setUpdatePassword(false);
         setRemovePassword(false);
@@ -185,6 +207,7 @@ export default function ManageConversation(
         }
         setSuccess("Password successfully updated");
         setHasPassword(true);
+        props.password.setConversationPassword(true)
         setAddPassword(false);
         setUpdatePassword(false);
         setRemovePassword(false);
@@ -204,28 +227,28 @@ export default function ManageConversation(
   }, []);
 
   return (
-    <section>
+    <section className={styles.manageContainer}>
       {props.self.current &&
       props.self.current.role === ConversationRoleEnum.OWNER ? (
         <>
           <article>
             {isVisible ? (
-              <button onClick={makeInvisible}>Make invisible</button>
+              <button className={ styles.ownerButton } onClick={makeInvisible}>Make invisible</button>
             ) : (
-              <button onClick={makeVisible}>Make visible</button>
+              <button className={ styles.ownerButton } onClick={makeVisible}>Make visible</button>
             )}
           </article>
           <article>
             {hasPassword ? (
               <>
-                <button
+                <button className={ styles.ownerButton }
                   onClick={() => {
                     setUpdatePassword(true), setRemovePassword(false);
                   }}
                 >
                   Change password
                 </button>
-                <button
+                <button className={ styles.ownerButton }
                   onClick={() => {
                     setRemovePassword(true), setUpdatePassword(false);
                   }}
@@ -234,7 +257,7 @@ export default function ManageConversation(
                 </button>
               </>
             ) : (
-              <button
+              <button className={ styles.ownerButton }
                 onClick={() => {
                   setAddPassword(true);
                 }}
@@ -270,18 +293,20 @@ export default function ManageConversation(
               }}
             >
               <input
+              className={styles.inputField}
                 type="password"
                 name="password"
                 required
                 placeholder="Password"
               />
               <input
+              className={styles.inputField}
                 type="password"
                 name="confirmation-password"
                 required
                 placeholder="Confirm password"
               />
-              <input type="submit" value="Add password" />
+              <input className={ styles.ownerButton } type="submit" value="Confirm" />
             </form>
           ) : null}
           {updatePassword ? (
@@ -320,24 +345,27 @@ export default function ManageConversation(
               }}
             >
               <input
+              className={styles.inputField}
                 type="password"
                 name="oldPassword"
                 required
                 placeholder="Current password"
               />
               <input
+              className={styles.inputField}
                 type="password"
                 name="password"
                 required
                 placeholder="New password"
               />
               <input
+              className={styles.inputField}
                 type="password"
                 name="confirmation-password"
                 required
                 placeholder="Confirm password"
               />
-              <input type="submit" value="Update password" />
+              <input className={ styles.ownerButton } type="submit" value="Confirm" />
             </form>
           ) : null}
           {removePassword ? (
@@ -358,41 +386,35 @@ export default function ManageConversation(
               }}
             >
               <input
+              className={styles.inputField}
                 type="password"
                 name="password"
                 required
                 placeholder="Current password"
               />
-              <input type="submit" value="Remove password" />
+              <input className={ styles.ownerButton } type="submit" value="Confirm" />
             </form>
           ) : null}
           {props.participants.length > 1 ? (
-            <article>Leave (pick a new owner if you want to leave)</article>
+            <article style={{color: "red", margin: "5px 5px"}}>Leave : (pick a new owner if you want to leave)</article>
           ) : (
-            <article onClick={leaveConversation}>Leave</article>
+            <article className={ styles.ownerButton } onClick={leaveConversation}>Leave</article>
           )}
         </>
       ) : (
-        <article onClick={leaveConversation}>Leave</article>
+        <article className={ styles.ownerButton } onClick={leaveConversation}>Leave</article>
       )}
-      <article
+      <div className={ styles.ownerButton }
         onClick={() => {
           setDisplaySearchBox(true);
         }}
       >
         Invite someone
-      </article>
+      </div>
       {displaySearchBox ? (
         <>
-          <section className="errors">
-            {errors.map((error) => (
-              <div>{error}</div>
-            ))}
-          </section>
-          <section className="success">
-            {success.length ? <div>{success}</div> : <></>}
-          </section>
           <input
+          className={styles.inputField}
           style={{marginBottom: "5px"}}
             ref={searchRef}
             autoComplete="off"
@@ -439,9 +461,9 @@ export default function ManageConversation(
                 });
             }}
           />
-          <section style={{paddingBottom: "5px"}}>
+          <section className={styles.matchesContainer} style={{paddingBottom: "5px"}}>
             {matches.map((el) => (
-              <article
+              <article className={styles.matches}
                 key={el.id}
                 onClick={(e) => {
                   setErrors([]);
@@ -479,6 +501,14 @@ export default function ManageConversation(
           </section>{" "}
         </>
       ) : null}
+      <section className={styles.error}>
+            {errors.map((error, i) => (
+              <div key={`error_${i}`}>{error}</div>
+            ))}
+          </section>
+          <section className={styles.success}>
+            {success.length ? <div>{success}</div> : <></>}
+          </section>
     </section>
   );
 }

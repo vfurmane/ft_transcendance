@@ -1,0 +1,93 @@
+@import "variables";
+
+.manageContainer
+{
+    display: flex;
+    flex-direction: column;
+}
+
+.inputField
+{
+    margin: 5pxpx 0px;
+    border-top: 0px;
+    border-bottom: solid $dark-neutral-white 1px;
+    border-left: 0px;
+    border-right: 0px;
+    background-color: rgba(0, 0, 0, 0);
+    text-align: center;
+    width: 200px;
+    font-size: 15px;
+    color: $dark-neutral-white;
+    align-self: center;
+}
+
+.ownerButton {
+    align-self: center;
+    background: url("../public/texture.png"),
+      linear-gradient(
+        160deg,
+        rgba(234, 196, 53, 1) 45%,
+        rgb(233, 110, 9) 70%,
+        rgb(218, 74, 8) 100%
+      );
+    background-repeat: repeat, no-repeat;
+    background-size: 50px 50px, 100% 100%;
+    border-radius: 10px;
+    border: solid 1px white;
+    color: #1e1e1e;
+    transition: transform 0.3s ease;
+    transform: translateX(0px);
+    margin-top: 5px;
+    margin-bottom: 5px;
+    z-index: 2;
+    width: 200px;
+    text-align: center;
+    box-shadow: 0px 0px 8px 1px rgba(234, 196, 53, 1);
+  }
+
+  .ownerButton:hover
+  {
+    cursor: pointer;
+  }
+
+  .error {
+    color: red;
+    text-align: center;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+  }
+  
+  .success {
+    font-style: italic;
+    text-align: center;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    color: $dark-system-green
+  }
+
+  .matchesContainer
+  {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-items: center;
+  }
+
+  .matches
+  {
+    border: solid 1px black;
+    border-radius: 8px;
+    margin: 2px 50px;
+    align-self: center;
+    text-align: center;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    background-color: $dark-neutral-grey;
+    transition: all ease-in 0.3s;
+  }
+
+  .matches:hover
+  {
+    cursor: pointer;
+    transform: scale(1.1);
+  }

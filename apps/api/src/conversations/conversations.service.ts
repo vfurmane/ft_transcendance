@@ -1248,8 +1248,7 @@ export class ConversationsService {
       },
     });
     if (!conversation) throw new NotFoundException();
-    conversation.visible = visible;
-    await this.conversationRepository.save(conversation);
+    await this.conversationRepository.update({ id: id}, {visible : visible})
     return true;
   }
 
@@ -1280,12 +1279,11 @@ export class ConversationsService {
     });
     if (!conversation) throw new NotFoundException();
     const salt = await bcrypt.genSalt();
-    conversation.password = await bcrypt.hash(
+    const password = await bcrypt.hash(
       addConversationPasswordDto.password,
       salt,
     );
-    conversation.has_password = true;
-    await this.conversationRepository.save(conversation);
+    await this.conversationRepository.update({ id: addConversationPasswordDto.id}, {password : password, has_password : true})
     if (conversation.visible) return true;
     return false;
   }
@@ -1324,11 +1322,11 @@ export class ConversationsService {
     )
       throw new ForbiddenException();
     const salt = await bcrypt.genSalt();
-    conversation.password = await bcrypt.hash(
+    const password = await bcrypt.hash(
       updateConversationPasswordDto.password,
       salt,
     );
-    await this.conversationRepository.save(conversation);
+    await this.conversationRepository.update({ id: updateConversationPasswordDto.id}, {password : password})
     return true;
   }
 
@@ -1353,14 +1351,11 @@ export class ConversationsService {
       },
     });
     if (!conversation) {
-      console.error('No conversation found');
       throw new NotFoundException();
     }
     if (!conversation.password) {
-      console.error('COnversation does not have a password');
       throw new NotFoundException();
     }
-    console.error('So far so good');
     if (
       !(await bcrypt.compare(
         removeConversationPasswordDto.password,
@@ -1368,9 +1363,7 @@ export class ConversationsService {
       ))
     )
       throw new ForbiddenException();
-    conversation.password = null;
-    conversation.has_password = false;
-    await this.conversationRepository.save(conversation);
+    await this.conversationRepository.update({ id: removeConversationPasswordDto.id}, {password : null, has_password: false})
     if (conversation.visible) return true;
     return false;
   }

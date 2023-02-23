@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Dispatch, SetStateAction, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { Socket } from "socket.io-client";
 import {
   Conversation as ConversationEntity,
@@ -40,6 +40,11 @@ export default function ConversationParticipant(
         props.setParticipants(roles)
         })
   }
+
+  useEffect(() => {
+    websockets.conversations?.on("userJoined", () => {setTimeout(refreshParticipants, 500)})
+    websockets.conversations?.on("userLeft", () => {setTimeout(refreshParticipants, 500)})
+  }, [])
 
   const promoteUser = (newRole: ConversationRoleEnum, promote: boolean) => {
     setError("");

@@ -542,7 +542,6 @@ export class ConversationsGateway implements OnGatewayConnection {
     @ConnectedSocket() client: Socket,
     @MessageBody() removeConversationPasswordDto: removeConversationPasswordDto,
   ) {
-    console.error('removing password');
     const ret = await this.conversationsService.removePassword(
       client.data as User,
       removeConversationPasswordDto,
@@ -552,7 +551,4 @@ export class ConversationsGateway implements OnGatewayConnection {
     }
     return true;
   }
-
-  // @SubscribeMessage('removePassword')
-  // async removePassword(@ConnectedSocket() client : Socket, @MessageBody() {id} : isUUIDDto)
 }

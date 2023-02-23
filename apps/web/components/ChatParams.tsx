@@ -16,6 +16,14 @@ interface chatParamsProps {
   currentConversation: ConversationEntity;
   updateConversationList: Dispatch<SetStateAction<ConversationWithUnread[]>>;
   selectConversation: Dispatch<SetStateAction<ConversationEntity | null>>;
+  visibility: {
+    conversationVisibility: boolean;
+    setConversationVisibility: Dispatch<SetStateAction<boolean>>;
+}
+password: {
+  conversationPassword: boolean;
+  setConversationPassword: Dispatch<SetStateAction<boolean>>;
+}
 }
 export default function ChatParams(props: chatParamsProps): JSX.Element {
   const websockets = useWebsocketContext();
@@ -81,6 +89,8 @@ export default function ChatParams(props: chatParamsProps): JSX.Element {
             self={self}
             participants={participants}
             updateConversationList={props.updateConversationList}
+            visibility={props.visibility}
+            password={props.password}
           />
         ) : (
           <></>
