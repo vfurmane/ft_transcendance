@@ -202,7 +202,6 @@ export default function Message(props: MessageProps): JSX.Element {
               Click to join
             </Button>
           ) : null}
-          ;
         </article>
       );
     }
