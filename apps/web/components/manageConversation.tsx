@@ -228,6 +228,7 @@ export default function ManageConversation(
 
   return (
     <section className={styles.manageContainer}>
+      {(props.self.current && props.self.current.role) ? <div style={{alignSelf:"right"}}>{props.self.current.role}</div> : null}
       {props.self.current &&
       props.self.current.role === ConversationRoleEnum.OWNER ? (
         <>
