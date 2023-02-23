@@ -393,7 +393,7 @@ export default function ManageConversation(
             {success.length ? <div>{success}</div> : <></>}
           </section>
           <input
-          style={{marginBottom: "5px"}}
+            style={{ marginBottom: "5px" }}
             ref={searchRef}
             autoComplete="off"
             name="participants"
@@ -439,7 +439,7 @@ export default function ManageConversation(
                 });
             }}
           />
-          <section style={{paddingBottom: "5px"}}>
+          <section style={{ paddingBottom: "5px" }}>
             {matches.map((el) => (
               <article
                 key={el.id}

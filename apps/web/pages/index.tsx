@@ -112,6 +112,7 @@ function Home(): JSX.Element {
       websockets.pong.on("game_start", (gameStartPayload: GameStartPayload) => {
         const elm = (
           <WatchGame
+            key={gameStartPayload.id}
             gameId={gameStartPayload.id}
             users={gameStartPayload.users}
           />
@@ -127,7 +128,9 @@ function Home(): JSX.Element {
       websockets.pong.emit("get_featuring", (data: GameStartPayload[]) => {
         setFeaturingList((f) => [
           ...data.map((game) => {
-            return <WatchGame gameId={game.id} users={game.users} />;
+            return (
+              <WatchGame key={game.id} gameId={game.id} users={game.users} />
+            );
           }),
           ...f,
         ]);

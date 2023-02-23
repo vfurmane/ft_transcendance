@@ -13,39 +13,15 @@ export interface WatchGameProps {
 
 export function WatchGame(props: WatchGameProps): ReactElement {
   const setterInit: React.Dispatch<React.SetStateAction<boolean>> = () => false;
-  const prevIndexOfUserRef = useRef(-1);
-  const prevSetterUsermenuRef = useRef(setterInit);
-  const [indexOfUser, setIndexOfUser] = useState(-1);
-  const [openUserMenu, setOpenUserMenu] = useState(false);
   const [isShown, setIsShown] = useState(false);
   const [userList, setUserList] = useState<JSX.Element[]>([]);
-
-  const handleClickUserMenu = useCallback(
-    (e: {
-      index: number;
-      openMenu: boolean;
-      setOpenMenu: React.Dispatch<React.SetStateAction<boolean>>;
-    }): void => {
-      setOpenUserMenu(true);
-      e.setOpenMenu(true);
-      if (
-        prevSetterUsermenuRef.current !== setterInit &&
-        prevSetterUsermenuRef.current !== e.setOpenMenu
-      )
-        prevSetterUsermenuRef.current(false);
-      prevSetterUsermenuRef.current = e.setOpenMenu;
-      setIndexOfUser(e.index);
-      prevIndexOfUserRef.current = e.index;
-    },
-    []
-  );
 
   useEffect(() => {
     if (!props.users.length) return;
     setUserList(
       props.users.map((user, i) => {
         return (
-          <div className={styles.imageText}>
+          <div className={styles.imageText} key={user.id}>
             <div className="fill small">
               <ProfilePicture
                 userId={user.id}
@@ -61,9 +37,7 @@ export function WatchGame(props: WatchGameProps): ReactElement {
               </div>
             ) : (
               <div>
-                {i === props.users.length - 1 ? (
-                  <></>
-                ) : (
+                {i === props.users.length - 1 ? null : (
                   <p className={textStyles.laquer}> vs</p>
                 )}
               </div>
