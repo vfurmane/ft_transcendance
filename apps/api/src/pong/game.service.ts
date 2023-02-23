@@ -239,6 +239,10 @@ export class Ball extends Entity {
 
   constructor(points: Point[], player: Racket[], walls: Wall[]) {
     super(points);
+    if (player.length === Form.REC) this.defaultSpeed = 3;
+    else {
+      this.defaultSpeed = 1.5;
+    }
     const dir = player[0].point[1]
       .midSegment(player[0].point[2])
       .vectorTo(player[0].point[0].midSegment(player[0].point[3]))

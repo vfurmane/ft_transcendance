@@ -332,7 +332,7 @@ export class ConversationsService {
       totalNumberOfUnreadMessages: 0,
       conversations: [],
     };
-    let conversations = await this.conversationRepository.find({
+    const conversations = await this.conversationRepository.find({
       relations: {
         conversationRoles: true,
       },
@@ -663,13 +663,11 @@ export class ConversationsService {
         throw new ForbiddenException();
     }
     const joiningUser = await this.userRepository.findOne({
-      where:
-      {
-        id : currentUser.id
-      }
-    })
-    if (!joiningUser)
-      throw new NotFoundException()
+      where: {
+        id: currentUser.id,
+      },
+    });
+    if (!joiningUser) throw new NotFoundException();
     const joined = this.conversationRoleRepository.create({
       role: ConversationRoleEnum.USER,
       lastRead: new Date(),
