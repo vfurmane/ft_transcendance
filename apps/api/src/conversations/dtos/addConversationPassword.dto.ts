@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString, IsUUID } from 'class-validator';
+import { IsNotEmpty, IsString, IsUUID, MaxLength, MinLength } from 'class-validator';
 
 export class addConversationPasswordDto {
   @IsString()
@@ -8,9 +8,13 @@ export class addConversationPasswordDto {
 
   @IsString()
   @IsNotEmpty()
+  @MaxLength(29)
+  @MinLength(1)
   password!: string;
 
   @IsString()
   @IsNotEmpty()
+  @MaxLength(29)
+  @MinLength(1)
   confirmationPassword!: string;
 }

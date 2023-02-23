@@ -8,12 +8,15 @@ import {
   IsString,
   IsUUID,
   MaxLength,
+  MinLength,
 } from 'class-validator';
 import sanitize from 'sanitize-html';
 
 export class createConversationDto {
   @IsOptional()
   @IsString()
+  @MaxLength(29)
+  @MinLength(1)
   @Transform(({ value }) => sanitize(value))
   name!: string;
 
@@ -23,7 +26,8 @@ export class createConversationDto {
 
   @IsOptional()
   @IsString()
-  @MaxLength(72)
+  @MaxLength(29)
+  @MinLength(1)
   password!: string;
 
   @IsOptional()
