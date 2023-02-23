@@ -38,7 +38,7 @@ import { addConversationPasswordDto } from './dtos/addConversationPassword.dto';
 import { updateConversationPasswordDto } from './dtos/updateConversationPassword.dto';
 import { removeConversationPasswordDto } from './dtos/removeConversationPassword.dto';
 
-@UseFilters(HttpExceptionTransformationFilter)
+@UseFilters(new HttpExceptionTransformationFilter())
 @UsePipes(new ValidationPipe())
 @UseInterceptors(ClassSerializerInterceptor)
 @WebSocketGateway({

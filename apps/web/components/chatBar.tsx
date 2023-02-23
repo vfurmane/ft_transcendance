@@ -47,7 +47,7 @@ export default function ChatBar(): JSX.Element {
       dispatch(ReinitConversations());
     }
     if (visibility === false) {
-      if (websockets.conversations?.connected && websockets.pong?.connected) {
+      if (websockets.conversations && websockets.pong) {
         websockets.conversations.emit(
           "getUnread",
           ({ totalNumberOfUnreadMessages }: unreadMessagesResponse) => {
@@ -59,13 +59,12 @@ export default function ChatBar(): JSX.Element {
       }
     } else {
       websockets.conversations?.off("newMessage", newUnreadMessage);
-      websockets.pong?.off("newMessage");
       setUnreadMessages(0);
     }
     return () => {
       websockets.conversations?.off("newMessage", newUnreadMessage);
     };
-  }, [conversationToOpen, visibility, unreadMessages]);
+  }, [conversationToOpen, visibility, unreadMessages, websockets]);
 
   if (!visibility) {
     return (
