@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import ProfilePicture from "./ProfilePicture";
 import styles from "../styles/ProfilePictureUploader.module.scss";
 import hash from "object-hash";
+import { useDispatch, useSelector } from "react-redux";
+import { selectUserState, setUserState } from "../store/UserSlice";
 
 async function handleFileUpload(
   userId: string,
@@ -27,6 +29,8 @@ const ProfilePictureUploader = (props: {
 }): JSX.Element => {
   const hiddenFileInput = React.useRef<HTMLInputElement>(null);
   const [errorMessage, _setErrorMessage] = useState<string>("");
+  const UserState = useSelector(selectUserState);
+  const dispatch = useDispatch();
 
   const setErrorMessage = (msg: string): void => {
     _setErrorMessage(msg);
@@ -49,7 +53,9 @@ const ProfilePictureUploader = (props: {
       return setErrorMessage("File size exceeds 5MB");
     }
     if ((await handleFileUpload(props.userId, uploadedFile)) === true) {
-      props.setFileHash(hash(uploadedFile));
+      const avatarHash = hash(uploadedFile);
+      dispatch(setUserState({ ...UserState, avatarHash: avatarHash}));
+      props.setFileHash(avatarHash);
     } else {
       return setErrorMessage("Unexpected error, please try again");
     }

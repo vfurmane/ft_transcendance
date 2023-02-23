@@ -1,4 +1,6 @@
 import React from "react";
+import { useSelector } from "react-redux";
+import { selectUserState } from "../store/UserSlice";
 import styles from "../styles/ProfilePicture.module.scss";
 
 const ProfilePicture = (props: {
@@ -8,6 +10,8 @@ const ProfilePicture = (props: {
   fileHash?: string | null;
   handleClick?: (event: React.MouseEvent<HTMLImageElement>) => void;
 }): JSX.Element => {
+  const UserState = useSelector(selectUserState);
+  const hash = UserState.avatarHash ? `?f=${UserState.avatarHash}` : "";
   if (!props.userId) return <></>;
   return (
     <>
@@ -16,7 +20,7 @@ const ProfilePicture = (props: {
         alt="avatar"
         width={props.width}
         height={props.height}
-        src={`/api/users/${props.userId}/profile-picture?f=${props.fileHash}`}
+        src={`/api/users/${props.userId}/profile-picture${hash}`}
         onClick={props.handleClick}
       />
     </>
