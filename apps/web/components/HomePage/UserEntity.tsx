@@ -221,7 +221,7 @@ export default function UserEntity(props: {
             <div></div>
           )}
           <div className={styles.entityText}>
-            <h3 className={textStyles.laquer}>{props.user.name}</h3>
+            <h3 className={`${textStyles.laquer} ${styles.croppedUsername}`}>{props.user.name}</h3>
             <p className={textStyles.saira}>{status}</p>
           </div>
         </div>
