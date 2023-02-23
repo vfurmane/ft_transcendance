@@ -109,7 +109,7 @@ export default function MiniProfil(props: {
             </span>
           </p>
         )}
-        <h2 className={`${textStyles.pixel} ${styles.h2} d-none d-lg-block`}>
+        <h2 className={`${textStyles.pixel} ${styles.h2} d-none d-lg-block`}  style={{maxWidth: '105px', fontSize:'19px'}}>
           {props.user.user.name}
         </h2>
         {props.left ? (

@@ -29,7 +29,7 @@ export default function MatchEntity(props: {
             />
           </div>
           <div className={styles.entityText}>
-            <h3 className={textStyle.laquer}>
+            <h3 className={textStyle.laquer} style={{maxWidth: '105px', fontSize:'19px'}}>
               {props.match.winner ? props.match.winner.name : props.user.name}
             </h3>
             <p className={textStyle.saira} style={{ textAlign: "center" }}>
@@ -40,7 +40,7 @@ export default function MatchEntity(props: {
         <span>VS</span>
         <div className={`${styles.entityContainer} ${styles.end}`}>
           <div className={styles.entityText}>
-            <h3 className={textStyle.laquer}>
+            <h3 className={textStyle.laquer}  style={{maxWidth: '105px', fontSize:'19px'}}>
               {props.match.looser !== null
                 ? props.match.looser.name
                 : props.user.name}
