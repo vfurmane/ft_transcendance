@@ -484,6 +484,8 @@ export class ConversationsService {
     }
     const blockedUser = await this.getBlockedUsers(currentUser.id);
     for (const role of conversationRoles) {
+      if (!role || !(role.conversation))
+        continue
       if (
         (await this.verifyRestrictionsOnUser(role.restrictions)).filter(
           (restriction) =>
@@ -506,7 +508,7 @@ export class ConversationsService {
           },
         });
         if (
-          check &&
+          check !== null &&
           blockedUser.find((block) => block.target.id === check.user.id) !==
             undefined
         )
@@ -1372,7 +1374,4 @@ export class ConversationsService {
     if (conversation.visible) return true;
     return false;
   }
-
-  // else if (!(await bcrypt.compare(password, conversation.password)))
-  // throw new ForbiddenException();
 }
