@@ -100,7 +100,7 @@ export class MatchService {
     const res = await Promise.all([...winArray, ...looseArray]);
 
     return res.sort(function (a, b) {
-      return a.date - b.date;
+      return b.date - a.date;
     });
   }
 }

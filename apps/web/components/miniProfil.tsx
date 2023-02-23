@@ -132,7 +132,7 @@ export default function MiniProfil(props: {
       </div>
       <div
         className={`d-none ${
-          props.user.user.victory && props.user.user.defeat ? "d-lg-block" : ""
+          props.user.user.victory || props.user.user.defeat ? "d-lg-block" : ""
         }`}
       >
         <div style={{ width: "100%" }}>

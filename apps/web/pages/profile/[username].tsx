@@ -526,7 +526,7 @@ export default function Profil(): JSX.Element {
                         className={textStyles.pixel}
                         style={{ marginBottom: "20px" }}
                       >
-                        Achivements
+                        Achievements
                       </h2>
                       <div className="cardList">{achievementsList}</div>
                     </div>
