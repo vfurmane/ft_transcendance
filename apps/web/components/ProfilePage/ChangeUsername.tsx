@@ -60,6 +60,7 @@ export default function ChangeUsername(): JSX.Element {
         } else {
           setFormSuccess(response.message);
           dispatch(setUserName(data.new_username));
+          router.replace("/");
         }
       })
       .catch((error) => {
