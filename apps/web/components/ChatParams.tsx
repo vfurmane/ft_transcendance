@@ -73,7 +73,7 @@ export default function ChatParams(props: chatParamsProps): JSX.Element {
   if (!self) return <></>;
   else {
     return (
-      <>
+      <section style={{height: "88%", display: "flex", flexDirection:"column"}}>
         {props.currentConversation.groupConversation ? (
           <ManageConversation
             selectConversation={props.selectConversation}
@@ -86,7 +86,7 @@ export default function ChatParams(props: chatParamsProps): JSX.Element {
           <></>
         )}
         <section
-          style={{ overflowY: "scroll", overflowX: "hidden", height: "80%" }}
+          style={{ overflowY: "scroll", overflowX: "hidden", height: "100%" }}
         >
           {props.currentConversation.groupConversation ? (
             <div>
@@ -112,7 +112,7 @@ export default function ChatParams(props: chatParamsProps): JSX.Element {
             );
           })}
         </section>
-      </>
+      </section>
     );
   }
 }
