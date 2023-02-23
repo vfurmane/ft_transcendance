@@ -118,6 +118,8 @@ export default function OpenedConversation(
   };
 
   const addNewMessage = (message: any) => {
+    console.error("Adding message", message);
+    console.error("currentConversation", currentConversation);
     if (message.id === currentConversation?.id) {
       setMessages((m) => [...m, message.message]);
       if (lastElement !== null) {
@@ -129,6 +131,10 @@ export default function OpenedConversation(
       }
     }
     setScroll(false);
+  };
+
+  const pongNewMessage = (message: any) => {
+    addNewMessage(message);
   };
 
   const hydrateMessages = () => {
@@ -154,7 +160,7 @@ export default function OpenedConversation(
         websockets.conversations.on("kickedUser", amIKicked);
         websockets.conversations.on("mutedUser", amIMuted);
         websockets.conversations.on("unmutedUser", amIUnmuted);
-        websockets.pong.on("newMessage", addNewMessage);
+        websockets.pong.on("newPongMessage", pongNewMessage);
         socketConnected.current = true;
       } else if (websockets.conversations?.disconnected) {
         socketConnected.current = false;
@@ -163,8 +169,6 @@ export default function OpenedConversation(
       setMessages((m) => []);
     }
     return () => {
-      websockets.conversations?.off("newMessage", addNewMessage);
-      websockets.pong?.off("newMessage");
       if (currentConversation) {
         const targetId = currentConversation.id;
         websockets.conversations

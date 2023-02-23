@@ -122,6 +122,7 @@ export class ConversationsService {
     createdConversation.name = `${creator.name} - ${participant.name}`;
     createdConversation.password = null;
     createdConversation.visible = false;
+    createdConversation.groupConversation = false;
     await this.conversationRepository.save(createdConversation);
     const conversationRoleCreator = this.conversationRoleRepository.create({
       lastRead: new Date(),
@@ -165,6 +166,7 @@ export class ConversationsService {
     }
     const createdConversation =
       this.conversationRepository.create(newConversation);
+      createdConversation.groupConversation = true
     if (createdConversation.password) {
       const salt = await bcrypt.genSalt();
       createdConversation.password = await bcrypt.hash(
@@ -366,12 +368,16 @@ export class ConversationsService {
           await this.messageRepository.count({
             relations: {
               conversation: true,
+              sender: true
             },
             where: {
               created_at: MoreThan(conversation.conversationRoles[0].lastRead),
               conversation: {
                 id: conversation.id,
               },
+              sender: {
+                id: Not(currentUser.id)
+              }
             },
           });
         const lastMessage = await this.messageRepository.findOne({
@@ -509,12 +515,17 @@ export class ConversationsService {
       const unreadMessages = await this.messageRepository.count({
         relations: {
           conversation: true,
+          sender: true
         },
         where: {
           created_at: MoreThan(role.lastRead),
           conversation: {
             id: role.conversation.id,
           },
+          sender:
+          {
+            id: Not(currentUser.id)
+          }
         },
       });
       if (unreadMessages) {

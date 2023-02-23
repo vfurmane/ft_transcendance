@@ -55,10 +55,9 @@ export default function ChatBar(): JSX.Element {
           }
         );
         websockets.conversations.on("newMessage", newUnreadMessage);
-        websockets.pong.on("newMessage", newUnreadMessage);
+        websockets.pong.on("newPongMessage", newUnreadMessage);
       }
     } else {
-      websockets.conversations?.off("newMessage", newUnreadMessage);
       setUnreadMessages(0);
     }
     return () => {

@@ -118,7 +118,7 @@ export default function Chat({
         websockets.pong.on("newConversation", addNewConversation);
         websockets.conversations.on("newMessage", newUnread);
         websockets.conversations.on("kickedUser", kickMeImFamous);
-        websockets.pong.on("newMessage", newUnread);
+        websockets.pong.on("newPongMessage", newUnread);
       }
     } else {
       setLoading(false);
@@ -126,10 +126,8 @@ export default function Chat({
     return () => {
       websockets.conversations?.off("newConversation", addNewConversation);
       websockets.pong?.off("newConversation");
-      websockets.conversations?.off("newMessage", newUnread);
       websockets.conversations?.off("bannedUser");
       websockets.conversations?.off("unbannedUser");
-      websockets.pong?.off("newMessage");
       websockets.conversations?.emit(
         "getUnread",
         ({ totalNumberOfUnreadMessages }: unreadMessagesResponse) => {

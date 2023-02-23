@@ -475,7 +475,7 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
         conversation.id,
         "let's play",
       );
-      this.server.to(`user_${target.id}`).emit('newMessage', {
+      this.server.to(`user_${target.id}`).emit('newPongMessage', {
         id: conversation.id,
         message: instanceToPlain(ret),
       });

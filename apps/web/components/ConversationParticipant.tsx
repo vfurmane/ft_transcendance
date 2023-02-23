@@ -118,9 +118,10 @@ export default function ConversationParticipant(
     );
   }
   if (
-    props.self?.role === ConversationRoleEnum.OWNER ||
-    (props.self?.role === ConversationRoleEnum.ADMIN &&
-      props.participant.role === ConversationRoleEnum.USER)
+    !props.self?.restrictions.length &&
+    (props.self?.role === ConversationRoleEnum.OWNER ||
+      (props.self?.role === ConversationRoleEnum.ADMIN &&
+        props.participant.role === ConversationRoleEnum.USER))
   ) {
     return (
       <section
