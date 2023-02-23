@@ -23,6 +23,35 @@ export default function ChatParams(props: chatParamsProps): JSX.Element {
   const self = useRef<ConversationRole | null>(null);
   const userState = useSelector(selectUserState);
 
+  const refreshParticipants = () =>
+  {
+    websockets.conversations?.emit(
+      "getParticipants",
+      { id: props.currentConversation.id },
+      (roles: ConversationRole[]) => {
+        setParticipants(roles)
+        self.current = roles.filter((e) => e.user.id === userState.id)[0];
+        })
+  }
+
+  const findKicked = (payload : {conversationID: string, userId: string | undefined}) =>
+  {
+    if (props.currentConversation.id === payload.conversationID)
+      refreshParticipants()
+  }
+
+  const findMuted = (payload : {conversationID: string, userId: string | undefined}) =>
+  {
+    if (props.currentConversation.id === payload.conversationID)
+      refreshParticipants()
+  }
+
+  const findBanned = (payload : {conversationID: string, userId: string | undefined}) =>
+  {
+    if (props.currentConversation.id === payload.conversationID)
+      refreshParticipants()
+  }
+
   useEffect(() => {
     if (websockets.conversations?.connected && participants.length === 0) {
       websockets.conversations.emit(
@@ -34,6 +63,9 @@ export default function ChatParams(props: chatParamsProps): JSX.Element {
             self.current = tmp.filter((e) => e.user.id === userState.id)[0];
             return tmp;
           });
+          websockets.conversations?.on("kickedUser", findKicked)
+          websockets.conversations?.on("bannedUser", findBanned)
+          websockets.conversations?.on("mutedUser", findMuted)
         }
       );
     }
@@ -75,6 +107,7 @@ export default function ChatParams(props: chatParamsProps): JSX.Element {
                   participant={participant}
                   self={self.current}
                   conversation={props.currentConversation}
+                  setParticipants={setParticipants}
                 />
               </div>
             );

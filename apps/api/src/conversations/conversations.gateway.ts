@@ -315,7 +315,7 @@ export class ConversationsGateway implements OnGatewayConnection {
       new Date(date),
     );
     const target = await this.usersService.getByUsername(username);
-    client
+    this.server
       .to(`conversation_${id}`)
       .emit('mutedUser', { conversationID: id, userId: target?.id });
     return restriction;
@@ -335,10 +335,10 @@ export class ConversationsGateway implements OnGatewayConnection {
       new Date(date),
     );
     const target = await this.usersService.getByUsername(username);
-    client
+    this.server
       .to(`conversation_${id}`)
       .emit('bannedUser', { conversationID: id, userId: target?.id });
-    client
+      this.server
       .to(`user_${target?.id}`)
       .emit('bannedUser', { conversationID: id, userId: target?.id });
     this.server.in(`user_${target?.id}`).socketsLeave(`conversation_${id}`);
@@ -356,10 +356,10 @@ export class ConversationsGateway implements OnGatewayConnection {
       username,
     );
     const target = await this.usersService.getByUsername(username);
-    client
+    this.server
       .to(`conversation_${id}`)
       .emit('kickedUser', { conversationID: id, userId: target?.id });
-    client
+      this.server
       .to(`user_${target?.id}`)
       .emit('kickedUser', { conversationID: id, userId: target?.id });
     this.server.in(`user_${target?.id}`).socketsLeave(`conversation_${id}`);
@@ -379,10 +379,10 @@ export class ConversationsGateway implements OnGatewayConnection {
       null,
     );
     const target = await this.usersService.getByUsername(username);
-    client
+    this.server
       .to(`conversation_${id}`)
       .emit('bannedUser', { conversationID: id, userId: target?.id });
-    client
+      this.server
       .to(`user_${target?.id}`)
       .emit('bannedUser', { conversationID: id, userId: target?.id });
     this.server.in(`user_${target?.id}`).socketsLeave(`conversation_${id}`);

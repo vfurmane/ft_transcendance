@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 import { Socket } from "socket.io-client";
 import {
   Conversation as ConversationEntity,
@@ -12,11 +12,14 @@ import ToggleCross from "../public/toggleCross.png";
 import { useWebsocketContext } from "./Websocket";
 import { Button } from "./Button";
 import styles from "../styles/openedConversation.module.scss";
+import { useSelector } from "react-redux";
+import { selectUserState } from "../store/UserSlice";
 
 interface ConversationParticipantsProps {
   participant: ConversationRole;
   self: ConversationRole | null;
   conversation: ConversationEntity;
+  setParticipants: Dispatch<SetStateAction<ConversationRole[]>>
 }
 
 export default function ConversationParticipant(
@@ -26,6 +29,17 @@ export default function ConversationParticipant(
   const [showOptions, setShowOptions] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
   const [success, setSuccess] = useState<string>("");
+  const userState = useSelector(selectUserState);
+  
+  const refreshParticipants = () =>
+  {
+    websockets.conversations?.emit(
+      "getParticipants",
+      { id: props.conversation.id },
+      (roles: ConversationRole[]) => {
+        props.setParticipants(roles)
+        })
+  }
 
   const promoteUser = (newRole: ConversationRoleEnum, promote: boolean) => {
     setError("");
@@ -54,6 +68,8 @@ export default function ConversationParticipant(
           return;
         }
         setSuccess(answer);
+        setShowOptions(false)
+        setTimeout(refreshParticipants, 500)
       }
     );
   };
@@ -201,6 +217,8 @@ export default function ConversationParticipant(
                         return;
                       }
                       setSuccess(answer);
+                      setShowOptions(false)
+                      setTimeout(refreshParticipants, 500)
                     }
                   );
                 }}
@@ -232,6 +250,8 @@ export default function ConversationParticipant(
                       setSuccess(
                         `Sucessfully unmuted ${props.participant.user.name}`
                       );
+                      setShowOptions(false)
+                      setTimeout(refreshParticipants, 500)
                     }
                   );
                 }}
@@ -270,6 +290,8 @@ export default function ConversationParticipant(
                           return;
                         }
                         setSuccess(answer);
+                        setShowOptions(false)
+                        setTimeout(refreshParticipants, 500)
                       }
                     );
                   }}
@@ -300,6 +322,8 @@ export default function ConversationParticipant(
                           return;
                         }
                         setSuccess(answer);
+                        setShowOptions(false)
+                        setTimeout(refreshParticipants, 500)
                       }
                     );
                   }}
@@ -333,6 +357,8 @@ export default function ConversationParticipant(
                       setSuccess(
                         `Sucessfully unbanned ${props.participant.user.name}`
                       );
+                      setShowOptions(false)
+                      setTimeout(refreshParticipants, 500)
                     }
                   );
                 }}
@@ -365,6 +391,8 @@ export default function ConversationParticipant(
                     setSuccess(
                       `${props.participant.user.name} has been kicked`
                     );
+                    setShowOptions(false)
+                    setTimeout(refreshParticipants, 500)
                   }
                 );
               }}
