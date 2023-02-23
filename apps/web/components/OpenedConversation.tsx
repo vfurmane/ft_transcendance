@@ -22,9 +22,7 @@ import ChatParams from "./ChatParams";
 import { useDispatch, useSelector } from "react-redux";
 import { OpenConversation } from "../store/ConversationSlice";
 import { selectUserState } from "../store/UserSlice";
-import {
-  ReinitConversations,
-} from "../store/ConversationSlice";
+import { ReinitConversations } from "../store/ConversationSlice";
 
 interface OpenedConversationProps {
   newConversation: { userId: string; userName: string } | null;

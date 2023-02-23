@@ -67,6 +67,13 @@ export default function SearchChannel(props: SearchChannelProps): JSX.Element {
               setChannels(conversations);
               setMatches(conversations);
               websockets.conversations?.on("NewChannel", updateChannelList);
+              websockets.conversations?.on("isVisible", updateChannelList);
+              websockets.conversations?.on("isInvisible", updateChannelList);
+              websockets.conversations?.on("protectChannel", updateChannelList);
+              websockets.conversations?.on(
+                "unprotectChannel",
+                updateChannelList
+              );
             }
           );
       }
@@ -74,6 +81,10 @@ export default function SearchChannel(props: SearchChannelProps): JSX.Element {
     }
     return () => {
       websockets.conversations?.off("NewChannel", updateChannelList);
+      websockets.conversations?.off("isVisible", updateChannelList);
+      websockets.conversations?.off("isInvisible", updateChannelList);
+      websockets.conversations?.off("protectChannel", updateChannelList);
+      websockets.conversations?.off("unprotectChannel", updateChannelList);
     };
   }, [websockets.conversations?.connected]);
 
@@ -112,6 +123,7 @@ export default function SearchChannel(props: SearchChannelProps): JSX.Element {
       <section className={styles.matchesContainer}>
         {matches.map((match) => (
           <Channel
+            key={`channel_${match.id}`}
             changeConversation={props.changeConversation}
             closeSearchChannel={props.closeSearchChannel}
             setErrors={setErrors}

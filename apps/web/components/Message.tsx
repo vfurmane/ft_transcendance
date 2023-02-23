@@ -69,7 +69,7 @@ export default function Message(props: MessageProps): JSX.Element {
           <p>
             You are invited to join the conversation {props.message.content}
           </p>
-          {!requirePassword && selfMessage.current ? (
+          {!requirePassword ? (
             <button
               className={styles.joinButton}
               onClick={(e) => {
