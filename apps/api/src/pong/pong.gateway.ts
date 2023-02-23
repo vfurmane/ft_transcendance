@@ -66,17 +66,14 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   async handleConnection(client: Socket): Promise<void | string> {
-    console.log('SOMEBODY IS TRYING TO CONNECT');
     const token = getCookie(client, 'access_token');
     if (!token) {
       client.disconnect();
-      console.log('No Authorization cookie found');
       return;
     }
     const currentUser = this.authService.verifyUserFromToken(token);
     if (!currentUser) {
       client.disconnect();
-      console.log('invalid Token');
       return;
     }
     client.data = {
@@ -86,8 +83,6 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
       position: -1,
     };
     client.join(`user_${currentUser.sub}`);
-    console.log('NEW CONNECTION!');
-    console.log('YOU ARE ' + currentUser.name + ' OF ID ' + client.data.id);
     if (this.pongService.games) {
       this.pongService.games.forEach((value, key) => {
         value[1].forEach((user) => {
@@ -95,7 +90,6 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
             client.data.room = key;
             client.data.position = value[1].indexOf(user);
             client.join(`game_${key}`);
-            console.log('Reconnected to the game !');
             this.server
               .in(`user_${client.data.id}`)
               .emit('replace', `/pingPong/${key}`);
@@ -110,11 +104,9 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
   async handleDisconnect(client: Socket): Promise<void> {
     await this.leaveQueue(client);
     if (!client.data.room) {
-      console.log(client.data.name + ' WAS NOT IN A ROOM');
       return;
     }
     if (!this.room_id.includes(client.data.room)) {
-      console.log(client.data.name + ' IS CURRENTLY GAMING');
       return;
     }
     client.leave(client.data.room);
@@ -146,10 +138,8 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
               socket.data.position--;
             }
           });
-          console.log('REMOVED PLAYER ', pos);
         }
       } else {
-        console.log('GAME ENDED');
         const sockets = await this.server.in(`game_${room}`).fetchSockets();
         this.server.emit('game_end', {
           id: room,
@@ -191,12 +181,8 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
     game[1].forEach((user) => {
       if (client.data.id === user.id) {
         if (user.ready === true) {
-          console.log(
-            client.data.name + ' SENT A READY REQUEST HE WASNT SUPPOSED TO ...',
-          );
           return;
         }
-        console.log(client.data.name + ' IS READY IN GAME ' + room);
         user.ready = true;
         this.cacheManager.set(`spy:${user.id}`, user.id, 0);
         this.server.to(`spy_${user.id}`).emit('user_status_update', {
@@ -208,7 +194,6 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
             return;
           }
         }
-        console.log('LAUNCHING GAME AT ', Date.now());
         game[0].init();
         game[0].await = false;
         this.server
@@ -218,29 +203,12 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
     });
   }
 
-  /*    THIS FUNCTION IS DEBUG ONLY (SHOW SERVER SIDE VISION OF THE GAME)    */
-  // @Interval(10)
-  // refresh() {
-  // 	if (!this.games || this.games === undefined) {
-  // 		return ;
-  // 	}
-  // 	this.games.forEach(async (key, room) => {
-  // 		let game = key[0];
-  // 		if (!game.await && game.boardType !== 0) {
-  // 			let state = game.getState();
-  // 			this.server.in(room).emit('refresh', state, Date.now());
-  // 		}
-  // 	});
-  // }
-
   checkUser(client: Socket, room: undefined | string): boolean {
     if (room === undefined) {
       // not in any room
-      console.log('no room');
       return false;
     } else if (client.data.position === -1) {
       // is not a player (spectate)
-      console.log('no position : ' + client.data.position);
       return false;
     }
     return true;
@@ -335,7 +303,6 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   @SubscribeMessage('launch')
   async launch(@ConnectedSocket() client: Socket) {
-    console.log('receiving launch');
     const user = await this.usersService.getById(client.data.id);
     if (!user) return;
     const gameQueue = await this.pongService.getGameModeQueue(
@@ -344,7 +311,6 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
     if (!gameQueue) return;
     if (gameQueue.length < 2) return;
     if (user.id !== gameQueue[0].id) return;
-    console.log('should be launching the game');
     const game = await this.pongService.startGame(gameQueue, this.server);
 
     this.server.emit(
@@ -520,7 +486,6 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const user = await this.cacheManager.get<User>(
       `spy:${spiedUserDto.userId}`,
     );
-    console.log(user);
     return user !== undefined;
   }
 

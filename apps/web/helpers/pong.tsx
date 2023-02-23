@@ -33,7 +33,7 @@ class Game {
   public static keyPressed = { up: false, down: false };
   public start = Date.now();
   public lastUpdate = 0;
-  public color: string[] = ["blue", "red", "orange", "white", "pink", "black"];
+  public color: string[] = ["blue", "red", "orange", "white", "pink", "cyan"];
   public static position: number;
   public static scoreMax = 10;
   public static changeLife: (
@@ -177,8 +177,13 @@ class Game {
       state.ball.dir.x,
       state.ball.dir.y
     ).normalized();
-    this.ball.defaultSpeed =
-      Game.ballSpeed * (this.boardCanvas.width / ServerCanvas.width);
+    if (this.boardType === Form.REC)
+      this.ball.defaultSpeed =
+        Game.ballSpeed * (this.boardCanvas.width / ServerCanvas.width);
+    else {
+      this.ball.defaultSpeed =
+        (Game.ballSpeed / 2) * (this.boardCanvas.width / ServerCanvas.width);
+    }
     this.ball.speed = new Vector(
       exBallSpeed.x * this.ball.defaultSpeed,
       exBallSpeed.y * this.ball.defaultSpeed
@@ -240,8 +245,13 @@ class Game {
       );
     }
     const speed = new Vector(state.ball.dir.x, state.ball.dir.y).normalized();
-    this.ball.defaultSpeed =
-      Game.ballSpeed * ((window.innerWidth * 0.6) / ServerCanvas.width);
+    if (this.boardType === Form.REC)
+      this.ball.defaultSpeed =
+        Game.ballSpeed * (this.boardCanvas.width / ServerCanvas.width);
+    else {
+      this.ball.defaultSpeed =
+        (Game.ballSpeed / 2) * (this.boardCanvas.width / ServerCanvas.width);
+    }
     this.ball.speed = new Vector(
       speed.x * this.ball.defaultSpeed,
       speed.y * this.ball.defaultSpeed
@@ -427,8 +437,13 @@ class Game {
         this.board.wall
       );
     }
-    this.ball.defaultSpeed =
-      Game.ballSpeed * (this.boardCanvas.width / ServerCanvas.width);
+    if (this.boardType === Form.REC)
+      this.ball.defaultSpeed =
+        Game.ballSpeed * (this.boardCanvas.width / ServerCanvas.width);
+    else {
+      this.ball.defaultSpeed =
+        (Game.ballSpeed / 2) * (this.boardCanvas.width / ServerCanvas.width);
+    }
     const dir = this.ball.speed.normalized();
     this.ball.speed = new Vector(
       dir.x * this.ball.defaultSpeed,
@@ -617,7 +632,6 @@ class Game {
           this.ball.point[0].x > this.board.wall[2].point[0].x ||
           this.ball.point[0].y > this.board.wall[3].point[0].y
         ) {
-          //console.log("BALL SAVED");
           this.ball = this.saveBall.ball;
         }
         this.saveBall.count = 0;
@@ -699,6 +713,10 @@ class Ball extends Entity {
 
   constructor(points: Point[], player: Racket[], walls: Wall[]) {
     super(points);
+    if (player.length === Form.REC) this.defaultSpeed = Game.ballSpeed;
+    else {
+      this.defaultSpeed = Game.ballSpeed / 2;
+    }
     const dir = player[0].point[1]
       .midSegment(player[0].point[2])
       .vectorTo(player[0].point[0].midSegment(player[0].point[3]))

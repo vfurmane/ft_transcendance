@@ -81,7 +81,6 @@ export default function PingPong(): JSX.Element {
       users.findIndex((e) => e.id === UserState.id) === -1
         ? users.length
         : users.length + 1;
-    //console.log('-----------------in rotateInit');
     const angle = 360 / size;
 
     let ratio = 1;
@@ -123,7 +122,6 @@ export default function PingPong(): JSX.Element {
 
     const canvas = document.getElementById("canvasElem");
     if (canvas) {
-      //console.error('-----------------in Rotate');
       const wallSize = Math.min(Math.round(width), Math.round(height));
       let centerAxeX = 0;
       if (users.length === 2) centerAxeX = wallSize * ratio;
@@ -187,7 +185,6 @@ export default function PingPong(): JSX.Element {
 
   const changeLife = useCallback(
     (index: number, val: number, length: number) => {
-      //console.log('----------------in changelife');
       if (
         !usersGame.length ||
         endGame ||
@@ -200,9 +197,7 @@ export default function PingPong(): JSX.Element {
       );
       if (MiniProfilArray[indexHurt].props.life === val) return;
       if (val === 0) {
-        //console.log('----------------someone died');
         if (usersGame.length > 2 && usersGame[index].id === UserState.id) {
-          //console.log('-------------open overlay');
           setOpenOverlay(true);
         }
         let newClassement = [
@@ -213,13 +208,11 @@ export default function PingPong(): JSX.Element {
         newUsersGame.splice(index, 1);
         rotateInit(newUsersGame);
         if (newUsersGame.length === 1) {
-          //console.log('----------------end game');
           if (newUsersGame[0].id === UserState.id) setWin(true);
           newClassement = [
             createTrClassement(newUsersGame[0], newClassement),
             ...newClassement,
           ];
-          //console.log(newClassement);
           setClassement(newClassement);
           setEndGame(true);
           setOpenOverlay(false);
@@ -232,9 +225,7 @@ export default function PingPong(): JSX.Element {
         rotateUsers = rotate(rotateUsers);
         setUsersRotate(rotateUsers);
         setMiniProfilArray(createMiniProfilArray(rotateUsers));
-        //console.log('----------------end died');
       } else {
-        //console.log('----------------someone loose life');
         const newMiniProfilArray = [...MiniProfilArray];
         newMiniProfilArray[indexHurt] = changeScoreOrLife(
           indexHurt,
@@ -242,7 +233,6 @@ export default function PingPong(): JSX.Element {
           MiniProfilArray[indexHurt].props.score
         );
         if (usersGame.length === 2) {
-          //console.log('----------------someone mark point');
           const indexWin = indexHurt !== 0 ? 0 : 1;
           const life = Number(newMiniProfilArray[indexWin].props.life);
           const score =
@@ -253,7 +243,6 @@ export default function PingPong(): JSX.Element {
             score
           );
         }
-        //console.log(newMiniProfilArray.map(e => e.props.score));
         setMiniProfilArray(newMiniProfilArray);
       }
     },
@@ -273,7 +262,6 @@ export default function PingPong(): JSX.Element {
           setPrintButton(false);
           let tmp = game.opponents.map((opponent) => opponent.user);
           usersRef.current = game.opponents.map((opponent) => opponent.user);
-          //console.log('----------------in first useEffect');
           setUsersGame(usersRef.current);
           tmp = rotate(tmp);
           setUsers(tmp);
@@ -296,15 +284,11 @@ export default function PingPong(): JSX.Element {
   }, [websockets.pong, router.query.id]);
 
   useEffect(() => {
-    //console.log('----------------in UseEffect');
-
     if (usersGame.length === 0) return;
     if (game) {
-      //console.log("-----------------set Game.changeLife");
       Game.changeLife = changeLife;
     }
     if (usersGame.length !== usersGameRef.current.length && !endGame) {
-      //console.log("-----------------setGame");
       if (usersGame.findIndex((user) => user.id === UserState.id) === -1) {
         window.addEventListener(
           "keydown",
@@ -317,12 +301,8 @@ export default function PingPong(): JSX.Element {
         );
       }
       if (intervalRef.current) clearInterval(intervalRef.current);
-      //console.error('------------------setGame');
-      //console.error(usersGame.length);
       const index = usersGame.findIndex((user) => user.id === UserState.id);
       if (index >= 0) dispatch(setUserGameId(router.query.id));
-      //console.log("------------------setGAme");
-      //console.log(usersGame);
       setGame(new Game(usersGame.length, index, changeLife));
       usersGameRef.current = usersGame;
     }

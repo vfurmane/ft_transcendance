@@ -49,7 +49,6 @@ export default function FtOauth2(): JSX.Element {
     }
     exchangeCodeForToken(code, state)
       .then(async (response) => {
-        console.log(response);
         if (response === false) {
           throw new Error("An unexpected error occured...");
         } else if (response === true) {

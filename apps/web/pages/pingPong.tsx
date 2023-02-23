@@ -242,7 +242,6 @@ export default function PingPong(): JSX.Element {
   }
 
   function newPartie() {
-    console.log("click");
     setUsers([UserState]);
     setEndGame(false);
     setMiniProfilArray([]);

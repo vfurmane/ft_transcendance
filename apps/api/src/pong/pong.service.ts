@@ -231,7 +231,6 @@ export class PongService {
       invitations.push(this.invitesList[pos]);
       if (pos >= 0) this.invitesList.splice(pos, 1);
     }
-    console.log(invitations);
     return invitations;
   }
 }
