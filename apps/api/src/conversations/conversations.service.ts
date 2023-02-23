@@ -166,7 +166,7 @@ export class ConversationsService {
     }
     const createdConversation =
       this.conversationRepository.create(newConversation);
-      createdConversation.groupConversation = true
+    createdConversation.groupConversation = true;
     if (createdConversation.password) {
       const salt = await bcrypt.genSalt();
       createdConversation.password = await bcrypt.hash(
@@ -368,7 +368,7 @@ export class ConversationsService {
           await this.messageRepository.count({
             relations: {
               conversation: true,
-              sender: true
+              sender: true,
             },
             where: {
               created_at: MoreThan(conversation.conversationRoles[0].lastRead),
@@ -376,8 +376,8 @@ export class ConversationsService {
                 id: conversation.id,
               },
               sender: {
-                id: Not(currentUser.id)
-              }
+                id: Not(currentUser.id),
+              },
             },
           });
         const lastMessage = await this.messageRepository.findOne({
@@ -484,8 +484,7 @@ export class ConversationsService {
     }
     const blockedUser = await this.getBlockedUsers(currentUser.id);
     for (const role of conversationRoles) {
-      if (!role || !(role.conversation))
-        continue
+      if (!role || !role.conversation) continue;
       if (
         (await this.verifyRestrictionsOnUser(role.restrictions)).filter(
           (restriction) =>
@@ -517,17 +516,16 @@ export class ConversationsService {
       const unreadMessages = await this.messageRepository.count({
         relations: {
           conversation: true,
-          sender: true
+          sender: true,
         },
         where: {
           created_at: MoreThan(role.lastRead),
           conversation: {
             id: role.conversation.id,
           },
-          sender:
-          {
-            id: Not(currentUser.id)
-          }
+          sender: {
+            id: Not(currentUser.id),
+          },
         },
       });
       if (unreadMessages) {

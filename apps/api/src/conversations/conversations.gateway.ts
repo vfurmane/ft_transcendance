@@ -186,7 +186,7 @@ export class ConversationsGateway implements OnGatewayConnection {
       DMId = invitationMessage.prevConversation;
     else DMId = '';
     this.server.in(`conversation_${DMId}`).emit('newMessage', {
-      id : DMId,
+      id: DMId,
       message: instanceToPlain(invitationMessage.message),
     });
     return true;
@@ -338,7 +338,7 @@ export class ConversationsGateway implements OnGatewayConnection {
     this.server
       .to(`conversation_${id}`)
       .emit('bannedUser', { conversationID: id, userId: target?.id });
-      this.server
+    this.server
       .to(`user_${target?.id}`)
       .emit('bannedUser', { conversationID: id, userId: target?.id });
     this.server.in(`user_${target?.id}`).socketsLeave(`conversation_${id}`);
@@ -359,7 +359,7 @@ export class ConversationsGateway implements OnGatewayConnection {
     this.server
       .to(`conversation_${id}`)
       .emit('kickedUser', { conversationID: id, userId: target?.id });
-      this.server
+    this.server
       .to(`user_${target?.id}`)
       .emit('kickedUser', { conversationID: id, userId: target?.id });
     this.server.in(`user_${target?.id}`).socketsLeave(`conversation_${id}`);
@@ -382,7 +382,7 @@ export class ConversationsGateway implements OnGatewayConnection {
     this.server
       .to(`conversation_${id}`)
       .emit('bannedUser', { conversationID: id, userId: target?.id });
-      this.server
+    this.server
       .to(`user_${target?.id}`)
       .emit('bannedUser', { conversationID: id, userId: target?.id });
     this.server.in(`user_${target?.id}`).socketsLeave(`conversation_${id}`);

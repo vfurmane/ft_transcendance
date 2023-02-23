@@ -116,6 +116,10 @@ export default function Profil(): JSX.Element {
   }
   /*==========================================================*/
 
+  useEffect(() => {
+    setUserProfil(router.query.username === UserState.name);
+  }, [router.query.username, UserState.name]);
+
   useEffect((): void => {
     fetch(`/api/user/${router.query.username}`, {
       credentials: "same-origin",
@@ -135,7 +139,6 @@ export default function Profil(): JSX.Element {
       .catch(() => {
         router.replace("/");
       });
-    setUserProfil(router.query.username === UserState.name);
 
     if (typeof router.query.username === "string") {
       fetch(`/api/achievements/${router.query.username}`, {
@@ -165,7 +168,7 @@ export default function Profil(): JSX.Element {
           console.error(`problem with fetch : ${error.message}`);
         });
     }
-  }, [router.query, UserState, router, user.id]);
+  }, [router.query, router, user.id]);
 
   useEffect(() => {
     if (user.id) {

@@ -16,7 +16,7 @@ const ProfilePicture = (props: {
         alt="avatar"
         width={props.width}
         height={props.height}
-        src={`/api/users/${props.userId}/profile-picture`}
+        src={`/api/users/${props.userId}/profile-picture?f=${props.fileHash}`}
         onClick={props.handleClick}
       />
     </>

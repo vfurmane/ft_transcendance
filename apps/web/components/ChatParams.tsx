@@ -31,34 +31,40 @@ export default function ChatParams(props: chatParamsProps): JSX.Element {
   const self = useRef<ConversationRole | null>(null);
   const userState = useSelector(selectUserState);
 
-  const refreshParticipants = () =>
-  {
+  const refreshParticipants = () => {
     websockets.conversations?.emit(
       "getParticipants",
       { id: props.currentConversation.id },
       (roles: ConversationRole[]) => {
-        setParticipants(roles)
+        setParticipants(roles);
         self.current = roles.filter((e) => e.user.id === userState.id)[0];
-        })
-  }
+      }
+    );
+  };
 
-  const findKicked = (payload : {conversationID: string, userId: string | undefined}) =>
-  {
+  const findKicked = (payload: {
+    conversationID: string;
+    userId: string | undefined;
+  }) => {
     if (props.currentConversation.id === payload.conversationID)
-      refreshParticipants()
-  }
+      refreshParticipants();
+  };
 
-  const findMuted = (payload : {conversationID: string, userId: string | undefined}) =>
-  {
+  const findMuted = (payload: {
+    conversationID: string;
+    userId: string | undefined;
+  }) => {
     if (props.currentConversation.id === payload.conversationID)
-      refreshParticipants()
-  }
+      refreshParticipants();
+  };
 
-  const findBanned = (payload : {conversationID: string, userId: string | undefined}) =>
-  {
+  const findBanned = (payload: {
+    conversationID: string;
+    userId: string | undefined;
+  }) => {
     if (props.currentConversation.id === payload.conversationID)
-      refreshParticipants()
-  }
+      refreshParticipants();
+  };
 
   useEffect(() => {
     if (websockets.conversations?.connected && participants.length === 0) {
@@ -71,9 +77,9 @@ export default function ChatParams(props: chatParamsProps): JSX.Element {
             self.current = tmp.filter((e) => e.user.id === userState.id)[0];
             return tmp;
           });
-          websockets.conversations?.on("kickedUser", findKicked)
-          websockets.conversations?.on("bannedUser", findBanned)
-          websockets.conversations?.on("mutedUser", findMuted)
+          websockets.conversations?.on("kickedUser", findKicked);
+          websockets.conversations?.on("bannedUser", findBanned);
+          websockets.conversations?.on("mutedUser", findMuted);
         }
       );
     }
@@ -81,7 +87,9 @@ export default function ChatParams(props: chatParamsProps): JSX.Element {
   if (!self) return <></>;
   else {
     return (
-      <section style={{height: "88%", display: "flex", flexDirection:"column"}}>
+      <section
+        style={{ height: "88%", display: "flex", flexDirection: "column" }}
+      >
         {props.currentConversation.groupConversation ? (
           <ManageConversation
             selectConversation={props.selectConversation}

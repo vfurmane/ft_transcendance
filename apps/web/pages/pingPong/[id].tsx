@@ -15,8 +15,6 @@ import { selectUserState } from "../../store/UserSlice";
 import { useWebsocketContext } from "../../components/Websocket";
 import ProfilePicture from "../../components/ProfilePicture";
 import { setUserGameId } from "../../store/UserSlice";
-import { relative } from "path";
-import { Loading } from "../../components/Loading";
 
 export default function PingPong(): JSX.Element {
   const router = useRouter();
@@ -50,13 +48,6 @@ export default function PingPong(): JSX.Element {
   const UserState = useSelector(selectUserState);
   const websockets = useWebsocketContext();
 
-  /*websockets.pong?.on("endGame", () => {
-    setEndGame(true);
-    setOpenOverlay(false);
-    setPrintButton(true);
-    setGame(null);
-  });*/
-
   const dispatch = useDispatch();
   useEffect(() => {
     if (endGame) {
@@ -80,7 +71,7 @@ export default function PingPong(): JSX.Element {
     const size =
       users.findIndex((e) => e.id === UserState.id) === -1
         ? users.length
-        : users.length + 1;
+        : users.length;
     const angle = 360 / size;
 
     let ratio = 1;
@@ -100,16 +91,15 @@ export default function PingPong(): JSX.Element {
       else if (users.length === 4) centerAxeX = (wallSize * ratio) / 2;
       else if (users.length > 4)
         centerAxeX = (wallSize * ratio) / (2 * Math.tan(Math.PI / size));
-
       canvas.style.transformOrigin = `${centerAxeX}px ${wallSize / 2}px`;
+      const numOfRotate = users.findIndex((e) => e.id === UserState.id);
       canvas.style.transform = `rotate(${
-        angle * users.findIndex((e) => e.id === UserState.id)
+        angle * (numOfRotate >= 0 ? numOfRotate : 0)
       }deg)`;
     }
   }
 
   function rotate(users: User[]): User[] {
-    // i need the real siwe of the wall
     if (!users.find((user) => UserState.id === user.id)) return users;
     const lastIndex = users.length - 1;
     const angle = -360 / users.length;
@@ -134,8 +124,10 @@ export default function PingPong(): JSX.Element {
 
       canvas.style.transformOrigin = `${centerAxeX}px ${wallSize / 2}px`;
 
+      const numOfRotate = users.findIndex((e) => e.id === UserState.id);
+
       canvas.style.transform = `rotate(${
-        angle * users.findIndex((e) => e.id === UserState.id)
+        angle * (numOfRotate >= 0 ? numOfRotate : 0)
       }deg)`;
     }
 
@@ -206,7 +198,7 @@ export default function PingPong(): JSX.Element {
         ];
         const newUsersGame = [...usersGame];
         newUsersGame.splice(index, 1);
-        rotateInit(newUsersGame);
+        rotateInit(usersRotate);
         if (newUsersGame.length === 1) {
           if (newUsersGame[0].id === UserState.id) setWin(true);
           newClassement = [

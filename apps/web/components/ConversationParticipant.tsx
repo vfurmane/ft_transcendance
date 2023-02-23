@@ -19,7 +19,7 @@ interface ConversationParticipantsProps {
   participant: ConversationRole;
   self: ConversationRole | null;
   conversation: ConversationEntity;
-  setParticipants: Dispatch<SetStateAction<ConversationRole[]>>
+  setParticipants: Dispatch<SetStateAction<ConversationRole[]>>;
 }
 
 export default function ConversationParticipant(
@@ -30,16 +30,16 @@ export default function ConversationParticipant(
   const [error, setError] = useState<string>("");
   const [success, setSuccess] = useState<string>("");
   const userState = useSelector(selectUserState);
-  
-  const refreshParticipants = () =>
-  {
+
+  const refreshParticipants = () => {
     websockets.conversations?.emit(
       "getParticipants",
       { id: props.conversation.id },
       (roles: ConversationRole[]) => {
-        props.setParticipants(roles)
-        })
-  }
+        props.setParticipants(roles);
+      }
+    );
+  };
 
   useEffect(() => {
     websockets.conversations?.on("userJoined", () => {setTimeout(refreshParticipants, 500)})
@@ -73,8 +73,8 @@ export default function ConversationParticipant(
           return;
         }
         setSuccess(answer);
-        setShowOptions(false)
-        setTimeout(refreshParticipants, 500)
+        setShowOptions(false);
+        setTimeout(refreshParticipants, 500);
       }
     );
   };
@@ -222,8 +222,8 @@ export default function ConversationParticipant(
                         return;
                       }
                       setSuccess(answer);
-                      setShowOptions(false)
-                      setTimeout(refreshParticipants, 500)
+                      setShowOptions(false);
+                      setTimeout(refreshParticipants, 500);
                     }
                   );
                 }}
@@ -255,8 +255,8 @@ export default function ConversationParticipant(
                       setSuccess(
                         `Sucessfully unmuted ${props.participant.user.name}`
                       );
-                      setShowOptions(false)
-                      setTimeout(refreshParticipants, 500)
+                      setShowOptions(false);
+                      setTimeout(refreshParticipants, 500);
                     }
                   );
                 }}
@@ -295,8 +295,8 @@ export default function ConversationParticipant(
                           return;
                         }
                         setSuccess(answer);
-                        setShowOptions(false)
-                        setTimeout(refreshParticipants, 500)
+                        setShowOptions(false);
+                        setTimeout(refreshParticipants, 500);
                       }
                     );
                   }}
@@ -327,8 +327,8 @@ export default function ConversationParticipant(
                           return;
                         }
                         setSuccess(answer);
-                        setShowOptions(false)
-                        setTimeout(refreshParticipants, 500)
+                        setShowOptions(false);
+                        setTimeout(refreshParticipants, 500);
                       }
                     );
                   }}
@@ -362,8 +362,8 @@ export default function ConversationParticipant(
                       setSuccess(
                         `Sucessfully unbanned ${props.participant.user.name}`
                       );
-                      setShowOptions(false)
-                      setTimeout(refreshParticipants, 500)
+                      setShowOptions(false);
+                      setTimeout(refreshParticipants, 500);
                     }
                   );
                 }}
@@ -396,8 +396,8 @@ export default function ConversationParticipant(
                     setSuccess(
                       `${props.participant.user.name} has been kicked`
                     );
-                    setShowOptions(false)
-                    setTimeout(refreshParticipants, 500)
+                    setShowOptions(false);
+                    setTimeout(refreshParticipants, 500);
                   }
                 );
               }}
