@@ -662,17 +662,25 @@ export class ConversationsService {
       else if (!(await bcrypt.compare(password, conversation.password)))
         throw new ForbiddenException();
     }
+    const joiningUser = await this.userRepository.findOne({
+      where:
+      {
+        id : currentUser.id
+      }
+    })
+    if (!joiningUser)
+      throw new NotFoundException()
     const joined = this.conversationRoleRepository.create({
       role: ConversationRoleEnum.USER,
       lastRead: new Date(),
-      user: currentUser,
+      user: joiningUser,
       conversation: conversation,
     });
     this.conversationRoleRepository.save(joined);
     const joinMessage = this.messageRepository.create({
       sender: null,
       conversation: conversation,
-      content: `${currentUser.name} has joined the conversation`,
+      content: `${joiningUser.name} has joined the conversation`,
       system_generated: true,
     });
     this.messageRepository.save(joinMessage);
