@@ -134,13 +134,10 @@ export class FriendshipsService {
         },
       },
     });
-    console.log(friendContract);
     if (friendContract) {
-      console.log('fiend');
       if (friendContract.accepted === true) return true;
       friendContract.accepted = true;
       this.friendshipsRepository.save(friendContract);
-      console.log('save');
       return true;
     }
     return false;

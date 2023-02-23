@@ -226,19 +226,6 @@ export default function Profil(): JSX.Element {
     return;
   }
 
-  /*useEffect(() => {
-    if (achievementSelect)
-    {
-      const index = achievementsList.findIndex(e => e.props.achievement.id === achievementSelect.id);
-      if (index === -1) return;
-      const className = achievementsList[index].props.className;
-      console.log(className);
-      const elem = document.getElementsByClassName(className);
-      console.log(elem);
-      elem[0]?.scrollIntoView(true);
-    }
-  }, [achievementSelect])*/
-
   function changeUsername(): void {
     setOpenConfigProfil(true);
     setOpenAchivementList(false);

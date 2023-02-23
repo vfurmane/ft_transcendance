@@ -47,7 +47,6 @@ async function login(
       });
     }
   });
-  console.log("Parsed Response: ", response);
   if (!response) return false;
   else if (!Object.keys(response).length) return true;
   return response;

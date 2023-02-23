@@ -632,7 +632,6 @@ class Game {
           this.ball.point[0].x > this.board.wall[2].point[0].x ||
           this.ball.point[0].y > this.board.wall[3].point[0].y
         ) {
-          //console.log("BALL SAVED");
           this.ball = this.saveBall.ball;
         }
         this.saveBall.count = 0;

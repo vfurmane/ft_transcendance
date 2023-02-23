@@ -54,17 +54,14 @@ export class ConversationsGateway implements OnGatewayConnection {
   ) {}
 
   async handleConnection(client: Socket): Promise<string | void> {
-    console.error('Someone is trying to connect');
     const token = getCookie(client, 'access_token');
     if (!token) {
       client.disconnect();
-      console.log('No Authorization cookie found');
       return;
     }
     const currentUser = this.authService.verifyUserFromToken(token);
     if (!currentUser) {
       client.disconnect();
-      console.log('invalid Token');
       return;
     }
     client.data = { id: currentUser.sub, name: currentUser.name };

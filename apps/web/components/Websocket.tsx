@@ -32,7 +32,6 @@ const WebsocketContext = createContext<OpenedSockets>({
 const deregisterSocket = (
   socket: Socket<DefaultEventsMap, DefaultEventsMap>
 ): void => {
-  console.error("disconnecting socket");
   setTimeout(() => {
     socket.disconnect();
   }, 5000);
@@ -42,7 +41,6 @@ const deregisterSocket = (
 };
 
 const closeOpenSockets = (sockets: OpenedSockets): void => {
-  console.error("Closing sockets");
   if (sockets.general) deregisterSocket(sockets.general);
   if (sockets.conversations) deregisterSocket(sockets.conversations);
   if (sockets.pong) deregisterSocket(sockets.pong);
@@ -52,9 +50,6 @@ const OpenSocket = (
 ): Socket<DefaultEventsMap, DefaultEventsMap> => {
   const newSocket = io(namespace, {
     withCredentials: true,
-  });
-  newSocket.on("connect_error", () => {
-    console.error(`Error while trying to connect to socket ${namespace}`);
   });
   return newSocket;
 };
@@ -111,7 +106,6 @@ export default function Websocket({ children }: WebsocketProps): JSX.Element {
       });
     }
     return (): void => {
-      console.error("returning to close sockets");
       closeOpenSockets(socketInstances);
       setSocketInstances({
         general: null,
