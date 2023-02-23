@@ -24,6 +24,9 @@ import { conversationRestrictionEnum } from 'types';
 import { ConversationRestriction } from 'types';
 import { invitationDto } from './dtos/invitation.dto';
 import { muteUserDto } from './dtos/muteUser.dto';
+import { addConversationPasswordDto } from './dtos/addConversationPassword.dto';
+import { updateConversationPasswordDto } from './dtos/updateConversationPassword.dto';
+import { removeConversationPasswordDto } from './dtos/removeConversationPassword.dto';
 
 @Injectable()
 export class ConversationsService {
@@ -1208,4 +1211,151 @@ export class ConversationsService {
       target: { id: targetId },
     });
   }
+
+  async changeVisibility(currentUser: User, id: string, visible: boolean) {
+    const conversation = await this.conversationRepository.findOne({
+      relations: {
+        conversationRoles: true,
+      },
+      where: {
+        id: id,
+        groupConversation: true,
+        conversationRoles: {
+          user: {
+            id: currentUser.id,
+          },
+          role: ConversationRoleEnum.OWNER,
+        },
+      },
+    });
+    if (!conversation) throw new NotFoundException();
+    conversation.visible = visible;
+    await this.conversationRepository.save(conversation);
+    return true;
+  }
+
+  async addPassword(
+    currentUser: User,
+    addConversationPasswordDto: addConversationPasswordDto,
+  ) {
+    if (
+      addConversationPasswordDto.password !==
+      addConversationPasswordDto.confirmationPassword
+    )
+      throw new NotFoundException();
+    const conversation = await this.conversationRepository.findOne({
+      relations: {
+        conversationRoles: true,
+      },
+      where: {
+        id: addConversationPasswordDto.id,
+        groupConversation: true,
+        has_password: false,
+        conversationRoles: {
+          user: {
+            id: currentUser.id,
+          },
+          role: ConversationRoleEnum.OWNER,
+        },
+      },
+    });
+    if (!conversation) throw new NotFoundException();
+    const salt = await bcrypt.genSalt();
+    conversation.password = await bcrypt.hash(
+      addConversationPasswordDto.password,
+      salt,
+    );
+    conversation.has_password = true;
+    await this.conversationRepository.save(conversation);
+    if (conversation.visible) return true;
+    return false;
+  }
+
+  async updatePassword(
+    currentUser: User,
+    updateConversationPasswordDto: updateConversationPasswordDto,
+  ) {
+    if (
+      updateConversationPasswordDto.password !==
+      updateConversationPasswordDto.confirmationPassword
+    )
+      throw new NotFoundException();
+    const conversation = await this.conversationRepository.findOne({
+      relations: {
+        conversationRoles: true,
+      },
+      where: {
+        id: updateConversationPasswordDto.id,
+        groupConversation: true,
+        has_password: true,
+        conversationRoles: {
+          user: {
+            id: currentUser.id,
+          },
+          role: ConversationRoleEnum.OWNER,
+        },
+      },
+    });
+    if (!conversation || !conversation.password) throw new NotFoundException();
+    if (
+      !(await bcrypt.compare(
+        updateConversationPasswordDto.oldPassword,
+        conversation.password,
+      ))
+    )
+      throw new ForbiddenException();
+    const salt = await bcrypt.genSalt();
+    conversation.password = await bcrypt.hash(
+      updateConversationPasswordDto.password,
+      salt,
+    );
+    await this.conversationRepository.save(conversation);
+    return true;
+  }
+
+  async removePassword(
+    currentUser: User,
+    removeConversationPasswordDto: removeConversationPasswordDto,
+  ) {
+    const conversation = await this.conversationRepository.findOne({
+      relations: {
+        conversationRoles: true,
+      },
+      where: {
+        id: removeConversationPasswordDto.id,
+        groupConversation: true,
+        has_password: true,
+        conversationRoles: {
+          user: {
+            id: currentUser.id,
+          },
+          role: ConversationRoleEnum.OWNER,
+        },
+      },
+    });
+    if (!conversation) {
+      console.error('No conversation found');
+      throw new NotFoundException();
+    }
+    if (!conversation.password) {
+      console.error('COnversation does not have a password');
+      throw new NotFoundException();
+    }
+    console.error('So far so good');
+    if (
+      !(await bcrypt.compare(
+        removeConversationPasswordDto.password,
+        conversation.password,
+      ))
+    )
+      throw new ForbiddenException();
+    conversation.password = null;
+    conversation.has_password = false;
+    await this.conversationRepository.save(conversation);
+    if (conversation.visible) return true;
+    return false;
+  }
+
+  // else if (!(await bcrypt.compare(password, conversation.password)))
+  // throw new ForbiddenException();
 }

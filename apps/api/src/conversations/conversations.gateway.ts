@@ -34,6 +34,9 @@ import { instanceToPlain } from 'class-transformer';
 import { BlockUserDto } from './block-user.dto';
 import { invitationDto } from './dtos/invitation.dto';
 import getCookie from 'src/common/helpers/getCookie';
+import { addConversationPasswordDto } from './dtos/addConversationPassword.dto';
+import { updateConversationPasswordDto } from './dtos/updateConversationPassword.dto';
+import { removeConversationPasswordDto } from './dtos/removeConversationPassword.dto';
 
 @UseFilters(new HttpExceptionTransformationFilter())
 @UsePipes(new ValidationPipe())
@@ -478,4 +481,81 @@ export class ConversationsGateway implements OnGatewayConnection {
       .emit('unmutedUser', { conversationID: id, userId: target?.id });
     return ret;
   }
+
+  @SubscribeMessage('makeVisible')
+  async makeVisible(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() { id }: isUUIDDto,
+  ) {
+    const ret = await this.conversationsService.changeVisibility(
+      client.data as User,
+      id,
+      true,
+    );
+    if (ret) {
+      this.server.emit('isVisible', id);
+    }
+    return true;
+  }
+
+  @SubscribeMessage('makeInvisible')
+  async makeInvisible(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() { id }: isUUIDDto,
+  ) {
+    const ret = await this.conversationsService.changeVisibility(
+      client.data as User,
+      id,
+      false,
+    );
+    if (ret) {
+      this.server.emit('isInvisible', id);
+    }
+    return true;
+  }
+
+  @SubscribeMessage('addPassword')
+  async addPassword(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() addConversationPasswordDto: addConversationPasswordDto,
+  ) {
+    const ret = await this.conversationsService.addPassword(
+      client.data as User,
+      addConversationPasswordDto,
+    );
+    if (ret) {
+      this.server.emit('protectChannel', addConversationPasswordDto.id);
+    }
+    return true;
+  }
+
+  @SubscribeMessage('updatePassword')
+  updatePassword(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() updateConversationPasswordDto: updateConversationPasswordDto,
+  ) {
+    return this.conversationsService.updatePassword(
+      client.data as User,
+      updateConversationPasswordDto,
+    );
+  }
+
+  @SubscribeMessage('removePassword')
+  async removePassword(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() removeConversationPasswordDto: removeConversationPasswordDto,
+  ) {
+    console.error('removing password');
+    const ret = await this.conversationsService.removePassword(
+      client.data as User,
+      removeConversationPasswordDto,
+    );
+    if (ret) {
+      this.server.emit('unprotectChannel', removeConversationPasswordDto.id);
+    }
+    return true;
+  }
+
+  // @SubscribeMessage('removePassword')
+  // async removePassword(@ConnectedSocket() client : Socket, @MessageBody() {id} : isUUIDDto)
 }
