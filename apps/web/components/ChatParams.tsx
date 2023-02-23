@@ -99,11 +99,10 @@ export default function ChatParams(props: chatParamsProps): JSX.Element {
             <></>
           )}
           {participants.map((participant) => {
-            if (participant.user.id === userState.id) return <></>;
+            if (participant.user.id === userState.id) return null;
             return (
-              <div style={{ marginBottom: "10px" }}>
+              <div key={participant.user.id} style={{ marginBottom: "10px" }}>
                 <ConversationParticipant
-                  key={participant.user.id}
                   participant={participant}
                   self={self.current}
                   conversation={props.currentConversation}

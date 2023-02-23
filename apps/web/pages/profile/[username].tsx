@@ -168,7 +168,7 @@ export default function Profil(): JSX.Element {
   }, [router.query, UserState, router, user.id]);
 
   useEffect(() => {
-    if (user) {
+    if (user.id) {
       fetch(`/api/match/${user.id}`, {
         headers: {
           "Content-Type": "application/json",
