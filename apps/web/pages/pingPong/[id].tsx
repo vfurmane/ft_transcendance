@@ -284,7 +284,6 @@ export default function PingPong(): JSX.Element {
   }, [websockets.pong, router.query.id]);
 
   useEffect(() => {
-
     if (usersGame.length === 0) return;
     if (game) {
       Game.changeLife = changeLife;

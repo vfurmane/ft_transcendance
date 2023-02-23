@@ -36,8 +36,7 @@ export default function Invite(): ReactElement {
 
     return () => {
       if (websockets.pong) {
-        websockets.pong.emit("discard", () => {
-        });
+        websockets.pong.emit("discard");
         websockets.pong.off("game_start");
       }
     };
