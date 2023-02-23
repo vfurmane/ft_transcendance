@@ -55,8 +55,12 @@ export default function FtOauth2(): JSX.Element {
           setMessage("Success! Redirecting...");
           localStorage.removeItem("state");
           const user = await identifyUser(false);
-          if (user) dispatch(setUserState(user));
-          router.replace("/");
+          if (user) {
+            dispatch(setUserState(user));
+            router.replace(`/profile/${user.name}`);
+          } else {
+            router.replace('/')
+          }
         } else if (
           "message" in response &&
           response.message === "Authentication factor needed"
