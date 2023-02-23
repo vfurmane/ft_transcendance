@@ -33,6 +33,8 @@ services:
       FT_OAUTH2_CLIENT_ID: ${FT_OAUTH2_CLIENT_ID}
       FT_OAUTH2_CLIENT_SECRET: ${FT_OAUTH2_CLIENT_SECRET}
       JWT_SECRET: ${JWT_SECRET}
+    volumes:
+      - ./apps/api/uploads:/usr/src/apps/api/uploads
     networks:
       - app
   database:

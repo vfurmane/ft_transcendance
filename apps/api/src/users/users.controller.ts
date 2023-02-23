@@ -42,6 +42,7 @@ export class UsersController {
   }
 
   @Header('Content-Type', 'image/jpeg')
+  @Header('Expires', 'Thu, 17 Dec 1995 16:00:00 GMT')
   @Get(':id/profile-picture')
   async getUserProfilePicture(
     @Param('id') id: string,
