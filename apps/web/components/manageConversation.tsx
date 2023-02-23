@@ -35,7 +35,6 @@ export default function ManageConversation(
   const [errors, setErrors] = useState<string[]>([]);
   const [success, setSuccess] = useState<string>("");
   const [matches, setMatches] = useState<User[]>([]);
-  const [participants, setParticipants] = useState<User[]>([]);
   const [displaySearchBox, setDisplaySearchBox] = useState<boolean>(false);
   const [isVisible, setIsVisible] = useState<boolean>(
     props.currentConversation.visible
@@ -395,6 +394,7 @@ export default function ManageConversation(
           </section>
           <input
             ref={searchRef}
+            autoComplete="off"
             name="participants"
             placeholder="Search a user"
             type="text"
@@ -415,11 +415,13 @@ export default function ManageConversation(
                   response.json().then((data: User[]) => {
                     const currentMatches = data.filter((res: User) => {
                       if (
-                        participants.filter(
-                          (participant) =>
-                            participant.name.toLowerCase() ===
-                            res.name.toLowerCase()
-                        ).length
+                        (props.participants &&
+                          props.participants.find(
+                            (participant) =>
+                              participant.user.name.toLowerCase() ===
+                              res.name.toLowerCase()
+                          ) !== undefined) ||
+                        res.name === props.self.current?.user.name
                       )
                         return false;
                       return true;
@@ -459,7 +461,8 @@ export default function ManageConversation(
                         setTimeout(() => {
                           setDisplaySearchBox(false);
                           setSuccess(""), setErrors([]);
-                        }, 2000);
+                          setMatches([]);
+                        }, 500);
                       } else {
                         setErrors([
                           "Cannot invite this person in this conversation",
