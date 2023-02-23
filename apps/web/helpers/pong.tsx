@@ -33,7 +33,7 @@ class Game {
   public static keyPressed = { up: false, down: false };
   public start = Date.now();
   public lastUpdate = 0;
-  public color: string[] = ["blue", "red", "orange", "white", "pink", "black"];
+  public color: string[] = ["blue", "red", "orange", "white", "pink", "cyan"];
   public static position: number;
   public static scoreMax = 10;
   public static changeLife: (
